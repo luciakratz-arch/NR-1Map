@@ -37,8 +37,8 @@
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--linha);
   }
-  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-  .nav-logo img { height: 40px; width: 40px; border-radius: 8px; object-fit: cover; }
+  .nav-logo { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+  .nav-logo img { height: 28px; width: 28px; border-radius: 5px; object-fit: cover; flex-shrink:0; }
   .nav-logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: var(--preto); letter-spacing: -0.5px; }
   .nav-logo-text span { color: var(--verde); }
   .nav-links { display: flex; gap: 28px; align-items: center; }
@@ -226,7 +226,8 @@
     <a href="#entregaveis">Entregáveis</a>
     <a href="#precos">Preços</a>
     <a href="#faq">Dúvidas</a>
-    <a href="#precos" class="btn-nav">Assinar agora</a>
+    <a href="#contato">E-book gratuito</a>
+    <a href="#precos" class="btn-nav" style="color:#ffffff!important;font-weight:600;">Acessar a plataforma</a>
   </div>
 </nav>
 
@@ -367,12 +368,253 @@
   </div>
 </section>
 
-<section class="cta-final">
-  <h2>Cada mês sem diagnóstico é <em>evidência contra</em> você.</h2>
-  <p>Comece agora. Diagnóstico completo em até 72h. Cancele quando quiser.</p>
-  <a href="#precos" class="btn-cta">Escolher meu plano →</a>
-  <p class="cta-garantia">Sem fidelidade · Sem taxa de setup · Cancele a qualquer momento</p>
+
+
+<!-- CAPTURA DE LEADS -->
+<section id="contato" style="padding:96px 5%;background:var(--preto);border-top:3px solid var(--verde-claro);">
+  <div style="max-width:640px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="display:inline-block;background:var(--roxo-xp);border:1px solid rgba(123,0,196,0.2);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">E-book gratuito</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px;">Receba a NR-1 explicada<br/>no seu e-mail</h2>
+      <p style="font-size:15px;color:#8A9590;line-height:1.65;max-width:480px;margin:0 auto;">Enviaremos o e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> + o resumo técnico da norma. Nossa equipe também entrará em contato.</p>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div style="height:3px;background:#1E2A28;border-radius:2px;margin-bottom:32px;">
+      <div id="lead-prog" style="height:100%;background:var(--verde-claro);border-radius:2px;width:25%;transition:width .3s;"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="lead-step-1">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 1 de 4 — Seus dados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Seu nome</label>
+            <input id="l-nome" type="text" placeholder="Nome completo" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Cargo / função</label>
+            <input id="l-cargo" type="text" placeholder="Ex: Diretora de RH" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">E-mail profissional *</label>
+          <input id="l-email" type="email" placeholder="seu@empresa.com.br" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">WhatsApp (opcional)</label>
+          <input id="l-wpp" type="tel" placeholder="(11) 9 9999-0000" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+      </div>
+      <button onclick="leadStep(2)" style="width:100%;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="lead-step-2" style="display:none;">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 2 de 4 — Sua empresa</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Nome da empresa</label>
+          <input id="l-empresa" type="text" placeholder="Razão social ou nome fantasia" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Segmento</label>
+          <select id="l-segmento" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;">
+            <option value="">Selecione...</option>
+            <option>Saúde / Clínicas / Hospitais</option>
+            <option>Educação / Escolas / Faculdades</option>
+            <option>Comércio / Varejo</option>
+            <option>Serviços / Consultoria</option>
+            <option>Indústria / Manufatura</option>
+            <option>Tecnologia</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:8px;">Número de colaboradores</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-porte-opts">
+            <div onclick="selPorte(this,'Até 5')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">Até 5</span>
+            </div>
+            <div onclick="selPorte(this,'6 a 20')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">6 a 20</span>
+            </div>
+            <div onclick="selPorte(this,'21 a 50')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">21 a 50</span>
+            </div>
+            <div onclick="selPorte(this,'51 a 100')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">51 a 100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="leadStep(1)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
+        <button onclick="leadStep(3)" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="lead-step-3" style="display:none;">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 3 de 4 — Uma pergunta rápida</div>
+        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Como você avalia a conformidade da sua empresa com a NR-1 hoje?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;" id="l-nivel-opts">
+          <div onclick="selNivel(this,'Não sei por onde começar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">😰</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Não sei por onde começar</div>
+          </div>
+          <div onclick="selNivel(this,'Já ouvi mas não adotei nada')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">🤔</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já ouvi, mas não adotei nada</div>
+          </div>
+          <div onclick="selNivel(this,'Tenho algo mas incompleto')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">📋</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho algo, mas incompleto</div>
+          </div>
+          <div onclick="selNivel(this,'Já fui notificado ou multado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">⚠️</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já fui notificado ou multado</div>
+          </div>
+          <div onclick="selNivel(this,'Tudo documentado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">✅</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho tudo documentado</div>
+          </div>
+          <div onclick="selNivel(this,'Avaliando soluções')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">🔍</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Estou avaliando soluções</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Maior preocupação atual?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-concern-opts">
+          <div onclick="selConcern(this,'Evitar multas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Evitar multas e autuações</span>
+          </div>
+          <div onclick="selConcern(this,'Reduzir afastamentos')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Reduzir afastamentos</span>
+          </div>
+          <div onclick="selConcern(this,'Evitar processos trabalhistas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Evitar processos trabalhistas</span>
+          </div>
+          <div onclick="selConcern(this,'Cuidar do bem-estar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Cuidar do bem-estar da equipe</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="leadStep(2)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
+        <button onclick="enviarLead()" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Receber e-book gratuito →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 CONFIRMAÇÃO -->
+    <div id="lead-step-4" style="display:none;text-align:center;">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--verde-xp);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;">✓</div>
+      <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;">Cadastro confirmado!</h3>
+      <p style="font-size:14px;color:#8A9590;line-height:1.65;max-width:400px;margin:0 auto 24px;">O e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> será enviado para o seu e-mail em instantes. Nossa equipe entrará em contato em breve.</p>
+      <div style="background:#181D1B;border-radius:10px;padding:20px;border:1px solid #2A2E2C;text-align:left;max-width:400px;margin:0 auto;">
+        <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:10px;">Você vai receber:</div>
+        <div style="font-size:13px;color:#8A9590;line-height:1.8;">
+          ✓ E-book NR-1 Descomplicada (PDF)<br/>
+          ✓ Resumo técnico da norma por segmento<br/>
+          ✓ Interpretação de Dejours, Herzberg e Maslow<br/>
+          ✓ Contato da nossa equipe
+        </div>
+      </div>
+    </div>
+
+  </div>
 </section>
+
+<script>
+var leadData = { porte: '', nivel: '', concern: '' };
+
+function leadStep(n) {
+  if (n === 2 && !document.getElementById('l-email').value) {
+    alert('Por favor informe seu e-mail.');
+    return;
+  }
+  for (var i = 1; i <= 4; i++) {
+    var el = document.getElementById('lead-step-' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  }
+  document.getElementById('lead-prog').style.width = (n * 25) + '%';
+}
+
+function selPorte(el, val) {
+  leadData.porte = val;
+  document.querySelectorAll('#l-porte-opts > div').forEach(function(d) {
+    d.style.borderColor = '#2A2E2C';
+    d.querySelector('.l-radio').style.background = 'transparent';
+    d.querySelector('span').style.color = '#8A9590';
+  });
+  el.style.borderColor = 'var(--verde-claro)';
+  el.querySelector('.l-radio').style.background = 'var(--verde-claro)';
+  el.querySelector('span').style.color = '#fff';
+}
+
+function selNivel(el, val) {
+  leadData.nivel = val;
+  document.querySelectorAll('#l-nivel-opts > div').forEach(function(d) {
+    d.style.borderColor = '#2A2E2C';
+    d.querySelector('div:last-child').style.color = '#8A9590';
+  });
+  el.style.borderColor = 'var(--verde-claro)';
+  el.querySelector('div:last-child').style.color = '#fff';
+}
+
+function selConcern(el, val) {
+  leadData.concern = val;
+  document.querySelectorAll('#l-concern-opts > div').forEach(function(d) {
+    d.style.borderColor = '#2A2E2C';
+    d.querySelector('.l-radio-c').style.background = 'transparent';
+    d.querySelector('span').style.color = '#8A9590';
+  });
+  el.style.borderColor = 'var(--verde-claro)';
+  el.querySelector('.l-radio-c').style.background = 'var(--verde-claro)';
+  el.querySelector('span').style.color = '#fff';
+}
+
+async function enviarLead() {
+  var payload = {
+    nome: document.getElementById('l-nome').value,
+    cargo: document.getElementById('l-cargo').value,
+    email: document.getElementById('l-email').value,
+    whatsapp: document.getElementById('l-wpp').value,
+    empresa: document.getElementById('l-empresa').value,
+    segmento: document.getElementById('l-segmento').value,
+    porte: leadData.porte,
+    nivel_nr1: leadData.nivel,
+    preocupacao: leadData.concern,
+    data: new Date().toISOString()
+  };
+
+  // SUBSTITUA ESTA URL PELO WEBHOOK DO MAKE OU N8N
+  var WEBHOOK_URL = 'COLE_AQUI_A_URL_DO_WEBHOOK_MAKE_OU_N8N';
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    console.log('Webhook error:', e);
+  }
+
+  // Mostra confirmação independente do webhook
+  leadStep(4);
+}
+</script>
 
 <footer>
   <div class="footer-logo">
@@ -399,6 +641,188 @@ window.addEventListener('scroll', () => {
   });
 });
 </script>
+
+
+<!-- DEPOIMENTOS -->
+<section id="depoimentos" style="padding:96px 5%;background:var(--cinza-claro);">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="margin-bottom:48px;">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--verde);margin-bottom:12px;">Depoimentos</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--preto);line-height:1.15;letter-spacing:-.02em;margin-bottom:8px;">O que dizem sobre o NR-1 Map</h2>
+      <p style="font-size:15px;color:var(--cinza-medio);">Resultados reais de empresas que cumpriram a NR-1.</p>
+    </div>
+
+    <!-- CARROSSEL -->
+    <div style="position:relative;">
+      <div id="dep-track" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;overflow:hidden;">
+
+        <!-- Card 1 -->
+        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
+          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
+          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">M.F.S.</div>
+          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Gestora de RH · Clínica Médica</div>
+          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Em menos de 72h tínhamos o laudo técnico completo. Nunca imaginei que cumprir a NR-1 pudesse ser tão simples. A equipe da fiscalização aceitou a documentação sem nenhuma ressalva."</p>
+          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
+              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Fico muito feliz que a documentação atendeu plenamente a fiscalização. É exatamente para isso que o NR-1 Map foi criado!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
+          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
+          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">R.A.M.</div>
+          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Diretor · Escola de Idiomas</div>
+          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Descobrimos através das pesquisas pulso que dois setores estavam com índices críticos de esgotamento. Agimos antes do afastamento. Economizamos muito mais do que o custo da assinatura."</p>
+          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
+              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Prevenção é sempre o melhor caminho. Fico feliz que conseguiram agir a tempo!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
+          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
+          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">C.B.</div>
+          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Proprietária · Contabilidade</div>
+          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Tenho 8 funcionários e não sabia nem que precisava disso. O sistema é muito fácil — minha equipe respondeu pelo WhatsApp e em dias já tinha o laudo. Vale cada centavo."</p>
+          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
+              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Obrigada pela confiança! Empresas de todos os portes merecem ter acesso a isso.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SETAS -->
+      <button onclick="depNav(-1)" style="position:absolute;left:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--branco);border:1px solid var(--linha);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:2;">‹</button>
+      <button onclick="depNav(1)" style="position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--branco);border:1px solid var(--linha);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:2;">›</button>
+    </div>
+
+    <!-- BOTÃO ENVIAR DEPOIMENTO -->
+    <div style="text-align:center;margin-top:40px;">
+      <button onclick="abrirFormDep()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--roxo);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+        ✍ Compartilhar meu depoimento
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL DEPOIMENTO -->
+<div id="modal-dep" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:var(--branco);border-radius:14px;padding:32px;max-width:480px;width:90%;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Compartilhar depoimento</h3>
+      <button onclick="fecharFormDep()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--cinza-medio);">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--cinza-medio);background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:18px;">
+      Seu depoimento será avaliado antes de ser publicado.
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Identificação (pode usar iniciais)</label>
+      <input id="dep-nome" type="text" placeholder="Ex: M.F.S." style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;" />
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Cargo e empresa</label>
+      <input id="dep-cargo" type="text" placeholder="Ex: Gestora de RH · Clínica Médica" style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;" />
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:6px;">Avaliação</label>
+      <div style="display:flex;gap:6px;" id="dep-stars">
+        <span onclick="setStar(5)" style="font-size:24px;cursor:pointer;color:var(--roxo);">★</span>
+        <span onclick="setStar(4)" style="font-size:24px;cursor:pointer;color:var(--roxo);">★</span>
+        <span onclick="setStar(3)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
+        <span onclick="setStar(2)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
+        <span onclick="setStar(1)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Seu depoimento</label>
+      <textarea id="dep-texto" placeholder="Conte sua experiência com o NR-1 Map..." style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;resize:vertical;min-height:100px;"></textarea>
+    </div>
+    <button onclick="enviarDep()" style="width:100%;padding:13px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+      Enviar depoimento →
+    </button>
+  </div>
+</div>
+
+<script>
+// CARROSSEL
+var depIndex = 0;
+function depNav(dir) {
+  var cards = document.querySelectorAll('.dep-card');
+  depIndex = Math.max(0, Math.min(depIndex + dir, cards.length - 3));
+  // simple highlight effect
+  cards.forEach(function(c, i) {
+    c.style.opacity = (i >= depIndex && i < depIndex + 3) ? '1' : '0.4';
+  });
+}
+
+// MODAL
+function abrirFormDep() {
+  var m = document.getElementById('modal-dep');
+  m.style.display = 'flex';
+}
+function fecharFormDep() {
+  document.getElementById('modal-dep').style.display = 'none';
+}
+
+var depStars = 5;
+function setStar(n) {
+  depStars = n;
+  var stars = document.querySelectorAll('#dep-stars span');
+  stars.forEach(function(s, i) {
+    s.style.color = (5 - i) <= n ? 'var(--roxo)' : 'var(--linha)';
+  });
+}
+
+async function enviarDep() {
+  var payload = {
+    nome: document.getElementById('dep-nome').value,
+    cargo: document.getElementById('dep-cargo').value,
+    texto: document.getElementById('dep-texto').value,
+    estrelas: depStars,
+    status: 'pendente',
+    data: new Date().toISOString()
+  };
+
+  if (!payload.nome || !payload.texto) {
+    alert('Por favor preencha ao menos o nome e o depoimento.');
+    return;
+  }
+
+  // SUBSTITUA PELO WEBHOOK DO MAKE/N8N
+  var WEBHOOK_DEP = 'COLE_AQUI_URL_WEBHOOK_DEPOIMENTOS';
+  try {
+    await fetch(WEBHOOK_DEP, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+
+  fecharFormDep();
+  alert('✅ Depoimento enviado! Será publicado após aprovação.');
+}
+</script>
+
+
+<section class="cta-final">
+  <h2>Cada mês sem diagnóstico é <em>evidência contra</em> você.</h2>
+  <p>Comece agora. Diagnóstico completo em até 72h. Cancele quando quiser.</p>
+  <a href="#precos" class="btn-cta">Escolher meu plano →</a>
+  <p class="cta-garantia">Sem fidelidade · Sem taxa de setup · Cancele a qualquer momento</p>
+</section>
+
 </body>
 </html><!-- PREÇOS -->
 <section class="precos" id="precos">
@@ -608,5 +1032,3 @@ function calcValor(n) {
 // Inicializar com Assinatura selecionada
 selectOpcao('mensal');
 </script>
-
-
