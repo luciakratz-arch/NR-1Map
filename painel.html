@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Painel do Gestor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
+  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
+  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
+  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
+  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
+  --sidebar:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--verde-claro);}
+.sidebar-empresa{padding:12px 18px;border-bottom:1px solid #1E2A28;}
+.sidebar-empresa .lbl{font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.sidebar-empresa .nome{font-size:12px;color:#C8D4D0;font-weight:500;}
+.sidebar-empresa .plano{font-size:11px;color:var(--verde-claro);margin-top:1px;}
+.nav{padding:10px 0;flex:1;}
+.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--verde-claro);}
+.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+.s-user{display:flex;align-items:center;gap:9px;}
+.s-avatar{width:30px;height:30px;border-radius:7px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.s-user .nm{font-size:11px;color:#C8D4D0;font-weight:500;}
+.s-user .cg{font-size:10px;color:#4A5450;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-danger{background:#C53030;color:#fff;}
+.content{padding:20px 24px;flex:1;}
+
+/* MÉTRICAS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
+.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.mc .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.mc .sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+.mc .delta{font-size:11px;margin-top:3px;font-weight:500;}
+.up{color:var(--verde-claro);}.down{color:var(--laranja);}
+
+/* FILTROS */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.filter-bar input,.filter-bar select{padding:7px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.filter-bar input{min-width:180px;}
+.filter-bar select{min-width:140px;}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--verde-claro);}
+.filter-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--verde-xp);color:var(--verde);border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;}
+.filter-tag .x{font-size:13px;opacity:.6;}
+
+/* CARD */
+.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
+.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
+.card-body{padding:16px 18px;}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;cursor:pointer;}
+thead th:hover{color:var(--preto);}
+thead th .sort{opacity:.4;margin-left:3px;}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#F5F8F7;}
+tbody tr.inativo td{opacity:.5;}
+
+/* BADGES */
+.bdg-s{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;white-space:nowrap;}
+.s-ok{background:var(--verde-xp);color:var(--verde);}
+.s-pend{background:#FFF8E6;color:#92610A;}
+.s-erro{background:#FEEFEF;color:#C53030;}
+.s-inativo{background:var(--cinza-claro);color:var(--cinza-medio);}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3c{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+
+/* FORM */
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.form-control:focus{outline:none;border-color:var(--verde-claro);}
+textarea.form-control{resize:vertical;min-height:70px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* MODULOS */
+.modulo-card{border:1.5px solid var(--linha);border-radius:9px;margin-bottom:12px;overflow:hidden;}
+.modulo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--branco);}
+.modulo-header:hover{background:var(--cinza-claro);}
+.modulo-header .m-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.modulo-header .m-sub{font-size:11px;color:var(--cinza-medio);margin-top:2px;}
+.modulo-header .m-right{display:flex;align-items:center;gap:10px;}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--cinza-claro);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--verde-claro);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;}
+.toggle.on::after{left:19px;}
+.modulo-body{padding:14px 16px;border-top:1px solid var(--linha);background:var(--cinza-claro);display:none;}
+.modulo-body.open{display:block;}
+.pergunta-item{background:var(--branco);border:1px solid var(--linha);border-radius:7px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+.perg-check{width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--verde);}
+.perg-text{font-size:12px;color:var(--cinza-escuro);flex:1;line-height:1.4;}
+.perg-tag{font-size:10px;padding:2px 7px;border-radius:100px;background:var(--roxo-xp);color:var(--roxo);margin-left:auto;white-space:nowrap;}
+.add-perg{display:flex;gap:8px;margin-top:10px;}
+
+/* PLANEJAMENTO */
+.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--linha);}
+.agenda-item:last-child{border-bottom:none;}
+.agenda-data{min-width:50px;text-align:center;background:var(--cinza-claro);border-radius:7px;padding:6px;}
+.agenda-data .dia{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;line-height:1;}
+.agenda-data .mes{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;}
+.agenda-info{flex:1;}
+.agenda-info h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.agenda-info p{font-size:11px;color:var(--cinza-medio);}
+.agenda-tipo{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;}
+.tipo-geral{background:var(--roxo-xp);color:var(--roxo);}
+.tipo-pulso{background:var(--verde-xp);color:var(--verde);}
+
+/* IA BOX */
+.ia-box{background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.ia-box .ia-lbl{font-size:10px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.ia-box .ia-txt{font-size:12px;color:var(--preto);line-height:1.5;}
+.ia-box .ia-sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+
+/* ALERTA */
+.alerta{display:flex;gap:9px;align-items:flex-start;background:#FFF8E6;border:1px solid #F6C544;border-radius:7px;padding:10px 12px;margin-bottom:14px;}
+.alerta p{font-size:12px;color:#92610A;line-height:1.5;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--linha);margin-bottom:16px;}
+.tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--cinza-medio);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.tab:hover{color:var(--preto);}
+.tab.active{color:var(--verde);border-bottom-color:var(--verde);font-weight:600;}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--linha);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cinza-claro);}
+.upload-zone:hover{border-color:var(--verde-claro);background:var(--verde-xp);}
+.upload-zone p{font-size:12px;color:var(--cinza-medio);line-height:1.5;}
+
+/* TIMELINE */
+.timeline-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--linha);}
+.timeline-item:last-child{border-bottom:none;}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.tl-geral{background:var(--roxo);}
+.tl-pulso{background:var(--verde-claro);}
+.tl-body{flex:1;}
+.tl-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.tl-tipo.g{color:var(--roxo);}
+.tl-tipo.p{color:var(--verde);}
+.tl-desc{font-size:12px;color:var(--cinza-escuro);margin-bottom:3px;}
+.tl-data{font-size:10px;color:var(--cinza-medio);}
+.score-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:var(--cinza-claro);color:var(--cinza-escuro);margin-right:4px;margin-top:4px;}
+.score-alto{background:#FEEFEF;color:#C53030;}
+.score-medio{background:#FFF8E6;color:#92610A;}
+.score-baixo{background:var(--verde-xp);color:var(--verde);}
+
+/* PROGRESS */
+.progress-bar{height:4px;background:var(--cinza-claro);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;background:var(--verde-claro);transition:width .3s;}
+
+/* LINK AUTOCADASTRO */
+.link-box{background:var(--cinza-claro);border:1px solid var(--linha);border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cinza-escuro);margin-top:12px;}
+.link-box .link-url{flex:1;font-family:monospace;font-size:11px;color:var(--verde);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* DISPARO OPTS */
+.disparo-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.d-opt{border:2px solid var(--linha);border-radius:8px;padding:14px;cursor:pointer;transition:all .15s;text-align:center;}
+.d-opt:hover{border-color:var(--verde-claro);background:var(--verde-xp);}
+.d-opt.sel{border-color:var(--verde);background:var(--verde-xp);}
+.d-opt .d-ic{font-size:22px;margin-bottom:4px;}
+.d-opt .d-lb{font-size:12px;font-weight:500;}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">NR-1<span>Map</span></div>
+  <div class="sidebar-empresa">
+    <div class="lbl">Empresa</div>
+    <div class="nome">Clínica Vida S.A.</div>
+    <div class="plano">Assinatura · Faixa 2</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">Visão geral</div>
+    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg">14</span></div>
+    <div class="nav-sec">Pesquisas</div>
+    <div class="nav-item" onclick="sv('planejamento')"><span class="ic">🗓</span>Planejamento</div>
+    <div class="nav-item" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
+    <div class="nav-item" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
+    <div class="nav-item" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg">1</span></div>
+    <div class="nav-sec">Referência</div>
+    <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
+    <div class="nav-sec">Resultados</div>
+    <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
+    <div class="nav-item" onclick="sv('relatorios')"><span class="ic">📄</span>Relatórios</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="s-user">
+      <div class="s-avatar">LK</div>
+      <div><div class="nm">Dra. Lucia Kratz</div><div class="cg">Gestora RH</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="view-dashboard" class="view active">
+  <div class="topbar">
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm">⚙ Config</button>
+      <button class="btn btn-primary btn-sm" onclick="sv('diagnostico')">+ Iniciar Diagnóstico</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- BANNER NR-1 -->
+    <div onclick="sv('nr1')" style="background:linear-gradient(135deg,#0D1210 60%,#1A0A2E 100%);border-radius:10px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:1px solid #2A1A3E;transition:all .2s;flex-wrap:wrap;gap:12px;"
+      onmouseover="this.style.borderColor='var(--roxo-claro)'" onmouseout="this.style.borderColor='#2A1A3E'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:44px;height:44px;border-radius:10px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📑</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;">Conheça a Base Legal: Veja a norma NR-1</div>
+          <div style="font-size:12px;color:#8A9590;max-width:520px;line-height:1.5;">Entenda as obrigações da sua empresa no Gerenciamento de Riscos Ocupacionais (GRO) e na proteção da saúde mental.</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span style="font-size:11px;color:var(--roxo-claro);font-weight:600;background:rgba(123,0,196,.15);padding:4px 12px;border-radius:100px;">Base legal do app</span>
+        <span style="color:var(--roxo-claro);font-size:18px;">→</span>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val">14</div><div class="sub">2 inativos</div></div>
+      <div class="mc"><div class="lbl">Índice Prazer</div><div class="val">58</div><div class="delta down">▼ 4 pts vs. anterior</div></div>
+      <div class="mc"><div class="lbl">Índice Sofrimento</div><div class="val">72</div><div class="delta down">▲ 8 pts vs. anterior</div></div>
+      <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val">83%</div><div class="delta up">▲ 11% vs. anterior</div></div>
+    </div>
+    <div class="grid-3c">
+      <div class="card">
+        <div class="card-header"><div><div class="title">Termômetro Prazer ↔ Sofrimento</div><div class="subtitle">Jun 2025</div></div><button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">Ver laudo</button></div>
+        <div class="card-body">
+          <div class="ia-box"><div class="ia-lbl">🤖 Sugestão IA</div><div class="ia-txt"><strong>Próxima Pulso:</strong> Esgotamento / Sobrecarga</div><div class="ia-sub">Maior deterioração: +8 pts nos últimos 30 dias</div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Realização profissional</span><span style="font-weight:600;color:var(--verde);">65</span></div><div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Reconhecimento</span><span style="font-weight:600;color:var(--verde);">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:58%"></div></div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Esgotamento / Sobrecarga</span><span style="font-weight:600;color:var(--laranja);">72</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--laranja)"></div></div></div>
+          <div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Insegurança / Medo</span><span style="font-weight:600;color:var(--laranja);">61</span></div><div class="progress-bar"><div class="progress-fill" style="width:61%;background:var(--laranja)"></div></div></div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="sv('pulso')">📡 Disparar Pesquisa Pulso</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Histórico recente</div><a href="#" style="font-size:11px;color:var(--verde);text-decoration:none;" onclick="sv('historico')">Ver tudo →</a></div>
+        <div class="card-body" style="padding:8px 16px;">
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores responderam</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><div class="tl-data">Jun 2025</div></div></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Reconhecimento</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Espaço de fala</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COLABORADORES ===== -->
+<div id="view-colaboradores" class="view">
+  <div class="topbar">
+    <div class="topbar-title">Colaboradores</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="sv('autocadastro')">🔗 Link autocadastro</button>
+      <button class="btn btn-ghost btn-sm">⬇ Modelo Excel</button>
+      <button class="btn btn-primary btn-sm" onclick="sv('upload')">⬆ Importar planilha</button>
+      <button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-novo-colab')">+ Novo colaborador</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="filter-bar">
+      <input type="text" placeholder="🔍 Buscar nome ou contato..." oninput="filtrarTabela(this.value)"/>
+      <select onchange="filtrarStatus(this.value)">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativos</option>
+        <option value="inativo">Inativos</option>
+      </select>
+      <select>
+        <option value="">Todos os cargos</option>
+        <option>Psicólogo · 2515-10</option>
+        <option>Téc. Enfermagem · 3222-05</option>
+        <option>Médico · 2251-05</option>
+        <option>Analista RH · 2524-05</option>
+        <option>Ass. Administrativo · 4110-10</option>
+      </select>
+      <select>
+        <option value="">Todos os departamentos</option>
+        <option>Clínico</option><option>UTI</option><option>Emergência</option><option>RH</option><option>Recepção</option>
+      </select>
+      <select>
+        <option value="">Todas as unidades</option>
+        <option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="title">Lista de colaboradores</div><div class="subtitle">14 ativos · 2 inativos</div></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="ordenar('nome')">A→Z Nome</button>
+          <button class="btn btn-ghost btn-sm" onclick="ordenar('admissao')">↕ Admissão</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-colab">
+          <thead>
+            <tr>
+              <th onclick="ordenar('nome')">Nome <span class="sort">↕</span></th>
+              <th>WhatsApp / E-mail</th>
+              <th onclick="ordenar('cargo')">Cargo (CBO) <span class="sort">↕</span></th>
+              <th>Departamento</th>
+              <th>Unidade</th>
+              <th onclick="ordenar('admissao')">Admissão <span class="sort">↕</span></th>
+              <th>Demissão</th>
+              <th>Status</th>
+              <th>Link pesquisa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-colab">
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0001</td><td>Psicólogo · 2515-10</td><td>Clínico</td><td>Goiânia</td><td>03/01/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
+            <tr data-nome="Ana Costa" data-status="ativo"><td>Ana Costa</td><td>11 9 9999-0002</td><td>Téc. Enf. · 3222-05</td><td>UTI</td><td>Goiânia</td><td>15/03/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0003</td><td>Médico · 2251-05</td><td>Clínico</td><td>Brasília</td><td>01/06/2021</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
+            <tr data-nome="Carlos M." data-status="ativo"><td>Carlos M.</td><td>carlos@clinica.com</td><td>Analista RH · 2524-05</td><td>RH</td><td>Goiânia</td><td>10/09/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0005</td><td>Téc. Enf. · 3222-05</td><td>Emergência</td><td>Brasília</td><td>20/02/2024</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0006</td><td>Ass. Adm. · 4110-10</td><td>Recepção</td><td>Belo Horizonte</td><td>05/07/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-erro"><span class="dot"></span>Erro envio</span></td><td><button class="btn btn-danger btn-sm">Corrigir</button></td></tr>
+            <tr data-nome="Pedro Lima" data-status="inativo" class="inativo"><td>Pedro Lima</td><td>pedro@clinica.com</td><td>Médico · 2251-05</td><td>Clínico</td><td>Goiânia</td><td>01/01/2020</td><td>30/04/2025</td><td><span class="bdg-s s-inativo"><span class="dot"></span>Inativo</span></td><td>—</td><td><button class="btn btn-ghost btn-sm">Reativar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AUTOCADASTRO ===== -->
+<div id="view-autocadastro" class="view">
+  <div class="topbar"><div class="topbar-title">Link de autocadastro</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Como funciona o autocadastro</div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);line-height:1.6;margin-bottom:16px;">Você envia o link abaixo para o colaborador. Ele preenche seus dados (WhatsApp/e-mail, cargo e departamento) e o sistema o cadastra automaticamente. O RH pré-cadastra os cargos e CBO disponíveis — o colaborador só seleciona.</p>
+        <div class="alerta"><span style="font-size:14px;">🔒</span><p>Nenhum dado pessoal é vinculado às respostas das pesquisas. O autocadastro serve apenas para disparar o link correto para o cargo certo.</p></div>
+        <div class="form-group"><div class="form-label">Unidade / Filial para este link</div>
+          <select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select>
+        </div>
+        <div class="link-box">
+          <span>🔗</span>
+          <span class="link-url">https://nr1map.com.br/cadastro/clinicavida/goiania/abc123</span>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Link copiado!')">Copiar</button>
+          <button class="btn btn-ghost btn-sm">Compartilhar WhatsApp</button>
+        </div>
+        <div style="margin-top:20px;">
+          <div class="form-label" style="margin-bottom:8px;">Cargos/CBO pré-cadastrados para seleção</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+            <span class="filter-tag">Psicólogo · 2515-10 <span class="x">×</span></span>
+            <span class="filter-tag">Téc. Enfermagem · 3222-05 <span class="x">×</span></span>
+            <span class="filter-tag">Médico · 2251-05 <span class="x">×</span></span>
+            <span class="filter-tag">Analista RH · 2524-05 <span class="x">×</span></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-control" placeholder="Buscar cargo na base CBO..." style="flex:1;"/>
+            <button class="btn btn-primary btn-sm">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== UPLOAD ===== -->
+<div id="view-upload" class="view">
+  <div class="topbar"><div class="topbar-title">Importar colaboradores</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">1. Baixe o modelo</div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Preencha e salve como .xlsx ou .csv. Colunas obrigatórias marcadas com *</p>
+        <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:12px;"><strong style="color:var(--preto);">Colunas:</strong> nome · whatsapp_ou_email* · cargo_cbo* · departamento · unidade · data_admissao · data_demissao</div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm">⬇ Excel (.xlsx)</button><button class="btn btn-ghost btn-sm">⬇ CSV</button></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">2. Envie a planilha</div></div>
+      <div class="card-body">
+        <div class="upload-zone" onclick="document.getElementById('fi').click()">
+          <div style="font-size:26px;margin-bottom:6px;">📂</div>
+          <p><strong>Clique para selecionar</strong> ou arraste aqui</p>
+          <p>.xlsx ou .csv · máx 5 MB</p>
+          <input type="file" id="fi" style="display:none;" accept=".xlsx,.csv" onchange="handleUpload(this)"/>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="uploadPreview" style="display:none;">
+      <div class="card-header"><div class="title">3. Validação</div></div>
+      <div class="card-body">
+        <div style="display:flex;gap:12px;margin-bottom:14px;">
+          <div style="flex:1;background:var(--verde-xp);border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--verde);">11</div><div style="font-size:10px;color:var(--verde);margin-top:2px;">Válidos</div></div>
+          <div style="flex:1;background:#FFF8E6;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#92610A;">2</div><div style="font-size:10px;color:#92610A;margin-top:2px;">Alertas</div></div>
+          <div style="flex:1;background:#FEEFEF;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#C53030;">1</div><div style="font-size:10px;color:#C53030;margin-top:2px;">Erros</div></div>
+        </div>
+        <div style="font-size:11px;color:#C53030;background:#FEEFEF;border-radius:6px;padding:8px 10px;margin-bottom:8px;">⚠ Linha 4: WhatsApp/e-mail em branco.</div>
+        <div style="font-size:11px;color:#92610A;background:#FFF8E6;border-radius:6px;padding:8px 10px;margin-bottom:14px;">ℹ Linhas 7 e 9: cargo ajustado automaticamente pela base CBO. Confirme.</div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('uploadPreview').style.display='none'">Cancelar</button><button class="btn btn-primary btn-sm" onclick="confirmUpload()">✓ Confirmar 11 colaboradores</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLANEJAMENTO ===== -->
+<div id="view-planejamento" class="view">
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="title">Agenda — Jul/Ago 2025</div></div>
+        <div class="card-body" style="padding:8px 16px;">
+          <div class="agenda-item">
+            <div class="agenda-data"><div class="dia">07</div><div class="mes">Jul</div></div>
+            <div class="agenda-info"><h4>Pesquisa Pulso — Esgotamento</h4><p>Sugerida pela IA · WhatsApp · 14 colaboradores</p></div>
+            <span class="agenda-tipo tipo-pulso">Pulso</span>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-data"><div class="dia">14</div><div class="mes">Jul</div></div>
+            <div class="agenda-info"><h4>Pesquisa Pulso — Reconhecimento</h4><p>Manual · E-mail · 14 colaboradores</p></div>
+            <span class="agenda-tipo tipo-pulso">Pulso</span>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-data"><div class="dia">01</div><div class="mes">Ago</div></div>
+            <div class="agenda-info"><h4>Diagnóstico Geral — Ciclo 2</h4><p>Programado · WhatsApp + E-mail · todas as unidades</p></div>
+            <span class="agenda-tipo tipo-geral">Geral</span>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-data"><div class="dia">18</div><div class="mes">Ago</div></div>
+            <div class="agenda-info"><h4>Pesquisa Pulso — Relações interpessoais</h4><p>Manual · WhatsApp · unidade Brasília</p></div>
+            <span class="agenda-tipo tipo-pulso">Pulso</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Regras de disparo automático</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Pesquisa Pulso semanal automática</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">IA escolhe o tema com pior índice semana a semana</div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Lembrete automático (48h sem resposta)</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Reenvio automático para quem não respondeu</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Diagnóstico Geral anual obrigatório</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Alerta 30 dias antes do vencimento do ciclo anual</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MÓDULOS ===== -->
+<div id="view-modulos" class="view">
+  <div class="topbar"><div class="topbar-title">Módulos e perguntas</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm">Filtrar por grupo</button></div></div>
+  <div class="content">
+    <div class="alerta"><span style="font-size:14px;">ℹ</span><p>Ative ou desative módulos inteiros. Dentro de cada módulo, selecione quais perguntas serão enviadas — ou adicione perguntas personalizadas.</p></div>
+
+    <!-- DEJOURS PRAZER -->
+    <div class="modulo-card">
+      <div class="modulo-header" onclick="toggleModulo(this)">
+        <div><div class="m-title">🟢 Índices de Prazer — Dejours</div><div class="m-sub">Realização · Reconhecimento · Liberdade de expressão</div></div>
+        <div class="m-right"><span style="font-size:11px;color:var(--verde);">9 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="modulo-body">
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Sinto que meu trabalho tem um propósito claro e contribui para algo maior."</div><span class="perg-tag">Realização</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Recebo retorno positivo da liderança quando faço um bom trabalho."</div><span class="perg-tag">Reconhecimento</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Tenho espaço para expressar minhas opiniões e sugestões na equipe."</div><span class="perg-tag">Liberdade</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check"/><div class="perg-text">"Me sinto valorizado(a) pelo que entrego, além dos resultados quantitativos."</div><span class="perg-tag">Reconhecimento</span></div>
+        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada neste módulo..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
+      </div>
+    </div>
+
+    <!-- DEJOURS SOFRIMENTO -->
+    <div class="modulo-card">
+      <div class="modulo-header" onclick="toggleModulo(this)">
+        <div><div class="m-title">🔴 Índices de Sofrimento — Dejours</div><div class="m-sub">Esgotamento · Frustração · Insegurança</div></div>
+        <div class="m-right"><span style="font-size:11px;color:var(--laranja);">8 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="modulo-body">
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Nas últimas semanas, senti que as demandas de trabalho superaram minha capacidade."</div><span class="perg-tag">Esgotamento</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Consigo descansar adequadamente fora do horário de trabalho."</div><span class="perg-tag">Esgotamento</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Sinto insegurança sobre minha continuidade nesta empresa."</div><span class="perg-tag">Insegurança</span></div>
+        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
+      </div>
+    </div>
+
+    <!-- HERZBERG -->
+    <div class="modulo-card">
+      <div class="modulo-header" onclick="toggleModulo(this)">
+        <div><div class="m-title">🔵 Fatores Higiênicos — Herzberg</div><div class="m-sub">Condições físicas · Políticas · Relações interpessoais</div></div>
+        <div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">6 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="modulo-body">
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"As condições físicas do meu ambiente de trabalho são adequadas."</div><span class="perg-tag">Condições</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"As políticas e regras da empresa são claras e justas."</div><span class="perg-tag">Políticas</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"O relacionamento com minha equipe e liderança é saudável."</div><span class="perg-tag">Relações</span></div>
+        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
+      </div>
+    </div>
+
+    <!-- MASLOW -->
+    <div class="modulo-card">
+      <div class="modulo-header" onclick="toggleModulo(this)">
+        <div><div class="m-title">🟡 Base da Pirâmide — Maslow</div><div class="m-sub">Necessidades fisiológicas e de segurança</div></div>
+        <div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">5 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="modulo-body">
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Minha remuneração atual atende às minhas necessidades básicas."</div><span class="perg-tag">Fisiológica</span></div>
+        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Me sinto seguro(a) no ambiente físico de trabalho."</div><span class="perg-tag">Segurança</span></div>
+        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DIAGNÓSTICO GERAL ===== -->
+<div id="view-diagnostico" class="view">
+  <div class="topbar"><div class="topbar-title">Diagnóstico Geral</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Enviado para todos os colaboradores ativos</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p><strong>14 colaboradores ativos</strong> receberão o link. Respostas 100% anônimas — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option><option>30 dias</option></select></div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="alert('🚀 Diagnóstico Geral disparado!\n14 colaboradores receberão o link agora.')">🚀 Disparar Diagnóstico Geral — 14 colaboradores</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PULSO ===== -->
+<div id="view-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">+ Nova Pesquisa Pulso</button></div></div>
+  <div class="content">
+    <div class="ia-box" style="margin-bottom:16px;"><div class="ia-lbl">🤖 Sugestão da IA</div><div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div><div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div><div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">Aceitar sugestão →</button></div></div>
+    <div class="card"><div class="card-header"><div class="title">Histórico de Pulsos</div></div>
+      <div class="card-body" style="padding:8px 16px;">
+        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Reconhecimento</div><div class="tl-desc">10 de 14 responderam · 83% adesão · ↑ +4 pts</div><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
+        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Espaço de fala</div><div class="tl-desc">9 de 14 responderam · 75% adesão · Estável</div><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NOVA PULSO ===== -->
+<div id="view-nova-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Nova Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('pulso')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-body">
+        <div class="ia-box"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
+          <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
+          <div class="tab" onclick="swTab(this,'t-pers')">Pergunta própria</div>
+        </div>
+        <div id="t-sug" class="view active">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 perguntas geradas sobre <strong>Esgotamento / Sobrecarga</strong>:</p>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Nas últimas semanas, as demandas de trabalho superaram minha capacidade?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Consigo descansar adequadamente fora do horário de trabalho?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
+        </div>
+        <div id="t-esc" class="view">
+          <div class="form-group"><div class="form-label">Indicador para a Pulso</div><select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select></div>
+        </div>
+        <div id="t-pers" class="view">
+          <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
+          <div class="form-group"><div class="form-label">Segunda pergunta (opcional)</div><textarea class="form-control" placeholder="Pergunta adicional..."></textarea></div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--linha);">
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
+            <div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
+          </div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="alert('📡 Pesquisa Pulso disparada!\n14 colaboradores receberão o link agora.')">📡 Disparar Pesquisa Pulso</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTÓRICO ===== -->
+<div id="view-historico" class="view">
+  <div class="topbar"><div class="topbar-title">Histórico completo</div><div class="topbar-actions">
+    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as pesquisas</option><option>Diagnóstico Geral</option><option>Pesquisa Pulso</option></select>
+    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
+    <button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">📄 Relatório anual</button>
+  </div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="title">Linha do tempo</div></div>
+        <div class="card-body" style="padding:8px 16px;">
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Evolução dos indicadores</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:16px;"><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Sofrimento geral</div>
+            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
+              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.5;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">64</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:38px;opacity:.65;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">67</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.75;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">63</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:56px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;color:var(--laranja);">72</div></div>
+            </div>
+          </div>
+          <div><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Prazer geral</div>
+            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
+              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:35px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">62</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:37px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">66</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:40px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;color:var(--verde);">70</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:33px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">58</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIOS ===== -->
+<div id="view-relatorios" class="view">
+  <div class="topbar"><div class="topbar-title">Relatórios</div><div class="topbar-actions">
+    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
+    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>2025</option><option>2024</option></select>
+  </div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📄 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">✏ Editar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📊 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== NORMA NR-1 ===== -->
+<div id="view-nr1" class="view">
+  <div class="topbar">
+    <div class="topbar-title">📑 Norma NR-1 — Base Legal do NR-1 Map</div>
+    <div class="topbar-actions">
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
+        target="_blank" class="btn btn-roxo btn-sm">📥 Baixar PDF Original (Gov.br)</a>
+    </div>
+  </div>
+  <div class="content" style="max-width:820px;">
+
+    <!-- INTRO -->
+    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;margin-bottom:20px;border:1px solid #2A1A3E;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚖️</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;">NR-1 — Disposições Gerais e Gerenciamento de Riscos Ocupacionais</div>
+          <div style="font-size:11px;color:#8A9590;margin-top:2px;">Atualizada 2024 · Ministério do Trabalho e Emprego · Portaria MTE nº 1.419/2024</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#C8D4D0;line-height:1.7;">A NR-1 é a norma regulamentadora mais abrangente do Brasil. Ela estabelece as disposições gerais de Segurança e Saúde no Trabalho (SST) e, desde sua atualização em 2024, tornou obrigatório o <strong style="color:#fff;">Gerenciamento de Riscos Ocupacionais (GRO)</strong> — incluindo, pela primeira vez de forma explícita, os <strong style="color:var(--roxo-claro);">riscos psicossociais e organizacionais</strong> como perigos a serem identificados, avaliados e controlados.</p>
+    </div>
+
+    <!-- BLOCO 1: GRO -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.1</span>
+            <div class="title">O que é o GRO — Gerenciamento de Riscos Ocupacionais</div>
+          </div>
+          <div class="subtitle">A obrigação central que fundamenta o NR-1 Map</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">O GRO determina que <strong style="color:var(--preto);">todo empregador é obrigado a mapear, avaliar e gerenciar continuamente TODOS os perigos presentes no ambiente de trabalho</strong> — físicos, químicos, biológicos, ergonômicos e, agora de forma expressa, os <strong style="color:var(--preto);">riscos psicossociais e organizacionais</strong>.</p>
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--roxo);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.1</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"O empregador deve implementar o Gerenciamento de Riscos Ocupacionais — GRO por meio do Programa de Gerenciamento de Riscos — PGR, que deve contemplar a identificação de perigos, avaliação de riscos, implementação de medidas de prevenção e monitoramento."</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--verde-xp);border-radius:7px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">O que o NR-1 Map entrega</div>
+            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✓ Identificação automática de perigos psicossociais por cargo CBO<br/>✓ Laudo Técnico como evidência do GRO<br/>✓ Mapa de Risco para o PGR</div>
+          </div>
+          <div style="background:var(--laranja-xp);border-radius:7px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--laranja);margin-bottom:4px;">Risco sem o app</div>
+            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✗ GRO incompleto sem avaliação psicossocial<br/>✗ Auto de infração imediato na fiscalização<br/>✗ Multa mínima de R$ 15.000,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 2: RISCOS PSICOSSOCIAIS -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">INOVAÇÃO 2024</span>
+            <div class="title">Riscos Psicossociais e Organizacionais como Perigos de Lei</div>
+          </div>
+          <div class="subtitle">Dejours, Herzberg e Maslow agora têm respaldo normativo expresso</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:16px;">A atualização de 2024 tornou inequívoco: <strong style="color:var(--preto);">sobrecarga mental, pressões abusivas, falta de reconhecimento, esgotamento e insegurança no trabalho são perigos ocupacionais previstos em lei</strong> — e devem ser identificados, avaliados e controlados pelo empregador.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🧠 Dejours</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Psicodinâmica do Trabalho — equilíbrio entre Prazer e Sofrimento</div>
+            <div style="font-size:11px;color:var(--roxo);font-weight:500;">Mensura: esgotamento, frustração, insegurança, realização, reconhecimento e liberdade de expressão</div>
+          </div>
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">⚙️ Herzberg</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Fatores Higiênicos — condições do ambiente de trabalho</div>
+            <div style="font-size:11px;color:var(--verde);font-weight:500;">Avalia: condições físicas, políticas da empresa e relações interpessoais</div>
+          </div>
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🔺 Maslow</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Base da pirâmide — necessidades fisiológicas e de segurança</div>
+            <div style="font-size:11px;color:var(--laranja);font-weight:500;">Verifica: remuneração adequada, segurança física e estabilidade no trabalho</div>
+          </div>
+        </div>
+
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">IMPACTO PRÁTICO</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;">Um colaborador sobrecarregado, sem reconhecimento ou com medo constante de demissão está exposto a um <strong>perigo ocupacional legalmente reconhecido</strong>. A empresa que não identificar, documentar e controlar esses riscos está em <strong>descumprimento da NR-1</strong> — independente do porte.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 3: MELHORIA CONTÍNUA -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--verde-xp);color:var(--verde);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.4.4.6</span>
+            <div class="title">Monitoramento e Melhoria Contínua</div>
+          </div>
+          <div class="subtitle">A exigência que torna a assinatura mensal uma necessidade legal</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">A norma não permite diagnóstico único e estático. O item 1.5.4.4.6 exige que o empregador <strong style="color:var(--preto);">monitore continuamente a eficácia das medidas implementadas e reavalie os riscos periodicamente</strong> — criando um ciclo permanente de melhoria.</p>
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.4.4.6</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"Monitorar os resultados das ações implementadas por meio de indicadores, verificando sua eficácia para a melhoria das condições de trabalho e saúde dos trabalhadores."</p>
+        </div>
+        <div style="background:var(--verde-xp);border-radius:7px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">Como o NR-1 Map cumpre este item</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--cinza-escuro);">
+            <span>✓ Pesquisas Pulso semanais automatizadas</span>
+            <span>✓ Painel dinâmico de Prazer/Sofrimento</span>
+            <span>✓ Histórico comparativo de todos os ciclos</span>
+            <span>✓ Relatório de eficácia das ações (5W2H)</span>
+            <span>✓ IA sugere novo foco a cada semana</span>
+            <span>✓ Evidência documental contínua do GRO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 4: PENALIDADES -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="title">⚠️ Penalidades por Descumprimento</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="text-align:center;background:#FEEFEF;border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#C53030;">R$15k+</div>
+            <div style="font-size:11px;color:#9B2C2C;margin-top:4px;">multa mínima por auto de infração da NR-1</div>
+          </div>
+          <div style="text-align:center;background:#FFF8E6;border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#92610A;">+40%</div>
+            <div style="font-size:11px;color:#92610A;margin-top:4px;">de aumento em processos trabalhistas por adoecimento psíquico desde 2022</div>
+          </div>
+          <div style="text-align:center;background:var(--cinza-claro);border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cinza-escuro);">2ª</div>
+            <div style="font-size:11px;color:var(--cinza-medio);margin-top:4px;">maior causa de afastamento no INSS são transtornos mentais ligados ao trabalho</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA DOWNLOAD -->
+    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;border:1px solid #2A1A3E;text-align:center;">
+      <div style="font-size:18px;margin-bottom:10px;">📥</div>
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;">Texto Oficial da NR-1 na Íntegra</div>
+      <div style="font-size:12px;color:#8A9590;margin-bottom:20px;">Portaria MTE nº 1.419/2024 — Ministério do Trabalho e Emprego — Fonte: Gov.br</div>
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
+        target="_blank"
+        style="display:inline-flex;align-items:center;gap:10px;background:var(--roxo);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:background .2s;"
+        onmouseover="this.style.background='var(--roxo-claro)'" onmouseout="this.style.background='var(--roxo)'">
+        📥 Baixar PDF Original da NR-1 (Fonte: Gov.br)
+      </a>
+      <div style="font-size:11px;color:#4A5450;margin-top:12px;">Abre em nova aba · PDF oficial do Governo Federal</div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL NOVO COLABORADOR -->
+<div class="modal-overlay" id="modal-novo-colab">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" placeholder="Nome do colaborador"/></div><div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" placeholder="11 9 9999-0000"/></div></div>
+    <div class="form-group"><div class="form-label">Cargo / CBO *</div><select class="form-control"><option value="">Selecione o cargo...</option><option>Psicólogo · 2515-10</option><option>Téc. Enfermagem · 3222-05</option><option>Médico · 2251-05</option><option>Analista RH · 2524-05</option><option>Ass. Administrativo · 4110-10</option></select></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Departamento</div><input class="form-control" placeholder="Ex: UTI"/></div><div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control"/></div></div>
+    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="fecharModal('modal-novo-colab');alert('✅ Colaborador cadastrado!')">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL AGENDAR -->
+<div class="modal-overlay" id="modal-agendar">
+  <div class="modal">
+    <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
+    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control"><option>Pesquisa Pulso</option><option>Diagnóstico Geral</option></select></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option></select></div></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div></div>
+    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="fecharModal('modal-agendar');alert('📅 Pesquisa agendada!')">Agendar</button></div>
+  </div>
+</div>
+
+<script>
+function sv(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('view-'+id);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav)nav.classList.add('active');
+  window.scrollTo(0,0);
+}
+function swTab(tab,targetId){
+  const parent=tab.closest('.card-body')||tab.closest('.content');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
+  const t=document.getElementById(targetId);
+  if(t)t.classList.add('active');
+}
+function toggleModulo(header){
+  const body=header.nextElementSibling;
+  body.classList.toggle('open');
+}
+function selOpt(el){
+  el.closest('.disparo-opts').querySelectorAll('.d-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function handleUpload(input){
+  if(input.files&&input.files[0]){
+    const z=document.querySelector('.upload-zone');
+    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
+    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
+  }
+}
+function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
+function filtrarTabela(q){
+  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
+    tr.style.display=tr.dataset.nome.toLowerCase().includes(q.toLowerCase())||q===''?'':'none';
+  });
+}
+function filtrarStatus(s){
+  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
+    tr.style.display=(!s||tr.dataset.status===s)?'':'none';
+  });
+}
+function ordenar(campo){alert('Ordenando por '+campo+'...');}
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+</script>
+</body>
+</html>
