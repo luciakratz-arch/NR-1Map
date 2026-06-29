@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Painel do Parceiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
+  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
+  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
+  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
+  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
+  --sidebar:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--roxo-claro);}
+.sidebar-perfil{padding:12px 18px;border-bottom:1px solid #1E2A28;}
+.sidebar-perfil .role{font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.sidebar-perfil .nome{font-size:12px;color:#C8D4D0;font-weight:500;}
+.sidebar-perfil .comissao{font-size:11px;color:var(--roxo-claro);margin-top:2px;}
+
+/* LOGO UPLOAD */
+.logo-upload-area{margin:12px 18px;padding:10px;background:#1E2A28;border-radius:8px;border:1px dashed #2A3A38;text-align:center;cursor:pointer;}
+.logo-upload-area:hover{border-color:var(--roxo-claro);}
+.logo-preview{font-size:10px;color:#4A5450;}
+
+.nav{padding:10px 0;flex:1;}
+.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--roxo-claro);}
+.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
+.bdg-nav{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+.btn-sair{width:100%;padding:8px;background:transparent;border:1px solid #2A2E2C;border-radius:7px;color:#4A5450;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-sair:hover{color:#C8D4D0;border-color:#4A5450;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.topbar-role{font-size:11px;font-weight:600;padding:3px 12px;border-radius:100px;background:var(--roxo-xp);color:var(--roxo);}
+.content{padding:24px;flex:1;}
+
+/* CARDS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.mc{background:var(--branco);border-radius:9px;padding:18px;border:1px solid var(--linha);}
+.mc.roxo{border-top:3px solid var(--roxo);}
+.mc.verde{border-top:3px solid var(--verde);}
+.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.mc .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;color:var(--preto);}
+.mc .sub{font-size:11px;margin-top:4px;}
+.up{color:var(--verde-claro);}
+.roxo-c{color:var(--roxo);}
+
+/* CARD GENÉRICO */
+.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
+.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
+.card-body{padding:16px 18px;}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#F5F8F7;}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;}
+.bdg-ok{background:var(--verde-xp);color:var(--verde);}
+.bdg-pend{background:#FFF8E6;color:#92610A;}
+.bdg-roxo{background:var(--roxo-xp);color:var(--roxo);}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}
+.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}
+.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}
+.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* FORM */
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.form-control:focus{outline:none;border-color:var(--roxo-claro);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* COMISSÃO */
+.comissao-card{background:linear-gradient(135deg,var(--roxo),var(--roxo-claro));border-radius:12px;padding:20px;color:#fff;margin-bottom:16px;}
+.comissao-pct{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;}
+.comissao-label{font-size:13px;opacity:.85;margin-bottom:16px;}
+.comissao-saldo{background:rgba(255,255,255,.15);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.saldo-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;}
+
+/* LINK AFILIADO */
+.link-afiliado{background:var(--cinza-claro);border:1px solid var(--linha);border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;}
+.link-url{flex:1;font-family:monospace;font-size:11px;color:var(--roxo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* CO-BRANDING */
+.cobranding-preview{display:flex;align-items:center;gap:16px;background:var(--cinza-claro);border-radius:8px;padding:14px;margin-bottom:12px;}
+.logo-box{width:80px;height:48px;border-radius:6px;border:1.5px dashed var(--linha);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cinza-medio);cursor:pointer;background:#fff;}
+.logo-box:hover{border-color:var(--roxo-claro);}
+.cobranding-plus{font-size:20px;color:var(--cinza-medio);}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--linha);margin-bottom:16px;}
+.tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--cinza-medio);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.tab:hover{color:var(--preto);}
+.tab.active{color:var(--roxo);border-bottom-color:var(--roxo);font-weight:600;}
+
+/* SACAR */
+.saque-card{background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:9px;padding:16px;margin-bottom:14px;}
+.saque-label{font-size:11px;color:var(--roxo);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">NR-1<span>Map</span></div>
+  <div class="sidebar-perfil">
+    <div class="role">Parceiro / Representante</div>
+    <div class="nome">Consultoria RH Brasil</div>
+    <div class="comissao">30% recorrente ativo</div>
+  </div>
+
+  <!-- CO-BRANDING LOGO UPLOAD -->
+  <div class="logo-upload-area" onclick="document.getElementById('logo-input').click()">
+    <div style="font-size:20px;margin-bottom:4px;">🏢</div>
+    <div class="logo-preview">Clique para subir<br/>sua logotipo</div>
+    <input type="file" id="logo-input" style="display:none;" accept="image/*" onchange="uploadLogo(this)"/>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-sec">Visão geral</div>
+    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-sec">Gestão</div>
+    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Minhas Empresas<span class="bdg-nav">6</span></div>
+    <div class="nav-item" onclick="sv('comissoes')"><span class="ic">💰</span>Comissões</div>
+    <div class="nav-item" onclick="sv('cobranding')"><span class="ic">🎨</span>Co-Branding</div>
+    <div class="nav-sec">Crescimento</div>
+    <div class="nav-item" onclick="sv('afiliado')"><span class="ic">🔗</span>Link de Afiliado</div>
+    <div class="nav-item" onclick="sv('novo-cliente')"><span class="ic">➕</span>Cadastrar Empresa</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="btn-sair" onclick="location.href='admin.html'">← Sair</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="view-dashboard" class="view active">
+    <div class="topbar"><div class="topbar-title">Dashboard do Parceiro</div><span class="topbar-role">Representante</span></div>
+    <div class="content">
+      <div class="metrics">
+        <div class="mc roxo"><div class="lbl">Saldo disponível</div><div class="val roxo-c">R$ 2.847</div><div class="sub up">↑ +R$340 este mês</div></div>
+        <div class="mc verde"><div class="lbl">Empresas ativas</div><div class="val">6</div><div class="sub up">↑ 1 nova este mês</div></div>
+        <div class="mc"><div class="lbl">Vidas gerenciadas</div><div class="val">142</div><div class="sub">colaboradores ativos</div></div>
+        <div class="mc"><div class="lbl">Comissão mensal</div><div class="val">R$ 847</div><div class="sub">30% recorrente</div></div>
+      </div>
+
+      <div class="comissao-card">
+        <div class="comissao-pct">30%</div>
+        <div class="comissao-label">de comissão recorrente em todas as assinaturas das suas empresas</div>
+        <div class="comissao-saldo">
+          <div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:2px;">Saldo disponível para saque</div>
+            <div class="saldo-val">R$ 2.847,00</div>
+          </div>
+          <button class="btn" style="background:#fff;color:var(--roxo);font-weight:600;" onclick="sv('comissoes')">Sacar →</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="title">Últimas atividades</div></div>
+          <div class="card-body" style="padding:8px 16px;">
+            <table><tbody>
+              <tr><td style="font-size:12px;">Clínica Bem Estar</td><td><span class="bdg bdg-ok"><span class="dot"></span>Pagamento</span></td><td style="font-size:11px;color:var(--cinza-medio);">hoje</td></tr>
+              <tr><td style="font-size:12px;">Escola do Futuro</td><td><span class="bdg bdg-ok"><span class="dot"></span>Nova empresa</span></td><td style="font-size:11px;color:var(--cinza-medio);">ontem</td></tr>
+              <tr><td style="font-size:12px;">Contábil Souza</td><td><span class="bdg bdg-pend"><span class="dot"></span>Aguard. pag.</span></td><td style="font-size:11px;color:var(--cinza-medio);">3 dias</td></tr>
+              <tr><td style="font-size:12px;">Tech Soluções</td><td><span class="bdg bdg-ok"><span class="dot"></span>Laudo gerado</span></td><td style="font-size:11px;color:var(--cinza-medio);">4 dias</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="title">Projeção de comissões</div></div>
+          <div class="card-body">
+            <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Este mês</span><span style="font-weight:600;color:var(--roxo);">R$ 847</span></div><div style="height:5px;background:var(--cinza-claro);border-radius:3px;"><div style="width:65%;height:100%;background:var(--roxo-claro);border-radius:3px;"></div></div></div>
+            <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Mês anterior</span><span style="font-weight:600;color:var(--verde);">R$ 507</span></div><div style="height:5px;background:var(--cinza-claro);border-radius:3px;"><div style="width:40%;height:100%;background:var(--verde-claro);border-radius:3px;"></div></div></div>
+            <div style="font-size:11px;color:var(--cinza-medio);margin-top:8px;">Com mais 2 empresas na faixa 2, sua comissão mensal chegaria a <strong style="color:var(--roxo);">R$ 1.347</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MINHAS EMPRESAS ===== -->
+  <div id="view-clientes" class="view">
+    <div class="topbar"><div class="topbar-title">Minhas Empresas</div><div style="display:flex;gap:8px;"><button class="btn btn-roxo btn-sm" onclick="sv('novo-cliente')">+ Cadastrar Empresa</button></div></div>
+    <div class="content">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="title">Empresas gerenciadas</div><div class="subtitle">Visíveis apenas para você · Co-branded</div></div>
+          <input placeholder="Buscar..." class="form-control" style="width:180px;font-size:12px;padding:6px 10px;"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empresa</th><th>Responsável</th><th>Colaboradores</th><th>Plano</th><th>Comissão/mês</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><strong>Clínica Bem Estar</strong></td><td>Ana Costa</td><td>12</td><td>Assinatura · Faixa 2</td><td style="color:var(--roxo);font-weight:600;">R$ 90</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <tr><td><strong>Escola do Futuro</strong></td><td>Carlos M.</td><td>28</td><td>Assinatura · Faixa 3</td><td style="color:var(--roxo);font-weight:600;">R$ 168</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <tr><td><strong>Contábil Souza</strong></td><td>Pedro S.</td><td>5</td><td>Assinatura · Faixa 1</td><td style="color:var(--roxo);font-weight:600;">R$ 52</td><td><span class="bdg bdg-pend"><span class="dot"></span>Pend. pag.</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <tr><td><strong>Tech Soluções</strong></td><td>Marina L.</td><td>35</td><td>Assinatura · Faixa 3</td><td style="color:var(--roxo);font-weight:600;">R$ 210</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <tr><td><strong>Farmácia PopuFar</strong></td><td>Joana R.</td><td>8</td><td>Uso Único</td><td style="color:var(--cinza-medio);">R$ 189</td><td><span class="bdg bdg-ok"><span class="dot"></span>Concluído</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <tr><td><strong>RH Consultoria SP</strong></td><td>Lucas A.</td><td>54</td><td>Assinatura · Faixa 4</td><td style="color:var(--roxo);font-weight:600;">R$ 267</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMISSÕES ===== -->
+  <div id="view-comissoes" class="view">
+    <div class="topbar"><div class="topbar-title">Comissões</div></div>
+    <div class="content">
+      <div class="saque-card">
+        <div class="saque-label">💰 Saldo disponível para saque</div>
+        <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--roxo);margin-bottom:10px;">R$ 2.847,00</div>
+        <div class="form-group"><div class="form-label">Chave PIX</div><input class="form-control" placeholder="CPF, e-mail ou chave aleatória" value="consultoria@rhbrasil.com.br"/></div>
+        <button class="btn btn-roxo" style="width:100%;" onclick="alert('Saque solicitado! Transferência em até 2 dias úteis.')">Solicitar saque via PIX →</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="title">Histórico de comissões</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Mês</th><th>Empresas</th><th>Receita gerada</th><th>Comissão (30%)</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Jun 2026</td><td>6</td><td>R$ 2.823</td><td style="color:var(--roxo);font-weight:600;">R$ 847</td><td><span class="bdg bdg-pend"><span class="dot"></span>A receber</span></td></tr>
+              <tr><td>Mai 2026</td><td>5</td><td>R$ 1.690</td><td style="color:var(--roxo);font-weight:600;">R$ 507</td><td><span class="bdg bdg-ok"><span class="dot"></span>Pago</span></td></tr>
+              <tr><td>Abr 2026</td><td>5</td><td>R$ 1.690</td><td style="color:var(--roxo);font-weight:600;">R$ 507</td><td><span class="bdg bdg-ok"><span class="dot"></span>Pago</span></td></tr>
+              <tr><td>Mar 2026</td><td>4</td><td>R$ 1.340</td><td style="color:var(--roxo);font-weight:600;">R$ 402</td><td><span class="bdg bdg-ok"><span class="dot"></span>Pago</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CO-BRANDING ===== -->
+  <div id="view-cobranding" class="view">
+    <div class="topbar"><div class="topbar-title">Co-Branding</div></div>
+    <div class="content" style="max-width:620px;">
+      <div class="card">
+        <div class="card-header"><div class="title">Preview do cabeçalho co-branded</div><div class="subtitle">Como aparece nos laudos PDF das suas empresas</div></div>
+        <div class="card-body">
+          <div class="cobranding-preview">
+            <div class="logo-box" onclick="document.getElementById('logo-parceiro').click()">
+              <div id="logo-parceiro-preview" style="text-align:center;">
+                <div style="font-size:18px;">🏢</div>
+                <div style="font-size:10px;color:var(--cinza-medio);">Sua logo</div>
+              </div>
+              <input type="file" id="logo-parceiro" style="display:none;" accept="image/*" onchange="previewLogo(this,'logo-parceiro-preview')"/>
+            </div>
+            <div class="cobranding-plus">+</div>
+            <div class="logo-box" style="cursor:default;">
+              <div style="text-align:center;">
+                <div style="font-size:15px;font-weight:700;">NR-1<span style="color:var(--verde-claro);">Map</span></div>
+                <div style="font-size:10px;color:var(--cinza-medio);">Logo empresa</div>
+              </div>
+            </div>
+            <div style="flex:1;padding-left:12px;">
+              <div style="font-size:12px;color:var(--cinza-medio);line-height:1.5;">Ambas as logos aparecem no cabeçalho de todos os laudos PDF gerados para as suas empresas clientes.</div>
+            </div>
+          </div>
+          <div class="form-group"><div class="form-label">Nome da sua consultoria (exibido nos relatórios)</div><input class="form-control" value="Consultoria RH Brasil Ltda."/></div>
+          <div class="form-group"><div class="form-label">CRP / Registro Profissional (opcional)</div><input class="form-control" placeholder="Ex: CRP 09/99999"/></div>
+          <div class="form-group"><div class="form-label">Site da consultoria</div><input class="form-control" placeholder="https://suaconsultoria.com.br"/></div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="alert('✅ Co-branding salvo! Todos os laudos PDF usarão essa configuração.')">Salvar configuração de co-branding</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LINK DE AFILIADO ===== -->
+  <div id="view-afiliado" class="view">
+    <div class="topbar"><div class="topbar-title">Link de Afiliado</div></div>
+    <div class="content" style="max-width:620px;">
+      <div class="card">
+        <div class="card-header"><div class="title">Seu link exclusivo de indicação</div><div class="subtitle">Empresas que assinarem por este link são vinculadas à sua conta automaticamente</div></div>
+        <div class="card-body">
+          <div class="link-afiliado" style="margin-bottom:16px;">
+            <span>🔗</span>
+            <span class="link-url">https://nr1map.com.br/?ref=RHBRASIL2025</span>
+            <button class="btn btn-ghost btn-sm" onclick="alert('Link copiado!')">Copiar</button>
+            <button class="btn btn-ghost btn-sm">WhatsApp</button>
+          </div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:14px;font-size:12px;color:var(--cinza-medio);line-height:1.6;">
+            <strong style="color:var(--preto);">Como funciona:</strong><br/>
+            1. Compartilhe seu link com empresas clientes<br/>
+            2. Quando assinarem, são vinculadas automaticamente à sua conta<br/>
+            3. Você recebe 30% de comissão recorrente em cada mensalidade<br/>
+            4. Acompanhe as conversões em tempo real neste painel
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-size:12px;font-weight:500;color:var(--preto);margin-bottom:10px;">Estatísticas do link</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="background:var(--roxo-xp);border-radius:8px;padding:12px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--roxo);">23</div><div style="font-size:11px;color:var(--roxo);">Cliques</div></div>
+              <div style="background:var(--verde-xp);border-radius:8px;padding:12px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--verde);">6</div><div style="font-size:11px;color:var(--verde);">Conversões</div></div>
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;">26%</div><div style="font-size:11px;color:var(--cinza-medio);">Taxa conv.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOVO CLIENTE ===== -->
+  <div id="view-novo-cliente" class="view">
+    <div class="topbar"><div class="topbar-title">Cadastrar Nova Empresa</div><div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="sv('clientes')">← Voltar</button></div></div>
+    <div class="content" style="max-width:620px;">
+      <div class="card">
+        <div class="card-header"><div class="title">Dados da empresa cliente</div><div class="subtitle">Será vinculada automaticamente à sua conta de parceiro</div></div>
+        <div class="card-body">
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group"><div class="form-label">Nome da empresa *</div><input class="form-control" placeholder="Razão social ou nome fantasia"/></div>
+            <div class="form-group"><div class="form-label">Segmento</div><select class="form-control"><option>Saúde / Clínicas</option><option>Educação</option><option>Comércio</option><option>Serviços</option><option>Indústria</option><option>Tecnologia</option></select></div>
+          </div>
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group"><div class="form-label">Nome do responsável RH *</div><input class="form-control" placeholder="Nome completo"/></div>
+            <div class="form-group"><div class="form-label">E-mail profissional *</div><input class="form-control" placeholder="rh@empresa.com.br" type="email"/></div>
+          </div>
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group"><div class="form-label">WhatsApp</div><input class="form-control" placeholder="(11) 9 9999-0000"/></div>
+            <div class="form-group"><div class="form-label">Nº de colaboradores</div><input class="form-control" placeholder="Ex: 25" type="number"/></div>
+          </div>
+          <div class="form-group"><div class="form-label">Plano</div>
+            <select class="form-control">
+              <option>Assinatura Mensal</option>
+              <option>Uso Único (Diagnóstico Pontual)</option>
+            </select>
+          </div>
+          <div style="background:var(--verde-xp);border-radius:7px;padding:12px;font-size:12px;color:var(--verde);margin:14px 0;line-height:1.5;">
+            ✅ Esta empresa será vinculada à sua conta. Você receberá <strong>30% de comissão recorrente</strong> em cada pagamento.
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost" style="flex:1;" onclick="sv('clientes')">Cancelar</button>
+            <button class="btn btn-roxo" style="flex:2;" onclick="alert('✅ Empresa cadastrada e vinculada à sua conta!\n\nO responsável RH receberá acesso por e-mail.')">Cadastrar empresa →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+function sv(id) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  var nav = document.querySelector('.nav-item[onclick*="' + id + '"]');
+  if (nav) nav.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function uploadLogo(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var area = document.querySelector('.logo-upload-area');
+      area.innerHTML = '<img src="' + e.target.result + '" style="max-height:40px;max-width:120px;object-fit:contain;border-radius:4px;"/>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function previewLogo(input, targetId) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+</body>
+</html>
