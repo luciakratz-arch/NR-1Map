@@ -991,6 +991,13 @@ function calcValor(n) {
   var unit = faixas[fi].unit;
   var total = n * unit;
 
+  // PISO MÍNIMO ANTIDECRÉSCIMO
+  // O valor total nunca pode ser menor que o teto da faixa anterior
+  // Tetos: Faixa1=5*unit0, Faixa2=20*unit1, Faixa3=50*unit2
+  if (fi === 1) { var piso = 5 * faixas[0].unit;  if (total < piso) total = piso; }
+  if (fi === 2) { var piso = 20 * faixas[1].unit; if (total < piso) total = piso; }
+  if (fi === 3) { var piso = 50 * faixas[2].unit; if (total < piso) total = piso; }
+
   document.getElementById('calc-faixa').textContent = 'Faixa ' + (fi+1) + ' — ' + faixas[fi].label + ' colaboradores';
   document.getElementById('calc-total').textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('calc-detalhe').textContent = n + ' × R$ ' + unit.toFixed(2).replace('.', ',') + (d.sufixo ? ' / colaborador/mês' : ' / colaborador · pagamento único');
