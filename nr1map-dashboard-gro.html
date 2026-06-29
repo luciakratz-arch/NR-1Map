@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Dashboard GRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f8f9fa;color:#1a1a1a;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1100px;margin:0 auto;padding:24px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;}
+.logo{font-size:18px;font-weight:600;letter-spacing:-.5px;}
+.logo span{color:#10b981;}
+.topbar-right{display:flex;gap:10px;align-items:center;}
+.company-sel{background:#fff;border:1px solid #e5e7eb;color:#374151;font-size:13px;padding:7px 12px;border-radius:8px;cursor:pointer;}
+.btn-pgr{display:flex;align-items:center;gap:6px;background:#10b981;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;}
+.btn-pgr:hover{background:#059669;}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.kpi-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;border-top:3px solid transparent;}
+.kpi-card.cr{border-top-color:#ef4444;}
+.kpi-card.ca{border-top-color:#f59e0b;}
+.kpi-card.cg{border-top-color:#10b981;}
+.kpi-lbl{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
+.kpi-val{font-size:32px;font-weight:600;line-height:1;margin-bottom:4px;}
+.kpi-sub{font-size:12px;font-weight:500;}
+.col-r{color:#ef4444;}.col-a{color:#f59e0b;}.col-g{color:#10b981;}.col-o{color:#f97316;}
+.circles{display:flex;gap:14px;align-items:center;margin-top:8px;}
+.circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;}
+.cr-r{background:#fee2e2;color:#b91c1c;border:1.5px solid #ef4444;}
+.cr-a{background:#fef3c7;color:#92400e;border:1.5px solid #f59e0b;}
+.cr-g{background:#d1fae5;color:#065f46;border:1.5px solid #10b981;}
+.circle-lbl{font-size:10px;color:#9ca3af;margin-top:3px;text-align:center;}
+.def-bar-wrap{height:5px;background:#f3f4f6;border-radius:3px;margin:10px 0 6px;overflow:hidden;}
+.def-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#f59e0b,#ef4444);}
+.ibp-strip{height:4px;border-radius:2px;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 50%,#10b981 100%);position:relative;margin-top:10px;}
+.ibp-dot{position:absolute;top:-4px;width:12px;height:12px;background:#fff;border-radius:50%;border:2px solid #374151;transform:translateX(-50%);}
+.ibp-strip-labels{display:flex;justify-content:space-between;font-size:9px;color:#9ca3af;font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.sec-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:12px;}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.gauge-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;}
+.g-setor{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px;}
+.g-cbo{font-size:11px;color:#9ca3af;margin-bottom:10px;}
+.g-ibp{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;margin-bottom:2px;}
+.g-zona{font-size:11px;color:#6b7280;}
+.table-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;}
+.t-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #e5e7eb;}
+.t-title{font-size:14px;font-weight:600;color:#111827;}
+.t-sub{font-size:12px;color:#6b7280;margin-top:2px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:9px 14px;text-align:left;font-size:11px;font-weight:500;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;background:#f9fafb;border-bottom:1px solid #e5e7eb;}
+tbody td{padding:12px 14px;border-bottom:1px solid #f3f4f6;color:#374151;vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#f9fafb;}
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;}
+.bdg-r{background:#fee2e2;color:#b91c1c;}
+.bdg-a{background:#fef3c7;color:#92400e;}
+.bdg-g{background:#d1fae5;color:#065f46;}
+.bdg-o{background:#ffedd5;color:#9a3412;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;}
+.sn{font-weight:600;font-size:13px;color:#111827;}
+.ss{font-size:11px;color:#9ca3af;margin-top:1px;}
+.acao{font-size:12px;color:#4b5563;line-height:1.5;max-width:280px;}
+.prazo{font-size:11px;font-weight:600;}
+@media(max-width:700px){.kpi-grid,.gauge-grid{grid-template-columns:1fr;}.wrap{padding:14px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo">NR-1<span>Map</span> <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:8px;text-transform:uppercase;letter-spacing:.1em;">GRO · PGR</span></div>
+    <div class="topbar-right">
+      <select class="company-sel"><option>Clínica Vida S.A.</option><option>Escola ABC Ltda.</option></select>
+      <button class="btn-pgr" onclick="alert('Exportando Relatório PGR NR-1...')">📥 Exportar Relatório PGR</button>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Índice de Balança Psicodinâmica — Visão Global</div>
+  <div class="kpi-grid">
+    <div class="kpi-card cr">
+      <div class="kpi-lbl">IBP Global da Empresa</div>
+      <div class="kpi-val col-r">−0.8</div>
+      <div class="kpi-sub col-r">Zona de Defesa Oculta</div>
+      <div class="ibp-strip"><div class="ibp-dot" style="left:42%"></div></div>
+      <div class="ibp-strip-labels"><span>−5</span><span>0</span><span>+5</span></div>
+    </div>
+    <div class="kpi-card ca">
+      <div class="kpi-lbl">Termômetro de Alertas Ativos</div>
+      <div class="circles">
+        <div style="text-align:center;"><div class="circle cr-r">02</div><div class="circle-lbl">Críticos</div></div>
+        <div style="text-align:center;"><div class="circle cr-a">04</div><div class="circle-lbl">Alertas</div></div>
+        <div style="text-align:center;"><div class="circle cr-g">12</div><div class="circle-lbl">Férteis</div></div>
+      </div>
+    </div>
+    <div class="kpi-card ca">
+      <div class="kpi-lbl">Taxa de Estratégias de Defesa</div>
+      <div class="kpi-val col-a">42%</div>
+      <div class="kpi-sub col-a">Cinismo Viril / Ativismo</div>
+      <div class="def-bar-wrap"><div class="def-bar" style="width:42%"></div></div>
+      <div style="font-size:11px;color:#6b7280;line-height:1.4;">Risco de <strong style="color:#ef4444;">burnout mascarado</strong> detectado</div>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Velocímetro IBP — Macro-categorias de Maslow (Balança de Dejours)</div>
+  <div class="gauge-grid">
+    <div class="gauge-card">
+      <div class="g-setor">Fatores de Segurança</div>
+      <div class="g-cbo">Maslow · base</div>
+      <canvas id="g1" width="180" height="100" style="display:block;margin:0 auto 8px;" aria-label="Velocímetro Fatores de Segurança IBP -2.1"></canvas>
+      <div class="g-ibp col-r">−2.1</div>
+      <div class="g-zona">Sofrimento Criativo</div>
+    </div>
+    <div class="gauge-card">
+      <div class="g-setor">Fatores Fisiológicos</div>
+      <div class="g-cbo">Maslow · sustento</div>
+      <canvas id="g2" width="180" height="100" style="display:block;margin:0 auto 8px;" aria-label="Velocímetro Fatores Fisiológicos IBP -0.3"></canvas>
+      <div class="g-ibp col-a">−0.3</div>
+      <div class="g-zona">Zona de Defesa Oculta</div>
+    </div>
+    <div class="gauge-card">
+      <div class="g-setor">Fatores Sociais</div>
+      <div class="g-cbo">Maslow · pertencimento</div>
+      <canvas id="g3" width="180" height="100" style="display:block;margin:0 auto 8px;" aria-label="Velocímetro Fatores Sociais IBP +1.8"></canvas>
+      <div class="g-ibp col-g">+1.8</div>
+      <div class="g-zona">Prazer no Trabalho</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="t-hdr">
+      <div>
+        <div class="t-title">Monitoramento de Riscos por Setor — GRO / PGR</div>
+        <div class="t-sub">Ações automáticas pelas zonas da Balança de Dejours · Conformidade NR-1 2024</div>
+      </div>
+      <button class="btn-pgr" onclick="alert('Exportando PGR...')">📥 Exportar PGR</button>
+    </div>
+    <table>
+      <thead><tr><th>Setor / Área</th><th>IBP Médio</th><th>Zona de Risco</th><th>Ação Recomendada (GRO)</th><th>Prazo</th></tr></thead>
+      <tbody>
+        <tr><td><div class="sn">Operações / Linha A</div><div class="ss">28 colaboradores · CBO 7170</div></td><td><span class="mono col-r">−3.4</span></td><td><span class="bdg bdg-r">🔴 Crítico</span></td><td><div class="acao">Abrir <strong>Espaço de Fala Coletivo</strong> urgente. Suspender exigências não essenciais por 30 dias.</div></td><td><span class="prazo col-r">Imediato</span></td></tr>
+        <tr><td><div class="sn">Comercial / Vendas</div><div class="ss">15 colaboradores · CBO 3541</div></td><td><span class="mono col-a">0.0</span></td><td><span class="bdg bdg-a">🟡 Alerta Defesa</span></td><td><div class="acao">Investigar <strong>ativismo e horas extras ocultas</strong>. Pesquisa Pulso semanal.</div></td><td><span class="prazo col-a">7 dias</span></td></tr>
+        <tr><td><div class="sn">TI / Engenharia</div><div class="ss">9 colaboradores · CBO 2124</div></td><td><span class="mono col-g">+2.5</span></td><td><span class="bdg bdg-g">🟢 Controlado</span></td><td><div class="acao">Manter <strong>rituais de reconhecimento</strong> e julgamento de estética.</div></td><td><span class="prazo col-g">Monitorar</span></td></tr>
+        <tr><td><div class="sn">RH / Gestão de Pessoas</div><div class="ss">6 colaboradores · CBO 2524</div></td><td><span class="mono col-o">−1.2</span></td><td><span class="bdg bdg-o">🟠 Sofrimento Criativo</span></td><td><div class="acao">Supervisão de pares e espaço de fala quinzenal.</div></td><td><span class="prazo col-o">14 dias</span></td></tr>
+        <tr><td><div class="sn">Administrativo / Recepção</div><div class="ss">11 colaboradores · CBO 4110</div></td><td><span class="mono col-g">+1.1</span></td><td><span class="bdg bdg-g">🟢 Controlado</span></td><td><div class="acao">Reforçar <strong>julgamento de utilidade</strong>. Conectar ao impacto no produto final.</div></td><td><span class="prazo col-g">Monitorar</span></td></tr>
+      </tbody>
+    </table>
+    <div style="padding:12px 16px;border-top:1px solid #f3f4f6;font-size:11px;color:#9ca3af;display:flex;justify-content:space-between;">
+      <span>5 de 18 setores · Ordenado por risco</span>
+      <span>NR-1 Map · GRO Ativo · Portaria MTE 1.419/2024</span>
+    </div>
+  </div>
+
+</div>
+<script>
+function drawGauge(id, ibp) {
+  var c = document.getElementById(id);
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var W = c.width, H = c.height;
+  var cx = W/2, cy = H - 6;
+  var r = 76;
+
+  ctx.clearRect(0, 0, W, H);
+
+  function angle(v) { return Math.PI + ((v + 5) / 10) * Math.PI; }
+
+  var segs = [
+    [-5, -2.1, '#fca5a5'],
+    [-2.1, -0.5, '#fdba74'],
+    [-0.5, 0.5, '#fde68a'],
+    [0.5, 2.5, '#86efac'],
+    [2.5, 5, '#6ee7b7']
+  ];
+
+  // fundo
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 2*Math.PI);
+  ctx.arc(cx, cy, r*0.6, 2*Math.PI, Math.PI, true);
+  ctx.fillStyle = '#f3f4f6';
+  ctx.fill();
+
+  // segmentos
+  segs.forEach(function(s) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, angle(s[0]), angle(s[1]));
+    ctx.arc(cx, cy, r*0.6, angle(s[1]), angle(s[0]), true);
+    ctx.closePath();
+    ctx.fillStyle = s[2];
+    ctx.fill();
+  });
+
+  // borda
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 2*Math.PI);
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r*0.6, Math.PI, 2*Math.PI);
+  ctx.stroke();
+
+  // marcações
+  [-5,-2.5,0,2.5,5].forEach(function(v) {
+    var a = angle(v);
+    ctx.beginPath();
+    ctx.moveTo(cx + r*0.61*Math.cos(a), cy + r*0.61*Math.sin(a));
+    ctx.lineTo(cx + r*0.74*Math.cos(a), cy + r*0.74*Math.sin(a));
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // labels
+  ctx.font = '8px monospace';
+  ctx.fillStyle = '#6b7280';
+  ctx.textAlign = 'center';
+  [[-5,'-5'],[0,'0'],[5,'+5']].forEach(function(l) {
+    var a = angle(l[0]);
+    ctx.fillText(l[1], cx + (r+10)*Math.cos(a), cy + (r+10)*Math.sin(a)+3);
+  });
+
+  // agulha
+  var na = angle(Math.max(-5, Math.min(5, ibp)));
+  var nLen = r * 0.8;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(na);
+  ctx.beginPath();
+  ctx.moveTo(-3, 0);
+  ctx.lineTo(0, -nLen);
+  ctx.lineTo(3, 0);
+  ctx.closePath();
+  ctx.fillStyle = '#111827';
+  ctx.fill();
+  ctx.restore();
+
+  // centro
+  ctx.beginPath();
+  ctx.arc(cx, cy, 9, 0, 2*Math.PI);
+  ctx.fillStyle = '#111827';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 5, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+}
+
+function animateGauge(id, target) {
+  var i = 0, steps = 45;
+  var iv = setInterval(function() {
+    i++;
+    var p = 1 - Math.pow(1 - i/steps, 3);
+    drawGauge(id, -5 + (target + 5) * p);
+    if (i >= steps) clearInterval(iv);
+  }, 18);
+}
+
+window.addEventListener('load', function() {
+  animateGauge('g1', -2.1);
+  setTimeout(function(){ animateGauge('g2', -0.3); }, 200);
+  setTimeout(function(){ animateGauge('g3', 1.8); }, 400);
+});
+</script>
+</body>
+</html>
