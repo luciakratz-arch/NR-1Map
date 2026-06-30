@@ -74,6 +74,10 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-clar
 
 /* CARD */
 .card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.cobranding-preview{display:flex;align-items:center;gap:16px;background:var(--cinza-claro);border-radius:8px;padding:14px;margin-bottom:12px;}
+.logo-box{width:80px;height:48px;border-radius:6px;border:1.5px dashed var(--linha);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cinza-medio);cursor:pointer;background:#fff;flex-shrink:0;}
+.logo-box:hover{border-color:var(--roxo-claro);}
+.cobranding-plus{font-size:20px;color:var(--cinza-medio);}
 .card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
 .card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
 .card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
@@ -230,6 +234,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-item" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
     <div class="nav-item" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
     <div class="nav-item" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg">1</span></div>
+    <div class="nav-sec">Configurações</div>
+    <div class="nav-item" onclick="sv('cobranding')"><span class="ic">🎨</span>Co-Branding (Logo)</div>
     <div class="nav-sec">Referência</div>
     <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
     <div class="nav-sec">Resultados</div>
@@ -704,6 +710,41 @@ textarea.form-control{resize:vertical;min-height:70px;}
 </div>
 
 
+<!-- ===== CO-BRANDING (LOGO DA EMPRESA) ===== -->
+<div id="view-cobranding" class="view">
+  <div class="topbar"><div class="topbar-title">🎨 Co-Branding — Logo da Empresa</div></div>
+  <div class="content" style="max-width:640px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Preview do cabeçalho co-branded</div><div class="subtitle">Como vai aparecer nos 4 documentos PDF do GRO (Inventário, Avaliação, Plano de Ação, Acompanhamento)</div></div>
+      <div class="card-body">
+        <div class="cobranding-preview">
+          <div class="logo-box" style="cursor:default;">
+            <div style="text-align:center;" id="logo-parceiro-herdado-preview">
+              <div style="font-size:18px;">🤝</div>
+              <div style="font-size:10px;color:var(--cinza-medio);">Logo do Parceiro<br/>(herdada)</div>
+            </div>
+          </div>
+          <div class="cobranding-plus">+</div>
+          <div class="logo-box" onclick="document.getElementById('logo-empresa').click()">
+            <div id="logo-empresa-preview" style="text-align:center;">
+              <div style="font-size:18px;">🏢</div>
+              <div style="font-size:10px;color:var(--cinza-medio);">Sua logo<br/>(clique p/ subir)</div>
+            </div>
+            <input type="file" id="logo-empresa" style="display:none;" accept="image/*" onchange="previewLogoEmpresa(this,'logo-empresa-preview')"/>
+          </div>
+          <div style="flex:1;padding-left:12px;">
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.5;">A logo do Parceiro é herdada automaticamente do cadastro dele — você só precisa subir a logo da sua empresa. As duas aparecem lado a lado em todos os relatórios.</div>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Nome da empresa (exibido nos relatórios)</div><input class="form-control" value="Clínica Vida S.A."/></div>
+        <button class="btn btn-roxo" style="width:100%;" onclick="salvarLogoEmpresa()">Salvar logo da empresa</button>
+        <p style="font-size:11px;color:var(--cinza-medio);margin-top:8px;">Formatos aceitos: PNG, JPG ou SVG, fundo transparente recomendado. Tamanho ideal: até 300×120px.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- ===== PLANO DE AÇÃO 5W2H (EDITÁVEL) ===== -->
 <div id="view-plano-acao" class="view">
   <div class="topbar">
@@ -1091,6 +1132,20 @@ function adicionarAcao(){
 }
 function gerarPdfPlano(){
   alert('⬇ Gerando PDF do Plano de Ação 5W2H com o estado atual (editado)...\n\nEm produção, isso envia os dados desta tela para o gerador Python (gerar_plano_5w2h.py) e devolve o PDF assinado.');
+}
+
+/* ===== CO-BRANDING — logo da empresa ===== */
+function previewLogoEmpresa(input, targetId){
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=function(e){
+      document.getElementById(targetId).innerHTML='<img src="'+e.target.result+'" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+function salvarLogoEmpresa(){
+  alert('✅ Logo salva (pré-visualização local).\n\nEm produção: o arquivo sobe para o Firebase Storage e a URL fica gravada em nr1map_empresas/{id}.logo_url — os 4 geradores de PDF (Inventário, Avaliação, Plano de Ação, Acompanhamento) passam a buscar essa URL e desenhar a imagem real no cabeçalho, no lugar do texto "[ LOGO DA EMPRESA ]".');
 }
 
 /* ===== ACOMPANHAMENTO — linha do tempo de evidências ===== */
