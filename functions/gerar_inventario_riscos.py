@@ -130,6 +130,15 @@ def zona_de(ibp: float) -> dict:
     return ZONAS_IBP[2]
 
 
+def nome_arquivo_padrao(tipo_documento: str, empresa: str = EMPRESA, ano: int = None) -> str:
+    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
+    import unicodedata, re
+    ano = ano or datetime.datetime.now().year
+    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
+    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
+    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
+
+
 # ───────────────────────────── ESTILOS ─────────────────────────────
 styles = getSampleStyleSheet()
 s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
@@ -185,7 +194,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
 
 # ───────────────────────────── MONTAGEM DO DOCUMENTO ─────────────────────────────
-def gerar_inventario(output_path="/mnt/user-data/outputs/nr1map-inventario-riscos.pdf"):
+def gerar_inventario(output_path=None):
+    output_path = output_path or nome_arquivo_padrao("InventarioDeRiscos")
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
         topMargin=38 * mm, bottomMargin=20 * mm,
