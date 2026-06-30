@@ -80,6 +80,16 @@ def zona_de(ibp: float) -> dict:
     return ZONAS_IBP[2]
 
 
+def nome_arquivo_padrao(tipo_documento: str, empresa: str = None, ano: int = None) -> str:
+    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
+    import unicodedata, re
+    empresa = empresa or EMPRESA
+    ano = ano or datetime.datetime.now().year
+    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
+    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
+    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
+
+
 def probabilidade_de(qtd_perigos: int) -> int:
     return min(qtd_perigos + 1, 5)  # 0 perigos->1(A) ... 4+ perigos->5(E)
 
@@ -192,7 +202,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.restoreState()
 
 
-def gerar_mapa_risco(output_path="/mnt/user-data/outputs/nr1map-mapa-risco.pdf"):
+def gerar_mapa_risco(output_path=None):
+    output_path = output_path or nome_arquivo_padrao("MapaDeRisco")
     doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
                              leftMargin=16 * mm, rightMargin=16 * mm)
     story = []
