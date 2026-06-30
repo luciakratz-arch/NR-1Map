@@ -71,6 +71,16 @@ def classificar(ibp, qtd):
     return zona, sev, letra, MATRIZ_GRO[(letra, sev)]
 
 
+def nome_arquivo_padrao(tipo_documento: str, empresa: str = None, ano: int = None) -> str:
+    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
+    import unicodedata, re
+    empresa = empresa or EMPRESA
+    ano = ano or datetime.datetime.now().year
+    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
+    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
+    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
+
+
 # ───────────────────────────── DADOS (mesma base — empresa, setores, CBOs, ações, acompanhamento) ─────────────────────────────
 EMPRESA = "Clínica Vida S.A."
 REFERENCIA = "Junho de 2026"
@@ -136,7 +146,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.restoreState()
 
 
-def gerar_relatorio_final(output_path="/mnt/user-data/outputs/nr1map-laudo-tecnico.pdf"):
+def gerar_relatorio_final(output_path=None):
+    output_path = output_path or nome_arquivo_padrao("LaudoTecnicoFinal")
     doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
                              leftMargin=18 * mm, rightMargin=18 * mm)
     story = []
