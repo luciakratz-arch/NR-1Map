@@ -741,7 +741,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <td><div contenteditable="true">Abrir Espaço de Fala Coletivo urgente. Suspender exigências não essenciais por 30 dias e revisar metas/cargas de trabalho.</div></td>
               <td><div contenteditable="true">Gestor de RH</div></td>
               <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
                   <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
                 </select>
               </td>
@@ -754,7 +754,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <td><div contenteditable="true">Implementar supervisão de pares e espaço de fala quinzenal. Avaliar distribuição de carga de trabalho.</div></td>
               <td><div contenteditable="true">Gestor de RH</div></td>
               <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
                   <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
                 </select>
               </td>
@@ -767,7 +767,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <td><div contenteditable="true">Investigar ativismo e horas extras ocultas na equipe. Aplicar Pesquisa Pulso direcionada sobre sobrecarga.</div></td>
               <td><div contenteditable="true">Liderança direta</div></td>
               <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
                   <option>Pendente</option><option>Em andamento</option><option selected>Concluída</option>
                 </select>
               </td>
@@ -785,6 +785,21 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A017;margin-right:4px;"></span>Vencendo em até 2 dias</span>
       <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C53030;margin-right:4px;"></span>Vencido</span>
       <span style="margin-left:auto;">Recorrência de revisão: a cada ciclo de Pesquisa Pulso (semanal)</span>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <div class="card-header">
+        <div><div class="title">📋 Linha do Tempo de Evidências (Acompanhamento)</div><div class="subtitle">Item 1.5.4.4.6 da NR-1 — registro de gestão contínua</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="gerarPdfAcompanhamento()">⬇ Gerar PDF de Acompanhamento</button>
+      </div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">
+          Toda mudança de status nas ações acima fica registrada aqui automaticamente, com data/hora
+          e responsável — essa é a evidência que comprova ao fiscal que o Plano de Ação realmente
+          foi executado, não só planejado.
+        </p>
+        <div id="lista-historico" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1066,7 +1081,7 @@ function adicionarAcao(){
     <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
     <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
     <td><div contenteditable="true">Responsável</div></td>
-    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
+    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
     <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
     <td class="sinalizador-cell"></td>
     <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
@@ -1077,9 +1092,51 @@ function adicionarAcao(){
 function gerarPdfPlano(){
   alert('⬇ Gerando PDF do Plano de Ação 5W2H com o estado atual (editado)...\n\nEm produção, isso envia os dados desta tela para o gerador Python (gerar_plano_5w2h.py) e devolve o PDF assinado.');
 }
+
+/* ===== ACOMPANHAMENTO — linha do tempo de evidências ===== */
+let historicoEventos=[
+  {data:'18/06/2026 09:14', resp:'Gestor de RH', evento:'Operações / Linha A — Ação criada (Pendente)'},
+  {data:'20/06/2026 14:02', resp:'Gestor de RH', evento:'Operações / Linha A — Status alterado para Em andamento'},
+  {data:'25/06/2026 10:05', resp:'Liderança direta', evento:'Comercial / Vendas — Status alterado para Concluída'},
+];
+function nomeSetorDaLinha(tr){
+  const primeiraCelula=tr.querySelector('td div[contenteditable]');
+  return primeiraCelula?primeiraCelula.textContent.split('\n')[0].trim():'Ação';
+}
+function registrarEvento(selectEl){
+  const tr=selectEl.closest('tr');
+  const setor=nomeSetorDaLinha(tr);
+  const status=selectEl.value;
+  const agora=new Date();
+  const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
+  renderHistorico();
+}
+function renderHistorico(){
+  const cor={'criada':'var(--cinza-medio)','Pendente':'#C53030','Em andamento':'#D4A017','Concluída':'var(--verde-claro)'};
+  const lista=document.getElementById('lista-historico');
+  if(!lista)return;
+  lista.innerHTML=historicoEventos.map(ev=>{
+    let c='var(--cinza-medio)';
+    if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
+    else if(ev.evento.includes('Em andamento'))c='#D4A017';
+    else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
+      <div style="flex:1;">
+        <div style="font-size:12px;">${ev.evento}</div>
+        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function gerarPdfAcompanhamento(){
+  alert('⬇ Gerando PDF de Acompanhamento (instrumento 4 do GRO)...\n\nEm produção, isso envia esta linha do tempo + a remedição de IBP de cada ação para o gerador Python (gerar_acompanhamento.py) e devolve o PDF assinado, para anexação ao PGR.');
+}
 document.addEventListener('DOMContentLoaded', ()=>{
   atualizarTodosSinalizadores();
   atualizarBadgePendentes();
+  renderHistorico();
 });
 </script>
 </body>
