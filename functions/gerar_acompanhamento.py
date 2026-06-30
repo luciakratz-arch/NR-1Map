@@ -98,6 +98,16 @@ def eficacia(ibp_antes, ibp_depois):
     return delta, "Estável — sem variação significativa ainda"
 
 
+def nome_arquivo_padrao(tipo_documento: str, empresa: str = None, ano: int = None) -> str:
+    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
+    import unicodedata, re
+    empresa = empresa or EMPRESA
+    ano = ano or datetime.datetime.now().year
+    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
+    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
+    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
+
+
 # ───────────────────────────── ESTILOS ─────────────────────────────
 styles = getSampleStyleSheet()
 s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
@@ -145,7 +155,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.restoreState()
 
 
-def gerar_acompanhamento(output_path="/mnt/user-data/outputs/nr1map-acompanhamento.pdf"):
+def gerar_acompanhamento(output_path=None):
+    output_path = output_path or nome_arquivo_padrao("Acompanhamento")
     doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
                              leftMargin=18 * mm, rightMargin=18 * mm)
     story = []
