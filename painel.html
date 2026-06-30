@@ -233,6 +233,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-sec">Referência</div>
     <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
     <div class="nav-sec">Resultados</div>
+    <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
     <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
     <div class="nav-item" onclick="sv('relatorios')"><span class="ic">📄</span>Relatórios</div>
   </nav>
@@ -696,8 +697,94 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="grid-2">
       <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📄 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
       <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">✏ Editar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="gerarPdfPlano()">⬇ PDF</button></div></div></div>
       <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📊 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== PLANO DE AÇÃO 5W2H (EDITÁVEL) ===== -->
+<div id="view-plano-acao" class="view">
+  <div class="topbar">
+    <div class="topbar-title">✅ Plano de Ação 5W2H</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="adicionarAcao()">+ Nova ação</button>
+      <button class="btn btn-primary btn-sm" onclick="gerarPdfPlano()">⬇ Gerar PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
+      Ações geradas automaticamente a partir dos setores/cargos (CBO) classificados como
+      <b>Substancial</b> ou <b>Intolerável</b> na Avaliação do Risco. Edite o texto, responsável,
+      prazo e status à vontade — toda alteração fica registrada como evidência de gestão contínua
+      (item 1.5.4.4.6 da NR-1).
+    </p>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="tbl-plano">
+          <thead>
+            <tr>
+              <th style="width:16%;">Setor / CBO</th>
+              <th style="width:30%;">Ação (What / How)</th>
+              <th style="width:14%;">Responsável</th>
+              <th style="width:12%;">Status</th>
+              <th style="width:13%;">Prazo</th>
+              <th style="width:10%;">Sinalizador</th>
+              <th style="width:5%;"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-plano">
+            <tr data-prazo="2026-07-02">
+              <td><div contenteditable="true" style="font-weight:600;">Operações / Linha A<br/><span style="font-size:10px;color:var(--cinza-medio);">Operador de Linha (CBO 7170) · Intolerável</span></div></td>
+              <td><div contenteditable="true">Abrir Espaço de Fala Coletivo urgente. Suspender exigências não essenciais por 30 dias e revisar metas/cargas de trabalho.</div></td>
+              <td><div contenteditable="true">Gestor de RH</div></td>
+              <td>
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
+                </select>
+              </td>
+              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-02" onchange="atualizarSinalizador(this)"/></td>
+              <td class="sinalizador-cell"></td>
+              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
+            </tr>
+            <tr data-prazo="2026-07-07">
+              <td><div contenteditable="true" style="font-weight:600;">RH / Gestão de Pessoas<br/><span style="font-size:10px;color:var(--cinza-medio);">Assistente de RH (CBO 3514) · Substancial</span></div></td>
+              <td><div contenteditable="true">Implementar supervisão de pares e espaço de fala quinzenal. Avaliar distribuição de carga de trabalho.</div></td>
+              <td><div contenteditable="true">Gestor de RH</div></td>
+              <td>
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
+                </select>
+              </td>
+              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-07" onchange="atualizarSinalizador(this)"/></td>
+              <td class="sinalizador-cell"></td>
+              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
+            </tr>
+            <tr data-prazo="2026-06-25">
+              <td><div contenteditable="true" style="font-weight:600;">Comercial / Vendas<br/><span style="font-size:10px;color:var(--cinza-medio);">Representante Comercial (CBO 3541) · Substancial</span></div></td>
+              <td><div contenteditable="true">Investigar ativismo e horas extras ocultas na equipe. Aplicar Pesquisa Pulso direcionada sobre sobrecarga.</div></td>
+              <td><div contenteditable="true">Liderança direta</div></td>
+              <td>
+                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()">
+                  <option>Pendente</option><option>Em andamento</option><option selected>Concluída</option>
+                </select>
+              </td>
+              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-06-25" onchange="atualizarSinalizador(this)"/></td>
+              <td class="sinalizador-cell"></td>
+              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;font-size:11px;color:var(--cinza-medio);margin-top:10px;">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--verde-claro);margin-right:4px;"></span>No prazo</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A017;margin-right:4px;"></span>Vencendo em até 2 dias</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C53030;margin-right:4px;"></span>Vencido</span>
+      <span style="margin-left:auto;">Recorrência de revisão: a cada ciclo de Pesquisa Pulso (semanal)</span>
     </div>
   </div>
 </div>
@@ -938,6 +1025,62 @@ function filtrarStatus(s){
 function ordenar(campo){alert('Ordenando por '+campo+'...');}
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ===== PLANO DE AÇÃO 5W2H — sinalizador de prazo ===== */
+function corSinalizador(dataPrazoStr){
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const prazo=new Date(dataPrazoStr+'T00:00:00');
+  const diffDias=Math.round((prazo-hoje)/86400000);
+  if(diffDias<0) return {cor:'#C53030',texto:'Vencido'};
+  if(diffDias<=2) return {cor:'#D4A017',texto:'Vencendo'};
+  return {cor:'var(--verde-claro)',texto:'No prazo'};
+}
+function atualizarSinalizador(inputOuTr){
+  const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
+  const input=tr.querySelector('input[type="date"]');
+  if(!input||!input.value)return;
+  const {cor,texto}=corSinalizador(input.value);
+  const cel=tr.querySelector('.sinalizador-cell');
+  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
+}
+function atualizarTodosSinalizadores(){
+  document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
+}
+function atualizarBadgePendentes(){
+  const total=document.querySelectorAll('#tbody-plano tr').length;
+  let pendentes=0;
+  document.querySelectorAll('#tbody-plano tr').forEach(tr=>{
+    const status=tr.querySelector('select').value;
+    if(status!=='Concluída')pendentes++;
+  });
+  const bdg=document.getElementById('bdg-plano-pendentes');
+  if(bdg)bdg.textContent=pendentes;
+}
+function adicionarAcao(){
+  const tbody=document.getElementById('tbody-plano');
+  const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
+  const dataPadrao=hoje.toISOString().slice(0,10);
+  const tr=document.createElement('tr');
+  tr.dataset.prazo=dataPadrao;
+  tr.innerHTML=`
+    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
+    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
+    <td><div contenteditable="true">Responsável</div></td>
+    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
+    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
+    <td class="sinalizador-cell"></td>
+    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
+  tbody.appendChild(tr);
+  atualizarSinalizador(tr);
+  atualizarBadgePendentes();
+}
+function gerarPdfPlano(){
+  alert('⬇ Gerando PDF do Plano de Ação 5W2H com o estado atual (editado)...\n\nEm produção, isso envia os dados desta tela para o gerador Python (gerar_plano_5w2h.py) e devolve o PDF assinado.');
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  atualizarTodosSinalizadores();
+  atualizarBadgePendentes();
+});
 </script>
 </body>
 </html>
