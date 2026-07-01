@@ -117,6 +117,16 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 /* MODULOS */
 .modulo-card{border:1.5px solid var(--linha);border-radius:9px;margin-bottom:12px;overflow:hidden;}
+.btn-aba{padding:8px 16px;border-radius:8px;border:1.5px solid var(--linha);background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:var(--cinza-medio);transition:all .15s;}
+.btn-aba:hover{border-color:var(--roxo);color:var(--roxo);}
+.btn-aba.aba-ativa{background:var(--roxo);color:#fff;border-color:var(--roxo);}
+.subcat-bloco{margin-bottom:10px;border:1px solid var(--linha);border-radius:7px;overflow:hidden;}
+.subcat-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--cinza-claro);cursor:pointer;}
+.subcat-hdr:hover{background:#eee;}
+.subcat-titulo{font-size:11.5px;font-weight:600;color:var(--roxo);}
+.subcat-counter{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.c-ok{background:#D2F2E2;color:#0A6E4F;}
+.c-warn{background:#FBD5D5;color:#C53030;}
 .modulo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--branco);}
 .modulo-header:hover{background:var(--cinza-claro);}
 .modulo-header .m-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
@@ -229,8 +239,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-sec">Visão geral</div>
     <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
     <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg">14</span></div>
+    <div class="nav-sec">Empresa</div>
+    <div class="nav-item" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
     <div class="nav-sec">Pesquisas</div>
     <div class="nav-item" onclick="sv('planejamento')"><span class="ic">🗓</span>Planejamento</div>
+    <div class="nav-item" onclick="sv('metodologia')"><span class="ic">🔬</span>Metodologia Científica</div>
     <div class="nav-item" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
     <div class="nav-item" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
     <div class="nav-item" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg">1</span></div>
@@ -286,6 +299,47 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="mc"><div class="lbl">Índice Sofrimento</div><div class="val">72</div><div class="delta down">▲ 8 pts vs. anterior</div></div>
       <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val">83%</div><div class="delta up">▲ 11% vs. anterior</div></div>
     </div>
+
+    <!-- VELOCÍMETROS IBP — Balança Psicodinâmica (Dejours) -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);margin-bottom:10px;">Velocímetro IBP — Balança Psicodinâmica (Dejours) × Macro-categorias</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Fisiológicos</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 1 · Corpo e Mente</div>
+          <canvas id="gauge-fis" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−0.3</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores de Segurança</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 2 · Previsibilidade</div>
+          <canvas id="gauge-seg" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−2.1</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Sofrimento Patogênico</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Sociais</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 3 · Relacionamentos</div>
+          <canvas id="gauge-soc" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:#10b981;">+1.8</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Terreno Fértil</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Motivacionais</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 4 · Propósito</div>
+          <canvas id="gauge-mot" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:#f59e0b;">+0.6</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--cinza-medio);">
+        <span>🔴 Sofrimento Patogênico (−5 a −1,5)</span>
+        <span>🟡 Defesa Oculta (−1,4 a +1,4)</span>
+        <span>🟢 Terreno Fértil (+1,5 a +5)</span>
+      </div>
+    </div>
+
     <div class="grid-3c">
       <div class="card">
         <div class="card-header"><div><div class="title">Termômetro Prazer ↔ Sofrimento</div><div class="subtitle">Jun 2025</div></div><button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">Ver laudo</button></div>
@@ -511,6 +565,280 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
+<!-- ===== METODOLOGIA CIENTÍFICA ===== -->
+<div id="view-metodologia" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🔬 Metodologia Científica</div>
+    <div class="topbar-actions">
+      <span style="font-size:11px;color:var(--cinza-medio);background:var(--cinza-claro);padding:4px 12px;border-radius:20px;">Dra. Lucia Kratz · CRP 09/20590</span>
+    </div>
+  </div>
+  <div class="content" style="max-width:900px;">
+
+    <!-- SEÇÃO 1: INFOGRÁFICO INTEGRADO -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">1. Fundação Teórica Integrada</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Maslow · Herzberg · Dejours — as três correntes que sustentam as 101 perguntas</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+        <!-- PIRÂMIDE -->
+        <div>
+          <!-- TOPO DA PIRÂMIDE -->
+          <div style="background:linear-gradient(135deg,#7B00C4,#9B30E0);border-radius:12px 12px 0 0;padding:18px 20px;color:#fff;margin-bottom:2px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES MOTIVACIONAIS · Herzberg & Dejours</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Propósito</div>
+                <div style="font-size:10px;opacity:.8;">Significado do trabalho</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Identidade</div>
+                <div style="font-size:10px;opacity:.8;">Autorrealização profissional</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Autonomia</div>
+                <div style="font-size:10px;opacity:.8;">Espaço de criação (Dejours)</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Reconhecimento</div>
+                <div style="font-size:10px;opacity:.8;">Julgamento de Utilidade e Beleza</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:10px;font-weight:600;margin-bottom:2px;">Relacionamentos Sociais</div>
+              <div style="font-size:10px;opacity:.8;">Espaço de Fala · Cultura · Proteção contra Assédio</div>
+            </div>
+          </div>
+
+          <!-- SEPARADOR IBP -->
+          <div style="background:#1F2937;padding:8px 20px;display:flex;align-items:center;gap:10px;">
+            <div style="height:1px;flex:1;background:linear-gradient(90deg,#ef444400,#ef4444,#10b98100);"></div>
+            <div style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.1em;white-space:nowrap;">IBP · ÍNDICE DE BALANÇA PSICODINÂMICA · −5 ←→ +5</div>
+            <div style="height:1px;flex:1;background:linear-gradient(90deg,#10b98100,#10b981,#ef444400);"></div>
+          </div>
+
+          <!-- BASE DA PIRÂMIDE -->
+          <div style="background:linear-gradient(135deg,#0A6E4F,#12A073);border-radius:0 0 12px 12px;padding:18px 20px;color:#fff;margin-top:2px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES HIGIÊNICOS · Maslow & Herzberg</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Infraestrutura</div>
+                <div style="font-size:10px;opacity:.8;">Ergonomia · Sistemas digitais</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Proteção Física</div>
+                <div style="font-size:10px;opacity:.8;">EPI · NR-1 · Direito de Recusa</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Ritmo e Pausas</div>
+                <div style="font-size:10px;opacity:.8;">Cadência · Limitações biológicas</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Estabilidade</div>
+                <div style="font-size:10px;opacity:.8;">Clareza de papéis · Segurança laboral</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPLICAÇÕES LATERAIS -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Explicação topo -->
+          <div style="background:var(--roxo-xp);border-left:3px solid var(--roxo);border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--roxo);margin-bottom:6px;">Zona de Terreno Fértil (+1,5 a +5,0)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aqui opera a transformação do sofrimento em <b>Prazer e Emancipação</b> através do Reconhecimento (Julgamento de Estética e Utilidade — Dejours) e do Espaço de Fala. O colaborador encontra sentido no trabalho e mobiliza sua subjetividade de forma criativa.</div>
+          </div>
+
+          <!-- Zona IBP -->
+          <div style="background:#F3F4F6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Zona de Defesa Oculta (−1,4 a +1,4)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mecanismos de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
+          </div>
+
+          <!-- Explicação base -->
+          <div style="background:var(--verde-xp);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--verde);margin-bottom:6px;">Zona de Sofrimento Patogênico (−5,0 a −1,5)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Se esta base falhar, o sofrimento se torna <b>patogênico e há risco imediato de adoecimento com nexo causal (NR-1)</b>. Ruptura do equilíbrio psíquico. Exige intervenção obrigatória conforme GRO e registro no Plano de Ação 5W2H.</div>
+          </div>
+
+          <!-- Fórmula IBP -->
+          <div style="background:var(--preto);border-radius:8px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--verde-claro);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Fórmula de Transposição</div>
+            <div style="font-family:monospace;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;">IBP = (Média<sub style="font-size:11px;">Likert</sub> − 3) × 2,5</div>
+            <div style="font-size:11px;color:#6B7370;">Escala Likert 1–5 → Balança Psicodinâmica −5 a +5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARADOR -->
+    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
+
+    <!-- SEÇÃO 2: ENGENHARIA DAS 101 QUESTÕES -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">2. A Engenharia das 101 Questões Regulatórias</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Taxonomia pericial do banco de dados · Autoria: Dra. Lucia Kratz (CRP 09/20590)</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Arquitetura da Matriz Mestre</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🧠 Módulo 1 — Fisiológico</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">27 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🛡️ Módulo 2 — Segurança</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">29 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🤝 Módulo 3 — Relacionamentos</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">25 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🚀 Módulo 4 — Motivacional</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">20 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 10px;background:var(--preto);border-radius:6px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">TOTAL REGULATÓRIO</div>
+              <span style="font-size:13px;font-weight:800;color:var(--verde-claro);">101 perguntas</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">⚙️ Trava Algorítmica — Regra da Validação Ímpar</div>
+          <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O sistema possui uma <b style="color:var(--preto);">trava de salvamento algorítmica</b> que impede o agendamento de questionários com número <b style="color:var(--laranja);">par de perguntas por subcategoria ativa</b> (mínimo 3).</div>
+          <div style="background:var(--laranja-xp);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--laranja);margin-bottom:4px;">Por que isso importa tecnicamente?</div>
+            <div style="font-size:11px;color:var(--preto);line-height:1.6;">Em escalas Likert de 5 pontos com número <b>par</b> de itens, os respondentes tendem a se neutralizar no ponto médio (3), gerando diagnósticos "mornos" sem vetor estatístico claro. A trava ímpar <b>força a balança a apontar</b> inequivocamente para o lado do Sofrimento ou do Prazer.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:8px 10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#DC2626;">✗ PAR</div>
+              <div style="font-size:10px;color:#DC2626;">2, 4, 6 perguntas</div>
+              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Bloqueado — diagnóstico inválido</div>
+            </div>
+            <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#16A34A;">✓ ÍMPAR</div>
+              <div style="font-size:10px;color:#16A34A;">3, 5, 7+ perguntas</div>
+              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Aprovado — vetor claro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regime de embaralhamento -->
+      <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:10px;padding:18px 20px;display:flex;gap:20px;align-items:center;">
+        <div style="font-size:32px;flex-shrink:0;">🎲</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Regime de Embaralhamento Total</div>
+          <div style="font-size:12px;color:#8A9590;line-height:1.6;">As 101 perguntas entram num <b style="color:var(--verde-claro);">pool único</b> e são sorteadas aleatoriamente — sem respeitar módulo ou subcategoria na ordem de exibição ao colaborador. Isso <b style="color:var(--verde-claro);">elimina o viés de resposta por contexto</b>: o respondente não percebe que está sendo avaliado sobre liderança e não "prepara" as respostas. O diagnóstico capta o estado emocional real, não o desejado.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARADOR -->
+    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
+
+    <!-- SEÇÃO 3: DUAS VELOCIDADES DE COLETA -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">3. Agendamento e Coleta em Duas Velocidades</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:20px;">O gestor opera a ferramenta em 3 passos, com dois motores de escuta independentes e simultâneos</div>
+
+      <!-- STEPPER -->
+      <div style="display:flex;flex-direction:column;gap:0;">
+
+        <!-- Passo 1 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">1</div>
+            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:12px;flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Setup do Projeto</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;">O gestor ativa ou desativa subcategorias inteiras por CBO ou setor, edita os textos das perguntas para moldar a pesquisa à cultura interna da empresa (override por cliente — sem afetar o banco global), e valida a trava ímpar antes de prosseguir. A IA do sistema sugere as subcategorias com pior histórico de IBP como prioridade inicial.</div>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">2</div>
+            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
+          </div>
+          <div style="flex:1;margin-bottom:12px;">
+            <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Definição do Ciclo — Dois Motores Simultâneos</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="border:1.5px solid var(--roxo);border-radius:8px;padding:14px;background:var(--roxo-xp);">
+                  <div style="font-size:10px;font-weight:800;color:var(--roxo);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">⚡ Velocidade 1</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Motor Pesquisa Pulso</div>
+                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Disparos automáticos e rotativos via WhatsApp com token efêmero. Frequência e quantidade de perguntas configuráveis pelo gestor. Sistema prioriza as subcategorias com piores IBPs.</div>
+                  <div style="background:var(--roxo);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 48h</div>
+                </div>
+                <div style="border:1.5px solid var(--verde);border-radius:8px;padding:14px;background:var(--verde-xp);">
+                  <div style="font-size:10px;font-weight:800;color:var(--verde);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">🏛 Velocidade 2</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Pesquisa Robusta</div>
+                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Questionário consolidado e profundo para auditoria do PGR. Ciclos bimestral, semestral ou anual. O sistema seleciona automaticamente o ciclo com base nos resultados acumulados do IBP.</div>
+                  <div style="background:var(--verde);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 7 dias úteis</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">3</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Coleta, Anonimização e Cálculo do IBP</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O colaborador responde de forma <b style="color:var(--preto);">100% anônima via Magic Link/OTP</b> enviado ao WhatsApp — sem cadastro de senhas. O RH nunca tem acesso ao ID do respondente. A trava de anonimato por CBO exige mínimo de 3 respondentes por agrupamento antes de exibir dados segmentados.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">📱</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Magic Link OTP</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Sem senhas · Sem cadastro</div>
+              </div>
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">🎲</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Likert → IBP</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">(Média − 3) × 2,5</div>
+              </div>
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">🛡️</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Cascata de Anonimato</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">CBO → Setor → Empresa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RODAPÉ DE AUTORIDADE -->
+    <div style="background:var(--preto);border-radius:10px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;">Dra. Lucia Kratz</div>
+        <div style="font-size:11px;color:#8A9590;">Psicóloga e Administradora · CRP 09/20590 · PhD</div>
+        <div style="font-size:11px;color:var(--verde-claro);margin-top:4px;">Criadora do Índice de Balança Psicodinâmica (IBP) e do NR-1 Map</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Psicodinâmica do Trabalho · Dejours</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Fatores Higiênicos · Herzberg</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Hierarquia de Necessidades · Maslow</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Conformidade Portaria MTE 1.419/2024</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ===== MÓDULOS ===== -->
 <div id="view-modulos" class="view">
   <div class="topbar"><div class="topbar-title">Módulos e perguntas</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm">Filtrar por grupo</button></div></div>
@@ -709,6 +1037,69 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
+
+<!-- ===== CARGOS / ORGANOGRAMA ===== -->
+<div id="view-cargos" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🏗 Cargos e Organograma</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportarOrgPDF()">⬇ Exportar PDF</button>
+      <button class="btn btn-primary btn-sm" id="btn-novo-cargo" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button>
+    </div>
+  </div>
+  <div class="content">
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      <button class="btn-aba aba-ativa" id="aba-cl" onclick="swCargos('lista')">📋 Lista de Cargos</button>
+      <button class="btn-aba" id="aba-co" onclick="swCargos('org')">🌳 Organograma</button>
+      <button class="btn-aba" id="aba-cn" onclick="swCargos('niveis')">🎨 Níveis Hierárquicos</button>
+    </div>
+    <div id="pc-lista">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</p>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
+    </div>
+    <div id="pc-org" style="display:none;">
+      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
+    </div>
+    <div id="pc-niveis" style="display:none;">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Posição</th><th>Nome do Nível</th><th>Cor</th><th>Cargos</th><th></th></tr></thead><tbody id="tbody-niveis"></tbody></table></div>
+        <div style="padding:12px 16px;border-top:1px solid var(--linha);display:flex;gap:10px;align-items:center;">
+          <input class="form-control" id="novo-nivel-nome" placeholder="Nome do nível (ex: Corpo Clínico)" style="flex:1;"/>
+          <input type="color" id="novo-nivel-cor" value="#7B00C4" style="width:40px;height:36px;border:1px solid var(--linha);border-radius:6px;cursor:pointer;padding:2px;"/>
+          <button class="btn btn-primary btn-sm" onclick="addNivel()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal novo cargo -->
+<div id="modal-novo-cargo" class="modal">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header"><h3>Novo cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
+      <div class="form-group" style="position:relative;">
+        <div class="form-label">CBO (busca por nome ou código)</div>
+        <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
+        <div id="nc-cbo-drop" style="position:absolute;z-index:9999;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
+        <input type="hidden" id="nc-cbo-val"/>
+      </div>
+      <div class="form-group"><div class="form-label">Nível hierárquico *</div>
+        <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
+        <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
+      </div>
+      <div class="form-group"><div class="form-label">Reporta a</div>
+        <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCargo()">Salvar cargo</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== CO-BRANDING (LOGO DA EMPRESA) ===== -->
 <div id="view-cobranding" class="view">
@@ -1188,10 +1579,287 @@ function renderHistorico(){
 function gerarPdfAcompanhamento(){
   alert('⬇ Gerando PDF de Acompanhamento (instrumento 4 do GRO)...\n\nEm produção, isso envia esta linha do tempo + a remedição de IBP de cada ação para o gerador Python (gerar_acompanhamento.py) e devolve o PDF assinado, para anexação ao PGR.');
 }
-document.addEventListener('DOMContentLoaded', ()=>{
+/* ===== VELOCÍMETROS IBP ===== */
+function drawGauge(id, ibp) {
+  var c = document.getElementById(id);
+  if (!c) return;
+  var ctx = c.getContext('2d'), W = c.width, H = c.height, cx = W/2, cy = H-4, r = 68;
+  ctx.clearRect(0, 0, W, H);
+  function ang(v) { return Math.PI + ((v+5)/10) * Math.PI; }
+  var segs = [[-5,-1.5,'#fca5a5'],[-1.5,-0.1,'#fdba74'],[-0.1,1.4,'#fde68a'],[1.4,3,'#86efac'],[3,5,'#6ee7b7']];
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.arc(cx,cy,r*0.58,2*Math.PI,Math.PI,true); ctx.fillStyle='#f3f4f6'; ctx.fill();
+  segs.forEach(function(s) {
+    ctx.beginPath(); ctx.arc(cx,cy,r,ang(s[0]),ang(s[1])); ctx.arc(cx,cy,r*0.58,ang(s[1]),ang(s[0]),true);
+    ctx.closePath(); ctx.fillStyle = s[2]; ctx.fill();
+  });
+  [-5,-2.5,0,2.5,5].forEach(function(v) {
+    var a = ang(v);
+    ctx.beginPath(); ctx.moveTo(cx+r*0.6*Math.cos(a),cy+r*0.6*Math.sin(a)); ctx.lineTo(cx+r*0.72*Math.cos(a),cy+r*0.72*Math.sin(a));
+    ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+  var na = ang(Math.max(-5, Math.min(5, ibp))), nl = r*0.78;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(na);
+  ctx.beginPath(); ctx.moveTo(-2.5,0); ctx.lineTo(0,-nl); ctx.lineTo(2.5,0); ctx.closePath();
+  ctx.fillStyle='#111827'; ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.arc(cx,cy,8,0,2*Math.PI); ctx.fillStyle='#111827'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+}
+function animGauge(id, target) {
+  var i=0, steps=45;
+  var iv = setInterval(function() {
+    i++; var p = 1 - Math.pow(1-i/steps,3);
+    drawGauge(id, -5+(target+5)*p);
+    if (i >= steps) clearInterval(iv);
+  }, 18);
+}
+function dispararVelocimetros() {
+  animGauge('gauge-fis', -0.3);
+  setTimeout(function(){animGauge('gauge-seg',-2.1);}, 150);
+  setTimeout(function(){animGauge('gauge-soc',1.8);}, 300);
+  setTimeout(function(){animGauge('gauge-mot',0.6);}, 450);
+}
+
+/* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
+var BANCO_CBO = [
+  {c:'1111-05',n:'Diretor Geral'},{c:'1411-05',n:'Gerente de RH'},{c:'1412-05',n:'Gerente Financeiro'},
+  {c:'1414-05',n:'Gerente Comercial'},{c:'1415-05',n:'Gerente de Operações'},{c:'2124-05',n:'Analista de Sistemas'},
+  {c:'2310-05',n:'Professor Universitário'},{c:'2394-05',n:'Coordenador de Curso'},
+  {c:'2515-10',n:'Psicólogo Clínico'},{c:'2515-15',n:'Psicólogo Organizacional'},{c:'2515-20',n:'Psicólogo Escolar'},
+  {c:'2524-05',n:'Analista de RH'},{c:'2524-10',n:'Analista de T&D'},{c:'2525-05',n:'Assistente Social'},
+  {c:'3122-05',n:'Supervisor de Produção'},{c:'3171-05',n:'Técnico de Suporte TI'},{c:'3222-05',n:'Técnico de Enfermagem'},
+  {c:'3514-05',n:'Assistente de RH'},{c:'3541-05',n:'Representante Comercial'},{c:'3542-05',n:'Vendedor Interno'},
+  {c:'4110-10',n:'Auxiliar Administrativo'},{c:'4221-05',n:'Recepcionista'},{c:'5169-10',n:'Auxiliar de Serviços Gerais'},
+  {c:'7170-05',n:'Operador de Linha de Produção'},{c:'8324-20',n:'Auxiliar de Produção'},
+  {c:'9412-05',n:'Inspetor de Qualidade'},{c:'9517-05',n:'Técnico de Manutenção'},
+  {c:'2251-05',n:'Médico Clínico'},{c:'2232-05',n:'Enfermeiro'},{c:'2235-05',n:'Nutricionista'},
+  {c:'2523-05',n:'Especialista em SST'},{c:'3519-05',n:'Técnico em SST'},
+];
+
+var niveisHier = [
+  {id:'nv1',nome:'Direção',cor:'#7B00C4'},
+  {id:'nv2',nome:'Gerência',cor:'#0A6E4F'},
+  {id:'nv3',nome:'Coordenação',cor:'#2563EB'},
+  {id:'nv4',nome:'Analista / Técnico',cor:'#D97706'},
+  {id:'nv5',nome:'Operacional',cor:'#DC2626'},
+];
+
+var cargos = [
+  {id:'c1',nome:'Diretora Geral',cbo:'1111-05',nvId:'nv1',repId:null,n:1},
+  {id:'c2',nome:'Gestora de RH',cbo:'1411-05',nvId:'nv2',repId:'c1',n:1},
+  {id:'c3',nome:'Psicóloga',cbo:'2515-10',nvId:'nv3',repId:'c2',n:3},
+  {id:'c4',nome:'Analista de RH',cbo:'2524-05',nvId:'nv4',repId:'c2',n:2},
+  {id:'c5',nome:'Auxiliar Adm.',cbo:'4110-10',nvId:'nv5',repId:'c2',n:4},
+];
+
+function swCargos(aba) {
+  document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
+  document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
+  document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
+  ['lista','org','niveis'].forEach(function(a) {
+    var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn'};
+    var el = document.getElementById(ids[a]);
+    if (el) { el.classList.remove('aba-ativa'); if (a === aba) el.classList.add('aba-ativa'); }
+  });
+  var btnNovo = document.getElementById('btn-novo-cargo');
+  if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
+  if (aba === 'org') renderOrg();
+  if (aba === 'niveis') renderNiveis();
+}
+
+function getNivel(id) {
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) return niveisHier[i]; }
+  return null;
+}
+function getCargo(id) {
+  for (var i=0; i<cargos.length; i++) { if (cargos[i].id === id) return cargos[i]; }
+  return null;
+}
+
+function renderCargos() {
+  var tbody = document.getElementById('tbody-cargos');
+  if (!tbody) return;
+  var html = '';
+  for (var i=0; i<cargos.length; i++) {
+    var c = cargos[i];
+    var nv = getNivel(c.nvId);
+    var sup = getCargo(c.repId);
+    var nvNome = nv ? nv.nome : '—';
+    var nvCor = nv ? nv.cor : '#999';
+    var supNome = sup ? sup.nome : '— Topo —';
+    html += '<tr>';
+    html += '<td style="font-weight:600;">' + c.nome + '</td>';
+    html += '<td style="font-family:monospace;font-size:12px;">' + c.cbo + '</td>';
+    html += '<td><span style="background:' + nvCor + '22;color:' + nvCor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + nvNome + '</span></td>';
+    html += '<td style="font-size:12px;">' + supNome + '</td>';
+    html += '<td style="text-align:center;font-size:12px;">' + c.n + '</td>';
+    html += '<td><button class="btn btn-ghost btn-sm" onclick="delCargo(\'' + c.id + '\')">✕</button></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+  // Atualiza selects do modal
+  var selNv = document.getElementById('nc-nivel');
+  if (selNv) {
+    var opNv = '<option value="">Selecione o nível...</option>';
+    for (var j=0; j<niveisHier.length; j++) { opNv += '<option value="' + niveisHier[j].id + '">' + niveisHier[j].nome + '</option>'; }
+    selNv.innerHTML = opNv;
+  }
+  var selRep = document.getElementById('nc-reporta');
+  if (selRep) {
+    var opRep = '<option value="">— Nenhum (topo) —</option>';
+    for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
+    selRep.innerHTML = opRep;
+  }
+}
+
+function renderNiveis() {
+  var tbody = document.getElementById('tbody-niveis');
+  if (!tbody) return;
+  var html = '';
+  for (var i=0; i<niveisHier.length; i++) {
+    var nv = niveisHier[i];
+    var qtd = 0;
+    for (var j=0; j<cargos.length; j++) { if (cargos[j].nvId === nv.id) qtd++; }
+    html += '<tr>';
+    html += '<td style="font-weight:600;color:' + nv.cor + ';">Nível ' + (i+1) + '</td>';
+    html += '<td><input class="form-control" value="' + nv.nome + '" data-id="' + nv.id + '" onchange="renomearNivel(this)" style="font-size:12px;padding:5px 8px;"/></td>';
+    html += '<td><input type="color" value="' + nv.cor + '" data-id="' + nv.id + '" onchange="recolorirNivel(this)" style="width:36px;height:28px;border:none;cursor:pointer;border-radius:4px;"/></td>';
+    html += '<td>' + qtd + '</td>';
+    html += '<td><button class="btn btn-ghost btn-sm" onclick="delNivel(\'' + nv.id + '\')">✕</button></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function renomearNivel(input) {
+  var id = input.getAttribute('data-id');
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].nome = input.value; break; } }
+  renderCargos();
+}
+function recolorirNivel(input) {
+  var id = input.getAttribute('data-id');
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].cor = input.value; break; } }
+  renderCargos();
+}
+function addNivel() {
+  var nome = document.getElementById('novo-nivel-nome').value.trim();
+  var cor = document.getElementById('novo-nivel-cor').value;
+  if (!nome) { alert('Informe o nome do nível.'); return; }
+  niveisHier.push({id:'nv'+Date.now(), nome:nome, cor:cor});
+  document.getElementById('novo-nivel-nome').value = '';
+  renderNiveis(); renderCargos();
+}
+function delNivel(id) {
+  for (var i=0; i<cargos.length; i++) { if (cargos[i].nvId === id) { alert('Este nível possui cargos. Remova os cargos antes.'); return; } }
+  niveisHier = niveisHier.filter(function(n){ return n.id !== id; });
+  renderNiveis(); renderCargos();
+}
+function delCargo(id) {
+  cargos = cargos.filter(function(c){ return c.id !== id; });
+  renderCargos();
+}
+
+function buscarCBO(query) {
+  var div = document.getElementById('nc-cbo-drop');
+  if (!div) return;
+  var q = (query || '').toLowerCase().trim();
+  var res = q.length === 0
+    ? BANCO_CBO.slice(0, 12)
+    : BANCO_CBO.filter(function(x){ return x.n.toLowerCase().indexOf(q) > -1 || x.c.indexOf(q) > -1; }).slice(0, 10);
+  if (!res.length) { div.style.display = 'none'; return; }
+  var html = '';
+  for (var i=0; i<res.length; i++) {
+    html += '<div onclick="selCBO(\'' + res[i].c + '\',\'' + res[i].n.replace(/'/g,"&#39;") + '\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">';
+    html += '<span style="font-weight:600;">' + res[i].n + '</span> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + res[i].c + '</span></div>';
+  }
+  if (q.length === 0) html += '<div style="padding:7px 14px;font-size:10px;color:#9ca3af;">' + BANCO_CBO.length + ' cargos disponíveis — digite para filtrar</div>';
+  div.innerHTML = html;
+  div.style.display = 'block';
+  setTimeout(function(){
+    document.addEventListener('click', function fechar(e) {
+      if (!div.contains(e.target) && e.target.id !== 'nc-cbo-busca') { div.style.display='none'; document.removeEventListener('click',fechar); }
+    });
+  }, 100);
+}
+function selCBO(codigo, nome) {
+  document.getElementById('nc-cbo-busca').value = nome + ' · ' + codigo;
+  document.getElementById('nc-cbo-val').value = codigo;
+  document.getElementById('nc-cbo-drop').style.display = 'none';
+}
+function salvarCargo() {
+  var nome = document.getElementById('nc-nome').value.trim();
+  var cbo = document.getElementById('nc-cbo-val').value || document.getElementById('nc-cbo-busca').value.trim();
+  var nvId = document.getElementById('nc-nivel').value;
+  var repId = document.getElementById('nc-reporta').value || null;
+  if (!nome) { alert('Informe o nome do cargo.'); return; }
+  if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
+  cargos.push({id:'c'+Date.now(), nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0});
+  fecharModal('modal-novo-cargo');
+  document.getElementById('nc-nome').value = '';
+  document.getElementById('nc-cbo-busca').value = '';
+  document.getElementById('nc-cbo-val').value = '';
+  renderCargos();
+}
+
+function renderOrg() {
+  var el = document.getElementById('org-chart');
+  if (!el) return;
+  var CW=140, CH=52, GX=20, GY=60;
+  var nvMap = {};
+  for (var i=0; i<cargos.length; i++) {
+    var pos = 0;
+    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
+    if (!pos) pos = niveisHier.length+1;
+    if (!nvMap[pos]) nvMap[pos] = [];
+    nvMap[pos].push(cargos[i]);
+  }
+  var maxNv = 0;
+  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
+  var posMap = {}, totalW = 0;
+  for (var nv=1; nv<=maxNv; nv++) {
+    var itens = nvMap[nv] || [];
+    var rowW = itens.length*(CW+GX)-GX;
+    if (rowW > totalW) totalW = rowW;
+    var sx = (totalW-rowW)/2;
+    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
+  }
+  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
+  var linhas = '', cards = '';
+  for (var ci=0; ci<cargos.length; ci++) {
+    var cr = cargos[ci];
+    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
+      var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
+      var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
+      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  }
+  for (var di=0; di<cargos.length; di++) {
+    var dr = cargos[di];
+    if (!posMap[dr.id]) continue;
+    var x=posMap[dr.id].x, y=posMap[dr.id].y;
+    var nv2 = getNivel(dr.nvId);
+    var cor = nv2 ? nv2.cor : '#6B7280';
+    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
+    cards += '<g>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
+    cards += '</g>';
+  }
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
+}
+
+function exportarOrgPDF() {
+  alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
   atualizarTodosSinalizadores();
   atualizarBadgePendentes();
   renderHistorico();
+  renderCargos();
+  setTimeout(dispararVelocimetros, 200);
 });
 </script>
 </body>
