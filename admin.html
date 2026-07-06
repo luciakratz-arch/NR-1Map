@@ -154,19 +154,30 @@ tbody tr:hover td{background:#F5F8F7;}
     </div>
 
     <div class="login-tabs">
-      <div class="login-tab active" onclick="setLoginTab('admin',this)">Admin</div>
+      <div class="login-tab" onclick="setLoginTab('admin',this)">Admin</div>
+      <div class="login-tab" onclick="setLoginTab('parceiro',this)">Parceiro</div>
       <div class="login-tab" onclick="setLoginTab('rh',this)">RH / Empresa</div>
-      <div class="login-tab" onclick="setLoginTab('user',this)">Usuário</div>
+      <div class="login-tab active" onclick="setLoginTab('user',this)">Usuário</div>
     </div>
 
     <!-- ADMIN -->
-    <div id="login-admin">
+    <div id="login-admin" style="display:none;">
       <label class="login-field-label">E-mail</label>
       <input class="login-input" type="email" placeholder="lucia@nr1map.com.br" id="adm-email"/>
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="adm-senha"/>
       <button class="login-btn roxo" onclick="entrarAdmin()">Entrar como Admin</button>
-      <p class="login-hint">Acesso exclusivo da administradora</p>
+      <p class="login-hint">Acesso exclusivo da administradora · use qualquer senha para demo</p>
+    </div>
+
+    <!-- PARCEIRO -->
+    <div id="login-parceiro" style="display:none;">
+      <label class="login-field-label">E-mail do parceiro</label>
+      <input class="login-input" type="email" placeholder="parceiro@consultoria.com.br" id="par-email"/>
+      <label class="login-field-label">Senha</label>
+      <input class="login-input" type="password" placeholder="••••••••" id="par-senha"/>
+      <button class="login-btn" style="background:var(--verde-claro);" onclick="entrarParceiro()">Entrar como Parceiro</button>
+      <p class="login-hint">Representante / Consultoria credenciada · use qualquer senha para demo</p>
     </div>
 
     <!-- RH -->
@@ -176,15 +187,15 @@ tbody tr:hover td{background:#F5F8F7;}
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="rh-senha"/>
       <button class="login-btn" onclick="entrarRH()">Entrar como Gestor RH</button>
-      <p class="login-hint">Conta criada após assinatura do plano</p>
+      <p class="login-hint">Conta criada após assinatura do plano · use qualquer senha para demo</p>
     </div>
 
-    <!-- USUÁRIO -->
-    <div id="login-user" style="display:none;">
+    <!-- USUÁRIO — padrão ao abrir -->
+    <div id="login-user">
       <label class="login-field-label">Código de acesso</label>
       <input class="login-input" placeholder="Ex: NR1-A2B3C4" id="user-codigo" style="letter-spacing:.1em;font-size:16px;text-align:center;"/>
       <button class="login-btn" onclick="entrarUser()">Acessar pesquisa</button>
-      <p class="login-hint">Código recebido por WhatsApp ou e-mail</p>
+      <p class="login-hint">Código recebido por WhatsApp · qualquer código funciona no demo</p>
     </div>
   </div>
 </div>
@@ -456,29 +467,38 @@ function setLoginTab(tab, el) {
   loginTab = tab;
   document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('login-admin').style.display = tab === 'admin' ? 'block' : 'none';
-  document.getElementById('login-rh').style.display = tab === 'rh' ? 'block' : 'none';
-  document.getElementById('login-user').style.display = tab === 'user' ? 'block' : 'none';
+  document.getElementById('login-admin').style.display    = tab === 'admin'    ? 'block' : 'none';
+  document.getElementById('login-parceiro').style.display = tab === 'parceiro' ? 'block' : 'none';
+  document.getElementById('login-rh').style.display       = tab === 'rh'       ? 'block' : 'none';
+  document.getElementById('login-user').style.display     = tab === 'user'     ? 'block' : 'none';
 }
 
 function entrarAdmin() {
   var email = document.getElementById('adm-email').value;
   var senha = document.getElementById('adm-senha').value;
   if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
-  // Em produção: verificar com Firebase Auth
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
 }
 
+function entrarParceiro() {
+  var email = document.getElementById('par-email').value;
+  var senha = document.getElementById('par-senha').value;
+  if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
+  window.location.href = 'parceiro.html';
+}
+
 function entrarRH() {
-  // Redireciona para painel RH
-  alert('Redirecionando para o painel do gestor...\n\nEm produção: autenticação via Firebase Auth e redirecionamento para painel.html');
+  var email = document.getElementById('rh-email').value;
+  var senha = document.getElementById('rh-senha').value;
+  if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
+  window.location.href = 'painel.html';
 }
 
 function entrarUser() {
   var codigo = document.getElementById('user-codigo').value;
   if (!codigo) { alert('Informe o código de acesso.'); return; }
-  alert('Código ' + codigo + ' validado!\n\nEm produção: abre o formulário de pesquisa anônima correspondente.');
+  window.location.href = 'colaborador.html';
 }
 
 function sair() {
