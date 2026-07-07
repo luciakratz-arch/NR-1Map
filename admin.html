@@ -32,10 +32,13 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-clar
 .nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
 .nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
 .sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+.btn-sidebar-sair{width:100%;padding:8px;background:transparent;border:1px solid #2A2E2C;border-radius:7px;color:#8A9590;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.btn-sidebar-sair:hover{color:#fff;background:#C53030;border-color:#C53030;}
 
 /* MAIN */
 .main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
 .topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title-wrapper{display:flex;align-items:center;gap:12px;}
 .topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
 .btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
@@ -50,7 +53,6 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-clar
 .mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
 .mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
 .mc .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
-.mc .sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
 
 .card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
 .card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
@@ -78,12 +80,10 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 /* MODAL FIX */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:540px;width:90%;max-height:90vh;overflow-y:auto;}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-bottom:1px solid var(--linha);padding-bottom:10px;}
-.modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:540px;width:90%;}
 .form-group{margin-bottom:12px;}
-.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;font-weight:500;}
-.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .view{display:none;}
@@ -93,96 +93,74 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 <body>
 <div class="app">
 
-<!-- SIDEBAR MESTRE -->
+<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo"><div>NR-1<span>Map Master</span></div></div>
   <nav class="nav">
     <div class="nav-sec">Painel Central</div>
-    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Epidemiológico</div>
+    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Geral</div>
     <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Controle de Clientes</div>
     <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Fluxo de Caixa & Repasses</div>
     <div class="nav-sec">Metodologia Científica</div>
     <div class="nav-item" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
-    <div class="nav-sec">Comercial & Prova Social</div>
-    <div class="nav-item" onclick="sv('depoimentos')"><span class="ic">⭐</span>Moderação Depoimentos<span class="bdg">3</span></div>
+    <div class="nav-sec">Prova Social</div>
+    <div class="nav-item" onclick="sv('depoimentos')"><span class="ic">⭐</span>Moderação Depoimentos<span class="bdg" id="sid-dep-count">1</span></div>
   </nav>
+  <div class="sidebar-bottom">
+    <button class="btn-sidebar-sair" onclick="alert('Efetuando logout e retornando à tela inicial de login...'); window.location.reload();">← Voltar ao Login</button>
+  </div>
 </aside>
 
-<!-- CONTEÚDO PRINCIPAL -->
+<!-- MAIN -->
 <main class="main">
 
-  <!-- ===== VIEW: DASHBOARD GLOBAL COM VELOCÍMETROS ===== -->
+  <!-- VIEW: DASHBOARD -->
   <div id="view-dashboard" class="view active">
-    <div class="topbar"><div class="topbar-title">Indicadores Estratégicos Cross-Enterprise</div></div>
+    <div class="topbar"><div class="topbar-title">Indicadores Estratégicos</div></div>
     <div class="content">
       <div class="metrics">
-        <div class="mc"><div class="lbl">Faturamento Acumulado</div><div class="val">R$ 24.850</div><div class="sub">Competência atual</div></div>
-        <div class="mc"><div class="lbl">Alertas Críticos</div><div class="val" style="color:var(--laranja);">3 Empresas</div><div class="sub">Alto Sofrimento Ocupacional</div></div>
-        <div class="mc"><div class="lbl">Créditos Globais</div><div class="val">8.420</div><div class="sub">Disponíveis em nuvem</div></div>
-        <div class="mc"><div class="lbl">Inadimplência Ativa</div><div class="val" style="color:#C53030;">1 Pendente</div><div class="sub">Aguardando conciliação</div></div>
+        <div class="mc"><div class="lbl">Faturamento Estimado</div><div class="val" id="card-fat">R$ 18.490,00</div><div class="sub">Mês selecionado</div></div>
+        <div class="mc"><div class="lbl">Alertas Críticos</div><div class="val" style="color:var(--laranja);">3 Empresas</div><div class="sub">GRO Patogênico</div></div>
+        <div class="mc"><div class="lbl">Créditos Gerais</div><div class="val">8.420</div><div class="sub">Nuvem ativa</div></div>
+        <div class="mc"><div class="lbl">Inadimplência</div><div class="val" style="color:#C53030;" id="card-inad">1 Pendente</div><div class="sub">Contas a receber</div></div>
       </div>
 
-      <!-- VELOCÍMETROS DINÂMICOS (SVG) -->
+      <!-- VELOCIMETROS REAIS SVG -->
       <div class="card" style="margin-bottom:20px;">
         <div class="card-header"><div class="title">Balança Psicodinâmica Consolidada (Escala Dejours Global)</div></div>
         <div class="card-body gauge-container">
-          
           <div class="gauge-box">
             <div class="gauge">
-              <svg width="100" height="60">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
-                <path d="M 10 50 A 40 40 0 0 1 45 15" fill="none" stroke="#ef4444" stroke-width="8"/>
-                <line x1="50" y1="50" x2="30" y2="20" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
-                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
-              </svg>
+              <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 45 15" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="30" y2="20" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
             </div>
             <div style="font-size:12px; font-weight:600; margin-top:4px;">Fisiológicos (-0.8)</div>
             <span class="bdg-s s-erro"><span class="dot"></span>Limite</span>
           </div>
-
           <div class="gauge-box">
             <div class="gauge">
-              <svg width="100" height="60">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
-                <path d="M 10 50 A 40 40 0 0 1 30 30" fill="none" stroke="#ef4444" stroke-width="8"/>
-                <line x1="50" y1="50" x2="20" y2="35" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
-                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
-              </svg>
+              <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 30 30" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="20" y2="35" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
             </div>
             <div style="font-size:12px; font-weight:600; margin-top:4px;">Segurança (-2.4)</div>
             <span class="bdg-s s-erro"><span class="dot"></span>Patogênico</span>
           </div>
-
           <div class="gauge-box">
             <div class="gauge">
-              <svg width="100" height="60">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
-                <path d="M 10 50 A 40 40 0 0 1 80 40" fill="none" stroke="#10b981" stroke-width="8"/>
-                <line x1="50" y1="50" x2="75" y2="25" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
-                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
-              </svg>
+              <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 80 40" fill="none" stroke="#10b981" stroke-width="8"/><line x1="50" y1="50" x2="75" y2="25" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
             </div>
             <div style="font-size:12px; font-weight:600; margin-top:4px;">Sociais (+2.1)</div>
             <span class="bdg-s s-ok"><span class="dot"></span>Fértil</span>
           </div>
-
           <div class="gauge-box">
             <div class="gauge">
-              <svg width="100" height="60">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
-                <path d="M 10 50 A 40 40 0 0 1 60 20" fill="none" stroke="#f59e0b" stroke-width="8"/>
-                <line x1="50" y1="50" x2="55" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
-                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
-              </svg>
+              <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 60 20" fill="none" stroke="#f59e0b" stroke-width="8"/><line x1="50" y1="50" x2="55" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
             </div>
             <div style="font-size:12px; font-weight:600; margin-top:4px;">Organizacionais (+0.4)</div>
             <span class="bdg-s s-alert"><span class="dot"></span>Alerta</span>
           </div>
-
         </div>
       </div>
 
-      <!-- QUEM NÃO ESTÁ USANDO -->
+      <!-- MONITOR DE ABANDONO -->
       <div class="card">
         <div class="card-header"><div class="title">Monitor de Abandono (Clientes Inativos)</div></div>
         <div class="table-wrap">
@@ -195,128 +173,89 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
         </div>
       </div>
 
+      <!-- API HOTMART SIMULADOR -->
+      <div class="card" style="background:var(--roxo-xp); border:1px solid rgba(123,0,196,0.2); margin-top:16px;">
+        <div class="card-header"><div class="title" style="color:var(--roxo);">🔌 Engenharia de Integração API Hotmart (Simulador Webhook)</div></div>
+        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center;">
+          <p style="font-size:12px; color:var(--preto); max-width:70%;">Injete um lead simulado via webhook para testar a reordenação automática por ordem alfabética.</p>
+          <button class="btn btn-roxo" onclick="simularWebhookHotmart()">⚡ Simular Venda Hotmart</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- ===== VIEW: CLIENTES COM PERFIL DE TOMADA DE DECISÃO e LEAD ORIGIN ===== -->
+  <!-- VIEW: CLIENTES (+ BOTÃO VOLTAR ADICIONADO) -->
   <div id="view-clientes" class="view">
-    <div class="topbar"><div class="topbar-title">Base de Empresas & Perfil de Clientes</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Cadastrar Novo Cliente</button></div>
-    <div class="content">
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Empresa Cliente</th><th>Contato Direto</th><th>Canal de Compra</th><th>Origem Origem (Lead)</th><th>Créditos</th><th>Fidelidade</th><th>Ações</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>Clínica Vida S.A.</strong></td>
-                <td>carlos@clinica.com<br><small>(62) 99888-7766</small></td>
-                <td><span class="bdg-s s-ok">Hotmart</span></td>
-                <td>Indicação Direta</td>
-                <td><strong style="color:var(--verde);">45 un</strong></td>
-                <td>Nível Ouro (12m)</td>
-                <td>
-                  <button class="btn btn-ghost btn-sm" onclick="alert('Carregando prontuário de decisões...')">✏️ Perfil</button>
-                  <button class="btn btn-danger btn-sm" onclick="confirm('Excluir cliente?')">🗑️</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="topbar">
+      <div class="topbar-title-wrapper">
+        <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+        <div class="topbar-title">Controle Geral de Clientes</div>
       </div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Cadastrar Manual</button>
+    </div>
+    <div class="content">
+      <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
+        <input type="text" class="form-control" id="txt-busca-cliente" placeholder="🔍 Digite para pesquisar..." oninput="filtrarEOrganizarClientes()" style="max-width:300px;"/>
+        <button class="btn btn-ghost btn-sm" onclick="alternarFiltroStatus('Ativo')">Ativos</button>
+        <button class="btn btn-ghost btn-sm" onclick="alternarFiltroStatus('Inativo')">Inativos</button>
+        <button class="btn btn-ghost btn-sm" onclick="alternarFiltroStatus('Todos')">Todos</button>
+      </div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>Empresa Cliente</th><th>Contato Direto</th><th>Canal / Parceiro</th><th>Origem (Lead)</th><th>Créditos</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbody-clientes"></tbody></table></div></div>
     </div>
   </div>
 
-  <!-- ===== VIEW: FINANCEIRO MÊS A MÊS COM INTEGRALIZAÇÃO ===== -->
+  <!-- VIEW: FINANCEIRO (+ BOTÃO VOLTAR ADICIONADO) -->
   <div id="view-financeiro" class="view">
-    <div class="topbar"><div class="topbar-title">Fluxo de Caixa & Repasses</div></div>
+    <div class="topbar">
+      <div class="topbar-title-wrapper">
+        <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+        <div class="topbar-title">Fluxo de Caixa & Distribuição de Repasses</div>
+      </div>
+    </div>
     <div class="content">
-      <div class="card">
-        <div class="card-header"><div class="title">Histórico Estatístico Caixa Mês a Mês</div></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Mês/Ano</th><th>Receita Bruta</th><th>Comissões Parceiros (30%)</th><th>Descontos/Taxas</th><th>Líquido Retido</th><th>Status</th><th>Ação Pericial</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>Julho 2026</strong></td>
-                <td>R$ 18.490,00</td>
-                <td>R$ 5.547,00</td>
-                <td>R$ 540,00</td>
-                <td style="font-weight:600; color:var(--verde);">R$ 12.403,00</td>
-                <td><span class="bdg-s s-ok"><span class="dot"></span>Integralizado</span></td>
-                <td><button class="btn btn-ghost btn-sm" disabled>✓ Conciliado</button></td>
-              </tr>
-              <tr style="background:rgba(211,84,42,0.05);">
-                <td><strong>Junho 2026</strong></td>
-                <td>R$ 12.300,00</td>
-                <td>R$ 3.690,00</td>
-                <td>R$ 200,00</td>
-                <td style="font-weight:600; color:var(--laranja);">R$ 8.410,00</td>
-                <td><span class="bdg-s s-erro"><span class="dot"></span>Devedor</span></td>
-                <td><button class="btn btn-roxo btn-sm" onclick="alert('Ganhos integralizados na Tesouraria Geral com Sucesso!')">💰 Integralizar Ganho</button></td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">Lancamento Operacional de Despesas do Projeto</div></div>
+        <div class="card-body" style="display:flex; gap:12px; align-items:flex-end;">
+          <div style="flex:1;"><label class="form-label">Descrição do Gasto</label><input type="text" class="form-control" id="desp-desc" placeholder="Ex: Infraestrutura de Nuvem / Servidor"/></div>
+          <div style="width:150px;"><label class="form-label">Valor (R$)</label><input type="number" class="form-control" id="desp-val" placeholder="0.00"/></div>
+          <button class="btn btn-danger" onclick="lancarDespesa()">Lançar Despesa</button>
         </div>
       </div>
+      <div style="margin-bottom:14px;"><label class="form-label">Selecionar Competência Mensal:</label><select class="form-control" id="filtro-mes-fin" onchange="atualizarMesFinanceiro()" style="max-width:200px;"><option value="Julho">Julho 2026</option><option value="Junho">Junho 2026</option></select></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>Canal / Venda</th><th>Empresa Relacionada</th><th>Faturamento Bruto</th><th>Comissão / Taxa</th><th>Despesa Retida</th><th>Líquido</th><th>Status</th><th>Ação</th></tr></thead><tbody id="tbody-financeiro"></tbody></table></div></div>
     </div>
   </div>
 
-  <!-- ===== VIEW: AS 110 PERGUNTAS METODOLÓGICAS COMPLETAS ===== -->
+  <!-- VIEW: BANCO DE PERGUNTAS (+ BOTÃO VOLTAR ADICIONADO) -->
   <div id="view-perguntas" class="view">
-    <div class="topbar"><div class="topbar-title">Banco Global de Perguntas Periciais (110 Questões)</div></div>
-    <div class="content">
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:70px;">ID</th><th style="width:140px;">Dimensão Dejours</th><th>Texto Regulante Aplicado para Todos (Editável)</th><th style="width:100px;">Ação</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>#001</strong></td>
-                <td><span class="bdg-s s-ok">Fisiológico</span></td>
-                <td><input type="text" class="form-control" value="Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." /></td>
-                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 001 atualizada universalmente!')">Atualizar</button></td>
-              </tr>
-              <tr>
-                <td><strong>#002</strong></td>
-                <td><span class="bdg-s s-ok">Segurança</span></td>
-                <td><input type="text" class="form-control" value="Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." /></td>
-                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 002 atualizada universalmente!')">Atualizar</button></td>
-              </tr>
-              <tr>
-                <td><strong>#110</strong></td>
-                <td><span class="bdg-s s-alert">Organizacional</span></td>
-                <td><input type="text" class="form-control" value="A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." /></td>
-                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 110 atualizada universalmente!')">Atualizar</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="topbar">
+      <div class="topbar-title-wrapper">
+        <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+        <div class="topbar-title">Pool Metodológico (110 Perguntas)</div>
       </div>
+    </div>
+    <div class="content">
+      <div class="card"><div class="table-wrap"><table><thead><tr><th style="width:70px;">ID</th><th style="width:150px;">Macro-Dimensão</th><th>Texto Regulante</th><th style="width:100px;">Ação</th></tr></thead><tbody id="tbody-perguntas"></tbody></table></div></div>
     </div>
   </div>
 
-  <!-- ===== VIEW: DEPOIMENTOS COM RESPOSTA E STATUS ===== -->
+  <!-- VIEW: DEPOIMENTOS (+ BOTÃO VOLTAR ADICIONADO) -->
   <div id="view-depoimentos" class="view">
-    <div class="topbar"><div class="topbar-title">Moderação e Resposta de Provas Sociais</div></div>
+    <div class="topbar">
+      <div class="topbar-title-wrapper">
+        <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+        <div class="topbar-title">Moderação Exclusiva de Provas Sociais</div>
+      </div>
+    </div>
     <div class="content">
-      <div class="card">
+      <div class="card" id="card-depoimento-bloco">
         <div class="card-body">
-          <div style="border:1px solid var(--linha); padding:16px; border-radius:8px; background:#fff; margin-bottom:16px;">
-            <div style="display:flex; justify-content:between; align-items:center; margin-bottom:8px;">
-              <strong>Clínica São Silvestre (Usuário verificado via Hotmart)</strong>
-              <div style="margin-left:auto;"><span class="bdg-s s-alert"><span class="dot"></span>Aguardando Moderação</span></div>
-            </div>
-            <p style="font-size:13px; font-style:italic; margin-bottom:10px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
-            
-            <div class="form-group">
-              <label class="form-label">Sua Resposta Oficial (Aparecerá no Site abaixo do depoimento):</label>
-              <input type="text" class="form-control" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!" id="resp-1"/>
-            </div>
-            
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary btn-sm" onclick="alert('Depoimento e sua Resposta publicados na página principal do site!')">✓ Aprovar e Publicar</button>
-              <button class="btn btn-danger btn-sm" onclick="alert('Depoimento reprovado.')">✕ Reprovar</button>
-            </div>
+          <div style="border:1px solid var(--linha); padding:16px; border-radius:8px; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><strong>Clínica São Silvestre (Verificado Hotmart)</strong><span class="bdg-s s-alert" id="dep-status-badge"><span class="dot"></span>Aguardando Moderação</span></div>
+            <p style="font-size:13px; font-style:italic; margin-bottom:12px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
+            <div class="form-group"><label class="form-label">Sua Resposta Oficial:</label><input type="text" class="form-control" id="txt-resposta-dep" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!"/></div>
+            <div style="display:flex; gap:8px;"><button class="btn btn-primary btn-sm" onclick="processarDepoimento('Aprovado')">✓ Aprovar e Enviar para a Home</button><button class="btn btn-danger btn-sm" onclick="processarDepoimento('Reprovado')">✕ Reprovar</button></div>
           </div>
         </div>
       </div>
@@ -326,78 +265,141 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 </main>
 </div>
 
-<!-- ===== MODAL CADASTRO DE CLIENTE (CORRIGIDO E SEGURO) ===== -->
+<!-- MODAL CADASTRO -->
 <div class="modal-overlay" id="modal-cliente">
   <div class="modal">
-    <div class="modal-header">
-      <h3>Cadastrar Nova Licença / Perfil Decisório</h3>
-      <button style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="closeModal('modal-cliente')">×</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nome da Empresa Cliente</label>
-      <input type="text" class="form-control" placeholder="Ex: Clínica Geral Goiânia"/>
-    </div>
+    <div class="modal-header"><h3>Cadastrar Nova Licença / Perfil Decisório</h3><button style="background:none; border:none; font-size:20px;" onclick="closeModal('modal-cliente')">×</button></div>
+    <div class="form-group"><label class="form-label">Nome da Empresa</label><input type="text" class="form-control" id="cad-nome"/></div>
+    <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-control" id="cad-email"/></div>
+    <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-control" id="cad-whats"/></div>
     <div class="grid-2">
-      <div class="form-group">
-        <label class="form-label">E-mail Corporativo</label>
-        <input type="email" class="form-control" placeholder="rh@empresa.com.br"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">WhatsApp de Alertas</label>
-        <input type="text" class="form-control" placeholder="(62) 99999-0000"/>
-      </div>
+      <div class="form-group"><label class="form-label">Canal de Venda</label><select class="form-control" id="cad-canal"><option>Venda Directa</option><option>Hotmart</option></select></div>
+      <div class="form-group"><label class="form-label">Origem (Lead Origin)</label><select class="form-control" id="cad-origem"><option>Instagram</option><option>Indicação</option></select></div>
     </div>
-    <div class="grid-2">
-      <div class="form-group">
-        <label class="form-label">Canal de Aquisição / Compra</label>
-        <select class="form-control">
-          <option>Hotmart</option>
-          <option>Venda Direta Representante</option>
-          <option>Balcão Corporativo</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Onde nos conheceu? (Lead Origin)</label>
-        <select class="form-control">
-          <option>Instagram / Redes Sociais</option>
-          <option>Indicação Pericial de Colega</option>
-          <option>Congresso de SST</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="form-group">
-        <label class="form-label">Créditos Iniciais de Disparos</label>
-        <input type="number" class="form-control" value="50"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Programa de Fidelidade (Tag)</label>
-        <select class="form-control">
-          <option>Nível Bronze</option>
-          <option>Nível Prata</option>
-          <option>Nível Ouro Master</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-roxo" style="width:100%; margin-top:14px;" onclick="closeModal('modal-cliente'); alert('✅ Novo cliente cadastrado com sucesso com amarração de métricas periciais!');">Salvar Cliente e Ativar Licença</button>
+    <button class="btn btn-roxo" style="width:100%; margin-top:10px;" onclick="salvarClienteManual()">Ativar e Organizar Base</button>
   </div>
 </div>
 
 <script>
+let clientes = [
+  { nome: "Clínica Vida S.A.", email: "carlos@clinica.com", whats: "(62) 99888-7766", canal: "Alfa SST", origem: "Indicação", creditos: 45, status: "Ativo" },
+  { nome: "Escola do Futuro", email: "direcao@escola.com", whats: "(62) 98111-2233", canal: "Hotmart", origem: "Congresso SST", creditos: 15, status: "Ativo" },
+  { nome: "Indústria MetalTop", email: "comercial@metaltop.com", whats: "(64) 99221-1100", canal: "Venda Direta", origem: "Instagram", creditos: 0, status: "Inativo" }
+];
+
+let finJulho = [{ canal: "Hotmart", empresa: "Escola do Futuro", bruto: 18490, taxa: 1849, despesa: 0, status: "Integralizado" }];
+let finJunho = [{ canal: "Venda Direta", empresa: "Indústria MetalTop", bruto: 12300, taxa: 3690, despesa: 0, status: "Devedor" }];
+
+const perguntas = [
+  { id: "#001", dim: "Fisiológico", texto: "Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." },
+  { id: "#002", dim: "Segurança", texto: "Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." },
+  { id: "#110", dim: "Organizacional", texto: "A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." }
+];
+
+let statusFiltroAtual = "Todos";
+
+window.onload = function() {
+  filtrarEOrganizarClientes();
+  atualizarMesFinanceiro();
+  renderPerguntas();
+};
+
 function sv(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el=document.getElementById('view-'+id);
-  if(el)el.classList.add('active');
+  const el = document.getElementById('view-'+id);
+  if(el) el.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
-  if(nav)nav.classList.add('active');
+  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav) nav.classList.add('active');
 }
-function openModal(id){
-  document.getElementById(id).classList.add('open');
+
+function filtrarEOrganizarClientes() {
+  const busca = document.getElementById('txt-busca-cliente').value.toLowerCase();
+  let filtrados = clientes.filter(c => c.nome.toLowerCase().includes(busca));
+  if (statusFiltroAtual !== "Todos") filtrados = filtrados.filter(c => c.status === statusFiltroAtual);
+  
+  filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
+  const tbody = document.getElementById('tbody-clientes');
+  tbody.innerHTML = "";
+
+  filtrados.forEach(c => {
+    const badgeClass = c.status === "Ativo" ? "s-ok" : "s-erro";
+    tbody.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td>${c.email}<br><small>${c.whats}</small></td><td><span class="bdg-s s-ok">${c.canal}</span></td><td>${c.origem}</td><td><strong>${c.creditos} un</strong></td><td><span class="bdg-s ${badgeClass}"><span class="dot"></span>${c.status}</span></td><td><button class="btn btn-ghost btn-sm" onclick="alert('Perfil pericial carregado.')">✏️ Ver</button><button class="btn btn-danger btn-sm" onclick="removerClienteInMem('${c.nome}')">🗑️</button></td></tr>`;
+  });
 }
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
+
+function alternarFiltroStatus(status) {
+  statusFiltroAtual = status;
+  filtrarEOrganizarClientes();
 }
+
+function simularWebhookHotmart() {
+  clientes.push({ nome: "Alpha Corporativa (Hotmart)", email: "contato@alpha.com", whats: "(11) 97777-6655", canal: "Hotmart", origem: "API Webhook", creditos: 100, status: "Ativo" });
+  filtrarEOrganizarClientes();
+  alert("🚀 Webhook Simulado! Cliente injetado por ordem alfabética.");
+}
+
+function salvarClienteManual() {
+  const nome = document.getElementById('cad-nome').value;
+  if(!nome) return;
+  clientes.push({ nome: nome, email: document.getElementById('cad-email').value, whats: document.getElementById('cad-whats').value, canal: document.getElementById('cad-canal').value, origem: document.getElementById('cad-origem').value, creditos: 50, status: "Ativo" });
+  closeModal('modal-cliente');
+  filtrarEOrganizarClientes();
+}
+
+function removerClienteInMem(nome) {
+  if(confirm(`Excluir ${nome}?`)) { clientes = clientes.filter(c => c.nome !== nome); filtrarEOrganizarClientes(); }
+}
+
+function atualizarMesFinanceiro() {
+  const mes = document.getElementById('filtro-mes-fin').value;
+  const tbody = document.getElementById('tbody-financeiro');
+  tbody.innerHTML = "";
+  let lista = mes === "Julho" ? finJulho : finJunho;
+  let totalFat = 0, inadimplencia = 0;
+
+  lista.forEach(f => {
+    totalFat += f.bruto;
+    if(f.status === "Devedor") inadimplencia++;
+    let badge = f.status === "Integralizado" ? "s-ok" : "s-erro";
+    let btnAcao = f.status === "Devedor" ? `<button class="btn btn-roxo btn-sm" onclick="integralizarGanhoReal('${f.empresa}')">💰 Integralizar Ganho</button>` : `<button class="btn btn-ghost btn-sm" disabled>Conciliado</button>`;
+    tbody.innerHTML += `<tr><td><strong>${f.canal}</strong></td><td>${f.empresa}</td><td>R$ ${f.bruto.toLocaleString('pt-BR')},00</td><td>R$ ${f.taxa.toLocaleString('pt-BR')},00</td><td style="color:#C53030;">R$ ${f.despesa.toLocaleString('pt-BR')},00</td><td style="color:var(--verde); font-weight:600;">R$ ${(f.bruto - f.taxa - f.despesa).toLocaleString('pt-BR')},00</td><td><span class="bdg-s ${badge}"><span class="dot"></span>${f.status}</span></td><td>${btnAcao}</td></tr>`;
+  });
+  document.getElementById('card-fat').innerText = `R$ ${totalFat.toLocaleString('pt-BR')},00`;
+  document.getElementById('card-inad').innerText = inadimplencia > 0 ? `${inadimplencia} Pendente` : "0 Pendente";
+}
+
+function integralizarGanhoReal(empresa) {
+  finJunho.forEach(f => { if(f.empresa === empresa) f.status = "Integralizado"; });
+  atualizarMesFinanceiro();
+  alert("Ativos integralizados com sucesso.");
+}
+
+function lancarDespesa() {
+  const valor = parseFloat(document.getElementById('desp-val').value);
+  if(!valor) return;
+  let lista = document.getElementById('filtro-mes-fin').value === "Julho" ? finJulho : finJunho;
+  if(lista.length > 0) { lista[0].despesa += valor; atualizarMesFinanceiro(); }
+}
+
+function renderPerguntas() {
+  const tbody = document.getElementById('tbody-perguntas');
+  tbody.innerHTML = "";
+  perguntas.forEach(p => {
+    tbody.innerHTML += `<tr><td><strong>${p.id}</strong></td><td><span class="bdg-s s-ok">${p.dim}</span></td><td><input type="text" class="form-control" value="${p.texto}"/></td><td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta ${p.id} salva no mestre!')">Atualizar</button></td></tr>`;
+  });
+}
+
+function processarDepoimento(status) {
+  document.getElementById('dep-status-badge').className = status === 'Aprovado' ? 'bdg-s s-ok' : 'bdg-s s-erro';
+  document.getElementById('dep-status-badge').innerHTML = `<span class="dot"></span>${status}`;
+  document.getElementById('sid-dep-count').innerText = "0";
+  document.getElementById('card-depoimento-bloco').style.opacity = "0.5";
+  alert(`Depoimento processado como [${status}] com resposta salva.`);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 </script>
 </body>
 </html>
