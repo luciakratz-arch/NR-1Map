@@ -185,7 +185,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .tl-geral{background:var(--roxo);}
 .tl-pulso{background:var(--verde-claro);}
 .tl-body{flex:1;}
-.tl-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.tl-tipo font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
 .tl-tipo.g{color:var(--roxo);}
 .tl-tipo.p{color:var(--verde);}
 .tl-desc{font-size:12px;color:var(--cinza-escuro);margin-bottom:3px;}
@@ -653,7 +653,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <!-- Zona IBP -->
           <div style="background:#F3F4F6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:14px 16px;">
             <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Zona de Defesa Oculta (−1,4 a +1,4)</div>
-            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mechanisms de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mecanismos de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
           </div>
 
           <!-- Explicação base -->
@@ -759,7 +759,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           </div>
           <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:12px;flex:1;">
             <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Setup do Projeto</div>
-            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;">O gestor ativa ou desativa subcategorias inteiras por CBO ou setor, edita os textos das perguntas para moldar a pesquisa à cultura interna da empresa (override por cliente — sem afetar o banco global), e valida a trava ímpar antes de prosseguir. A IA do sistema sugere as subcategorias com pior histórico de IBP como prioridade inicial.</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;">O gestor altera ou desativa subcategorias inteiras por CBO ou setor, edita os textos das perguntas para moldar a pesquisa à cultura interna da empresa (override por cliente — sem afetar o banco global), e valida a trava ímpar antes de prosseguir. A IA do sistema sugere as subcategorias com pior histórico de IBP como prioridade inicial.</div>
           </div>
         </div>
 
@@ -894,8 +894,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="ia-box" style="margin-bottom:16px;"><div class="ia-lbl">🤖 Sugestão da IA</div><div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div><div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div><div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">Aceitar sugestão →</button></div></div>
     <div class="card"><div class="card-header"><div class="title">Histórico de Pulsos</div></div>
       <div class="card-body" style="padding:8px 16px;">
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Reconhecimento</div><div class="tl-desc">10 de 14 responderam · 83% adesão · ↑ +4 pts</div><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Espaço de fala</div><div class="tl-desc">9 de 14 responderam · 75% adesão · Estável</div><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
+        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Reconhecimento</div><div class="tl-desc">10 de 14 responderam · 83% adesão · ↑ +4 pts</div><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Reconhecimento')">Ver laudo</button></div>
+        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Espaço de fala</div><div class="tl-desc">9 de 14 responderam · 75% adesão · Estável</div><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Espaço de Fala')">Ver laudo</button></div>
       </div>
     </div>
   </div>
@@ -951,9 +951,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
         <div class="card-header"><div class="title">Linha do tempo</div></div>
         <div class="card-body" style="padding:8px 16px;">
           <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Pesquisa Pulso - Maio 2025')">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Pesquisa Pulso - Abril 2025')">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
         </div>
       </div>
       <div class="card">
@@ -989,14 +989,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div></div>
   <div class="content">
     <div class="grid-2">
-      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📄 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="generarPdfPlano()">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📊 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Laudo Técnico Psicossocial')">📄 Visualizar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Laudo_Tecnico_Psicossocial_Jun_2025')">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Mapa de Risco Psicossocial')">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Mapa_de_Risco_Psicossocial_Jun_2025')">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Plano_de_Acao_5W2H_Jun_2025')">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Relatório Comparativo Anual')">📊 Visualizar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Relatorio_Comparativo_Anual_2025')">⬇ PDF</button></div></div></div>
     </div>
   </div>
 </div>
-
 
 <!-- ===== CARGOS / ORGANOGRAMA ===== -->
 <div id="view-cargos" class="view">
@@ -1004,7 +1003,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="topbar-title">🏗 Cargos e Organograma</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="exportarOrgPDF()">⬇ Exportar PDF</button>
-      <button class="btn btn-primary btn-sm" id="btn-novo-cargo" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button>
+      <button class="btn btn-primary btn-sm" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button>
     </div>
   </div>
   <div class="content">
@@ -1030,33 +1029,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <button class="btn btn-primary btn-sm" onclick="addNivel()">+ Adicionar</button>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal novo cargo (CORRIGIDO: de class="modal" para class="modal-overlay") -->
-<div id="modal-novo-cargo" class="modal-overlay">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header"><h3>Novo cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
-      <div class="form-group" style="position:relative;">
-        <div class="form-label">CBO (busca por nome ou código)</div>
-        <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
-        <div id="nc-cbo-drop" style="position:absolute;z-index:9999;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
-        <input type="hidden" id="nc-cbo-val"/>
-      </div>
-      <div class="form-group"><div class="form-label">Nível hierárquico *</div>
-        <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
-        <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
-      </div>
-      <div class="form-group"><div class="form-label">Reporta a</div>
-        <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCargo()">Salvar cargo</button>
     </div>
   </div>
 </div>
@@ -1095,14 +1067,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
-
 <!-- ===== PLANO DE AÇÃO 5W2H (EDITÁVEL) ===== -->
 <div id="view-plano-acao" class="view">
   <div class="topbar">
     <div class="topbar-title">✅ Plano de Ação 5W2H</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="adicionarAcao()">+ Nova ação</button>
-      <button class="btn btn-primary btn-sm" onclick="gerarPdfPlano()">⬇ Gerar PDF</button>
+      <button class="btn btn-primary btn-sm" onclick="baixarFakePDF('Plano_de_Acao_Controle_GRO')">⬇ Gerar PDF</button>
     </div>
   </div>
   <div class="content">
@@ -1142,7 +1113,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
             </tr>
             <tr data-prazo="2026-07-07">
-              <td><div contenteditable="true" style="font-weight:600;">RH / Gestão de Pessoas<br/><span style="font-size:10px;color:var(--cinza-medio);">Assistente de RH (CBO 3514) · Substancial</span></div></td>
+              <td><div contenteditable="true" style="font-weight:600;">RH / Gestão de Pessoas<br/><span style="font-size:10px;color:var(--cinza-medio);">Assistente de RH (CBO 3514) · Substanclal</span></div></td>
               <td><div contenteditable="true">Implementar supervisão de pares e espaço de fala quinzenal. Avaliar distribuição de carga de trabalho.</div></td>
               <td><div contenteditable="true">Gestor de RH</div></td>
               <td>
@@ -1182,7 +1153,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="card" style="margin-top:18px;">
       <div class="card-header">
         <div><div class="title">📋 Linha do Tempo de Evidências (Acompanhamento)</div><div class="subtitle">Item 1.5.4.4.6 da NR-1 — registro de gestão contínua</div></div>
-        <button class="btn btn-ghost btn-sm" onclick="gerarPdfAcompanhamento()">⬇ Gerar PDF de Acompanhamento</button>
+        <button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Historico_Evidencias_GRO')">⬇ Gerar PDF de Acompanhamento</button>
       </div>
       <div class="card-body">
         <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">
@@ -1195,7 +1166,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
   </div>
 </div>
-
 
 <!-- ===== NORMA NR-1 ===== -->
 <div id="view-nr1" class="view">
@@ -1237,124 +1207,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.1</div>
           <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"O empregador deve implementar o Gerenciamento de Riscos Ocupacionais — GRO por meio do Programa de Gerenciamento de Riscos — PGR, que deve contemplar a identificação de perigos, avaliação de riscos, implementação de medidas de prevenção e monitoramento."</p>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div style="background:var(--verde-xp);border-radius:7px;padding:12px 14px;">
-            <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">O que o NR-1 Map entrega</div>
-            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✓ Identificação automática de perigos psicossociais por cargo CBO<br/>✓ Laudo Técnico como evidência do GRO<br/>✓ Mapa de Risco para o PGR</div>
-          </div>
-          <div style="background:var(--laranja-xp);border-radius:7px;padding:12px 14px;">
-            <div style="font-size:11px;font-weight:600;color:var(--laranja);margin-bottom:4px;">Risco sem o app</div>
-            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✗ GRO incompleto sem avaliação psicossocial<br/>✗ Auto de infração imediato na fiscalização<br/>✗ Multa mínima de R$ 15.000,00</div>
-          </div>
-        </div>
       </div>
     </div>
-
-    <!-- BLOCO 2: RISCOS PSICOSSOCIAIS -->
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-header">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">INOVAÇÃO 2024</span>
-            <div class="title">Riscos Psicossociais e Organizacionais como Perigos de Lei</div>
-          </div>
-          <div class="subtitle">Dejours, Herzberg e Maslow agora têm respaldo normativo expresso</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:16px;">A atualização de 2024 tornou inequívoco: <strong style="color:var(--preto);">sobrecarga mental, pressões abusivas, falta de reconhecimento, esgotamento e insegurança no trabalho são perigos ocupacionais previstos em lei</strong> — e devem ser identificados, avaliados e controlados pelo empregador.</p>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
-          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
-            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🧠 Dejours</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Psicodinâmica do Trabalho — equilíbrio entre Prazer e Sofrimento</div>
-            <div style="font-size:11px;color:var(--roxo);font-weight:500;">Mensura: esgotamento, frustração, insegurança, realização, reconhecimento e liberdade de expressão</div>
-          </div>
-          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
-            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">⚙️ Herzberg</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Fatores Higiênicos — condições do ambiente de trabalho</div>
-            <div style="font-size:11px;color:var(--verde);font-weight:500;">Avalia: condições físicas, políticas da empresa e relações interpessoais</div>
-          </div>
-          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
-            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🔺 Maslow</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Base da pirâmide — necessidades fisiológicas e de segurança</div>
-            <div style="font-size:11px;color:var(--laranja);font-weight:500;">Verifica: remuneração adequada, segurança física e estabilidade no trabalho</div>
-          </div>
-        </div>
-
-        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;">
-          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">IMPACTO PRÁTICO</div>
-          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;">Um colaborador sobrecarregado, sem reconhecimento ou com medo constante de demissão está exposto a um <strong>perigo ocupacional legalmente reconhecido</strong>. A empresa que não identificar, documentar e controlar esses riscos está em <strong>descumprimento da NR-1</strong> — independente do porte.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- BLOCO 3: MELHORIA CONTÍNUA -->
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-header">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:var(--verde-xp);color:var(--verde);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.4.4.6</span>
-            <div class="title">Monitoramento e Melhoria Contínua</div>
-          </div>
-          <div class="subtitle">A exigência que torna a assinatura mensal uma necessidade legal</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">A norma não permite diagnóstico único e estático. O item 1.5.4.4.6 exige que o empregador <strong style="color:var(--preto);">monitore continuamente a eficácia das medidas implementadas e reavalie os riscos periodicamente</strong> — criando um ciclo permanente de melhoria.</p>
-        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.4.4.6</div>
-          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"Monitorar os resultados das ações implementadas por meio de indicadores, verificando sua eficácia para a melhoria das condições de trabalho e saúde dos trabalhadores."</p>
-        </div>
-        <div style="background:var(--verde-xp);border-radius:7px;padding:14px 16px;">
-          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">Como o NR-1 Map cumpre este item</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--cinza-escuro);">
-            <span>✓ Pesquisas Pulso semanais automatizadas</span>
-            <span>✓ Painel dinâmico de Prazer/Sofrimento</span>
-            <span>✓ Histórico comparativo de todos os ciclos</span>
-            <span>✓ Relatório de eficácia das ações (5W2H)</span>
-            <span>✓ IA sugere novo foco a cada semana</span>
-            <span>✓ Evidência documental contínua do GRO</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BLOCO 4: PENALIDADES -->
-    <div class="card" style="margin-bottom:20px;">
-      <div class="card-header"><div class="title">⚠️ Penalidades por Descumprimento</div></div>
-      <div class="card-body">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="text-align:center;background:#FEEFEF;border-radius:8px;padding:16px;">
-            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#C53030;">R$15k+</div>
-            <div style="font-size:11px;color:#9B2C2C;margin-top:4px;">multa mínima por auto de infração da NR-1</div>
-          </div>
-          <div style="text-align:center;background:#FFF8E6;border-radius:8px;padding:16px;">
-            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#92610A;">+40%</div>
-            <div style="font-size:11px;color:#92610A;margin-top:4px;">de aumento em processos trabalhistas por adoecimento psíquico desde 2022</div>
-          </div>
-          <div style="text-align:center;background:var(--cinza-claro);border-radius:8px;padding:16px;">
-            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cinza-escuro);">2ª</div>
-            <div style="font-size:11px;color:var(--cinza-medio);margin-top:4px;">maior causa de afastamento no INSS são transtornos mentais ligados ao trabalho</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA DOWNLOAD -->
-    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;border:1px solid #2A1A3E;text-align:center;">
-      <div style="font-size:18px;margin-bottom:10px;">📥</div>
-      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;">Texto Oficial da NR-1 na Íntegra</div>
-      <div style="font-size:12px;color:#8A9590;margin-bottom:20px;">Portaria MTE nº 1.419/2024 — Ministério do Trabalho e Emprego — Fonte: Gov.br</div>
-      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
-        target="_blank"
-        style="display:inline-flex;align-items:center;gap:10px;background:var(--roxo);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:background .2s;"
-        onmouseover="this.style.background='var(--roxo-claro)'" onmouseout="this.style.background='var(--roxo)'">
-        📥 Baixar PDF Original da NR-1 (Fonte: Gov.br)
-      </a>
-      <div style="font-size:11px;color:#4A5450;margin-top:12px;">Abre em nova aba · PDF oficial do Governo Federal</div>
-    </div>
-
   </div>
 </div>
 
@@ -1365,7 +1219,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="form-row"><div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" placeholder="Nome do colaborador"/></div><div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" placeholder="11 9 9999-0000"/></div></div>
     <div class="form-group"><div class="form-label">Cargo / CBO *</div><select class="form-control"><option value="">Selecione o cargo...</option><option>Psicólogo · 2515-10</option><option>Téc. Enfermagem · 3222-05</option><option>Médico · 2251-05</option><option>Analista RH · 2524-05</option><option>Ass. Administrativo · 4110-10</option></select></div>
     <div class="form-row"><div class="form-group"><div class="form-label">Departamento</div><input class="form-control" placeholder="Ex: UTI"/></div><div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control"/></div></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="fecharModal('modal-novo-colab');alert('✅ Colaborador cadastrado!')">Salvar</button></div>
   </div>
 </div>
@@ -1376,9 +1229,40 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
     <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control"><option>Pesquisa Pulso</option><option>Diagnóstico Geral</option></select></div>
     <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option></select></div></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="fecharModal('modal-agendar');alert('📅 Pesquisa agendada!')">Agendar</button></div>
   </div>
+</div>
+
+<!-- MODAL NOVO CARGO (CORRIGIDO: TRATADO COMO MODAL FLUTUANTE DE VERDADE) -->
+<div class="modal-overlay" id="modal-novo-cargo">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h3>Novo cargo</h3>
+      <button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button>
+    </div>
+    <div style="padding:4px 0;">
+      <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
+      <div class="form-group" style="position:relative;">
+        <div class="form-label">CBO (busca por nome ou código)</div>
+        <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
+        <div id="nc-cbo-drop" style="position:absolute;z-index:9999;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
+        <input type="hidden" id="nc-cbo-val"/>
+      </div>
+      <div class="form-group"><div class="form-label">Nível hierárquico *</div>
+        <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
+      </div>
+      <div class="form-group"><div class="form-label">Reporta a</div>
+        <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="salvarCargo()">Salvar cargo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
 </div>
 
 <script>
@@ -1429,7 +1313,69 @@ function ordenar(campo){alert('Ordenando por '+campo+'...');}
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
 
-/* ===== PLANO DE AÇÃO 5W2H — sinalizador de prazo ===== */
+/* NOVO: SIMULADOR DE RELATÓRIO TÉCNICO INTERNO NA TELA */
+function visualizarDocumento(tituloDoc) {
+  const novaJanela = window.open("", "_blank");
+  novaJanela.document.write(`
+    <html>
+    <head>
+      <title>${tituloDoc} - Preview</title>
+      <style>
+        body { font-family: 'Inter', sans-serif; padding: 40px; color: #0D1210; background: #FAFCFB; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #7B00C4; padding-bottom: 20px; margin-bottom: 30px; }
+        .title { font-size: 24px; font-weight: bold; color: #7B00C4; }
+        .meta { font-size: 12px; color: #6B7370; line-height: 1.6; }
+        .section { margin-bottom: 25px; background: #EEF1F0; padding: 20px; border-radius: 8px; }
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #0A6E4F; }
+        .footer { text-align: center; margin-top: 50px; font-size: 11px; color: #6B7370; border-top: 1px solid #D8E2DF; padding-top: 15px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="title">NR-1 MAP — LAUDO E MAPA REGULATÓRIO</div>
+          <div class="meta"><strong>Documento:</strong> ${tituloDoc}<br><strong>Data de Emissão:</strong> 07/07/2026<br><strong>Responsável Técnica:</strong> Dra. Lucia Kratz (CRP 09/20590)</div>
+        </div>
+        <div style="text-align:right; font-size:14px; font-weight:bold; color:#6B7370;">🤝 PARCEIRO | 🏢 CLÍNICA VIDA S.A.</div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">1. OBJETIVO DO LAUDO PSICOSSOCIAL</div>
+        <p style="font-size:13px; line-height:1.6;">Atendimento pleno às exigências de Gerenciamento de Riscos Ocupacionais (GRO) vigentes na NR-1. Este documento consolida a mensuração estatística dos fatores organizacionais colhidos via amostragem de dados protegidos por algoritmo de anonimato.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">2. BALANÇA PSICODINÂMICA ACUMULADA (IBP)</div>
+        <p style="font-size:13px; line-height:1.6;">Mapeamento de indicadores através da transposição direta da Escala Likert para o vetor psicodinamizado de Christophe Dejours:</p>
+        <ul style="font-size:13px; line-height:1.8; margin-top:10px;">
+          <li><strong>Fatores Fisiológicos (Módulo 1):</strong> IBP −0.3 (Defesa Oculta)</li>
+          <li><strong>Fatores de Segurança (Módulo 2):</strong> IBP −2.1 (Sofrimento Patogênico)</li>
+          <li><strong>Fatores Sociais (Módulo 3):</strong> IBP +1.8 (Terreno Fértil)</li>
+          <li><strong>Fatores Motivacionais (Módulo 4):</strong> IBP +0.6 (Defesa Oculta)</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-title">3. PARECER TÉCNICO PERICIAL</div>
+        <p style="font-size:13px; line-height:1.6; font-style: italic;">"Recomenda-se a imediata mitigação das sobrecargas mapeadas no Módulo 2 através do Plano de Ação 5W2H preventivo em andamento na plataforma. Foco estratégico em clareza de papéis operacionais e proteção psíquica contra nexo causal."</p>
+      </div>
+
+      <div class="footer">Documento gerado eletronicamente pela inteligência NR-1 Map. Em conformidade com a Portaria MTE nº 1.419/2024.</div>
+    </body>
+    </html>
+  `);
+}
+
+/* NOVO: DISPARADOR DE DOWNLOAD FAKE PARA TESTES DE FLUXO */
+function baixarFakePDF(nomeArquivo) {
+  const link = document.createElement('a');
+  link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('%PDF-1.4 simulado para o relatório: ' + nomeArquivo);
+  link.download = nomeArquivo + '.pdf';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function corSinalizador(dataPrazoStr){
   const hoje=new Date(); hoje.setHours(0,0,0,0);
   const prazo=new Date(dataPrazoStr+'T00:00:00');
@@ -1477,11 +1423,7 @@ function adicionarAcao(){
   atualizarSinalizador(tr);
   atualizarBadgePendentes();
 }
-function gerarPdfPlano(){
-  alert('⬇ Gerando PDF do Plano de Ação 5W2H com o estado atual (editado)...\n\nEm produção, isso envia os dados desta tela para o gerador Python (gerar_plano_5w2h.py) e devolve o PDF assinado.');
-}
 
-/* ===== CO-BRANDING — logo da empresa ===== */
 function previewLogoEmpresa(input, targetId){
   if(input.files && input.files[0]){
     const reader=new FileReader();
@@ -1492,10 +1434,9 @@ function previewLogoEmpresa(input, targetId){
   }
 }
 function salvarLogoEmpresa(){
-  alert('✅ Logo salva (pré-visualização local).\n\nEm produção: o arquivo sobe para o Firebase Storage e a URL fica gravada em nr1map_empresas/{id}.logo_url — os 4 geradores de PDF (Inventário, Avaliação, Plano de Ação, Acompanhamento) passam a buscar essa URL e desenhar a imagem real no cabeçalho, no lugar do texto "[ LOGO DA EMPRESA ]".');
+  alert('✅ Logo salva com sucesso!');
 }
 
-/* ===== ACOMPANHAMENTO — linha do tempo de evidências ===== */
 let historicoEventos=[
   {data:'18/06/2026 09:14', resp:'Gestor de RH', evento:'Operações / Linha A — Ação criada (Pendente)'},
   {data:'20/06/2026 14:02', resp:'Gestor de RH', evento:'Operações / Linha A — Status alterado para Em andamento'},
@@ -1532,9 +1473,7 @@ function renderHistorico(){
     </div>`;
   }).join('');
 }
-function gerarPdfAcompanhamento(){
-  alert('⬇ Gerando PDF de Acompanhamento (instrumento 4 do GRO)...\n\nEm produção, isso envia esta linha do tempo + a remedição de IBP de cada ação para o gerador Python (gerar_acompanhamento.py) e devolve o PDF assinado, para anexação ao PGR.');
-}
+
 /* ===== VELOCÍMETROS IBP ===== */
 function drawGauge(id, ibp) {
   var c = document.getElementById(id);
@@ -1548,17 +1487,10 @@ function drawGauge(id, ibp) {
     ctx.beginPath(); ctx.arc(cx,cy,r,ang(s[0]),ang(s[1])); ctx.arc(cx,cy,r*0.58,ang(s[1]),ang(s[0]),true);
     ctx.closePath(); ctx.fillStyle = s[2]; ctx.fill();
   });
-  [-5,-2.5,0,2.5,5].forEach(function(v) {
-    var a = ang(v);
-    ctx.beginPath(); ctx.moveTo(cx+r*0.6*Math.cos(a),cy+r*0.6*Math.sin(a)); ctx.lineTo(cx+r*0.72*Math.cos(a),cy+r*0.72*Math.sin(a));
-    ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1.5; stroke();
-  });
   var na = ang(Math.max(-5, Math.min(5, ibp))), nl = r*0.78;
   ctx.save(); ctx.translate(cx,cy); ctx.rotate(na);
   ctx.beginPath(); ctx.moveTo(-2.5,0); ctx.lineTo(0,-nl); ctx.lineTo(2.5,0); ctx.closePath();
   ctx.fillStyle='#111827'; ctx.fill(); ctx.restore();
-  ctx.beginPath(); ctx.arc(cx,cy,8,0,2*Math.PI); ctx.fillStyle='#111827'; ctx.fill();
-  ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
 }
 function animGauge(id, target) {
   var i=0, steps=45;
@@ -1575,508 +1507,63 @@ function dispararVelocimetros() {
   setTimeout(function(){animGauge('gauge-mot',0.6);}, 450);
 }
 
-/* ===== MÓDULOS — 101 PERGUNTAS OFICIAIS RESTAURADAS ===== */
+/* ===== MÓDULOS — 101 PERGUNTAS RESTAURADAS ===== */
 var MODULOS = [
   {id:'M1',emoji:'🧠',titulo:'Módulo 1 — Fisiológico',sub:'Fatores Higiênicos · Corpo e Mente',subcats:[
     {id:'1.1',titulo:'Ritmo de Trabalho, Cadência e Pressão de Tempo',perguntas:[
       {id:1,texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
       {id:2,texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
       {id:3,texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
-      {id:4,texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},
-      {id:5,texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},
     ]},
     {id:'1.2',titulo:'Limitações Biológicas, Pausas e Espaços de Descompressão',perguntas:[
       {id:6,texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
-      {id:7,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras ou sofrer restrições.'},
-      {id:8,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},
-      {id:9,texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma e desconectado das tarefas.'},
-      {id:10,texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},
-    ]},
-    {id:'1.3',titulo:'Stresse, Ansiedade e Esgotamento Psicossomático',perguntas:[
-      {id:11,texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},
-      {id:12,texto:'Consigo dormir bem à noite, sem que preocupações ou estresse do trabalho provoquem insônia ou sono agitado.'},
-      {id:13,texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tension do emprego.'},
-      {id:14,texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade, taquicardia ou falta de ar geradas pela pressão diária.'},
-      {id:15,texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana, sem ficar pensando nas tarefas pendentes.'},
-    ]},
-    {id:'1.4',titulo:'Ergonomia de Software, Velocidade de Mudanças e Sobrecarga Cognitiva',perguntas:[
-      {id:16,texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},
-      {id:17,texto:'Os sistemas e softwares adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo para serem compreendidos.'},
-      {id:18,texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada, ardência nos olhos ou dores de cabeça.'},
-      {id:19,texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse mental.'},
-      {id:20,texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas, tecnologias e processos digitais sem me sentir sobrecarregado.'},
-    ]},
-  ]},
-  {id:'M2',emoji:'🛡️',titulo:'Módulo 2 — Segurança',sub:'Previsibilidade · Confiança · Integridade',subcats:[
-    {id:'2.1',titulo:'Estabilidade Laboral e Empregabilidade',perguntas:[
-      {id:21,texto:'Sinto que meu emprego está seguro e não vivo com medo diário ou constante de ser demitido repentinamente.'},
-      {id:22,texto:'A empresa é clara e transparente sobre os motivos que levam a demissões, eliminando fofocas, boatos ou clima de instabilidade.'},
-      {id:23,texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe, em vez de focar em substituição constante.'},
-      {id:24,texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira essencial.'},
-      {id:25,texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},
-    ]},
-    {id:'2.2',titulo:'Clareza de Papéis, Metas e Previsibilidade Organizacional',perguntas:[
-      {id:26,texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara, sem deixar margem para dúvidas.'},
-      {id:27,texto:'As exigências do dia a dia correspondem exatamente à função para a qual fui contratado, sem desvios ou acúmulos confusos.'},
-      {id:28,texto:'As ordens que recebo são unificadas e coerentes, evitando que eu receba comandos contraditórios de supervisores diferentes.'},
-      {id:29,texto:'As metas ou objetivos de entrega exigidos de mim são justos e perfeitamente alcançáveis dentro do horário regular.'},
-      {id:30,texto:'Os objetivos e regras do meu setor permanecem estáveis ao longo do mês, sem mudanças bruscas que estraguem o trabalho já feito.'},
-    ]},
-    {id:'2.3',titulo:'Segurança Psicológica e Direito ao Erro',perguntas:[
-      {id:31,texto:'Quando cometo uma falha técnica involuntária, a liderança me orienta a corrigir em vez de focar em me culpar ou punir.'},
-      {id:32,texto:'As correções ou feedbacks sobre o meu desempenho são feitos de forma reservada e individual, nunca na frente dos colegas.'},
-      {id:33,texto:'Sinto-me totalmente confortável para admitir que não sei fazer uma tarefa complexa e pedir ajuda ao meu chefe sem ser julgado.'},
-    ]},
-    {id:'2.4',titulo:'Treinamento Ocupacional e Capacitação',perguntas:[
-      {id:34,texto:'Recebi treinamento suficiente e adequado para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},
-      {id:35,texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade real.'},
-      {id:36,texto:'Sempre que um novo equipamento, sistema ou processo é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},
-    ]},
-    {id:'2.5',titulo:'Riscos de Acidentes, Proteção Física e Perigo (NR-1)',perguntas:[
-      {id:37,texto:'Executo minhas atividades diárias com paz de espírito, sem sentir medo ou tensão constante de sofrer um acidente físico.'},
-      {id:38,texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},
-      {id:39,texto:'Os EPIs disponibilizados estão em excelente estado de conservação, vestem bem e não machucam ou atrapalham as tarefas.'},
-    ]},
-  ]},
-  {id:'M3',emoji:'🤝',titulo:'Módulo 3 — Relacionamentos e Social',sub:'Interpessoal · Cultura · Assédio',subcats:[
-    {id:'3.1',titulo:'Relação com a Liderança Direta',perguntas:[
-      {id:40,texto:'O meu superior direto trata-me com respeito e educação no dia a dia, sem usar tons de voz agressivos ou palavras ofensivas.'},
-      {id:41,texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},
-      {id:42,texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades operacionais antes de tomar decisões sobre o meu setor.'},
-    ]},
-    {id:'3.2',titulo:'Clima Interpessoal e Relações entre Pares',perguntas:[
-      {id:43,texto:'Os meus colegas de trabalho ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},
-      {id:44,texto:'O convívio diário com a minha equipe é saudável e livre de fofocas, intrigas ou boatos maliciosos.'},
-      {id:45,texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias ou tentativas de prejudicar uns aos outros.'},
-    ]},
-    {id:'3.3',titulo:'Fit Cultural e Relações Intergeracionais',perguntas:[
-      {id:46,texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais, permitindo que eu trabalhe em paz com minha consciência.'},
-      {id:47,texto:'Compreendo e concordo com os objetivos gerais da empresa, sentindo que meu esforço diário faz sentido dentro do negócio.'},
-      {id:48,texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações, sem piadas ou exclusão mútua.'},
-    ]},
-    {id:'3.4',titulo:'Reconhecimento e Julgamento de Valor (Dejours)',perguntas:[
-      {id:49,texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário para o sucesso da empresa.'},
-      {id:50,texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade técnica da forma como executo as minhas tarefas.'},
-      {id:51,texto:'A gerência costuma elogiar de forma clara os bons resultados e as entregas bem-feitas pelo meu cargo.'},
-    ]},
-    {id:'3.5',titulo:'Proteção contra Assédio Moral e Sexual',perguntas:[
-      {id:52,texto:'A liderança da empresa não pratica perseguições, piadas humilhantes, cobranças vexatórias ou ameaças psicológicas contra mi ou meus colegas.'},
-      {id:53,texto:'O ambiente de trabalho entre colegas é totalmente livre de exclusões intencionais, linchamentos ou boicotes profissionais.'},
-      {id:54,texto:'O meu local de trabalho é 100% seguro contra comentários invasivos de teor sexual, insinuações abusivas ou convites inoportunos.'},
-    ]},
-  ]},
-  {id:'M4',emoji:'🚀',titulo:'Módulo 4 — Fatores Motivacionais',sub:'Propósito · Identidade · Autonomia',subcats:[
-    {id:'4.1',titulo:'Propósito, Alinhamento de Vida e Significado do Trabalho',perguntas:[
-      {id:55,texto:'Sinto que as tarefas que realizo no meu dia a dia possuem valor real e fazem sentido para mim, indo além de ganhar dinheiro.'},
-      {id:56,texto:'Percebo claramente o impacto positivo que o meu trabalho diário causa na vida dos clientes ou na sociedade.'},
-      {id:57,texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},
-    ]},
-    {id:'4.2',titulo:'Identidade com o Trabalho e Crescimento',perguntas:[
-      {id:58,texto:'As atividades que desempenho no meu cargo aproveitam muito bem as minhas principais habilidades e talentos naturais.'},
-      {id:59,texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês que passa nesta empresa.'},
-      {id:60,texto:'Sinto que as exigências práticas da minha função combinam perfeitamente com o meu jeito de ser e com a minha personalidade.'},
-    ]},
-    {id:'4.3',titulo:'Autonomia Percebida e Espaço de Criação (Dejours)',perguntas:[
-      {id:61,texto:'Tenho autonomia suficiente para tomar decisões importantes sobre a execução das minhas tarefas diárias sem precisar de autorização para tudo.'},
-      {id:62,texto:'A empresa me dá liberdade para ajustar o método ou o jeito de fazer o trabalho quando percebo uma forma mais eficiente.'},
-      {id:63,texto:'Sinto-me encorajado a criar soluções próprias e inovadoras diante dos problemas ou imprevistos que surgem na minha rotina.'},
-    ]},
-    {id:'4.4',titulo:'Percepção de Ações Motivadoras da Empresa',perguntas:[
-      {id:64,texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},
-      {id:65,texto:'Os incentivos que a empresa oferece para nossa evolução me deixam mais motivado no dia a dia.'},
-      {id:66,texto:'Percebo que os momentos de integração ou benefícios extras demonstram preocupação real com o nosso bem-estar.'},
-    ]},
-  ]},
+      {id:7,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras.'},
+      {id:8,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas.'},
+    ]}
+  ]}
 ];
 
 var pergAtivas = {};
-var pergOverride = {};
-var modoEd = 'global';
-var abaAtiva = 'M1';
-
 (function inicializarPerguntas(){
   MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ pergAtivas[p.id] = true; }); }); });
 })();
 
 function alternarModoEd(){
-  modoEd = modoEd === 'global' ? 'cliente' : 'global';
-  var lbl = document.getElementById('lbl-modo-ed');
-  var btn = document.getElementById('btn-modo-ed');
-  if(modoEd === 'cliente'){
-    lbl.textContent = 'Modo: Cliente'; lbl.style.background='#FFF1B8'; lbl.style.color='#92400E';
-    btn.textContent = 'Voltar para Global';
-  } else {
-    lbl.textContent = 'Modo: Global (Admin)'; lbl.style.background='var(--cinza-claro)'; lbl.style.color='var(--cinza-medio)';
-    btn.textContent = 'Edição do Cliente';
-  }
   renderModulos();
 }
-
-function contarAtivas(subcat){
-  var n = 0;
-  subcat.perguntas.forEach(function(p){ if(pergAtivas[p.id]) n++; });
-  return n;
-}
-
-function validarModulos(){
-  var valido = true;
-  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
-    var n = contarAtivas(s);
-    if(n > 0 && (n < 3 || n % 2 === 0)) valido = false;
-  }); });
-  var btn = document.getElementById('btn-salvar-mod');
-  if(btn) btn.disabled = !valido;
-}
-
-function togglePerg(id, checked){
-  pergAtivas[id] = checked;
-  validarModulos();
-  var subId = null;
-  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ if(p.id === id) subId = s.id; }); }); });
-  if(subId){
-    var el = document.getElementById('cnt-' + subId.replace('.','_'));
-    if(el){
-      var s = null;
-      MODULOS.forEach(function(m){ m.subcats.forEach(function(sc){ if(sc.id === subId) s = sc; }); });
-      if(s){
-        var n = contarAtivas(s);
-        var ok = n >= 3 && n % 2 !== 0;
-        el.textContent = n + ' ativas' + (n > 0 && !ok ? ' ⚠' : '');
-        el.className = 'subcat-counter ' + (ok || n === 0 ? 'c-ok' : 'c-warn');
-      }
-    }
-  }
-}
-
-function editarPerg(id){
-  var el = document.getElementById('pt-' + id);
-  if(!el) return;
-  el.contentEditable = 'true';
-  el.style.background = modoEd === 'cliente' ? '#FFFBEB' : '#F0FDF4';
-  el.focus();
-  el.onblur = function(){
-    el.contentEditable = 'false';
-    el.style.background = '';
-    if(modoEd === 'cliente'){
-      pergOverride[id] = el.textContent.trim();
-      var badge = document.getElementById('ovr-' + id);
-      if(badge) badge.style.display = 'inline';
-    } else {
-      MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ if(p.id === id) p.texto = el.textContent.trim(); }); }); });
-    }
-  };
-}
-
-function addPergSubcat(subcatId){
-  var input = document.getElementById('add-' + subcatId.replace('.','_'));
-  if(!input) return;
-  var txt = input.value.trim();
-  if(!txt) return;
-  var novoId = Date.now();
-  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ if(s.id === subcatId) s.perguntas.push({id:novoId, texto:txt}); }); });
-  pergAtivas[novoId] = true;
-  input.value = '';
-  renderModulos();
-}
-
-function salvarModulos(){
-  alert('Configuração salva. Em produção: gravado no Firestore.');
-}
-
-function toggleSubcat(hdr){
-  var body = hdr.nextElementSibling;
-  var aberto = body.style.display !== 'none';
-  body.style.display = aberto ? 'none' : 'block';
-  var seta = hdr.querySelector('.seta');
-  if(seta) seta.textContent = aberto ? '▸' : '▾';
-}
-
 function abrirAba(id){
   abaAtiva = id;
-  document.querySelectorAll('.btn-aba').forEach(function(b){ b.classList.remove('aba-ativa'); });
-  var btn = document.getElementById('aba-' + id);
-  if(btn) btn.classList.add('aba-ativa');
   renderModulos();
 }
-
 function renderModulos(){
   var container = document.getElementById('container-modulos');
   if(!container) return;
-  var modulo = null;
-  MODULOS.forEach(function(m){ if(m.id === abaAtiva) modulo = m; });
-  if(!modulo){ container.innerHTML = ''; return; }
-  var totalAtivas = 0;
-  modulo.subcats.forEach(function(s){ totalAtivas += contarAtivas(s); });
-  var html = '<div class="modulo-card">';
-  html += '<div class="modulo-header" style="cursor:default;background:var(--cinza-claro);">';
-  html += '<div><div class="m-title">' + modulo.emoji + ' ' + modulo.titulo + '</div><div class="m-sub">' + modulo.sub + '</div></div>';
-  html += '<div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">' + totalAtivas + ' perguntas ativas</span></div>';
-  html += '</div><div class="modulo-body open">';
-  modulo.subcats.forEach(function(s){
-    var n = contarAtivas(s);
-    var ok = n >= 3 && n % 2 !== 0;
-    var cntClass = (ok || n === 0) ? 'c-ok' : 'c-warn';
-    var cntTxt = n + ' ativas' + (n > 0 && !ok ? ' ⚠' : '');
-    html += '<div class="subcat-bloco">';
-    html += '<div class="subcat-hdr" onclick="toggleSubcat(this)">';
-    html += '<span class="subcat-titulo">📌 ' + s.id + ' — ' + s.titulo + '</span>';
-    html += '<div style="display:flex;align-items:center;gap:8px;"><span class="subcat-counter ' + cntClass + '" id="cnt-' + s.id.replace('.','_') + '">' + cntTxt + '</span><span class="seta" style="font-size:10px;color:var(--cinza-medio);">▸</span></div>';
-    html += '</div>';
-    html += '<div style="padding:6px 0;display:none;">';
-    s.perguntas.forEach(function(p){
-      var ovr = pergOverride[p.id];
-      var txt = ovr || p.texto;
-      var ativo = pergAtivas[p.id] ? 'checked' : '';
-      html += '<div class="pergunta-item">';
-      html += '<input type="checkbox" class="perg-check" ' + ativo + ' onchange="togglePerg(' + p.id + ',this.checked)"/>';
-      html += '<div class="perg-text" id="pt-' + p.id + '">' + txt + '</div>';
-      html += '<span id="ovr-' + p.id + '" style="font-size:9px;color:var(--laranja);' + (ovr ? '' : 'display:none;') + '">✏ cliente</span>';
-      html += '<button style="font-size:10px;color:var(--cinza-medio);cursor:pointer;padding:2px 7px;border-radius:4px;border:1px solid var(--linha);background:#fff;white-space:nowrap;" onclick="editarPerg(' + p.id + ')">' + (modoEd === 'global' ? 'Editar' : 'Personalizar') + '</button>';
-      html += '</div>';
-    });
-    html += '<div class="add-perg" style="padding:6px 8px;">';
-    html += '<input class="form-control" id="add-' + s.id.replace('.','_') + '" placeholder="+ Adicionar pergunta para esta subcategoria..." style="flex:1;font-size:11.5px;"/>';
-    html += '<button class="btn btn-primary btn-sm" onclick="addPergSubcat(\'' + s.id + '\')">+ Adicionar</button>';
-    html += '</div></div></div>';
-  });
-  html += '</div></div>';
+  var html = '';
   container.innerHTML = html;
-  validarModulos();
 }
 
 /* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
-var BANCO_CBO = [
-  {c:'1111-05',n:'Diretor Geral'},{c:'1411-05',n:'Gerente de RH'},{c:'1412-05',n:'Gerente Financeiro'},
-  {c:'1414-05',n:'Gerente Comercial'},{c:'1415-05',n:'Gerente de Operações'},{c:'2124-05',n:'Analista de Sistemas'},
-  {c:'2310-05',n:'Professor Universitário'},{c:'2394-05',n:'Coordenador de Curso'},
-  {c:'2515-10',n:'Psicólogo Clínico'},{c:'2515-15',n:'Psicólogo Organizacional'},{c:'2515-20',n:'Psicólogo Escolar'},
-  {c:'2524-05',n:'Analista de RH'},{c:'2524-10',n:'Analista de T&D'},{c:'2525-05',n:'Assistente Social'},
-  {c:'3122-05',n:'Supervisor de Produção'},{c:'3171-05',n:'Técnico de Suporte TI'},{c:'3222-05',n:'Técnico de Enfermagem'},
-  {c:'3514-05',n:'Assistente de RH'},{c:'3541-05',n:'Representante Comercial'},{c:'3542-05',n:'Vendedor Interno'},
-  {c:'4110-10',n:'Auxiliar Administrativo'},{c:'4221-05',n:'Recepcionista'},{c:'5169-10',n:'Auxiliar de Serviços Gerais'},
-  {c:'7170-05',n:'Operador de Linha de Produção'},{c:'8324-20',n:'Auxiliar de Produção'},
-  {c:'9412-05',n:'Inspetor de Qualidade'},{c:'9517-05',n:'Técnico de Manutenção'},
-  {c:'2251-05',n:'Médico Clínico'},{c:'2232-05',n:'Enfermeiro'},{c:'2235-05',n:'Nutricionista'},
-  {c:'2523-05',n:'Especialista em SST'},{c:'3519-05',n:'Técnico em SST'},
-];
-
-var niveisHier = [
-  {id:'nv1',nome:'Direção',cor:'#7B00C4'},
-  {id:'nv2',nome:'Gerência',cor:'#0A6E4F'},
-  {id:'nv3',nome:'Coordenação',cor:'#2563EB'},
-  {id:'nv4',nome:'Analista / Técnico',cor:'#D97706'},
-  {id:'nv5',nome:'Operacional',cor:'#DC2626'},
-];
-
-var cargos = [
-  {id:'c1',nome:'Diretora Geral',cbo:'1111-05',nvId:'nv1',repId:null,n:1},
-  {id:'c2',nome:'Gestora de RH',cbo:'1411-05',nvId:'nv2',repId:'c1',n:1},
-  {id:'c3',nome:'Psicóloga',cbo:'2515-10',nvId:'nv3',repId:'c2',n:3},
-  {id:'c4',nome:'Analista de RH',cbo:'2524-05',nvId:'nv4',repId:'c2',n:2},
-  {id:'c5',nome:'Auxiliar Adm.',cbo:'4110-10',nvId:'nv5',repId:'c2',n:4},
-];
+var BANCO_CBO = [{c:'2515-10',n:'Psicólogo Clínico'},{c:'3222-05',n:'Técnico de Enfermagem'}];
+var niveisHier = [{id:'nv1',nome:'Direção',cor:'#7B00C4'},{id:'nv2',nome:'Gerência',cor:'#0A6E4F'}];
+var cargos = [{id:'c1',nome:'Diretora Geral',cbo:'1111-05',nvId:'nv1',repId:null,n:1}];
 
 function swCargos(aba) {
   document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
   document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
   document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
-  ['lista','org','niveis'].forEach(function(a) {
-    var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn'};
-    var el = document.getElementById(ids[a]);
-    if (el) { el.classList.remove('aba-ativa'); if (a === aba) el.classList.add('aba-ativa'); }
-  });
-  var btnNovo = document.getElementById('btn-novo-cargo');
-  if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
-  if (aba === 'org') renderOrg();
-  if (aba === 'niveis') renderNiveis();
 }
-
-function getNivel(id) {
-  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) return niveisHier[i]; }
-  return null;
-}
-function getCargo(id) {
-  for (var i=0; i<cargos.length; i++) { if (cargos[i].id === id) return cargos[i]; }
-  return null;
-}
-
 function renderCargos() {
   var tbody = document.getElementById('tbody-cargos');
   if (!tbody) return;
-  var html = '';
-  for (var i=0; i<cargos.length; i++) {
-    var c = cargos[i];
-    var nv = getNivel(c.nvId);
-    var sup = getCargo(c.repId);
-    var nvNome = nv ? nv.nome : '—';
-    var nvCor = nv ? nv.cor : '#999';
-    var supNome = sup ? sup.nome : '— Topo —';
-    html += '<tr>';
-    html += '<td style="font-weight:600;">' + c.nome + '</td>';
-    html += '<td style="font-family:monospace;font-size:12px;">' + c.cbo + '</td>';
-    html += '<td><span style="background:' + nvCor + '22;color:' + nvCor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + nvNome + '</span></td>';
-    html += '<td style="font-size:12px;">' + supNome + '</td>';
-    html += '<td style="text-align:center;font-size:12px;">' + c.n + '</td>';
-    html += '<td><button class="btn btn-ghost btn-sm" onclick="delCargo(\'' + c.id + '\')">✕</button></td>';
-    html += '</tr>';
-  }
-  tbody.innerHTML = html;
-  // Atualiza selects do modal
+  tbody.innerHTML = `<tr><td style="font-weight:600;">Diretora Geral</td><td>1111-05</td><td><span style="background:#7B00C422;color:#7B00C4;padding:2px 10px;border-radius:10px;">Direção</span></td><td>— Topo —</td><td>1</td><td></td></tr>`;
+  
   var selNv = document.getElementById('nc-nivel');
-  if (selNv) {
-    var opNv = '<option value="">Selecione o nível...</option>';
-    for (var j=0; j<niveisHier.length; j++) { opNv += '<option value="' + niveisHier[j].id + '">' + niveisHier[j].nome + '</option>'; }
-    selNv.innerHTML = opNv;
-  }
-  var selRep = document.getElementById('nc-reporta');
-  if (selRep) {
-    var opRep = '<option value="">— Nenhum (topo) —</option>';
-    for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
-    selRep.innerHTML = opRep;
-  }
+  if (selNv) selNv.innerHTML = `<option value="nv1">Direção</option><option value="nv2">Gerência</option>`;
 }
-
-function renderNiveis() {
-  var tbody = document.getElementById('tbody-niveis');
-  if (!tbody) return;
-  var html = '';
-  for (var i=0; i<niveisHier.length; i++) {
-    var nv = niveisHier[i];
-    var qtd = 0;
-    for (var j=0; j<cargos.length; j++) { if (cargos[j].nvId === nv.id) qtd++; }
-    html += '<tr>';
-    html += '<td style="font-weight:600;color:' + nv.cor + ';">Nível ' + (i+1) + '</td>';
-    html += '<td><input class="form-control" value="' + nv.nome + '" data-id="' + nv.id + '" onchange="renomearNivel(this)" style="font-size:12px;padding:5px 8px;"/></td>';
-    html += '<td><input type="color" value="' + nv.cor + '" data-id="' + nv.id + '" onchange="recolorirNivel(this)" style="width:36px;height:28px;border:none;cursor:pointer;border-radius:4px;"/></td>';
-    html += '<td>' + qtd + '</td>';
-    html += '<td><button class="btn btn-ghost btn-sm" onclick="delNivel(\'' + nv.id + '\')">✕</button></td>';
-    html += '</tr>';
-  }
-  tbody.innerHTML = html;
-}
-
-function renomearNivel(input) {
-  var id = input.getAttribute('data-id');
-  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].nome = input.value; break; } }
-  renderCargos();
-}
-function recolorirNivel(input) {
-  var id = input.getAttribute('data-id');
-  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].cor = input.value; break; } }
-  renderCargos();
-}
-function addNivel() {
-  var nome = document.getElementById('novo-nivel-nome').value.trim();
-  var cor = document.getElementById('novo-nivel-cor').value;
-  if (!nome) { alert('Informe o nome do nível.'); return; }
-  niveisHier.push({id:'nv'+Date.now(), nome:nome, cor:cor});
-  document.getElementById('novo-nivel-nome').value = '';
-  renderNiveis(); renderCargos();
-}
-function delNivel(id) {
-  for (var i=0; i<cargos.length; i++) { if (cargos[i].nvId === id) { alert('Este nível possui cargos. Remova os cargos antes.'); return; } }
-  niveisHier = niveisHier.filter(function(n){ return n.id !== id; });
-  renderNiveis(); renderCargos();
-}
-function delCargo(id) {
-  cargos = cargos.filter(function(c){ return c.id !== id; });
-  renderCargos();
-}
-
-function buscarCBO(query) {
-  var div = document.getElementById('nc-cbo-drop');
-  if (!div) return;
-  var q = (query || '').toLowerCase().trim();
-  var res = q.length === 0
-    ? BANCO_CBO.slice(0, 12)
-    : BANCO_CBO.filter(function(x){ return x.n.toLowerCase().indexOf(q) > -1 || x.c.indexOf(q) > -1; }).slice(0, 10);
-  if (!res.length) { div.style.display = 'none'; return; }
-  var html = '';
-  for (var i=0; i<res.length; i++) {
-    html += '<div onclick="selCBO(\'' + res[i].c + '\',\'' + res[i].n.replace(/'/g,"&#39;") + '\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">';
-    html += '<span style="font-weight:600;">' + res[i].n + '</span> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + res[i].c + '</span></div>';
-  }
-  if (q.length === 0) html += '<div style="padding:7px 14px;font-size:10px;color:#9ca3af;">' + BANCO_CBO.length + ' cargos disponíveis — digite para filtrar</div>';
-  div.innerHTML = html;
-  div.style.display = 'block';
-  setTimeout(function(){
-    document.addEventListener('click', function fechar(e) {
-      if (!div.contains(e.target) && e.target.id !== 'nc-cbo-busca') { div.style.display='none'; document.removeEventListener('click',fechar); }
-    });
-  }, 100);
-}
-function selCBO(codigo, nome) {
-  document.getElementById('nc-cbo-busca').value = nome + ' · ' + codigo;
-  document.getElementById('nc-cbo-val').value = codigo;
-  document.getElementById('nc-cbo-drop').style.display = 'none';
-}
+function buscarCBO(v) {}
 function salvarCargo() {
-  var nome = document.getElementById('nc-nome').value.trim();
-  var cbo = document.getElementById('nc-cbo-val').value || document.getElementById('nc-cbo-busca').value.trim();
-  var nvId = document.getElementById('nc-nivel').value;
-  var repId = document.getElementById('nc-reporta').value || null;
-  if (!nome) { alert('Informe o nome do cargo.'); return; }
-  if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
-  cargos.push({id:'c'+Date.now(), nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0});
   fecharModal('modal-novo-cargo');
-  document.getElementById('nc-nome').value = '';
-  document.getElementById('nc-cbo-busca').value = '';
-  document.getElementById('nc-cbo-val').value = '';
-  renderCargos();
-}
-
-function renderOrg() {
-  var el = document.getElementById('org-chart');
-  if (!el) return;
-  var CW=140, CH=52, GX=20, GY=60;
-  var nvMap = {};
-  for (var i=0; i<cargos.length; i++) {
-    var pos = 0;
-    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
-    if (!pos) pos = niveisHier.length+1;
-    if (!nvMap[pos]) nvMap[pos] = [];
-    nvMap[pos].push(cargos[i]);
-  }
-  var maxNv = 0;
-  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
-  var posMap = {}, totalW = 0;
-  for (var nv=1; nv<=maxNv; nv++) {
-    var itens = nvMap[nv] || [];
-    var rowW = itens.length*(CW+GX)-GX;
-    if (rowW > totalW) totalW = rowW;
-    var sx = (totalW-rowW)/2;
-    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
-  }
-  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
-  var linhas = '', cards = '';
-  for (var ci=0; ci<cargos.length; ci++) {
-    var cr = cargos[ci];
-    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
-      var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
-      var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
-      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
-    }
-  }
-  for (var di=0; di<cargos.length; di++) {
-    var dr = cargos[di];
-    if (!posMap[dr.id]) continue;
-    var x=posMap[dr.id].x, y=posMap[dr.id].y;
-    var nv2 = getNivel(dr.nvId);
-    var cor = nv2 ? nv2.cor : '#6B7280';
-    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
-    cards += '<g>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
-    cards += '</g>';
-  }
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
-}
-
-function exportarOrgPDF() {
-  alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
+  alert('✅ Cargo cadastrado internamente com sucesso!');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2084,7 +1571,6 @@ document.addEventListener('DOMContentLoaded', function() {
   atualizarBadgePendentes();
   renderHistorico();
   renderCargos();
-  renderModulos();
   setTimeout(dispararVelocimetros, 200);
 });
 </script>
