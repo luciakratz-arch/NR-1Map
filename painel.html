@@ -185,7 +185,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .tl-geral{background:var(--roxo);}
 .tl-pulso{background:var(--verde-claro);}
 .tl-body{flex:1;}
-.tl-tipo font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.tl-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
 .tl-tipo.g{color:var(--roxo);}
 .tl-tipo.p{color:var(--verde);}
 .tl-desc{font-size:12px;color:var(--cinza-escuro);margin-bottom:3px;}
@@ -300,7 +300,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val">83%</div><div class="delta up">▲ 11% vs. anterior</div></div>
     </div>
 
-    <!-- VELOCÍMETROS IBP — Balança Psicodinâmica (Dejours) -->
+    <!-- VELOCÍMETROS IBP -->
     <div style="margin-bottom:16px;">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);margin-bottom:10px;">Velocímetro IBP — Balança Psicodinâmica (Dejours) × Macro-categorias</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
@@ -333,11 +333,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
         </div>
       </div>
-      <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--cinza-medio);">
-        <span>🔴 Sofrimento Patogênico (−5 a −1,5)</span>
-        <span>🟡 Defesa Oculta (−1,4 a +1,4)</span>
-        <span>🟢 Terreno Fértil (+1,5 a +5)</span>
-      </div>
     </div>
 
     <div class="grid-3c">
@@ -348,16 +343,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Realização profissional</span><span style="font-weight:600;color:var(--verde);">65</span></div><div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div></div>
           <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Reconhecimento</span><span style="font-weight:600;color:var(--verde);">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:58%"></div></div></div>
           <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Esgotamento / Sobrecarga</span><span style="font-weight:600;color:var(--laranja);">72</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--laranja)"></div></div></div>
-          <div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Insegurança / Medo</span><span style="font-weight:600;color:var(--laranja);">61</span></div><div class="progress-bar"><div class="progress-fill" style="width:61%;background:var(--laranja)"></div></div></div>
           <button class="btn btn-roxo" style="width:100%;" onclick="sv('pulso')">📡 Disparar Pesquisa Pulso</button>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="title">Histórico recente</div><a href="#" style="font-size:11px;color:var(--verde);text-decoration:none;" onclick="sv('historico')">Ver tudo →</a></div>
         <div class="card-body" style="padding:8px 16px;">
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores responderam</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><div class="tl-data">Jun 2025</div></div></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Reconhecimento</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Espaço de fala</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div></div>
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores responderam</div><span class="score-tag score-alto">Sofrimento 72</span><div class="tl-data">Jun 2025</div></div></div>
         </div>
       </div>
     </div>
@@ -366,899 +358,188 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== COLABORADORES ===== -->
 <div id="view-colaboradores" class="view">
-  <div class="topbar">
-    <div class="topbar-title">Colaboradores</div>
-    <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" onclick="sv('autocadastro')">🔗 Link autocadastro</button>
-      <button class="btn btn-ghost btn-sm">⬇ Modelo Excel</button>
-      <button class="btn btn-primary btn-sm" onclick="sv('upload')">⬆ Importar planilha</button>
-      <button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-novo-colab')">+ Novo colaborador</button>
-    </div>
-  </div>
+  <div class="topbar"><div class="topbar-title">Colaboradores</div></div>
   <div class="content">
-    <div class="filter-bar">
-      <input type="text" placeholder="🔍 Buscar nome ou contato..." oninput="filtrarTabela(this.value)"/>
-      <select onchange="filtrarStatus(this.value)">
-        <option value="">Todos os status</option>
-        <option value="ativo">Ativos</option>
-        <option value="inativo">Inativos</option>
-      </select>
-      <select>
-        <option value="">Todos os cargos</option>
-        <option>Psicólogo · 2515-10</option>
-        <option>Téc. Enfermagem · 3222-05</option>
-        <option>Médico · 2251-05</option>
-        <option>Analista RH · 2524-05</option>
-        <option>Ass. Administrativo · 4110-10</option>
-      </select>
-      <select>
-        <option value="">Todos os departamentos</option>
-        <option>Clínico</option><option>UTI</option><option>Emergência</option><option>RH</option><option>Recepção</option>
-      </select>
-      <select>
-        <option value="">Todas as unidades</option>
-        <option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option>
-      </select>
-    </div>
     <div class="card">
-      <div class="card-header">
-        <div><div class="title">Lista de colaboradores</div><div class="subtitle">14 ativos · 2 inativos</div></div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost btn-sm" onclick="ordenar('nome')">A→Z Nome</button>
-          <button class="btn btn-ghost btn-sm" onclick="ordenar('admissao')">↕ Admissão</button>
-        </div>
-      </div>
       <div class="table-wrap">
-        <table id="tbl-colab">
-          <thead>
-            <tr>
-              <th onclick="ordenar('nome')">Nome <span class="sort">↕</span></th>
-              <th>WhatsApp / E-mail</th>
-              <th onclick="ordenar('cargo')">Cargo (CBO) <span class="sort">↕</span></th>
-              <th>Departamento</th>
-              <th>Unidade</th>
-              <th onclick="ordenar('admissao')">Admissão <span class="sort">↕</span></th>
-              <th>Demissão</th>
-              <th>Status</th>
-              <th>Link pesquisa</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-colab">
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0001</td><td>Psicólogo · 2515-10</td><td>Clínico</td><td>Goiânia</td><td>03/01/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="Ana Costa" data-status="ativo"><td>Ana Costa</td><td>11 9 9999-0002</td><td>Téc. Enf. · 3222-05</td><td>UTI</td><td>Goiânia</td><td>15/03/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0003</td><td>Médico · 2251-05</td><td>Clínico</td><td>Brasília</td><td>01/06/2021</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="Carlos M." data-status="ativo"><td>Carlos M.</td><td>carlos@clinica.com</td><td>Analista RH · 2524-05</td><td>RH</td><td>Goiânia</td><td>10/09/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0005</td><td>Téc. Enf. · 3222-05</td><td>Emergência</td><td>Brasília</td><td>20/02/2024</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0006</td><td>Ass. Adm. · 4110-10</td><td>Recepção</td><td>Belo Horizonte</td><td>05/07/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-erro"><span class="dot"></span>Erro envio</span></td><td><button class="btn btn-danger btn-sm">Corrigir</button></td></tr>
-            <tr data-nome="Pedro Lima" data-status="inativo" class="inativo"><td>Pedro Lima</td><td>pedro@clinica.com</td><td>Médico · 2251-05</td><td>Clínico</td><td>Goiânia</td><td>01/01/2020</td><td>30/04/2025</td><td><span class="bdg-s s-inativo"><span class="dot"></span>Inativo</span></td><td>—</td><td><button class="btn btn-ghost btn-sm">Reativar</button></td></tr>
-          </tbody>
+        <table>
+          <thead><tr><th>Nome</th><th>WhatsApp / E-mail</th><th>Cargo (CBO)</th><th>Status</th></tr></thead>
+          <tbody><tr><td>Dra. Lucia Kratz</td><td>lucia@clinica.com</td><td>Psicólogo Clínico · 2515-10</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td></tr></tbody>
         </table>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== AUTOCADASTRO ===== -->
-<div id="view-autocadastro" class="view">
-  <div class="topbar"><div class="topbar-title">Link de autocadastro</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
-  <div class="content" style="max-width:620px;">
-    <div class="card">
-      <div class="card-header"><div class="title">Como funciona o autocadastro</div></div>
-      <div class="card-body">
-        <p style="font-size:12px;color:var(--cinza-medio);line-height:1.6;margin-bottom:16px;">Você envia o link abaixo para o colaborador. Ele preenche seus dados (WhatsApp/e-mail, cargo e departamento) e o sistema o cadastra automaticamente. O RH pré-cadastra os cargos e CBO disponíveis — o colaborador só seleciona.</p>
-        <div class="alerta"><span style="font-size:14px;">🔒</span><p>Nenhum dado pessoal é vinculado às respostas das pesquisas. O autocadastro serve apenas para disparar o link correto para o cargo certo.</p></div>
-        <div class="form-group"><div class="form-label">Unidade / Filial para este link</div>
-          <select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select>
-        </div>
-        <div class="link-box">
-          <span>🔗</span>
-          <span class="link-url">https://nr1map.com.br/cadastro/clinicavida/goiania/abc123</span>
-          <button class="btn btn-ghost btn-sm" onclick="alert('Link copiado!')">Copiar</button>
-          <button class="btn btn-ghost btn-sm">Compartilhar WhatsApp</button>
-        </div>
-        <div style="margin-top:20px;">
-          <div class="form-label" style="margin-bottom:8px;">Cargos/CBO pré-cadastrados para seleção</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-            <span class="filter-tag">Psicólogo · 2515-10 <span class="x">×</span></span>
-            <span class="filter-tag">Téc. Enfermagem · 3222-05 <span class="x">×</span></span>
-            <span class="filter-tag">Médico · 2251-05 <span class="x">×</span></span>
-            <span class="filter-tag">Analista RH · 2524-05 <span class="x">×</span></span>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <input class="form-control" placeholder="Buscar cargo na base CBO..." style="flex:1;"/>
-            <button class="btn btn-primary btn-sm">+ Adicionar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== UPLOAD ===== -->
-<div id="view-upload" class="view">
-  <div class="topbar"><div class="topbar-title">Importar colaboradores</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
-  <div class="content" style="max-width:620px;">
-    <div class="card" style="margin-bottom:14px;">
-      <div class="card-header"><div class="title">1. Baixe o modelo</div></div>
-      <div class="card-body">
-        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Preencha e salve como .xlsx ou .csv. Colunas obrigatórias marcadas com *</p>
-        <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:12px;"><strong style="color:var(--preto);">Colunas:</strong> nome · whatsapp_ou_email* · cargo_cbo* · departamento · unidade · data_admissao · data_demissao</div>
-        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm">⬇ Excel (.xlsx)</button><button class="btn btn-ghost btn-sm">⬇ CSV</button></div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:14px;">
-      <div class="card-header"><div class="title">2. Envie a planilha</div></div>
-      <div class="card-body">
-        <div class="upload-zone" onclick="document.getElementById('fi').click()">
-          <div style="font-size:26px;margin-bottom:6px;">📂</div>
-          <p><strong>Clique para selecionar</strong> ou arraste aqui</p>
-          <p>.xlsx ou .csv · máx 5 MB</p>
-          <input type="file" id="fi" style="display:none;" accept=".xlsx,.csv" onchange="handleUpload(this)"/>
-        </div>
-      </div>
-    </div>
-    <div class="card" id="uploadPreview" style="display:none;">
-      <div class="card-header"><div class="title">3. Validação</div></div>
-      <div class="card-body">
-        <div style="display:flex;gap:12px;margin-bottom:14px;">
-          <div style="flex:1;background:var(--verde-xp);border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--verde);">11</div><div style="font-size:10px;color:var(--verde);margin-top:2px;">Válidos</div></div>
-          <div style="flex:1;background:#FFF8E6;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#92610A;">2</div><div style="font-size:10px;color:#92610A;margin-top:2px;">Alertas</div></div>
-          <div style="flex:1;background:#FEEFEF;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#C53030;">1</div><div style="font-size:10px;color:#C53030;margin-top:2px;">Erros</div></div>
-        </div>
-        <div style="font-size:11px;color:#C53030;background:#FEEFEF;border-radius:6px;padding:8px 10px;margin-bottom:8px;">⚠ Linha 4: WhatsApp/e-mail em branco.</div>
-        <div style="font-size:11px;color:#92610A;background:#FFF8E6;border-radius:6px;padding:8px 10px;margin-bottom:14px;">ℹ Linhas 7 e 9: cargo ajustado automaticamente pela base CBO. Confirme.</div>
-        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('uploadPreview').style.display='none'">Cancelar</button><button class="btn btn-primary btn-sm" onclick="confirmUpload()">✓ Confirmar 11 colaboradores</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PLANEJAMENTO ===== -->
-<div id="view-planejamento" class="view">
-  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
-  <div class="content">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><div class="title">Agenda — Jul/Ago 2025</div></div>
-        <div class="card-body" style="padding:8px 16px;">
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">07</div><div class="mes">Jul</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Esgotamento</h4><p>Sugerida pela IA · WhatsApp · 14 colaboradores</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">14</div><div class="mes">Jul</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Reconhecimento</h4><p>Manual · E-mail · 14 colaboradores</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">01</div><div class="mes">Ago</div></div>
-            <div class="agenda-info"><h4>Diagnóstico Geral — Ciclo 2</h4><p>Programado · WhatsApp + E-mail · todas as unidades</p></div>
-            <span class="agenda-tipo tipo-geral">Geral</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">18</div><div class="mes">Ago</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Relações interpessoais</h4><p>Manual · WhatsApp · unidade Brasília</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="title">Regras de disparo automático</div></div>
-        <div class="card-body">
-          <div style="margin-bottom:14px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Pesquisa Pulso semanal automática</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-            <div style="font-size:11px;color:var(--cinza-medio);">IA escolhe o tema com pior índice semana a semana</div>
-          </div>
-          <div style="margin-bottom:14px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Lembrete automático (48h sem resposta)</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-            <div style="font-size:11px;color:var(--cinza-medio);">Reenvio automático para quem não respondeu</div>
-          </div>
-          <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Diagnóstico Geral anual obrigatório</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-            <div style="font-size:11px;color:var(--cinza-medio);">Alerta 30 dias antes do vencimento do ciclo anual</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== METODOLOGIA CIENTÍFICA ===== -->
-<div id="view-metodologia" class="view">
-  <div class="topbar">
-    <div class="topbar-title">🔬 Metodologia Científica</div>
-    <div class="topbar-actions">
-      <span style="font-size:11px;color:var(--cinza-medio);background:var(--cinza-claro);padding:4px 12px;border-radius:20px;">Dra. Lucia Kratz · CRP 09/20590</span>
-    </div>
-  </div>
-  <div class="content" style="max-width:900px;">
-
-    <!-- SEÇÃO 1: INFOGRÁFICO INTEGRADO -->
-    <div style="margin-bottom:28px;">
-      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">1. Fundação Teórica Integrada</div>
-      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Maslow · Herzberg · Dejours — as três correntes que sustentam as 101 perguntas</div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
-
-        <!-- PIRÂMIDE -->
-        <div>
-          <!-- TOPO DA PIRÂMIDE -->
-          <div style="background:linear-gradient(135deg,#7B00C4,#9B30E0);border-radius:12px 12px 0 0;padding:18px 20px;color:#fff;margin-bottom:2px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES MOTIVACIONAIS · Herzberg & Dejours</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Propósito</div>
-                <div style="font-size:10px;opacity:.8;">Significado do trabalho</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Identidade</div>
-                <div style="font-size:10px;opacity:.8;">Autorrealização profissional</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Autonomia</div>
-                <div style="font-size:10px;opacity:.8;">Espaço de criação (Dejours)</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Reconhecimento</div>
-                <div style="font-size:10px;opacity:.8;">Julgamento de Utilidade e Beleza</div>
-              </div>
-            </div>
-            <div style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;">
-              <div style="font-size:10px;font-weight:600;margin-bottom:2px;">Relacionamentos Sociais</div>
-              <div style="font-size:10px;opacity:.8;">Espaço de Fala · Cultura · Proteção contra Assédio</div>
-            </div>
-          </div>
-
-          <!-- SEPARADOR IBP -->
-          <div style="background:#1F2937;padding:8px 20px;display:flex;align-items:center;gap:10px;">
-            <div style="height:1px;flex:1;background:linear-gradient(90deg,#ef444400,#ef4444,#10b98100);"></div>
-            <div style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.1em;white-space:nowrap;">IBP · ÍNDICE DE BALANÇA PSICODINÂMICA · −5 ←→ +5</div>
-            <div style="height:1px;flex:1;background:linear-gradient(90deg,#10b98100,#10b981,#ef444400);"></div>
-          </div>
-
-          <!-- BASE DA PIRÂMIDE -->
-          <div style="background:linear-gradient(135deg,#0A6E4F,#12A073);border-radius:0 0 12px 12px;padding:18px 20px;color:#fff;margin-top:2px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES HIGIÊNICOS · Maslow & Herzberg</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Infraestrutura</div>
-                <div style="font-size:10px;opacity:.8;">Ergonomia · Sistemas digitais</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Proteção Física</div>
-                <div style="font-size:10px;opacity:.8;">EPI · NR-1 · Direito de Recusa</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Ritmo e Pausas</div>
-                <div style="font-size:10px;opacity:.8;">Cadência · Limitações biológicas</div>
-              </div>
-              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
-                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Estabilidade</div>
-                <div style="font-size:10px;opacity:.8;">Clareza de papéis · Segurança laboral</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- EXPLICAÇÕES LATERAIS -->
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <!-- Explicação topo -->
-          <div style="background:var(--roxo-xp);border-left:3px solid var(--roxo);border-radius:0 8px 8px 0;padding:14px 16px;">
-            <div style="font-size:12px;font-weight:700;color:var(--roxo);margin-bottom:6px;">Zona de Terreno Fértil (+1,5 a +5,0)</div>
-            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aqui opera a transformação do sofrimento em <b>Prazer e Emancipação</b> através do Reconhecimento (Julgamento de Estética e Utilidade — Dejours) e do Espaço de Fala. O colaborador encontra sentido no trabalho e mobiliza sua subjetividade de forma criativa.</div>
-          </div>
-
-          <!-- Zona IBP -->
-          <div style="background:#F3F4F6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:14px 16px;">
-            <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Zona de Defesa Oculta (−1,4 a +1,4)</div>
-            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mecanismos de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
-          </div>
-
-          <!-- Explicação base -->
-          <div style="background:var(--verde-xp);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:14px 16px;">
-            <div style="font-size:12px;font-weight:700;color:var(--verde);margin-bottom:6px;">Zona de Sofrimento Patogênico (−5,0 a −1,5)</div>
-            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Se esta base falhar, o sofrimento se torna <b>patogênico e há risco imediato de adoecimento com nexo causal (NR-1)</b>. Ruptura do equilíbrio psíquico. Exige intervenção obrigatória conforme GRO e registro no Plano de Ação 5W2H.</div>
-          </div>
-
-          <!-- Fórmula IBP -->
-          <div style="background:var(--preto);border-radius:8px;padding:14px 16px;">
-            <div style="font-size:10px;font-weight:700;color:var(--verde-claro);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Fórmula de Transposição</div>
-            <div style="font-family:monospace;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;">IBP = (Média<sub style="font-size:11px;">Likert</sub> − 3) × 2,5</div>
-            <div style="font-size:11px;color:#6B7370;">Escala Likert 1–5 → Balança Psicodinâmica −5 a +5</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SEPARADOR -->
-    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
-
-    <!-- SEÇÃO 2: ENGENHARIA DAS 101 QUESTÕES -->
-    <div style="margin-bottom:28px;">
-      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">2. A Engenharia das 101 Questões Regulatórias</div>
-      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Taxonomia pericial do banco de dados · Autoria: Dra. Lucia Kratz (CRP 09/20590)</div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-
-        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
-          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Arquitetura da Matriz Mestre</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
-              <div style="font-size:12px;font-weight:600;">🧠 Módulo 1 — Fisiológico</div>
-              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">27 perguntas</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
-              <div style="font-size:12px;font-weight:600;">🛡️ Módulo 2 — Segurança</div>
-              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">29 perguntas</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
-              <div style="font-size:12px;font-weight:600;">🤝 Módulo 3 — Relacionamentos</div>
-              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">25 perguntas</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
-              <div style="font-size:12px;font-weight:600;">🚀 Módulo 4 — Motivacional</div>
-              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">20 perguntas</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 10px;background:var(--preto);border-radius:6px;">
-              <div style="font-size:13px;font-weight:700;color:#fff;">TOTAL REGULATÓRIO</div>
-              <span style="font-size:13px;font-weight:800;color:var(--verde-claro);">101 perguntas</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
-          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">⚙️ Trava Algorítmica — Regra da Validação Ímpar</div>
-          <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O sistema possui uma <b style="color:var(--preto);">trava de salvamento algorítmica</b> que impede o agendamento de questionários com número <b style="color:var(--laranja);">par de perguntas por subcategoria ativa</b> (mínimo 3).</div>
-          <div style="background:var(--laranja-xp);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
-            <div style="font-size:11px;font-weight:700;color:var(--laranja);margin-bottom:4px;">Por que isso importa tecnicamente?</div>
-            <div style="font-size:11px;color:var(--preto);line-height:1.6;">Em escalas Likert de 5 pontos com número <b>par</b> de itens, os respondentes tendem a se neutralizar no ponto médio (3), gerando diagnósticos "mornos" sem vetor estatístico claro. A trava ímpar <b>força a balança a apontar</b> inequivocamente para o lado do Sofrimento ou do Prazer.</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:8px 10px;text-align:center;">
-              <div style="font-size:20px;font-weight:800;color:#DC2626;">✗ PAR</div>
-              <div style="font-size:10px;color:#DC2626;">2, 4, 6 perguntas</div>
-              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Bloqueado — diagnóstico inválido</div>
-            </div>
-            <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 10px;text-align:center;">
-              <div style="font-size:20px;font-weight:800;color:#16A34A;">✓ ÍMPAR</div>
-              <div style="font-size:10px;color:#16A34A;">3, 5, 7+ perguntas</div>
-              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Aprovado — vetor claro</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Regime de embaralhamento -->
-      <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:10px;padding:18px 20px;display:flex;gap:20px;align-items:center;">
-        <div style="font-size:32px;flex-shrink:0;">🎲</div>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Regime de Embaralhamento Total</div>
-          <div style="font-size:12px;color:#8A9590;line-height:1.6;">As 101 perguntas entram num <b style="color:var(--verde-claro);">pool único</b> e são sorteadas aleatoriamente — sem respeitar módulo ou subcategoria na ordem de exibição ao colaborador. Isso <b style="color:var(--verde-claro);">elimina o viés de resposta por contexto</b>: o respondente não percebe que está sendo avaliado sobre liderança e não "prepara" as respostas. O diagnóstico capta o estado emocional real, não o desejado.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SEPARADOR -->
-    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
-
-    <!-- SEÇÃO 3: DUAS VELOCIDADES DE COLETA -->
-    <div style="margin-bottom:28px;">
-      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">3. Agendamento e Coleta em Duas Velocidades</div>
-      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:20px;">O gestor opera a ferramenta em 3 passos, com dois motores de escuta independentes e simultâneos</div>
-
-      <!-- STEPPER -->
-      <div style="display:flex;flex-direction:column;gap:0;">
-
-        <!-- Passo 1 -->
-        <div style="display:flex;gap:16px;">
-          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">1</div>
-            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
-          </div>
-          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:12px;flex:1;">
-            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Setup do Projeto</div>
-            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;">O gestor altera ou desativa subcategorias inteiras por CBO ou setor, edita os textos das perguntas para moldar a pesquisa à cultura interna da empresa (override por cliente — sem afetar o banco global), e valida a trava ímpar antes de prosseguir. A IA do sistema sugere as subcategorias com pior histórico de IBP como prioridade inicial.</div>
-          </div>
-        </div>
-
-        <!-- Passo 2 -->
-        <div style="display:flex;gap:16px;">
-          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">2</div>
-            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
-          </div>
-          <div style="flex:1;margin-bottom:12px;">
-            <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:10px;">
-              <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Definição do Ciclo — Dois Motores Simultâneos</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div style="border:1.5px solid var(--roxo);border-radius:8px;padding:14px;background:var(--roxo-xp);">
-                  <div style="font-size:10px;font-weight:800;color:var(--roxo);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">⚡ Velocidade 1</div>
-                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Motor Pesquisa Pulso</div>
-                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Disparos automáticos e rotativos via WhatsApp com token efêmero. Frequência e quantidade de perguntas configuráveis pelo gestor. Sistema prioriza as subcategorias com piores IBPs.</div>
-                  <div style="background:var(--roxo);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 48h</div>
-                </div>
-                <div style="border:1.5px solid var(--verde);border-radius:8px;padding:14px;background:var(--verde-xp);">
-                  <div style="font-size:10px;font-weight:800;color:var(--verde);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">🏛 Velocidade 2</div>
-                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Pesquisa Robusta</div>
-                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Questionário consolidado e profundo para auditoria do PGR. Ciclos bimestral, semestral ou anual. O sistema seleciona automaticamente o ciclo com base nos resultados acumulados do IBP.</div>
-                  <div style="background:var(--verde);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 7 dias úteis</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Passo 3 -->
-        <div style="display:flex;gap:16px;">
-          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">3</div>
-          </div>
-          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;flex:1;">
-            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O colaborador responde de forma <b style="color:var(--preto);">100% anônima via Magic Link/OTP</b> enviado ao WhatsApp — sem cadastro de senhas. O RH nunca tem acesso ao ID do respondente. A trava de anonimato por CBO exige mínimo de 3 respondentes por agrupamento antes de exibir dados segmentados.</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
-                <div style="font-size:20px;margin-bottom:4px;">📱</div>
-                <div style="font-size:11px;font-weight:600;color:var(--preto);">Magic Link OTP</div>
-                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Sem senhas · Sem cadastro</div>
-              </div>
-              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
-                <div style="font-size:20px;margin-bottom:4px;">🎲</div>
-                <div style="font-size:11px;font-weight:600;color:var(--preto);">Likert → IBP</div>
-                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">(Média − 3) × 2,5</div>
-              </div>
-              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
-                <div style="font-size:20px;margin-bottom:4px;">🛡️</div>
-                <div style="font-size:11px;font-weight:600;color:var(--preto);">Cascata de Anonimato</div>
-                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">CBO → Setor → Empresa</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- RODAPÉ DE AUTORIDADE -->
-    <div style="background:var(--preto);border-radius:10px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;">Dra. Lucia Kratz</div>
-        <div style="font-size:11px;color:#8A9590;">Psicóloga e Administradora · CRP 09/20590 · PhD</div>
-        <div style="font-size:11px;color:var(--verde-claro);margin-top:4px;">Criadora do Índice de Balança Psicodinâmica (IBP) e do NR-1 Map</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Psicodinâmica do Trabalho · Dejours</span>
-        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Fatores Higiênicos · Herzberg</span>
-        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Hierarquia de Necessidades · Maslow</span>
-        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Conformidade Portaria MTE 1.419/2024</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ===== MÓDULOS ===== -->
-<div id="view-modulos" class="view">
-  <div class="topbar">
-    <div class="topbar-title">🧩 Módulos e perguntas</div>
-    <div class="topbar-actions">
-      <span id="lbl-modo-ed" style="font-size:11px;padding:4px 10px;border-radius:20px;background:var(--cinza-claro);color:var(--cinza-medio);margin-right:8px;">Modo: Global (Admin)</span>
-      <button class="btn btn-ghost btn-sm" id="btn-modo-ed" onclick="alternarModoEd()">Edição do Cliente</button>
-      <button class="btn btn-primary btn-sm" id="btn-salvar-mod" onclick="salvarModulos()" disabled>💾 Salvar</button>
-    </div>
-  </div>
-  <div class="content">
-    <div class="alerta" style="margin-bottom:14px;">
-      <span style="font-size:14px;">ℹ</span>
-      <p>Selecione as perguntas que serão aplicadas. Mínimo 3 por subcategoria, sempre ímpar. Clique numa subcategoria para expandir.</p>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
-      <button class="btn-aba aba-ativa" id="aba-M1" onclick="abrirAba('M1')">🧠 Fisiológico</button>
-      <button class="btn-aba" id="aba-M2" onclick="abrirAba('M2')">🛡️ Segurança</button>
-      <button class="btn-aba" id="aba-M3" onclick="abrirAba('M3')">🤝 Relacionamentos</button>
-      <button class="btn-aba" id="aba-M4" onclick="abrirAba('M4')">🚀 Motivacional</button>
-    </div>
-    <div id="container-modulos"></div>
-  </div>
-</div>
-
-<!-- ===== DIAGNÓSTICO GERAL ===== -->
-<div id="view-diagnostico" class="view">
-  <div class="topbar"><div class="topbar-title">Diagnóstico Geral</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button></div></div>
-  <div class="content" style="max-width:620px;">
-    <div class="card">
-      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Enviado para todos os colaboradores ativos</div></div>
-      <div class="card-body">
-        <div class="alerta"><span>ℹ</span><p><strong>14 colaboradores ativos</strong> receberão o link. Respostas 100% anônimas — tabuladas por cargo CBO.</p></div>
-        <div class="form-row" style="margin-bottom:12px;">
-          <div class="form-group"><div class="form-label">Prazo para resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option><option>30 dias</option></select></div>
-          <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
-        </div>
-        <div class="form-group"><div class="form-label">Canal de envio</div>
-          <div class="disparo-opts">
-            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
-            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
-          </div>
-        </div>
-        <button class="btn btn-primary" style="width:100%;" onclick="alert('🚀 Diagnóstico Geral disparado!\n14 colaboradores receberão o link agora.')">🚀 Disparar Diagnóstico Geral — 14 colaboradores</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PULSO ===== -->
-<div id="view-pulso" class="view">
-  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">+ Nova Pesquisa Pulso</button></div></div>
-  <div class="content">
-    <div class="ia-box" style="margin-bottom:16px;"><div class="ia-lbl">🤖 Sugestão da IA</div><div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div><div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div><div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">Aceitar sugestão →</button></div></div>
-    <div class="card"><div class="card-header"><div class="title">Histórico de Pulsos</div></div>
-      <div class="card-body" style="padding:8px 16px;">
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Reconhecimento</div><div class="tl-desc">10 de 14 responderam · 83% adesão · ↑ +4 pts</div><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Reconhecimento')">Ver laudo</button></div>
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Espaço de fala</div><div class="tl-desc">9 de 14 responderam · 75% adesão · Estável</div><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Espaço de Fala')">Ver laudo</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== NOVA PULSO ===== -->
-<div id="view-nova-pulso" class="view">
-  <div class="topbar"><div class="topbar-title">Nova Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('pulso')">← Voltar</button></div></div>
-  <div class="content" style="max-width:620px;">
-    <div class="card">
-      <div class="card-body">
-        <div class="ia-box"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
-        <div class="tabs">
-          <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
-          <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
-          <div class="tab" onclick="swTab(this,'t-pers')">Pergunta própria</div>
-        </div>
-        <div id="t-sug" class="view active">
-          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 perguntas geradas sobre <strong>Esgotamento / Sobrecarga</strong>:</p>
-          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Nas últimas semanas, as demandas de trabalho superaram minha capacidade?"</div>
-          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Consigo descansar adequadamente fora do horário de trabalho?"</div>
-          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
-        </div>
-        <div id="t-esc" class="view">
-          <div class="form-group"><div class="form-label">Indicador para a Pulso</div><select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select></div>
-        </div>
-        <div id="t-pers" class="view">
-          <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
-          <div class="form-group"><div class="form-label">Segunda pergunta (opcional)</div><textarea class="form-control" placeholder="Pergunta adicional..."></textarea></div>
-        </div>
-        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--linha);">
-          <div class="form-row" style="margin-bottom:12px;">
-            <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
-            <div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
-          </div>
-          <button class="btn btn-roxo" style="width:100%;" onclick="alert('📡 Pesquisa Pulso disparada!\n14 colaboradores receberão o link agora.')">📡 Disparar Pesquisa Pulso</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== HISTÓRICO ===== -->
-<div id="view-historico" class="view">
-  <div class="topbar"><div class="topbar-title">Histórico completo</div><div class="topbar-actions">
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as pesquisas</option><option>Diagnóstico Geral</option><option>Pesquisa Pulso</option></select>
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
-    <button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">📄 Relatório anual</button>
-  </div></div>
-  <div class="content">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><div class="title">Linha do tempo</div></div>
-        <div class="card-body" style="padding:8px 16px;">
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Pesquisa Pulso - Maio 2025')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Pesquisa Pulso - Abril 2025')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="title">Evolução dos indicadores</div></div>
-        <div class="card-body">
-          <div style="margin-bottom:16px;"><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Sofrimento geral</div>
-            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.5;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">64</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:38px;opacity:.65;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">67</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.75;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">63</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:56px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">72</div></div>
-            </div>
-          </div>
-          <div><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Prazer geral</div>
-            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:35px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">62</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:37px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">66</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:40px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">70</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:33px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">58</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== RELATÓRIOS ===== -->
-<div id="view-relatorios" class="view">
-  <div class="topbar"><div class="topbar-title">Relatórios</div><div class="topbar-actions">
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>2025</option><option>2024</option></select>
-  </div></div>
-  <div class="content">
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Laudo Técnico Psicossocial')">📄 Visualizar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Laudo_Tecnico_Psicossocial_Jun_2025')">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Mapa de Risco Psicossocial')">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Mapa_de_Risco_Psicossocial_Jun_2025')">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Plano_de_Acao_5W2H_Jun_2025')">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Relatório Comparativo Anual')">📊 Visualizar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Relatorio_Comparativo_Anual_2025')">⬇ PDF</button></div></div></div>
     </div>
   </div>
 </div>
 
 <!-- ===== CARGOS / ORGANOGRAMA ===== -->
 <div id="view-cargos" class="view">
-  <div class="topbar">
-    <div class="topbar-title">🏗 Cargos e Organograma</div>
-    <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" onclick="exportarOrgPDF()">⬇ Exportar PDF</button>
-      <button class="btn btn-primary btn-sm" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button>
+  <div class="topbar"><div class="topbar-title">🏗 Cargos e Organograma</div><div class="topbar-actions"><button class="btn btn-primary btn-sm" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button></div></div>
+  <div class="content">
+    <div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Painel de gerenciamento de hierarquias corporativas e amarração do CBO.</p></div></div>
+  </div>
+</div>
+
+<!-- ===== PLANEJAMENTO ===== -->
+<div id="view-planejamento" class="view">
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div></div>
+  <div class="content">
+    <div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Agendamento de ciclos anuais GRO e pesquisas pulso.</p></div></div>
+  </div>
+</div>
+
+<!-- ===== METODOLOGIA CIENTÍFICA ===== -->
+<div id="view-metodologia" class="view">
+  <div class="topbar"><div class="topbar-title">🔬 Metodologia Científica</div></div>
+  <div class="content">
+    <div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Fundamentação científica estruturada em Christophe Dejours, Herzberg e Maslow.</p></div></div>
+  </div>
+</div>
+
+<!-- ===== MÓDULOS ===== -->
+<div id="view-modulos" class="view">
+  <div class="topbar"><div class="topbar-title">🧩 Módulos e perguntas</div></div>
+  <div class="content">
+    <div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Configuração das 101 perguntas periciais regulatórias com trava ímpar.</p></div></div>
+  </div>
+</div>
+
+<!-- ===== DIAGNÓSTICO GERAL ===== -->
+<div id="view-diagnostico" class="view">
+  <div class="topbar"><div class="topbar-title">Diagnóstico Geral</div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Configurar disparo</div></div>
+      <div class="card-body">
+        <button class="btn btn-primary" style="width:100%;" onclick="alert('🚀 Diagnóstico Geral disparado com sucesso!')">🚀 Disparar Diagnóstico Geral — 14 colaboradores</button>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- ===== PESQUISA PULSO ===== -->
+<div id="view-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div></div>
   <div class="content">
-    <div style="display:flex;gap:6px;margin-bottom:16px;">
-      <button class="btn-aba aba-ativa" id="aba-cl" onclick="swCargos('lista')">📋 Lista de Cargos</button>
-      <button class="btn-aba" id="aba-co" onclick="swCargos('org')">🌳 Organograma</button>
-      <button class="btn-aba" id="aba-cn" onclick="swCargos('niveis')">🎨 Níveis Hierárquicos</button>
+    <div class="ia-box">
+      <div class="ia-lbl">🤖 SUGESTÃO DA IA</div>
+      <div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div>
+      <div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div>
+      <div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="alert('Sugestão aceita! Configurando painel de disparo...')">Aceitar sugestão →</button></div>
     </div>
-    <div id="pc-lista">
-      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</p>
-      <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
-    </div>
-    <div id="pc-org" style="display:none;">
-      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
-    </div>
-    <div id="pc-niveis" style="display:none;">
-      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
-      <div class="card">
-        <div class="table-wrap"><table><thead><tr><th>Posição</th><th>Nome do Nível</th><th>Cor</th><th>Cargos</th><th></th></tr></thead><tbody id="tbody-niveis"></tbody></table></div>
-        <div style="padding:12px 16px;border-top:1px solid var(--linha);display:flex;gap:10px;align-items:center;">
-          <input class="form-control" id="novo-nivel-nome" placeholder="Nome do nível (ex: Corpo Clínico)" style="flex:1;"/>
-          <input type="color" id="novo-nivel-cor" value="#7B00C4" style="width:40px;height:36px;border:1px solid var(--linha);border-radius:6px;cursor:pointer;padding:2px;"/>
-          <button class="btn btn-primary btn-sm" onclick="addNivel()">+ Adicionar</button>
+    
+    <div class="card">
+      <div class="card-header"><div class="title">Histórico de Pulsos</div></div>
+      <div class="card-body" style="padding:8px 16px;">
+        <div class="timeline-item" style="align-items: center;">
+          <div class="tl-dot tl-pulso"></div>
+          <div class="tl-body">
+            <div class="tl-tipo p" style="font-weight:700; color:var(--verde);">PULSO — RECONHECIMENTO</div>
+            <div class="tl-desc" style="font-size:12px; margin-top:2px;">10 de 14 responderam · 83% adesão · ↑ +4 pts</div>
+            <div class="tl-data" style="font-size:10px; color:var(--cinza-medio);">Mai 2025</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Reconhecimento (Maio/2025)')">Ver laudo</button>
+        </div>
+        
+        <div class="timeline-item" style="align-items: center;">
+          <div class="tl-dot tl-pulso"></div>
+          <div class="tl-body">
+            <div class="tl-tipo p" style="font-weight:700; color:var(--verde);">PULSO — ESPAÇO DE FALA</div>
+            <div class="tl-desc" style="font-size:12px; margin-top:2px;">9 de 14 responderam · 75% adesão · Estável</div>
+            <div class="tl-data" style="font-size:10px; color:var(--cinza-medio);">Abr 2025</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Espaço de Fala (Abril/2025)')">Ver laudo</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== CO-BRANDING (LOGO DA EMPRESA) ===== -->
+<!-- ===== CO-BRANDING ===== -->
 <div id="view-cobranding" class="view">
-  <div class="topbar"><div class="topbar-title">🎨 Co-Branding — Logo da Empresa</div></div>
-  <div class="content" style="max-width:640px;">
-    <div class="card">
-      <div class="card-header"><div class="title">Preview do cabeçalho co-branded</div><div class="subtitle">Como vai aparecer nos 4 documentos PDF do GRO (Inventário, Avaliação, Plano de Ação, Acompanhamento)</div></div>
-      <div class="card-body">
-        <div class="cobranding-preview">
-          <div class="logo-box" style="cursor:default;">
-            <div style="text-align:center;" id="logo-parceiro-herdado-preview">
-              <div style="font-size:18px;">🤝</div>
-              <div style="font-size:10px;color:var(--cinza-medio);">Logo do Parceiro<br/>(herdada)</div>
+  <div class="topbar"><div class="topbar-title">🎨 Co-Branding (Logo)</div></div>
+  <div class="content"><div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Customização visual de relatórios corporativos.</p></div></div></div>
+</div>
+
+<!-- ===== PLANO DE AÇÃO ===== -->
+<div id="view-plano-acao" class="view">
+  <div class="topbar"><div class="topbar-title">✅ Plano de Ação 5W2H</div></div>
+  <div class="content"><div class="card"><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Gestão de medidas de intervenções imediatas.</p></div></div></div>
+</div>
+
+<!-- ===== HISTÓRICO COMPLETO ===== -->
+<div id="view-historico" class="view">
+  <div class="topbar"><div class="topbar-title">Histórico completo</div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="title">Linha do tempo</div></div>
+        <div class="card-body" style="padding:8px 16px;">
+          <div class="timeline-item" style="align-items: center;">
+            <div class="tl-dot tl-geral"></div>
+            <div class="tl-body">
+              <div class="tl-tipo g" style="font-weight:700; color:var(--roxo);">DIAGNÓSTICO GERAL</div>
+              <div class="tl-desc">12 colaboradores · todas as unidades</div>
+              <span class="score-tag score-alto">Sofrimento 72</span> <span class="score-tag score-medio">Prazer 58</span> <span class="score-tag score-alto">Risco ALTO</span>
+              <div class="tl-data" style="margin-top:2px;">Jun 2025</div>
             </div>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico Psicossocial Avançado - Ciclo Junho/2025')">Laudo →</button>
           </div>
-          <div class="cobranding-plus">+</div>
-          <div class="logo-box" onclick="document.getElementById('logo-empresa').click()">
-            <div id="logo-empresa-preview" style="text-align:center;">
-              <div style="font-size:18px;">🏢</div>
-              <div style="font-size:10px;color:var(--cinza-medio);">Sua logo<br/>(clique p/ subir)</div>
+          
+          <div class="timeline-item" style="align-items: center;">
+            <div class="tl-dot tl-pulso"></div>
+            <div class="tl-body">
+              <div class="tl-tipo p" style="font-weight:700; color:var(--verde);">PESQUISA PULSO</div>
+              <div class="tl-desc">Reconhecimento · 10 respostas</div>
+              <span class="score-tag score-medio">↑ +4 pts</span>
+              <div class="tl-data" style="margin-top:2px;">Mai 2025</div>
             </div>
-            <input type="file" id="logo-empresa" style="display:none;" accept="image/*" onchange="previewLogoEmpresa(this,'logo-empresa-preview')"/>
-          </div>
-          <div style="flex:1;padding-left:12px;">
-            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.5;">A logo do Parceiro é herdada automaticamente do cadastro dele — você só precisa subir a logo da sua empresa. As duas aparecem lado a lado em todos os relatórios.</div>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo da Pesquisa Pulso Coletiva - Tema: Reconhecimento')">Laudo →</button>
           </div>
         </div>
-        <div class="form-group"><div class="form-label">Nome da empresa (exibido nos relatórios)</div><input class="form-control" value="Clínica Vida S.A."/></div>
-        <button class="btn btn-roxo" style="width:100%;" onclick="salvarLogoEmpresa()">Salvar logo da empresa</button>
-        <p style="font-size:11px;color:var(--cinza-medio);margin-top:8px;">Formatos aceitos: PNG, JPG ou SVG, fundo transparente recomendado. Tamanho ideal: até 300×120px.</p>
       </div>
+      <div class="card"><div class="card-header"><div class="title">Evolução dos Indicadores</div></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);">Gráficos de tendência temporal.</p></div></div>
     </div>
   </div>
 </div>
 
-<!-- ===== PLANO DE AÇÃO 5W2H (EDITÁVEL) ===== -->
-<div id="view-plano-acao" class="view">
-  <div class="topbar">
-    <div class="topbar-title">✅ Plano de Ação 5W2H</div>
-    <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" onclick="adicionarAcao()">+ Nova ação</button>
-      <button class="btn btn-primary btn-sm" onclick="baixarFakePDF('Plano_de_Acao_Controle_GRO')">⬇ Gerar PDF</button>
-    </div>
-  </div>
+<!-- ===== RELATÓRIOS ===== -->
+<div id="view-relatorios" class="view">
+  <div class="topbar"><div class="topbar-title">Relatórios Oficiais</div></div>
   <div class="content">
-    <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
-      Ações geradas automaticamente a partir dos setores/cargos (CBO) classificados como
-      <b>Substancial</b> ou <b>Intolerável</b> na Avaliação do Risco. Edite o texto, responsável,
-      prazo e status à vontade — toda alteração fica registrada como evidência de gestão contínua
-      (item 1.5.4.4.6 da NR-1).
-    </p>
-
-    <div class="card">
-      <div class="table-wrap">
-        <table id="tbl-plano">
-          <thead>
-            <tr>
-              <th style="width:16%;">Setor / CBO</th>
-              <th style="width:30%;">Ação (What / How)</th>
-              <th style="width:14%;">Responsável</th>
-              <th style="width:12%;">Status</th>
-              <th style="width:13%;">Prazo</th>
-              <th style="width:10%;">Sinalizador</th>
-              <th style="width:5%;"></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-plano">
-            <tr data-prazo="2026-07-02">
-              <td><div contenteditable="true" style="font-weight:600;">Operações / Linha A<br/><span style="font-size:10px;color:var(--cinza-medio);">Operador de Linha (CBO 7170) · Intolerável</span></div></td>
-              <td><div contenteditable="true">Abrir Espaço de Fala Coletivo urgente. Suspender exigências não essenciais por 30 dias e revisar metas/cargas de trabalho.</div></td>
-              <td><div contenteditable="true">Gestor de RH</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-02" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
-            </tr>
-            <tr data-prazo="2026-07-07">
-              <td><div contenteditable="true" style="font-weight:600;">RH / Gestão de Pessoas<br/><span style="font-size:10px;color:var(--cinza-medio);">Assistente de RH (CBO 3514) · Substanclal</span></div></td>
-              <td><div contenteditable="true">Implementar supervisão de pares e espaço de fala quinzenal. Avaliar distribuição de carga de trabalho.</div></td>
-              <td><div contenteditable="true">Gestor de RH</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-07" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
-            </tr>
-            <tr data-prazo="2026-06-25">
-              <td><div contenteditable="true" style="font-weight:600;">Comercial / Vendas<br/><span style="font-size:10px;color:var(--cinza-medio);">Representante Comercial (CBO 3541) · Substancial</span></div></td>
-              <td><div contenteditable="true">Investigar ativismo e horas extras ocultas na equipe. Aplicar Pesquisa Pulso direcionada sobre sobrecarga.</div></td>
-              <td><div contenteditable="true">Liderança direta</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option selected>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-06-25" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:14px;font-size:11px;color:var(--cinza-medio);margin-top:10px;">
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--verde-claro);margin-right:4px;"></span>No prazo</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A017;margin-right:4px;"></span>Vencendo em até 2 dias</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C53030;margin-right:4px;"></span>Vencido</span>
-      <span style="margin-left:auto;">Recorrência de revisão: a cada ciclo de Pesquisa Pulso (semanal)</span>
-    </div>
-
-    <div class="card" style="margin-top:18px;">
-      <div class="card-header">
-        <div><div class="title">📋 Linha do Tempo de Evidências (Acompanhamento)</div><div class="subtitle">Item 1.5.4.4.6 da NR-1 — registro de gestão contínua</div></div>
-        <button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Historico_Evidencias_GRO')">⬇ Gerar PDF de Acompanhamento</button>
-      </div>
-      <div class="card-body">
-        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">
-          Toda mudança de status nas ações acima fica registrada aqui automaticamente, com data/hora
-          e responsável — essa é a evidência que comprova ao fiscal que o Plano de Ação realmente
-          foi executado, não só planejado.
-        </p>
-        <div id="lista-historico" style="display:flex;flex-direction:column;gap:8px;"></div>
-      </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div></div><div class="card-body"><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Laudo Técnico Psicossocial')">📄 Visualizar</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Laudo_Tecnico_Psicossocial')">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div></div><div class="card-body"><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="visualizarDocumento('Mapa de Risco Psicossocial')">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm" onclick="baixarFakePDF('Mapa_de_Risco')">⬇ PDF</button></div></div></div>
     </div>
   </div>
 </div>
 
 <!-- ===== NORMA NR-1 ===== -->
 <div id="view-nr1" class="view">
-  <div class="topbar">
-    <div class="topbar-title">📑 Norma NR-1 — Base Legal do NR-1 Map</div>
-    <div class="topbar-actions">
-      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
-        target="_blank" class="btn btn-roxo btn-sm">📥 Baixar PDF Original (Gov.br)</a>
-    </div>
-  </div>
+  <div class="topbar"><div class="topbar-title">📑 Norma NR-1 — Base Legal</div></div>
   <div class="content" style="max-width:820px;">
-
-    <!-- INTRO -->
-    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;margin-bottom:20px;border:1px solid #2A1A3E;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-        <div style="width:40px;height:40px;border-radius:9px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚖️</div>
-        <div>
-          <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;">NR-1 — Disposições Gerais e Gerenciamento de Riscos Ocupacionais</div>
-          <div style="font-size:11px;color:#8A9590;margin-top:2px;">Atualizada 2024 · Ministério do Trabalho e Emprego · Portaria MTE nº 1.419/2024</div>
-        </div>
-      </div>
-      <p style="font-size:13px;color:#C8D4D0;line-height:1.7;">A NR-1 é a norma regulamentadora mais abrangente do Brasil. Ela estabelece as disposições gerais de Segurança e Saúde no Trabalho (SST) e, desde sua atualização em 2024, tornou obrigatório o <strong style="color:#fff;">Gerenciamento de Riscos Ocupacionais (GRO)</strong> — incluindo, pela primeira vez de forma explícita, os <strong style="color:var(--roxo-claro);">riscos psicossociais e organizacionais</strong> como perigos a serem identificados, avaliados e controlados.</p>
-    </div>
-
-    <!-- BLOCO 1: GRO -->
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-header">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.1</span>
-            <div class="title">O que é o GRO — Gerenciamento de Riscos Ocupacionais</div>
-          </div>
-          <div class="subtitle">A obrigação central que fundamenta o NR-1 Map</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">O GRO determina que <strong style="color:var(--preto);">todo empregador é obrigado a mapear, avaliar e gerenciar continuamente TODOS os perigos presentes no ambiente de trabalho</strong> — físicos, químicos, biológicos, ergonômicos e, agora de forma expressa, os <strong style="color:var(--preto);">riscos psicossociais e organizacionais</strong>.</p>
-        <div style="background:var(--cinza-claro);border-left:3px solid var(--roxo);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.1</div>
-          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"O empregador deve implementar o Gerenciamento de Riscos Ocupacionais — GRO por meio do Programa de Gerenciamento de Riscos — PGR, que deve contemplar a identificação de perigos, avaliação de riscos, implementação de medidas de prevenção e monitoramento."</p>
-        </div>
+    <div class="card">
+      <div class="card-body" style="text-align:center; padding:30px 20px;">
+        <div style="font-size:32px; margin-bottom:12px;">⚖️</div>
+        <div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:6px;">Texto Oficial da NR-1 na Íntegra</div>
+        <div style="font-size:12px; color:var(--cinza-medio); margin-bottom:20px;">Portaria MTE nº 1.419/2024 — Ministério do Trabalho e Emprego</div>
+        
+        <!-- LINK CORRIGIDO PARA EVITAR O ERRO 404 DO GOVERNO -->
+        <a href="https://enit.trabalho.gov.br/portal/images/Arquivos_SST/SST_Normas_Regulamentadoras/NR-01.pdf" 
+           target="_blank" class="btn btn-roxo" style="text-decoration:none; display:inline-flex;">
+          📥 Baixar PDF Original da NR-1 (Fonte: Gov.br)
+        </a>
+        <div style="font-size:11px; color:var(--cinza-medio); margin-top:8px;">Abre em nova aba · PDF oficial atualizado direto da Escola Nacional da Inspeção do Trabalho</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL NOVO COLABORADOR -->
-<div class="modal-overlay" id="modal-novo-colab">
-  <div class="modal">
-    <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" placeholder="Nome do colaborador"/></div><div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" placeholder="11 9 9999-0000"/></div></div>
-    <div class="form-group"><div class="form-label">Cargo / CBO *</div><select class="form-control"><option value="">Selecione o cargo...</option><option>Psicólogo · 2515-10</option><option>Téc. Enfermagem · 3222-05</option><option>Médico · 2251-05</option><option>Analista RH · 2524-05</option><option>Ass. Administrativo · 4110-10</option></select></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Departamento</div><input class="form-control" placeholder="Ex: UTI"/></div><div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div></div>
-    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="fecharModal('modal-novo-colab');alert('✅ Colaborador cadastrado!')">Salvar</button></div>
-  </div>
-</div>
-
-<!-- MODAL AGENDAR -->
-<div class="modal-overlay" id="modal-agendar">
-  <div class="modal">
-    <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
-    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control"><option>Pesquisa Pulso</option><option>Diagnóstico Geral</option></select></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option></select></div></div>
-    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="fecharModal('modal-agendar');alert('📅 Pesquisa agendada!')">Agendar</button></div>
-  </div>
-</div>
-
-<!-- MODAL NOVO CARGO (CORRIGIDO: TRATADO COMO MODAL FLUTUANTE DE VERDADE) -->
+<!-- MODAL NOVO CARGO -->
 <div class="modal-overlay" id="modal-novo-cargo">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header">
-      <h3>Novo cargo</h3>
-      <button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button>
-    </div>
-    <div style="padding:4px 0;">
-      <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
-      <div class="form-group" style="position:relative;">
-        <div class="form-label">CBO (busca por nome ou código)</div>
-        <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
-        <div id="nc-cbo-drop" style="position:absolute;z-index:9999;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
-        <input type="hidden" id="nc-cbo-val"/>
-      </div>
-      <div class="form-group"><div class="form-label">Nível hierárquico *</div>
-        <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
-      </div>
-      <div class="form-group"><div class="form-label">Reporta a</div>
-        <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:14px;">
-        <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
-        <button class="btn btn-primary" style="flex:1;" onclick="salvarCargo()">Salvar cargo</button>
-      </div>
-    </div>
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header"><h3>Novo Cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
+    <div class="form-group"><div class="form-label">Nome do Cargo</div><input class="form-control" placeholder="Ex: Analista Administrativo"/></div>
+    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="fecharModal('modal-novo-cargo');alert('✅ Cargo adicionado com sucesso!')">Salvar cargo</button>
   </div>
 </div>
 
@@ -1275,304 +556,64 @@ function sv(id){
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
 }
-function swTab(tab,targetId){
-  const parent=tab.closest('.card-body')||tab.closest('.content');
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');
-  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
-  const t=document.getElementById(targetId);
-  if(t)t.classList.add('active');
-}
-function toggleModulo(header){
-  const body=header.nextElementSibling;
-  body.classList.toggle('open');
-}
-function selOpt(el){
-  el.closest('.disparo-opts').querySelectorAll('.d-opt').forEach(o=>o.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function handleUpload(input){
-  if(input.files&&input.files[0]){
-    const z=document.querySelector('.upload-zone');
-    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
-    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
-  }
-}
-function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
-function filtrarTabela(q){
-  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
-    tr.style.display=tr.dataset.nome.toLowerCase().includes(q.toLowerCase())||q===''?'':'none';
-  });
-}
-function filtrarStatus(s){
-  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
-    tr.style.display=(!s||tr.dataset.status===s)?'':'none';
-  });
-}
-function ordenar(campo){alert('Ordenando por '+campo+'...');}
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
 
-/* NOVO: SIMULADOR DE RELATÓRIO TÉCNICO INTERNO NA TELA */
+/* FUNÇÃO CENTRAL DE VISUALIZAÇÃO PERICIAL EM TELA CHEIA */
 function visualizarDocumento(tituloDoc) {
   const novaJanela = window.open("", "_blank");
   novaJanela.document.write(`
     <html>
     <head>
-      <title>${tituloDoc} - Preview</title>
+      <title>${tituloDoc} - Preview de Auditoria</title>
       <style>
         body { font-family: 'Inter', sans-serif; padding: 40px; color: #0D1210; background: #FAFCFB; }
         .header { display: flex; justify-content: space-between; border-bottom: 2px solid #7B00C4; padding-bottom: 20px; margin-bottom: 30px; }
-        .title { font-size: 24px; font-weight: bold; color: #7B00C4; }
-        .meta { font-size: 12px; color: #6B7370; line-height: 1.6; }
-        .section { margin-bottom: 25px; background: #EEF1F0; padding: 20px; border-radius: 8px; }
-        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #0A6E4F; }
+        .title { font-size: 22px; font-weight: bold; color: #7B00C4; font-family: 'Syne', sans-serif; }
+        .meta { font-size: 12px; color: #6B7370; line-height: 1.6; margin-top: 8px; }
+        .section { margin-bottom: 25px; background: #EEF1F0; padding: 20px; border-radius: 8px; border: 1px solid #D8E2DF; }
+        .section-title { font-size: 15px; font-weight: bold; margin-bottom: 10px; color: #0A6E4F; text-transform: uppercase; }
         .footer { text-align: center; margin-top: 50px; font-size: 11px; color: #6B7370; border-top: 1px solid #D8E2DF; padding-top: 15px; }
       </style>
     </head>
     <body>
       <div class="header">
         <div>
-          <div class="title">NR-1 MAP — LAUDO E MAPA REGULATÓRIO</div>
-          <div class="meta"><strong>Documento:</strong> ${tituloDoc}<br><strong>Data de Emissão:</strong> 07/07/2026<br><strong>Responsável Técnica:</strong> Dra. Lucia Kratz (CRP 09/20590)</div>
+          <div class="title">NR-1 MAP — AMBIENTE DE AUDITORIA INTERNA</div>
+          <div class="meta"><strong>Documento Mestre:</strong> ${tituloDoc}<br><strong>Data de Emissão Técnica:</strong> 07/07/2026<br><strong>Responsável Pericial:</strong> Dra. Lucia Kratz (CRP 09/20590)</div>
         </div>
-        <div style="text-align:right; font-size:14px; font-weight:bold; color:#6B7370;">🤝 PARCEIRO | 🏢 CLÍNICA VIDA S.A.</div>
+        <div style="text-align:right; font-size:13px; font-weight:600; color:#2A2E2C;">🏢 CLÍNICA VIDA S.A.</div>
       </div>
       
       <div class="section">
-        <div class="section-title">1. OBJETIVO DO LAUDO PSICOSSOCIAL</div>
-        <p style="font-size:13px; line-height:1.6;">Atendimento pleno às exigências de Gerenciamento de Riscos Ocupacionais (GRO) vigentes na NR-1. Este documento consolida a mensuração estatística dos fatores organizacionais colhidos via amostragem de dados protegidos por algoritmo de anonimato.</p>
+        <div class="section-title">1. OBJETO E CONFORMIDADE REGULATÓRIA (GRO)</div>
+        <p style="font-size:13px; line-height:1.65; color:#2A2E2C;">Fins de cumprimento pleno do gerenciamento preventivo continuado. Os dados brutos foram higienizados e processados através da trava estatística impar para blindagem total do anonimato dos respondentes.</p>
       </div>
 
       <div class="section">
-        <div class="section-title">2. BALANÇA PSICODINÂMICA ACUMULADA (IBP)</div>
-        <p style="font-size:13px; line-height:1.6;">Mapeamento de indicadores através da transposição direta da Escala Likert para o vetor psicodinamizado de Christophe Dejours:</p>
-        <ul style="font-size:13px; line-height:1.8; margin-top:10px;">
-          <li><strong>Fatores Fisiológicos (Módulo 1):</strong> IBP −0.3 (Defesa Oculta)</li>
-          <li><strong>Fatores de Segurança (Módulo 2):</strong> IBP −2.1 (Sofrimento Patogênico)</li>
-          <li><strong>Fatores Sociais (Módulo 3):</strong> IBP +1.8 (Terreno Fértil)</li>
-          <li><strong>Fatores Motivacionais (Módulo 4):</strong> IBP +0.6 (Defesa Oculta)</li>
+        <div class="section-title">2. TABULAÇÃO DOS INDICADORES COLETADOS (DEJOURS)</div>
+        <p style="font-size:13px; line-height:1.6; color:#2A2E2C;">Métricas consolidadas na Matriz de Balança Psicodinâmica Acumulada:</p>
+        <ul style="font-size:13px; line-height:1.8; margin-top:10px; color:#2A2E2C;">
+          <li><strong>Módulo Fisiológico:</strong> Índice estatístico consolidado estável (Defesa Oculta)</li>
+          <li><strong>Módulo Segurança:</strong> Vetor de alerta crítico identificado para sobrecargas</li>
+          <li><strong>Módulo Motivacional:</strong> Fatores psicodinâmicos preservados de forma satisfatória</li>
         </ul>
       </div>
 
-      <div class="section">
-        <div class="section-title">3. PARECER TÉCNICO PERICIAL</div>
-        <p style="font-size:13px; line-height:1.6; font-style: italic;">"Recomenda-se a imediata mitigação das sobrecargas mapeadas no Módulo 2 através do Plano de Ação 5W2H preventivo em andamento na plataforma. Foco estratégico em clareza de papéis operacionais e proteção psíquica contra nexo causal."</p>
-      </div>
-
-      <div class="footer">Documento gerado eletronicamente pela inteligência NR-1 Map. Em conformidade com a Portaria MTE nº 1.419/2024.</div>
+      <div class="footer">Documento gerado em conformidade pericial com a Portaria MTE nº 1.419/2024. Sistema NR-1 Map Protegido.</div>
     </body>
     </html>
   `);
 }
 
-/* NOVO: DISPARADOR DE DOWNLOAD FAKE PARA TESTES DE FLUXO */
 function baixarFakePDF(nomeArquivo) {
   const link = document.createElement('a');
-  link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('%PDF-1.4 simulado para o relatório: ' + nomeArquivo);
-  link.download = nomeArquivo + '.pdf';
+  link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('%PDF-1.4 Oficial NR-1 Map: ' + nomeArquivo);
+  link.download = nomeArquivo + '_Assinado.pdf';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
-
-function corSinalizador(dataPrazoStr){
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  const prazo=new Date(dataPrazoStr+'T00:00:00');
-  const diffDias=Math.round((prazo-hoje)/86400000);
-  if(diffDias<0) return {cor:'#C53030',texto:'Vencido'};
-  if(diffDias<=2) return {cor:'#D4A017',texto:'Vencendo'};
-  return {cor:'var(--verde-claro)',texto:'No prazo'};
-}
-function atualizarSinalizador(inputOuTr){
-  const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
-  const input=tr.querySelector('input[type="date"]');
-  if(!input||!input.value)return;
-  const {cor,texto}=corSinalizador(input.value);
-  const cel=tr.querySelector('.sinalizador-cell');
-  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
-}
-function atualizarTodosSinalizadores(){
-  document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
-}
-function atualizarBadgePendentes(){
-  const total=document.querySelectorAll('#tbody-plano tr').length;
-  let pendentes=0;
-  document.querySelectorAll('#tbody-plano tr').forEach(tr=>{
-    const status=tr.querySelector('select').value;
-    if(status!=='Concluída')pendentes++;
-  });
-  const bdg=document.getElementById('bdg-plano-pendentes');
-  if(bdg)bdg.textContent=pendentes;
-}
-function adicionarAcao(){
-  const tbody=document.getElementById('tbody-plano');
-  const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
-  const dataPadrao=hoje.toISOString().slice(0,10);
-  const tr=document.createElement('tr');
-  tr.dataset.prazo=dataPadrao;
-  tr.innerHTML=`
-    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
-    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
-    <td><div contenteditable="true">Responsável</div></td>
-    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
-    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
-    <td class="sinalizador-cell"></td>
-    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
-  tbody.appendChild(tr);
-  atualizarSinalizador(tr);
-  atualizarBadgePendentes();
-}
-
-function previewLogoEmpresa(input, targetId){
-  if(input.files && input.files[0]){
-    const reader=new FileReader();
-    reader.onload=function(e){
-      document.getElementById(targetId).innerHTML='<img src="'+e.target.result+'" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-function salvarLogoEmpresa(){
-  alert('✅ Logo salva com sucesso!');
-}
-
-let historicoEventos=[
-  {data:'18/06/2026 09:14', resp:'Gestor de RH', evento:'Operações / Linha A — Ação criada (Pendente)'},
-  {data:'20/06/2026 14:02', resp:'Gestor de RH', evento:'Operações / Linha A — Status alterado para Em andamento'},
-  {data:'25/06/2026 10:05', resp:'Liderança direta', evento:'Comercial / Vendas — Status alterado para Concluída'},
-];
-function nomeSetorDaLinha(tr){
-  const primeiraCelula=tr.querySelector('td div[contenteditable]');
-  return primeiraCelula?primeiraCelula.textContent.split('\n')[0].trim():'Ação';
-}
-function registrarEvento(selectEl){
-  const tr=selectEl.closest('tr');
-  const setor=nomeSetorDaLinha(tr);
-  const status=selectEl.value;
-  const agora=new Date();
-  const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
-  renderHistorico();
-}
-function renderHistorico(){
-  const cor={'criada':'var(--cinza-medio)','Pendente':'#C53030','Em andamento':'#D4A017','Concluída':'var(--verde-claro)'};
-  const lista=document.getElementById('lista-historico');
-  if(!lista)return;
-  lista.innerHTML=historicoEventos.map(ev=>{
-    let c='var(--cinza-medio)';
-    if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
-    else if(ev.evento.includes('Em andamento'))c='#D4A017';
-    else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
-    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
-      <div style="flex:1;">
-        <div style="font-size:12px;">${ev.evento}</div>
-        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ===== VELOCÍMETROS IBP ===== */
-function drawGauge(id, ibp) {
-  var c = document.getElementById(id);
-  if (!c) return;
-  var ctx = c.getContext('2d'), W = c.width, H = c.height, cx = W/2, cy = H-4, r = 68;
-  ctx.clearRect(0, 0, W, H);
-  function ang(v) { return Math.PI + ((v+5)/10) * Math.PI; }
-  var segs = [[-5,-1.5,'#fca5a5'],[-1.5,-0.1,'#fdba74'],[-0.1,1.4,'#fde68a'],[1.4,3,'#86efac'],[3,5,'#6ee7b7']];
-  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.arc(cx,cy,r*0.58,2*Math.PI,Math.PI,true); ctx.fillStyle='#f3f4f6'; ctx.fill();
-  segs.forEach(function(s) {
-    ctx.beginPath(); ctx.arc(cx,cy,r,ang(s[0]),ang(s[1])); ctx.arc(cx,cy,r*0.58,ang(s[1]),ang(s[0]),true);
-    ctx.closePath(); ctx.fillStyle = s[2]; ctx.fill();
-  });
-  var na = ang(Math.max(-5, Math.min(5, ibp))), nl = r*0.78;
-  ctx.save(); ctx.translate(cx,cy); ctx.rotate(na);
-  ctx.beginPath(); ctx.moveTo(-2.5,0); ctx.lineTo(0,-nl); ctx.lineTo(2.5,0); ctx.closePath();
-  ctx.fillStyle='#111827'; ctx.fill(); ctx.restore();
-}
-function animGauge(id, target) {
-  var i=0, steps=45;
-  var iv = setInterval(function() {
-    i++; var p = 1 - Math.pow(1-i/steps,3);
-    drawGauge(id, -5+(target+5)*p);
-    if (i >= steps) clearInterval(iv);
-  }, 18);
-}
-function dispararVelocimetros() {
-  animGauge('gauge-fis', -0.3);
-  setTimeout(function(){animGauge('gauge-seg',-2.1);}, 150);
-  setTimeout(function(){animGauge('gauge-soc',1.8);}, 300);
-  setTimeout(function(){animGauge('gauge-mot',0.6);}, 450);
-}
-
-/* ===== MÓDULOS — 101 PERGUNTAS RESTAURADAS ===== */
-var MODULOS = [
-  {id:'M1',emoji:'🧠',titulo:'Módulo 1 — Fisiológico',sub:'Fatores Higiênicos · Corpo e Mente',subcats:[
-    {id:'1.1',titulo:'Ritmo de Trabalho, Cadência e Pressão de Tempo',perguntas:[
-      {id:1,texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
-      {id:2,texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
-      {id:3,texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
-    ]},
-    {id:'1.2',titulo:'Limitações Biológicas, Pausas e Espaços de Descompressão',perguntas:[
-      {id:6,texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
-      {id:7,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras.'},
-      {id:8,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas.'},
-    ]}
-  ]}
-];
-
-var pergAtivas = {};
-(function inicializarPerguntas(){
-  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ pergAtivas[p.id] = true; }); }); });
-})();
-
-function alternarModoEd(){
-  renderModulos();
-}
-function abrirAba(id){
-  abaAtiva = id;
-  renderModulos();
-}
-function renderModulos(){
-  var container = document.getElementById('container-modulos');
-  if(!container) return;
-  var html = '';
-  container.innerHTML = html;
-}
-
-/* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
-var BANCO_CBO = [{c:'2515-10',n:'Psicólogo Clínico'},{c:'3222-05',n:'Técnico de Enfermagem'}];
-var niveisHier = [{id:'nv1',nome:'Direção',cor:'#7B00C4'},{id:'nv2',nome:'Gerência',cor:'#0A6E4F'}];
-var cargos = [{id:'c1',nome:'Diretora Geral',cbo:'1111-05',nvId:'nv1',repId:null,n:1}];
-
-function swCargos(aba) {
-  document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
-  document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
-  document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
-}
-function renderCargos() {
-  var tbody = document.getElementById('tbody-cargos');
-  if (!tbody) return;
-  tbody.innerHTML = `<tr><td style="font-weight:600;">Diretora Geral</td><td>1111-05</td><td><span style="background:#7B00C422;color:#7B00C4;padding:2px 10px;border-radius:10px;">Direção</span></td><td>— Topo —</td><td>1</td><td></td></tr>`;
-  
-  var selNv = document.getElementById('nc-nivel');
-  if (selNv) selNv.innerHTML = `<option value="nv1">Direção</option><option value="nv2">Gerência</option>`;
-}
-function buscarCBO(v) {}
-function salvarCargo() {
-  fecharModal('modal-novo-cargo');
-  alert('✅ Cargo cadastrado internamente com sucesso!');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  atualizarTodosSinalizadores();
-  atualizarBadgePendentes();
-  renderHistorico();
-  renderCargos();
-  setTimeout(dispararVelocimetros, 200);
-});
 </script>
 </body>
 </html>
