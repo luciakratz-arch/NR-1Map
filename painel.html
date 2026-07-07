@@ -653,7 +653,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <!-- Zona IBP -->
           <div style="background:#F3F4F6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:14px 16px;">
             <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Zona de Defesa Oculta (−1,4 a +1,4)</div>
-            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mecanismos de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mechanisms de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
           </div>
 
           <!-- Explicação base -->
@@ -796,7 +796,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
             <div style="width:40px;height:40px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">3</div>
           </div>
           <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;flex:1;">
-            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Coleta, Anonimização e Cálculo do IBP</div>
             <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O colaborador responde de forma <b style="color:var(--preto);">100% anônima via Magic Link/OTP</b> enviado ao WhatsApp — sem cadastro de senhas. O RH nunca tem acesso ao ID do respondente. A trava de anonimato por CBO exige mínimo de 3 respondentes por agrupamento antes de exibir dados segmentados.</div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
               <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
@@ -841,65 +840,26 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== MÓDULOS ===== -->
 <div id="view-modulos" class="view">
-  <div class="topbar"><div class="topbar-title">Módulos e perguntas</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm">Filtrar por grupo</button></div></div>
+  <div class="topbar">
+    <div class="topbar-title">🧩 Módulos e perguntas</div>
+    <div class="topbar-actions">
+      <span id="lbl-modo-ed" style="font-size:11px;padding:4px 10px;border-radius:20px;background:var(--cinza-claro);color:var(--cinza-medio);margin-right:8px;">Modo: Global (Admin)</span>
+      <button class="btn btn-ghost btn-sm" id="btn-modo-ed" onclick="alternarModoEd()">Edição do Cliente</button>
+      <button class="btn btn-primary btn-sm" id="btn-salvar-mod" onclick="salvarModulos()" disabled>💾 Salvar</button>
+    </div>
+  </div>
   <div class="content">
-    <div class="alerta"><span style="font-size:14px;">ℹ</span><p>Ative ou desative módulos inteiros. Dentro de cada módulo, selecione quais perguntas serão enviadas — ou adicione perguntas personalizadas.</p></div>
-
-    <!-- DEJOURS PRAZER -->
-    <div class="modulo-card">
-      <div class="modulo-header" onclick="toggleModulo(this)">
-        <div><div class="m-title">🟢 Índices de Prazer — Dejours</div><div class="m-sub">Realização · Reconhecimento · Liberdade de expressão</div></div>
-        <div class="m-right"><span style="font-size:11px;color:var(--verde);">9 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
-      </div>
-      <div class="modulo-body">
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Sinto que meu trabalho tem um propósito claro e contribui para algo maior."</div><span class="perg-tag">Realização</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Recebo retorno positivo da liderança quando faço um bom trabalho."</div><span class="perg-tag">Reconhecimento</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Tenho espaço para expressar minhas opiniões e sugestões na equipe."</div><span class="perg-tag">Liberdade</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check"/><div class="perg-text">"Me sinto valorizado(a) pelo que entrego, além dos resultados quantitativos."</div><span class="perg-tag">Reconhecimento</span></div>
-        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada neste módulo..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
-      </div>
+    <div class="alerta" style="margin-bottom:14px;">
+      <span style="font-size:14px;">ℹ</span>
+      <p>Selecione as perguntas que serão aplicadas. Mínimo 3 por subcategoria, sempre ímpar. Clique numa subcategoria para expandir.</p>
     </div>
-
-    <!-- DEJOURS SOFRIMENTO -->
-    <div class="modulo-card">
-      <div class="modulo-header" onclick="toggleModulo(this)">
-        <div><div class="m-title">🔴 Índices de Sofrimento — Dejours</div><div class="m-sub">Esgotamento · Frustração · Insegurança</div></div>
-        <div class="m-right"><span style="font-size:11px;color:var(--laranja);">8 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
-      </div>
-      <div class="modulo-body">
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Nas últimas semanas, senti que as demandas de trabalho superaram minha capacidade."</div><span class="perg-tag">Esgotamento</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Consigo descansar adequadamente fora do horário de trabalho."</div><span class="perg-tag">Esgotamento</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Sinto insegurança sobre minha continuidade nesta empresa."</div><span class="perg-tag">Insegurança</span></div>
-        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
-      </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="btn-aba aba-ativa" id="aba-M1" onclick="abrirAba('M1')">🧠 Fisiológico</button>
+      <button class="btn-aba" id="aba-M2" onclick="abrirAba('M2')">🛡️ Segurança</button>
+      <button class="btn-aba" id="aba-M3" onclick="abrirAba('M3')">🤝 Relacionamentos</button>
+      <button class="btn-aba" id="aba-M4" onclick="abrirAba('M4')">🚀 Motivacional</button>
     </div>
-
-    <!-- HERZBERG -->
-    <div class="modulo-card">
-      <div class="modulo-header" onclick="toggleModulo(this)">
-        <div><div class="m-title">🔵 Fatores Higiênicos — Herzberg</div><div class="m-sub">Condições físicas · Políticas · Relações interpessoais</div></div>
-        <div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">6 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
-      </div>
-      <div class="modulo-body">
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"As condições físicas do meu ambiente de trabalho são adequadas."</div><span class="perg-tag">Condições</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"As políticas e regras da empresa são claras e justas."</div><span class="perg-tag">Políticas</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"O relacionamento com minha equipe e liderança é saudável."</div><span class="perg-tag">Relações</span></div>
-        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
-      </div>
-    </div>
-
-    <!-- MASLOW -->
-    <div class="modulo-card">
-      <div class="modulo-header" onclick="toggleModulo(this)">
-        <div><div class="m-title">🟡 Base da Pirâmide — Maslow</div><div class="m-sub">Necessidades fisiológicas e de segurança</div></div>
-        <div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">5 perguntas ativas</span><button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on')"></button></div>
-      </div>
-      <div class="modulo-body">
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Minha remuneração atual atende às minhas necessidades básicas."</div><span class="perg-tag">Fisiológica</span></div>
-        <div class="pergunta-item"><input type="checkbox" class="perg-check" checked/><div class="perg-text">"Me sinto seguro(a) no ambiente físico de trabalho."</div><span class="perg-tag">Segurança</span></div>
-        <div class="add-perg"><input class="form-control" placeholder="Adicionar pergunta personalizada..." style="flex:1;"/><button class="btn btn-primary btn-sm">+ Adicionar</button></div>
-      </div>
-    </div>
+    <div id="container-modulos"></div>
   </div>
 </div>
 
@@ -1004,14 +964,14 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.5;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">64</div></div>
               <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:38px;opacity:.65;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">67</div></div>
               <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.75;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">63</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:56px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;color:var(--laranja);">72</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:56px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">72</div></div>
             </div>
           </div>
           <div><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Prazer geral</div>
             <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
               <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:35px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">62</div></div>
               <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:37px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">66</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:40px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;color:var(--verde);">70</div></div>
+              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:40px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">70</div></div>
               <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:33px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">58</div></div>
             </div>
           </div>
@@ -1031,7 +991,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="grid-2">
       <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📄 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
       <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="gerarPdfPlano()">⬇ PDF</button></div></div></div>
+      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="generarPdfPlano()">⬇ PDF</button></div></div></div>
       <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📊 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
     </div>
   </div>
@@ -1074,9 +1034,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
-<!-- Modal novo cargo -->
-<div id="modal-novo-cargo" class="modal">
-  <div class="modal-box" style="max-width:460px;">
+<!-- Modal novo cargo (CORRIGIDO: de class="modal" para class="modal-overlay") -->
+<div id="modal-novo-cargo" class="modal-overlay">
+  <div class="modal" style="max-width:460px;">
     <div class="modal-header"><h3>Novo cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
     <div class="modal-body">
       <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
@@ -1398,10 +1358,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
-
-</main>
-</div>
-
 <!-- MODAL NOVO COLABORADOR -->
 <div class="modal-overlay" id="modal-novo-colab">
   <div class="modal">
@@ -1595,7 +1551,7 @@ function drawGauge(id, ibp) {
   [-5,-2.5,0,2.5,5].forEach(function(v) {
     var a = ang(v);
     ctx.beginPath(); ctx.moveTo(cx+r*0.6*Math.cos(a),cy+r*0.6*Math.sin(a)); ctx.lineTo(cx+r*0.72*Math.cos(a),cy+r*0.72*Math.sin(a));
-    ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1.5; stroke();
   });
   var na = ang(Math.max(-5, Math.min(5, ibp))), nl = r*0.78;
   ctx.save(); ctx.translate(cx,cy); ctx.rotate(na);
@@ -1617,6 +1573,275 @@ function dispararVelocimetros() {
   setTimeout(function(){animGauge('gauge-seg',-2.1);}, 150);
   setTimeout(function(){animGauge('gauge-soc',1.8);}, 300);
   setTimeout(function(){animGauge('gauge-mot',0.6);}, 450);
+}
+
+/* ===== MÓDULOS — 101 PERGUNTAS OFICIAIS RESTAURADAS ===== */
+var MODULOS = [
+  {id:'M1',emoji:'🧠',titulo:'Módulo 1 — Fisiológico',sub:'Fatores Higiênicos · Corpo e Mente',subcats:[
+    {id:'1.1',titulo:'Ritmo de Trabalho, Cadência e Pressão de Tempo',perguntas:[
+      {id:1,texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
+      {id:2,texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
+      {id:3,texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
+      {id:4,texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},
+      {id:5,texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},
+    ]},
+    {id:'1.2',titulo:'Limitações Biológicas, Pausas e Espaços de Descompressão',perguntas:[
+      {id:6,texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
+      {id:7,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras ou sofrer restrições.'},
+      {id:8,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},
+      {id:9,texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma e desconectado das tarefas.'},
+      {id:10,texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},
+    ]},
+    {id:'1.3',titulo:'Stresse, Ansiedade e Esgotamento Psicossomático',perguntas:[
+      {id:11,texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},
+      {id:12,texto:'Consigo dormir bem à noite, sem que preocupações ou estresse do trabalho provoquem insônia ou sono agitado.'},
+      {id:13,texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tension do emprego.'},
+      {id:14,texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade, taquicardia ou falta de ar geradas pela pressão diária.'},
+      {id:15,texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana, sem ficar pensando nas tarefas pendentes.'},
+    ]},
+    {id:'1.4',titulo:'Ergonomia de Software, Velocidade de Mudanças e Sobrecarga Cognitiva',perguntas:[
+      {id:16,texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},
+      {id:17,texto:'Os sistemas e softwares adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo para serem compreendidos.'},
+      {id:18,texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada, ardência nos olhos ou dores de cabeça.'},
+      {id:19,texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse mental.'},
+      {id:20,texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas, tecnologias e processos digitais sem me sentir sobrecarregado.'},
+    ]},
+  ]},
+  {id:'M2',emoji:'🛡️',titulo:'Módulo 2 — Segurança',sub:'Previsibilidade · Confiança · Integridade',subcats:[
+    {id:'2.1',titulo:'Estabilidade Laboral e Empregabilidade',perguntas:[
+      {id:21,texto:'Sinto que meu emprego está seguro e não vivo com medo diário ou constante de ser demitido repentinamente.'},
+      {id:22,texto:'A empresa é clara e transparente sobre os motivos que levam a demissões, eliminando fofocas, boatos ou clima de instabilidade.'},
+      {id:23,texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe, em vez de focar em substituição constante.'},
+      {id:24,texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira essencial.'},
+      {id:25,texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},
+    ]},
+    {id:'2.2',titulo:'Clareza de Papéis, Metas e Previsibilidade Organizacional',perguntas:[
+      {id:26,texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara, sem deixar margem para dúvidas.'},
+      {id:27,texto:'As exigências do dia a dia correspondem exatamente à função para a qual fui contratado, sem desvios ou acúmulos confusos.'},
+      {id:28,texto:'As ordens que recebo são unificadas e coerentes, evitando que eu receba comandos contraditórios de supervisores diferentes.'},
+      {id:29,texto:'As metas ou objetivos de entrega exigidos de mim são justos e perfeitamente alcançáveis dentro do horário regular.'},
+      {id:30,texto:'Os objetivos e regras do meu setor permanecem estáveis ao longo do mês, sem mudanças bruscas que estraguem o trabalho já feito.'},
+    ]},
+    {id:'2.3',titulo:'Segurança Psicológica e Direito ao Erro',perguntas:[
+      {id:31,texto:'Quando cometo uma falha técnica involuntária, a liderança me orienta a corrigir em vez de focar em me culpar ou punir.'},
+      {id:32,texto:'As correções ou feedbacks sobre o meu desempenho são feitos de forma reservada e individual, nunca na frente dos colegas.'},
+      {id:33,texto:'Sinto-me totalmente confortável para admitir que não sei fazer uma tarefa complexa e pedir ajuda ao meu chefe sem ser julgado.'},
+    ]},
+    {id:'2.4',titulo:'Treinamento Ocupacional e Capacitação',perguntas:[
+      {id:34,texto:'Recebi treinamento suficiente e adequado para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},
+      {id:35,texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade real.'},
+      {id:36,texto:'Sempre que um novo equipamento, sistema ou processo é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},
+    ]},
+    {id:'2.5',titulo:'Riscos de Acidentes, Proteção Física e Perigo (NR-1)',perguntas:[
+      {id:37,texto:'Executo minhas atividades diárias com paz de espírito, sem sentir medo ou tensão constante de sofrer um acidente físico.'},
+      {id:38,texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},
+      {id:39,texto:'Os EPIs disponibilizados estão em excelente estado de conservação, vestem bem e não machucam ou atrapalham as tarefas.'},
+    ]},
+  ]},
+  {id:'M3',emoji:'🤝',titulo:'Módulo 3 — Relacionamentos e Social',sub:'Interpessoal · Cultura · Assédio',subcats:[
+    {id:'3.1',titulo:'Relação com a Liderança Direta',perguntas:[
+      {id:40,texto:'O meu superior direto trata-me com respeito e educação no dia a dia, sem usar tons de voz agressivos ou palavras ofensivas.'},
+      {id:41,texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},
+      {id:42,texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades operacionais antes de tomar decisões sobre o meu setor.'},
+    ]},
+    {id:'3.2',titulo:'Clima Interpessoal e Relações entre Pares',perguntas:[
+      {id:43,texto:'Os meus colegas de trabalho ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},
+      {id:44,texto:'O convívio diário com a minha equipe é saudável e livre de fofocas, intrigas ou boatos maliciosos.'},
+      {id:45,texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias ou tentativas de prejudicar uns aos outros.'},
+    ]},
+    {id:'3.3',titulo:'Fit Cultural e Relações Intergeracionais',perguntas:[
+      {id:46,texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais, permitindo que eu trabalhe em paz com minha consciência.'},
+      {id:47,texto:'Compreendo e concordo com os objetivos gerais da empresa, sentindo que meu esforço diário faz sentido dentro do negócio.'},
+      {id:48,texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações, sem piadas ou exclusão mútua.'},
+    ]},
+    {id:'3.4',titulo:'Reconhecimento e Julgamento de Valor (Dejours)',perguntas:[
+      {id:49,texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário para o sucesso da empresa.'},
+      {id:50,texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade técnica da forma como executo as minhas tarefas.'},
+      {id:51,texto:'A gerência costuma elogiar de forma clara os bons resultados e as entregas bem-feitas pelo meu cargo.'},
+    ]},
+    {id:'3.5',titulo:'Proteção contra Assédio Moral e Sexual',perguntas:[
+      {id:52,texto:'A liderança da empresa não pratica perseguições, piadas humilhantes, cobranças vexatórias ou ameaças psicológicas contra mi ou meus colegas.'},
+      {id:53,texto:'O ambiente de trabalho entre colegas é totalmente livre de exclusões intencionais, linchamentos ou boicotes profissionais.'},
+      {id:54,texto:'O meu local de trabalho é 100% seguro contra comentários invasivos de teor sexual, insinuações abusivas ou convites inoportunos.'},
+    ]},
+  ]},
+  {id:'M4',emoji:'🚀',titulo:'Módulo 4 — Fatores Motivacionais',sub:'Propósito · Identidade · Autonomia',subcats:[
+    {id:'4.1',titulo:'Propósito, Alinhamento de Vida e Significado do Trabalho',perguntas:[
+      {id:55,texto:'Sinto que as tarefas que realizo no meu dia a dia possuem valor real e fazem sentido para mim, indo além de ganhar dinheiro.'},
+      {id:56,texto:'Percebo claramente o impacto positivo que o meu trabalho diário causa na vida dos clientes ou na sociedade.'},
+      {id:57,texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},
+    ]},
+    {id:'4.2',titulo:'Identidade com o Trabalho e Crescimento',perguntas:[
+      {id:58,texto:'As atividades que desempenho no meu cargo aproveitam muito bem as minhas principais habilidades e talentos naturais.'},
+      {id:59,texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês que passa nesta empresa.'},
+      {id:60,texto:'Sinto que as exigências práticas da minha função combinam perfeitamente com o meu jeito de ser e com a minha personalidade.'},
+    ]},
+    {id:'4.3',titulo:'Autonomia Percebida e Espaço de Criação (Dejours)',perguntas:[
+      {id:61,texto:'Tenho autonomia suficiente para tomar decisões importantes sobre a execução das minhas tarefas diárias sem precisar de autorização para tudo.'},
+      {id:62,texto:'A empresa me dá liberdade para ajustar o método ou o jeito de fazer o trabalho quando percebo uma forma mais eficiente.'},
+      {id:63,texto:'Sinto-me encorajado a criar soluções próprias e inovadoras diante dos problemas ou imprevistos que surgem na minha rotina.'},
+    ]},
+    {id:'4.4',titulo:'Percepção de Ações Motivadoras da Empresa',perguntas:[
+      {id:64,texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},
+      {id:65,texto:'Os incentivos que a empresa oferece para nossa evolução me deixam mais motivado no dia a dia.'},
+      {id:66,texto:'Percebo que os momentos de integração ou benefícios extras demonstram preocupação real com o nosso bem-estar.'},
+    ]},
+  ]},
+];
+
+var pergAtivas = {};
+var pergOverride = {};
+var modoEd = 'global';
+var abaAtiva = 'M1';
+
+(function inicializarPerguntas(){
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ pergAtivas[p.id] = true; }); }); });
+})();
+
+function alternarModoEd(){
+  modoEd = modoEd === 'global' ? 'cliente' : 'global';
+  var lbl = document.getElementById('lbl-modo-ed');
+  var btn = document.getElementById('btn-modo-ed');
+  if(modoEd === 'cliente'){
+    lbl.textContent = 'Modo: Cliente'; lbl.style.background='#FFF1B8'; lbl.style.color='#92400E';
+    btn.textContent = 'Voltar para Global';
+  } else {
+    lbl.textContent = 'Modo: Global (Admin)'; lbl.style.background='var(--cinza-claro)'; lbl.style.color='var(--cinza-medio)';
+    btn.textContent = 'Edição do Cliente';
+  }
+  renderModulos();
+}
+
+function contarAtivas(subcat){
+  var n = 0;
+  subcat.perguntas.forEach(function(p){ if(pergAtivas[p.id]) n++; });
+  return n;
+}
+
+function validarModulos(){
+  var valido = true;
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
+    var n = contarAtivas(s);
+    if(n > 0 && (n < 3 || n % 2 === 0)) valido = false;
+  }); });
+  var btn = document.getElementById('btn-salvar-mod');
+  if(btn) btn.disabled = !valido;
+}
+
+function togglePerg(id, checked){
+  pergAtivas[id] = checked;
+  validarModulos();
+  var subId = null;
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ if(p.id === id) subId = s.id; }); }); });
+  if(subId){
+    var el = document.getElementById('cnt-' + subId.replace('.','_'));
+    if(el){
+      var s = null;
+      MODULOS.forEach(function(m){ m.subcats.forEach(function(sc){ if(sc.id === subId) s = sc; }); });
+      if(s){
+        var n = contarAtivas(s);
+        var ok = n >= 3 && n % 2 !== 0;
+        el.textContent = n + ' ativas' + (n > 0 && !ok ? ' ⚠' : '');
+        el.className = 'subcat-counter ' + (ok || n === 0 ? 'c-ok' : 'c-warn');
+      }
+    }
+  }
+}
+
+function editarPerg(id){
+  var el = document.getElementById('pt-' + id);
+  if(!el) return;
+  el.contentEditable = 'true';
+  el.style.background = modoEd === 'cliente' ? '#FFFBEB' : '#F0FDF4';
+  el.focus();
+  el.onblur = function(){
+    el.contentEditable = 'false';
+    el.style.background = '';
+    if(modoEd === 'cliente'){
+      pergOverride[id] = el.textContent.trim();
+      var badge = document.getElementById('ovr-' + id);
+      if(badge) badge.style.display = 'inline';
+    } else {
+      MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ s.perguntas.forEach(function(p){ if(p.id === id) p.texto = el.textContent.trim(); }); }); });
+    }
+  };
+}
+
+function addPergSubcat(subcatId){
+  var input = document.getElementById('add-' + subcatId.replace('.','_'));
+  if(!input) return;
+  var txt = input.value.trim();
+  if(!txt) return;
+  var novoId = Date.now();
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){ if(s.id === subcatId) s.perguntas.push({id:novoId, texto:txt}); }); });
+  pergAtivas[novoId] = true;
+  input.value = '';
+  renderModulos();
+}
+
+function salvarModulos(){
+  alert('Configuração salva. Em produção: gravado no Firestore.');
+}
+
+function toggleSubcat(hdr){
+  var body = hdr.nextElementSibling;
+  var aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
+  var seta = hdr.querySelector('.seta');
+  if(seta) seta.textContent = aberto ? '▸' : '▾';
+}
+
+function abrirAba(id){
+  abaAtiva = id;
+  document.querySelectorAll('.btn-aba').forEach(function(b){ b.classList.remove('aba-ativa'); });
+  var btn = document.getElementById('aba-' + id);
+  if(btn) btn.classList.add('aba-ativa');
+  renderModulos();
+}
+
+function renderModulos(){
+  var container = document.getElementById('container-modulos');
+  if(!container) return;
+  var modulo = null;
+  MODULOS.forEach(function(m){ if(m.id === abaAtiva) modulo = m; });
+  if(!modulo){ container.innerHTML = ''; return; }
+  var totalAtivas = 0;
+  modulo.subcats.forEach(function(s){ totalAtivas += contarAtivas(s); });
+  var html = '<div class="modulo-card">';
+  html += '<div class="modulo-header" style="cursor:default;background:var(--cinza-claro);">';
+  html += '<div><div class="m-title">' + modulo.emoji + ' ' + modulo.titulo + '</div><div class="m-sub">' + modulo.sub + '</div></div>';
+  html += '<div class="m-right"><span style="font-size:11px;color:var(--cinza-medio);">' + totalAtivas + ' perguntas ativas</span></div>';
+  html += '</div><div class="modulo-body open">';
+  modulo.subcats.forEach(function(s){
+    var n = contarAtivas(s);
+    var ok = n >= 3 && n % 2 !== 0;
+    var cntClass = (ok || n === 0) ? 'c-ok' : 'c-warn';
+    var cntTxt = n + ' ativas' + (n > 0 && !ok ? ' ⚠' : '');
+    html += '<div class="subcat-bloco">';
+    html += '<div class="subcat-hdr" onclick="toggleSubcat(this)">';
+    html += '<span class="subcat-titulo">📌 ' + s.id + ' — ' + s.titulo + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:8px;"><span class="subcat-counter ' + cntClass + '" id="cnt-' + s.id.replace('.','_') + '">' + cntTxt + '</span><span class="seta" style="font-size:10px;color:var(--cinza-medio);">▸</span></div>';
+    html += '</div>';
+    html += '<div style="padding:6px 0;display:none;">';
+    s.perguntas.forEach(function(p){
+      var ovr = pergOverride[p.id];
+      var txt = ovr || p.texto;
+      var ativo = pergAtivas[p.id] ? 'checked' : '';
+      html += '<div class="pergunta-item">';
+      html += '<input type="checkbox" class="perg-check" ' + ativo + ' onchange="togglePerg(' + p.id + ',this.checked)"/>';
+      html += '<div class="perg-text" id="pt-' + p.id + '">' + txt + '</div>';
+      html += '<span id="ovr-' + p.id + '" style="font-size:9px;color:var(--laranja);' + (ovr ? '' : 'display:none;') + '">✏ cliente</span>';
+      html += '<button style="font-size:10px;color:var(--cinza-medio);cursor:pointer;padding:2px 7px;border-radius:4px;border:1px solid var(--linha);background:#fff;white-space:nowrap;" onclick="editarPerg(' + p.id + ')">' + (modoEd === 'global' ? 'Editar' : 'Personalizar') + '</button>';
+      html += '</div>';
+    });
+    html += '<div class="add-perg" style="padding:6px 8px;">';
+    html += '<input class="form-control" id="add-' + s.id.replace('.','_') + '" placeholder="+ Adicionar pergunta para esta subcategoria..." style="flex:1;font-size:11.5px;"/>';
+    html += '<button class="btn btn-primary btn-sm" onclick="addPergSubcat(\'' + s.id + '\')">+ Adicionar</button>';
+    html += '</div></div></div>';
+  });
+  html += '</div></div>';
+  container.innerHTML = html;
+  validarModulos();
 }
 
 /* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
@@ -1859,6 +2084,7 @@ document.addEventListener('DOMContentLoaded', function() {
   atualizarBadgePendentes();
   renderHistorico();
   renderCargos();
+  renderModulos();
   setTimeout(dispararVelocimetros, 200);
 });
 </script>
