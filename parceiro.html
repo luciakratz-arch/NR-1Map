@@ -98,10 +98,11 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
     <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Meus Clientes<span class="bdg">2</span></div>
     <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Minhas Comissões</div>
     <div class="nav-sec">Suporte Técnico</div>
+    <div class="nav-item" onclick="sv('valores')"><span class="ic">💲</span>Tabela de Valores</div>
     <div class="nav-item" onclick="sv('perguntas')"><span class="ic">🧩</span>Consulta 110 Questões</div>
   </nav>
   <div class="sidebar-bottom">
-    <button class="btn btn-ghost" style="color:#fff; border-color:#4A5450;" onclick="location.href='admin.html'">← Voltar ao Login</button>
+    <button class="btn btn-ghost" style="color:#fff; border-color:#4A5450;" onclick="window.location.href='admin.html'">← Voltar ao Login</button>
   </div>
 </aside>
 
@@ -233,6 +234,61 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
     </div>
   </div>
 
+  <!-- ===== VIEW: TABELA DE VALORES OFICIAIS ===== -->
+  <div id="view-valores" class="view">
+    <div class="topbar"><div class="topbar-title">💲 Tabela de Valores Oficiais · Sua Comissão: 30% Recorrente</div></div>
+    <div class="content">
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header" style="background:var(--roxo);"><div class="title" style="color:#fff;">Opção 1 — Uso Único (Diagnóstico Pontual)</div><div class="subtitle" style="color:rgba(255,255,255,.7);">Pagamento único · Validade 30 dias</div></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Cálculo: Nº <b>exato</b> de colaboradores × valor unitário da faixa.</p>
+          <table><thead><tr><th>Faixa</th><th>Colaboradores</th><th style="color:var(--roxo);">Valor/colab.</th><th style="color:var(--verde);">Sua comissão (30%)</th><th>Exemplo total</th></tr></thead>
+          <tbody>
+            <tr><td>Faixa 1</td><td>Até 5</td><td style="font-weight:700;color:var(--roxo);">R$ 97,00</td><td style="color:var(--verde);font-weight:600;">R$ 29,10/colab.</td><td style="color:var(--cinza-medio);font-size:11px;">5 × R$97 = R$485 → comissão R$145,50</td></tr>
+            <tr><td>Faixa 2</td><td>6 a 20</td><td style="font-weight:700;color:var(--roxo);">R$ 79,00</td><td style="color:var(--verde);font-weight:600;">R$ 23,70/colab.</td><td style="color:var(--cinza-medio);font-size:11px;">10 × R$79 = R$790 → comissão R$237,00</td></tr>
+            <tr><td>Faixa 3</td><td>21 a 50</td><td style="font-weight:700;color:var(--roxo);">R$ 59,00</td><td style="color:var(--verde);font-weight:600;">R$ 17,70/colab.</td><td style="color:var(--cinza-medio);font-size:11px;">30 × R$59 = R$1.770 → comissão R$531,00</td></tr>
+            <tr><td>Faixa 4</td><td>51 a 100</td><td style="font-weight:700;color:var(--roxo);">R$ 49,00</td><td style="color:var(--verde);font-weight:600;">R$ 14,70/colab.</td><td style="color:var(--cinza-medio);font-size:11px;">60 × R$49 = R$2.940 → comissão R$882,00</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header" style="background:var(--verde);"><div class="title" style="color:#fff;">Opção 2 — Assinatura Mensal (Gestão Contínua)</div><div class="subtitle" style="color:rgba(255,255,255,.7);">Recorrente · Sua comissão chega todo mês</div></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;"><b>Piso Mínimo antidecréscimo:</b> o valor total nunca pode cair ao migrar para faixa superior.</p>
+          <table><thead><tr><th>Faixa</th><th>Colaboradores</th><th style="color:var(--verde);">Valor/colab./mês</th><th style="color:var(--roxo);">Sua comissão (30%)</th><th>Exemplo mensal</th></tr></thead>
+          <tbody>
+            <tr><td>Faixa 1</td><td>Até 5</td><td style="font-weight:700;color:var(--verde);">R$ 35,00</td><td style="color:var(--roxo);font-weight:600;">R$ 10,50/colab./mês</td><td style="color:var(--cinza-medio);font-size:11px;">5 × R$35 = R$175/mês → comissão R$52,50/mês</td></tr>
+            <tr><td>Faixa 2</td><td>6 a 20</td><td style="font-weight:700;color:var(--verde);">R$ 25,00</td><td style="color:var(--roxo);font-weight:600;">R$ 7,50/colab./mês</td><td style="color:var(--cinza-medio);font-size:11px;">15 × R$25 = R$375/mês → comissão R$112,50/mês</td></tr>
+            <tr><td>Faixa 3</td><td>21 a 50</td><td style="font-weight:700;color:var(--verde);">R$ 20,00</td><td style="color:var(--roxo);font-weight:600;">R$ 6,00/colab./mês</td><td style="color:var(--cinza-medio);font-size:11px;">30 × R$20 = R$600/mês → comissão R$180,00/mês</td></tr>
+            <tr><td>Faixa 4</td><td>51 a 100</td><td style="font-weight:700;color:var(--verde);">R$ 16,50</td><td style="color:var(--roxo);font-weight:600;">R$ 4,95/colab./mês</td><td style="color:var(--cinza-medio);font-size:11px;">60 × R$16,50 = R$990/mês → comissão R$297,00/mês</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="title">🧮 Calculadora de Proposta</div><div class="subtitle">Simule o valor e a sua comissão para um cliente</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div><label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Modalidade</label>
+              <select id="calc-mod" style="width:100%;padding:8px;border:1px solid var(--linha);border-radius:7px;font-size:12px;" onchange="calcular()">
+                <option value="assinatura">Assinatura Mensal</option>
+                <option value="unico">Uso Único</option>
+              </select></div>
+            <div><label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Nº de colaboradores</label>
+              <input type="number" id="calc-n" value="30" min="1" max="100" style="width:100%;padding:8px;border:1px solid var(--linha);border-radius:7px;font-size:12px;" oninput="calcular()"/></div>
+          </div>
+          <div style="background:var(--cinza-claro);border-radius:8px;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
+            <div><div style="font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Valor ao cliente</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--preto);" id="res-total">—</div></div>
+            <div><div style="font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Sua comissão (30%)</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--roxo);" id="res-comissao">—</div></div>
+            <div><div style="font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Faixa</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--verde);" id="res-faixa">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== VIEW: COPA DE QUESTÕES (SÓ LEITURA PARA O PARCEIRO) ===== -->
   <div id="view-perguntas" class="view">
     <div class="topbar"><div class="topbar-title">Dicionário de Referência Pericial (110 Perguntas)</div></div>
@@ -279,6 +335,19 @@ function sv(id){
   const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
+}
+var TCALC={unico:[{max:5,val:97},{max:20,val:79},{max:50,val:59},{max:100,val:49}],assinatura:[{max:5,val:35},{max:20,val:25},{max:50,val:20},{max:100,val:16.5}]};
+var FNOMES=['Faixa 1 (até 5)','Faixa 2 (6–20)','Faixa 3 (21–50)','Faixa 4 (51–100)'];
+function calcular(){
+  var mod=document.getElementById('calc-mod').value;
+  var n=parseInt(document.getElementById('calc-n').value)||0;
+  var t=TCALC[mod]; var idx=t.length-1;
+  for(var i=0;i<t.length;i++){if(n<=t[i].max){idx=i;break;}}
+  var total=n*t[idx].val; var com=total*0.3;
+  var suf=mod==='assinatura'?'/mês':'';
+  document.getElementById('res-total').textContent='R$ '+total.toFixed(2).replace('.',',')+suf;
+  document.getElementById('res-comissao').textContent='R$ '+com.toFixed(2).replace('.',',')+suf;
+  document.getElementById('res-faixa').textContent=FNOMES[idx];
 }
 </script>
 </body>
