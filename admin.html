@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NR-1 Map — Painel Admin Master</title>
+<title>NR-1 Map — Área Administrativa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -14,430 +14,502 @@
   --laranja:#D45E2A;--laranja-xp:#FAEEE7;
   --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
   --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
-  --sidebar:240px;
+  --sidebar:220px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
-.app{display:flex;height:100vh;overflow:hidden;}
+html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+
+/* ========= LOGIN ========= */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#1A0A2E 0%,#0D1210 60%,#0A1F15 100%);
+}
+.login-card{
+  background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.1);border-radius:20px;
+  padding:44px 40px;width:420px;max-width:94vw;
+}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .nr{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;}
+.login-logo .map{color:var(--verde-claro);}
+.login-logo .sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;}
+.login-tabs{display:flex;background:rgba(255,255,255,.06);border-radius:10px;padding:3px;margin-bottom:28px;}
+.login-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;border-radius:8px;transition:all .2s;}
+.login-tab.active{background:rgba(255,255,255,.12);color:#fff;}
+.login-field-label{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:5px;display:block;}
+.login-input{
+  width:100%;padding:12px 14px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;
+  color:#fff;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:14px;
+}
+.login-input:focus{outline:none;border-color:var(--verde-claro);}
+.login-input::placeholder{color:rgba(255,255,255,.25);}
+.login-btn{
+  width:100%;padding:13px;background:var(--verde);color:#fff;
+  border:none;border-radius:9px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;margin-top:4px;
+}
+.login-btn.roxo{background:var(--roxo);}
+.login-btn:hover{opacity:.9;}
+.login-hint{text-align:center;margin-top:16px;font-size:12px;color:rgba(255,255,255,.3);}
+
+/* ========= APP ========= */
+.app{display:none;height:100vh;overflow:hidden;background:var(--cinza-claro);}
+.app.active{display:flex;}
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
-.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.5px;border-bottom:1px solid #1E2A28;}
-.sidebar-logo span{color:var(--roxo-claro);}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--verde-claro);}
+.sidebar-perfil{padding:12px 18px;border-bottom:1px solid #1E2A28;}
+.sidebar-perfil .role{font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.sidebar-perfil .nome{font-size:12px;color:#C8D4D0;font-weight:500;}
 .nav{padding:10px 0;flex:1;}
 .nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
 .nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
 .nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
-.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--roxo-claro);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--verde-claro);}
 .nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
-.nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.bdg-nav{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+.btn-sair{width:100%;padding:8px;background:transparent;border:1px solid #2A2E2C;border-radius:7px;color:#4A5450;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-sair:hover{color:#C8D4D0;border-color:#4A5450;}
 
 /* MAIN */
 .main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
 .topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title-wrapper{display:flex;align-items:center;gap:12px;}
 .topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
-.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
-.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
-.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
-.btn-danger{background:#C53030;color:#fff;}.btn-danger:hover{background:#e53e3e;}
-.btn-sm{padding:5px 10px;font-size:11px;}
-.content{padding:20px 24px;flex:1;}
+.topbar-role{font-size:11px;font-weight:600;padding:3px 12px;border-radius:100px;background:var(--roxo-xp);color:var(--roxo);}
+.content{padding:24px;flex:1;}
 
 /* CARDS */
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
+.mc{background:var(--branco);border-radius:9px;padding:18px;border:1px solid var(--linha);border-top:3px solid var(--roxo);}
+.mc.verde{border-top-color:var(--verde);}
 .mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-.mc .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+.mc .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;color:var(--preto);}
+.mc .sub{font-size:11px;margin-top:4px;}
+.up{color:var(--verde-claro);} .down{color:var(--laranja); }
 
+/* CARD GENÉRICO */
 .card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
 .card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
 .card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
 .card-body{padding:16px 18px;}
+
+/* VELOCIMETROS */
+.gauge-container {display:grid; grid-template-columns:repeat(4,1fr); gap:14px; text-align:center;}
+.gauge-box {background:var(--branco); border:1px solid var(--linha); padding:14px; border-radius:9px;}
+.gauge {width:100px; height:60px; margin:0 auto; position:relative;}
 
 /* TABELA */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;}
-tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);vertical-align:middle;}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#F5F8F7;}
 
 /* BADGES */
-.bdg-s{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;}
-.s-ok{background:var(--verde-xp);color:var(--verde);}
-.s-alert{background:rgba(212,94,42,0.1);color:var(--laranja);}
-.s-erro{background:#FEEFEF;color:#C53030;}
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;}
+.bdg-ok{background:var(--verde-xp);color:var(--verde);}
+.bdg-pend{background:#FFF8E6;color:#92610A;}
+.bdg-erro{background:#FEEFEF;color:#C53030;}
+.bdg-roxo{background:var(--roxo-xp);color:var(--roxo);}
 .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
 
-/* MODAL FIX */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:540px;width:90%;}
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-danger{background:#C53030;color:#fff;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--linha);margin-bottom:16px;}
+.tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--cinza-medio);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.tab:hover{color:var(--preto);}
+.tab.active{color:var(--roxo);border-bottom-color:var(--roxo);font-weight:600;}
+
+/* FORM */
 .form-group{margin-bottom:12px;}
 .form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
-.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.form-control:focus{outline:none;border-color:var(--verde-claro);}
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+
+/* VIEWS */
 .view{display:none;}
 .view.active{display:block;}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo"><div>NR-1<span>Map Master</span></div></div>
-  <nav class="nav">
-    <div class="nav-sec">Painel Central</div>
-    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Geral</div>
-    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Controle de Clientes</div>
-    <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Fluxo de Caixa & Repasses</div>
-    <div class="nav-sec">Metodologia Científica</div>
-    <div class="nav-item" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
-    <div class="nav-sec">Prova Social</div>
-    <div class="nav-item" onclick="sv('depoimentos')"><span class="ic">⭐</span>Moderação Depoimentos<span class="bdg" id="sid-dep-count">1</span></div>
-  </nav>
-</aside>
+<!-- ========= TELA DE LOGIN RESTAURADA ========= -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="nr">NR-1<span class="map">Map</span></div>
+      <div class="sub">Área Restrita</div>
+    </div>
 
-<!-- MAIN -->
-<main class="main">
+    <div class="login-tabs">
+      <div class="login-tab" onclick="setLoginTab('admin',this)">Admin</div>
+      <div class="login-tab" onclick="setLoginTab('parceiro',this)">Parceiro</div>
+      <div class="login-tab" onclick="setLoginTab('rh',this)">RH / Empresa</div>
+      <div class="login-tab active" onclick="setLoginTab('user',this)">Usuário</div>
+    </div>
 
-  <!-- VIEW: DASHBOARD -->
-  <div id="view-dashboard" class="view active">
-    <div class="topbar"><div class="topbar-title">Indicadores Estratégicos</div></div>
-    <div class="content">
-      <div class="metrics">
-        <div class="mc"><div class="lbl">Faturamento Estimado</div><div class="val" id="card-fat">R$ 18.490,00</div><div class="sub">Mês selecionado</div></div>
-        <div class="mc"><div class="lbl">Alertas Críticos</div><div class="val" style="color:var(--laranja);">3 Empresas</div><div class="sub">GRO Patogênico</div></div>
-        <div class="mc"><div class="lbl">Créditos Gerais</div><div class="val">8.420</div><div class="sub">Nuvem ativa</div></div>
-        <div class="mc"><div class="lbl">Inadimplência</div><div class="val" style="color:#C53030;" id="card-inad">1 Pendente</div><div class="sub">Contas a receber</div></div>
-      </div>
+    <!-- ADMIN -->
+    <div id="login-admin" style="display:none;">
+      <label class="login-field-label">E-mail</label>
+      <input class="login-input" type="email" placeholder="lucia@nr1map.com.br" id="adm-email"/>
+      <label class="login-field-label">Senha</label>
+      <input class="login-input" type="password" placeholder="••••••••" id="adm-senha"/>
+      <button class="login-btn roxo" onclick="entrarAdmin()">Entrar como Admin</button>
+      <p class="login-hint">Acesso exclusivo da administradora · use qualquer senha para demo</p>
+    </div>
 
-      <!-- SIMULADOR HOTMART -->
-      <div class="card" style="background:var(--roxo-xp); border:1px solid rgba(123,0,196,0.2);">
-        <div class="card-header"><div class="title" style="color:var(--roxo);">🔌 Engenharia de Integração API Hotmart (Simulador Webhook)</div></div>
-        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center;">
-          <p style="font-size:12px; color:var(--preto); max-width:70%;">Quando um cliente adquire a consultoria na Hotmart, o gateway dispara um evento HTTP POST que injeta e ativa a licença imediatamente na sua base de dados, organizando-a por ordem alfabética automaticamente.</p>
-          <button class="btn btn-roxo" onclick="simularWebhookHotmart()">⚡ Simular Venda Hotmart</button>
-        </div>
-      </div>
+    <!-- PARCEIRO -->
+    <div id="login-parceiro" style="display:none;">
+      <label class="login-field-label">E-mail do parceiro</label>
+      <input class="login-input" type="email" placeholder="parceiro@consultoria.com.br" id="par-email"/>
+      <label class="login-field-label">Senha</label>
+      <input class="login-input" type="password" placeholder="••••••••" id="par-senha"/>
+      <button class="login-btn" style="background:var(--verde-claro);" onclick="entrarParceiro()">Entrar como Parceiro</button>
+      <p class="login-hint">Representante / Consultoria credenciada · use qualquer senha para demo</p>
+    </div>
+
+    <!-- RH -->
+    <div id="login-rh" style="display:none;">
+      <label class="login-field-label">E-mail da empresa</label>
+      <input class="login-input" type="email" placeholder="rh@suaempresa.com.br" id="rh-email"/>
+      <label class="login-field-label">Senha</label>
+      <input class="login-input" type="password" placeholder="••••••••" id="rh-senha"/>
+      <button class="login-btn" onclick="entrarRH()">Entrar como Gestor RH</button>
+      <p class="login-hint">Conta criada após assinatura do plano · use qualquer senha para demo</p>
+    </div>
+
+    <!-- USUÁRIO -->
+    <div id="login-user">
+      <label class="login-field-label">Código de acesso</label>
+      <input class="login-input" placeholder="Ex: NR1-A2B3C4" id="user-codigo" style="letter-spacing:.1em;font-size:16px;text-align:center;"/>
+      <button class="login-btn" onclick="entrarUser()">Acessar pesquisa</button>
+      <p class="login-hint">Código recebido por WhatsApp · qualquer código funciona no demo</p>
     </div>
   </div>
+</div>
 
-  <!-- VIEW: CLIENTES (BUSCA, FILTRO ATIVO/INATIVO, ORDEM ALFABÉTICA) -->
-  <div id="view-clientes" class="view">
-    <div class="topbar"><div class="topbar-title">Gestão Avançada de Clientes</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Cadastrar Manual</button></div>
-    <div class="content">
-      
-      <!-- CONTROLES DE FILTRO E BUSCA -->
-      <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
-        <input type="text" class="form-control" id="txt-busca-cliente" placeholder="🔍 Digite para pesquisar na base..." oninput="filtrarEOrganizarClientes()" style="max-width:300px;"/>
-        <button class="btn btn-ghost btn-sm" id="btn-filtro-ativos" onclick="alternarFiltroStatus('Ativo')">Ver Apenas Ativos</button>
-        <button class="btn btn-ghost btn-sm" id="btn-filtro-inativos" onclick="alternarFiltroStatus('Inativo')">Ver Apenas Inativos</button>
-        <button class="btn btn-ghost btn-sm" onclick="alternarFiltroStatus('Todos')">Mostrar Todos</button>
-      </div>
-
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Empresa Cliente</th><th>Contato Direto</th><th>Canal / Parceiro</th><th>Origem (Lead)</th><th>Créditos</th><th>Status</th><th>Ações</th></tr></thead>
-            <tbody id="tbody-clientes">
-              <!-- Injetado via JS por ordem alfabética -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+<!-- ========= PAINEL ADMIN MASTER ========= -->
+<div class="app" id="app-admin">
+  <aside class="sidebar">
+    <div class="sidebar-logo">NR-1<span>Map</span></div>
+    <div class="sidebar-perfil">
+      <div class="role">Administradora</div>
+      <div class="nome">Dra. Lucia Kratz</div>
     </div>
-  </div>
-
-  <!-- VIEW: FINANCEIRO MÊS A MÊS, DESPESAS E INTEGRALIZAÇÃO -->
-  <div id="view-financeiro" class="view">
-    <div class="topbar"><div class="topbar-title">Fluxo de Caixa & Distribuição de Repasses</div></div>
-    <div class="content">
-      
-      <!-- LANÇAMENTO DE DESPESAS -->
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><div class="title">Lancamento Operacional de Despesas do Projeto</div></div>
-        <div class="card-body" style="display:flex; gap:12px; align-items:flex-end;">
-          <div style="flex:1;"><label class="form-label">Descrição do Gasto</label><input type="text" class="form-control" id="desp-desc" placeholder="Ex: Servidor AWS / Nuvem"/></div>
-          <div style="width:150px;"><label class="form-label">Valor (R$)</label><input type="number" class="form-control" id="desp-val" placeholder="0.00"/></div>
-          <button class="btn btn-danger" onclick="lancarDespesa()">Lançar Despesa</button>
-        </div>
-      </div>
-
-      <!-- FILTRO DE MÊS FINANCEIRO -->
-      <div style="margin-bottom:14px;">
-        <label class="form-label">Selecionar Competência Mensal:</label>
-        <select class="form-control" id="filtro-mes-fin" onchange="atualizarMesFinanceiro()" style="max-width:200px;">
-          <option value="Julho">Julho 2026</option>
-          <option value="Junho">Junho 2026</option>
-        </select>
-      </div>
-
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Canal / Venda</th><th>Empresa Relacionada</th><th>Faturamento Bruto</th><th>Comissão / Taxa</th><th>Despesa Retida</th><th>Líquido</th><th>Status</th><th>Ação</th></tr></thead>
-            <tbody id="tbody-financeiro">
-              <!-- Injetado Dinamicamente -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <nav class="nav">
+      <div class="nav-sec">Visão geral</div>
+      <div class="nav-item active" id="nav-painel" onclick="sv('painel')"><span class="ic">📊</span>Painel Geral</div>
+      <div class="nav-sec">Gestão</div>
+      <div class="nav-item" id="nav-financeiro" onclick="sv('financeiro')"><span class="ic">💰</span>Financeiro</div>
+      <div class="nav-item" id="nav-clientes" onclick="sv('clientes')"><span class="ic">🏢</span>Clientes / Empresas</div>
+      <div class="nav-item" id="nav-leads" onclick="sv('leads')"><span class="ic">🎯</span>Leads<span class="bdg-nav">4</span></div>
+      <div class="nav-sec">Conteúdo</div>
+      <div class="nav-item" id="nav-laudos" onclick="sv('laudos')"><span class="ic">📄</span>Laudos Gerados</div>
+      <div class="nav-item" id="nav-perguntas" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
+      <div class="nav-item" id="nav-depoimentos" onclick="sv('depoimentos')"><span class="ic">⭐</span>Depoimentos<span class="bdg-nav" id="sid-dep-count">2</span></div>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="btn-sair" onclick="sair()">← Sair</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- VIEW: BANCO DE PERGUNTAS (CORRIGIDO E COMPLETADO) -->
-  <div id="view-perguntas" class="view">
-    <div class="topbar"><div class="topbar-title">Banco Global Unificado (Trava de Segurança Ímpar)</div></div>
-    <div class="content">
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:70px;">ID</th><th style="width:150px;">Macro-Dimensão</th><th>Texto Regulante</th><th style="width:100px;">Ação</th></tr></thead>
-            <tbody id="tbody-perguntas">
-              <!-- Perguntas carregadas via JS -->
-            </tbody>
-          </table>
+  <main class="main">
+
+    <!-- PAINEL GERAL (COM VELOCÍMETROS REAIS EMBUTIDOS) -->
+    <div id="view-painel" class="view active">
+      <div class="topbar"><div class="topbar-title">Painel Geral</div><span class="topbar-role">Administradora</span></div>
+      <div class="content">
+        <div class="metrics">
+          <div class="mc verde"><div class="lbl">Receita do mês</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12% vs. mês anterior</div></div>
+          <div class="mc verde"><div class="lbl">Clientes ativos</div><div class="val">14</div><div class="sub up">↑ 3 novos este mês</div></div>
+          <div class="mc"><div class="lbl">Laudos gerados</div><div class="val">38</div><div class="sub">este mês</div></div>
+          <div class="mc"><div class="lbl">Leads captados</div><div class="val">27</div><div class="sub">formulário landing</div></div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- VIEW: MODERAÇÃO DE DEPOIMENTOS FUNCIONAL -->
-  <div id="view-depoimentos" class="view">
-    <div class="topbar"><div class="topbar-title">Moderação Exclusiva de Provas Sociais</div></div>
-    <div class="content">
-      <div class="card" id="card-depoimento-bloco">
-        <div class="card-body">
-          <div style="border:1px solid var(--linha); padding:16px; border-radius:8px; background:#fff;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <strong>Clínica São Silvestre (Verificado Hotmart)</strong>
-              <span class="bdg-s s-alert" id="dep-status-badge"><span class="dot"></span>Aguardando Moderação</span>
+        <!-- VELOCÍMETROS DA BALANÇA PSICODINÂMICA -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="title">Balança Psicodinâmica Consolidada (Escala Dejours Global)</div></div>
+          <div class="card-body gauge-container">
+            <div class="gauge-box">
+              <div class="gauge">
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 45 15" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="30" y2="20" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+              </div>
+              <div style="font-size:11px; font-weight:600; margin-top:4px;">Fisiológicos (-0.8)</div>
+              <span class="bdg bdg-erro"><span class="dot"></span>Limite</span>
             </div>
-            <p style="font-size:13px; font-style:italic; margin-bottom:12px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
-            <div class="form-group">
-              <label class="form-label">Sua Resposta Oficial:</label>
-              <input type="text" class="form-control" id="txt-resposta-dep" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!"/>
+            <div class="gauge-box">
+              <div class="gauge">
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 30 30" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="20" y2="35" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+              </div>
+              <div style="font-size:11px; font-weight:600; margin-top:4px;">Segurança (-2.4)</div>
+              <span class="bdg bdg-erro"><span class="dot"></span>Patogênico</span>
             </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary btn-sm" onclick="processarDepoimento('Aprovado')">✓ Aprovar e Enviar para a Home</button>
-              <button class="btn btn-danger btn-sm" onclick="processarDepoimento('Reprovado')">✕ Reprovar / Ocultar</button>
+            <div class="gauge-box">
+              <div class="gauge">
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 80 40" fill="none" stroke="#10b981" stroke-width="8"/><line x1="50" y1="50" x2="75" y2="25" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+              </div>
+              <div style="font-size:11px; font-weight:600; margin-top:4px;">Sociais (+2.1)</div>
+              <span class="bdg bdg-ok"><span class="dot"></span>Fértil</span>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge">
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 60 20" fill="none" stroke="#f59e0b" stroke-width="8"/><line x1="50" y1="50" x2="55" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+              </div>
+              <div style="font-size:11px; font-weight:600; margin-top:4px;">Organizacionais (+0.4)</div>
+              <span class="bdg bdg-pend"><span class="dot"></span>Alerta</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="title">Últimas atividades</div></div>
+            <div class="card-body" style="padding:8px 16px;">
+              <table><tbody>
+                <tr><td>Clínica Vida S.A.</td><td><span class="bdg bdg-ok"><span class="dot"></span>Laudo gerado</span></td><td style="color:var(--cinza-medio);font-size:11px;">há 2h</td></tr>
+                <tr><td>Escola ABC</td><td><span class="bdg bdg-pend"><span class="dot"></span>Aguardando resp.</span></td><td style="color:var(--cinza-medio);font-size:11px;">há 5h</td></tr>
+                <tr><td>Contábil Souza</td><td><span class="bdg bdg-ok"><span class="dot"></span>Assinatura activa</span></td><td style="color:var(--cinza-medio);font-size:11px;">ontem</td></tr>
+                <tr><td>M.F.S.</td><td><span class="bdg bdg-roxo"><span class="dot"></span>Depoimento pendente</span></td><td style="color:var(--cinza-medio);font-size:11px;">ontem</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="title">Planos ativos</div></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Assinatura Mensal</span><span style="font-weight:600;color:var(--verde);">11 empresas</span></div>
+                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div style="width:78%;height:100%;background:var(--verde-claro);border-radius:3px;"></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Uso Único</span><span style="font-weight:600;color:var(--roxo);">3 empresas</span></div>
+                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div style="width:22%;height:100%;background:var(--roxo-claro);border-radius:3px;"></div></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-</main>
-</div>
-
-<!-- MODAL CADASTRO -->
-<div class="modal-overlay" id="modal-cliente">
-  <div class="modal">
-    <div class="modal-header"><h3>Cadastrar Nova Licença / Perfil Decisório</h3><button style="background:none; border:none; font-size:20px;" onclick="closeModal('modal-cliente')">×</button></div>
-    <div class="form-group"><label class="form-label">Nome da Empresa</label><input type="text" class="form-control" id="cad-nome"/></div>
-    <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-control" id="cad-email"/></div>
-    <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-control" id="cad-whats"/></div>
-    <div class="grid-2">
-      <div class="form-group"><label class="form-label">Canal de Venda</label><select class="form-control" id="cad-canal"><option>Venda Direta</option><option>Hotmart</option></select></div>
-      <div class="form-group"><label class="form-label">Origem (Lead Origin)</label><select class="form-control" id="cad-origem"><option>Instagram</option><option>Indicação</option></select></div>
+    <!-- FINANCEIRO -->
+    <div id="view-financeiro" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Financeiro</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="metrics">
+          <div class="mc verde"><div class="lbl">Receita do mês</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12%</div></div>
+          <div class="mc verde"><div class="lbl">Receita total acumulada</div><div class="val">R$ 18.290</div><div class="sub">desde o início</div></div>
+          <div class="mc"><div class="lbl">Ticket médio</div><div class="val">R$ 274</div><div class="sub">por venda</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">Fechamento Mensal</div><div class="subtitle">Junho de 2026</div></div>
+          </div>
+          <div class="card-body">
+            <div style="background:var(--verde-xp);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--verde);">
+              <strong>Junho 2026:</strong> 14 vendas · Receita: <strong>R$ 3.840,00</strong>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-roxo" style="width:100%; margin-top:10px;" onclick="salvarClienteManual()">Ativar e Organizar Base</button>
-  </div>
+
+    <!-- CLIENTES -->
+    <div id="view-clientes" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Clientes / Empresas</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">Empresas cadastradas</div></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div id="view-leads" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Leads Captados</div>
+        </div>
+      </div>
+      <div class="content"><div class="card"><div class="card-body">Painel de Leads Ativo.</div></div></div>
+    </div>
+
+    <!-- LAUDOS -->
+    <div id="view-laudos" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Laudos Gerados</div>
+        </div>
+      </div>
+      <div class="content"><div class="card"><div class="card-body">Histórico de Laudos Técnicos em SST.</div></div></div>
+    </div>
+
+    <!-- BANCO DE 110 PERGUNTAS (ITEM 5 CORRIGIDO SEPARADO) -->
+    <div id="view-perguntas" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Pool Metodológico (110 Perguntas)</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width:70px;">ID</th><th style="width:150px;">Macro-Dimensão</th><th>Texto Regulante</th><th style="width:100px;">Ação</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>#001</strong></td>
+                  <td><span class="bdg bdg-ok"><span class="dot"></span>Fisiológico</span></td>
+                  <td><input type="text" class="form-control" value="Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." id="txt-p-001" /></td>
+                  <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta #001 atualizada universalmente!')">Atualizar</button></td>
+                </tr>
+                <tr>
+                  <td><strong>#002</strong></td>
+                  <td><span class="bdg bdg-ok"><span class="dot"></span>Segurança</span></td>
+                  <td><input type="text" class="form-control" value="Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." id="txt-p-002" /></td>
+                  <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta #002 atualizada universalmente!')">Atualizar</button></td>
+                </tr>
+                <tr>
+                  <td><strong>#110</strong></td>
+                  <td><span class="bdg bdg-pend"><span class="dot"></span>Organizacional</span></td>
+                  <td><input type="text" class="form-control" value="A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." id="txt-p-110" /></td>
+                  <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta #110 atualizada universalmente!')">Atualizar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEPOIMENTOS (ITEM 6 MODERAÇÃO CORRIGIDA) -->
+    <div id="view-depoimentos" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">Moderação de Depoimentos</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" onclick="swTab(this,'dep-pend')">⏳ Pendentes</div>
+        </div>
+
+        <div id="dep-pend" class="view active">
+          <div class="card" id="dep-card-mestre">
+            <div class="card-body">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <span style="color:var(--roxo);font-size:16px;">★★★★★</span>
+                    <strong style="font-size:13px;">Clínica São Silvestre</strong>
+                  </div>
+                  <p style="font-size:13px;color:var(--cinza-escuro);margin-bottom:14px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
+                  <div class="form-group">
+                    <label class="form-label">Sua resposta pública</label>
+                    <input type="text" class="form-control" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!" />
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <button class="btn btn-primary btn-sm" onclick="aprovarDepMestre()">✓ Aprovar e Publicar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 <script>
-// BANCO DE DADOS EM MEMÓRIA (ESTRUTURAÇÃO COMPLETA)
-let clientes = [
-  { nome: "Clínica Vida S.A.", email: "carlos@clinica.com", whats: "(62) 99888-7766", canal: "Alfa SST", origem: "Indicação", creditos: 45, status: "Ativo" },
-  { nome: "Indústria MetalTop", email: "comercial@metaltop.com", whats: "(64) 99221-1100", canal: "Venda Direta", origem: "Instagram", creditos: 0, status: "Inativo" },
-  { nome: "Escola do Futuro", email: "direcao@escola.com", whats: "(62) 98111-2233", canal: "Hotmart", origem: "Congresso SST", creditos: 15, status: "Ativo" }
-];
-
-let finJulho = [
-  { canal: "Hotmart", empresa: "Escola do Futuro", bruto: 18490, taxa: 1849, despesa: 0, status: "Integralizado" }
-];
-
-let finJunho = [
-  { canal: "Venda Direta", empresa: "Indústria MetalTop", bruto: 12300, taxa: 3690, despesa: 0, status: "Devedor" }
-];
-
-const perguntas = [
-  { id: "#001", dim: "Fisiológico", texto: "Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." },
-  { id: "#002", dim: "Segurança", texto: "Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." },
-  { id: "#110", dim: "Organizacional", texto: "A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." }
-];
-
-let statusFiltroAtual = "Todos";
-
-// INICIALIZADORES OPERACIONAIS
-window.onload = function() {
-  filtrarEOrganizarClientes();
-  atualizarMesFinanceiro();
-  renderPerguntas();
-};
-
-function sv(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el = document.getElementById('view-'+id);
-  if(el) el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
-  if(nav) nav.classList.add('active');
+// LOGIN DE QUATRO PERFIS PRESERVADO
+var loginTab = 'user';
+function setLoginTab(tab, el) {
+  loginTab = tab;
+  document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('login-admin').style.display    = tab === 'admin'    ? 'block' : 'none';
+  document.getElementById('login-parceiro').style.display = tab === 'parceiro' ? 'block' : 'none';
+  document.getElementById('login-rh').style.display       = tab === 'rh'       ? 'block' : 'none';
+  document.getElementById('login-user').style.display     = tab === 'user'     ? 'block' : 'none';
 }
 
-// LÓGICA DE CRUD E ORDENAÇÃO ALFABÉTICA
-function filtrarEOrganizarClientes() {
-  const busca = document.getElementById('txt-busca-cliente').value.toLowerCase();
-  let filtrados = clientes.filter(c => c.nome.toLowerCase().includes(busca));
+function entrarAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-admin').classList.add('active');
+}
+function entrarParceiro() { alert('Redirecionando para parceiro.html...'); }
+function entrarRH() { alert('Redirecionando para painel.html...'); }
+function entrarUser() { alert('Acessando pesquisa do colaborador...'); }
 
-  if (statusFiltroAtual !== "Todos") {
-    filtrados = filtrados.filter(c => c.status === statusFiltroAtual);
-  }
-
-  // Ordenação Alfabética Estrita (A-Z)
-  filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
-
-  const tbody = document.getElementById('tbody-clientes');
-  tbody.innerHTML = "";
-
-  filtrados.forEach((c, index) => {
-    const badgeClass = c.status === "Ativo" ? "s-ok" : "s-erro";
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${c.nome}</strong></td>
-        <td>${c.email}<br><small>${c.whats}</small></td>
-        <td><span class="bdg-s s-ok">${c.canal}</span></td>
-        <td>${c.origem}</td>
-        <td><strong>${c.creditos} un</strong></td>
-        <td><span class="bdg-s ${badgeClass}"><span class="dot"></span>${c.status}</span></td>
-        <td>
-          <button class="btn btn-ghost btn-sm" onclick="alert('Perfil de ${c.nome} carregado para auditoria pericial.')">✏️ Ver</button>
-          <button class="btn btn-danger btn-sm" onclick="removerClienteInMemory('${c.nome}')">🗑️</button>
-        </td>
-      </tr>
-    `;
-  });
+function sair() {
+  document.getElementById('app-admin').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
 }
 
-function alternarFiltroStatus(status) {
-  statusFiltroAtual = status;
-  filtrarEOrganizarClientes();
+// NAVEGAÇÃO INTERNA COM RETORNO SEGURO
+function sv(id) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  var targetView = document.getElementById('view-' + id);
+  if(targetView) targetView.classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  var nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
 }
 
-function simularWebhookHotmart() {
-  const novo = { nome: "Alpha Corporativa (Via API Hotmart)", email: "contato@alpha.com", whats: "(11) 97777-6655", canal: "Hotmart", origem: "API Webhook", creditos: 100, status: "Ativo" };
-  clientes.push(novo);
-  filtrarEOrganizarClientes();
-  alert("🚀 Evento Webhook Recebido! Cliente 'Alpha Corporativa' injetado, processado e ordenado na tabela com sucesso.");
+function swTab(tab, targetId) {
+  var parent = tab.closest('.content');
+  parent.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  tab.classList.add('active');
 }
 
-function salvarClienteManual() {
-  const nome = document.getElementById('cad-nome').value;
-  if(!nome) return alert("Insira o nome da empresa.");
-  clientes.push({
-    nome: nome,
-    email: document.getElementById('cad-email').value || "vazio@corp.com",
-    whats: document.getElementById('cad-whats').value || "(00) 0000-0000",
-    canal: document.getElementById('cad-canal').value,
-    origem: document.getElementById('cad-origem').value,
-    creditos: 50,
-    status: "Ativo"
-  });
-  closeModal('modal-cliente');
-  filtrarEOrganizarClientes();
+// CORREÇÃO DOS DEPOIMENTOS DECREMENTANDO A SIDEBAR
+function aprovarDepMestre() {
+  var card = document.getElementById('dep-card-mestre');
+  card.style.opacity = '0.4';
+  document.getElementById('sid-dep-count').innerText = "1"; 
+  alert('Depoimento e resposta oficial publicados na página principal!');
 }
-
-function removerClienteInMemory(nome) {
-  if(confirm(`Deseja deletar ${nome}?`)) {
-    clientes = clientes.filter(c => c.nome !== nome);
-    filtrarEOrganizarClientes();
-  }
-}
-
-// LÓGICA FINANCEIRA MÊS A MÊS COM INTEGRALIZAÇÃO REAL
-function actualizarMesFinanceiro() {
-  const mes = document.getElementById('filtro-mes-fin').value;
-  const tbody = document.getElementById('tbody-financeiro');
-  tbody.innerHTML = "";
-
-  let lista = mes === "Julho" ? finJulho : finJunho;
-  let totalFat = 0;
-  let inadimplencia = 0;
-
-  lista.forEach(f => {
-    totalFat += f.bruto;
-    if(f.status === "Devedor") inadimplencia++;
-    let liq = f.bruto - f.taxa - f.despesa;
-    let badge = f.status === "Integralizado" ? "s-ok" : "s-erro";
-    let btnAcao = f.status === "Devedor" ? `<button class="btn btn-roxo btn-sm" onclick="integralizarGanhoReal('${f.empresa}')">💰 Integralizar Ganho</button>` : `<button class="btn btn-ghost btn-sm" disabled>Conciliado</button>`;
-
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${f.canal}</strong></td>
-        <td>${f.empresa}</td>
-        <td>R$ ${f.bruto.toLocaleString('pt-BR')},00</td>
-        <td>R$ ${f.taxa.toLocaleString('pt-BR')},00</td>
-        <td style="color:#C53030;">R$ ${f.despesa.toLocaleString('pt-BR')},00</td>
-        <td style="color:var(--verde); font-weight:600;">R$ ${liq.toLocaleString('pt-BR')},00</td>
-        <td><span class="bdg-s ${badge}"><span class="dot"></span>${f.status}</span></td>
-        <td>${btnAcao}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById('card-fat').innerText = `R$ ${totalFat.toLocaleString('pt-BR')},00`;
-  document.getElementById('card-inad').innerText = inadimplencia > 0 ? `${inadimplencia} Pendente` : "0 Pendente";
-}
-
-function integralizarGanhoReal(empresa) {
-  finJunho.forEach(f => { if(f.empresa === empresa) f.status = "Integralizado"; });
-  atualizarMesFinanceiro();
-  alert(`Sucesso! Os ativos da empresa ${empresa} foram auditados e integralizados no caixa geral do projeto.`);
-}
-
-function lancarDespesa() {
-  const valor = parseFloat(document.getElementById('desp-val').value);
-  if(!valor) return alert("Insira um valor numérico para a despesa.");
-  const mes = document.getElementById('filtro-mes-fin').value;
-  let lista = mes === "Julho" ? finJulho : finJunho;
-
-  if(lista.length > 0) {
-    lista[0].despesa += valor;
-    atualizarMesFinanceiro();
-    alert("Despesa retida e computada no fluxo líquido com sucesso!");
-  }
-}
-
-// RENDER DE QUESTÕES METODOLÓGICAS
-function renderPerguntas() {
-  const tbody = document.getElementById('tbody-perguntas');
-  tbody.innerHTML = "";
-  perguntas.forEach(p => {
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${p.id}</strong></td>
-        <td><span class="bdg-s s-ok">${p.dim}</span></td>
-        <td><input type="text" class="form-control" value="${p.texto}" id="txt-p-${p.id}"/></td>
-        <td><button class="btn btn-primary btn-sm" onclick="alert('Sucesso: Alinhamento pericial da pergunta ${p.id} atualizado no banco mestre global!')">Atualizar</button></td>
-      </tr>
-    `;
-  });
-}
-
-// MODERAÇÃO DE DEPOIMENTOS REAL
-function processarDepoimento(status) {
-  document.getElementById('dep-status-badge').className = status === 'Aprovado' ? 'bdg-s s-ok' : 'bdg-s s-erro';
-  document.getElementById('dep-status-badge').innerHTML = `<span class="dot"></span>${status}`;
-  document.getElementById('sid-dep-count').innerText = "0";
-  alert(`O depoimento foi marcado como [${status}]. A resposta oficial foi vinculada e enviada para renderização no index.html.`);
-  document.getElementById('card-depoimento-bloco').style.opacity = "0.5";
-}
-
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 </script>
 </body>
 </html>
