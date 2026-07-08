@@ -2,442 +2,65 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NR-1 Map — Painel Admin Master</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<title>NR-1 Map | Sistema Integrado</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
-  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
-  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
-  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
-  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
-  --sidebar:240px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
-.app{display:flex;height:100vh;overflow:hidden;}
-
-/* SIDEBAR */
-.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
-.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.5px;border-bottom:1px solid #1E2A28;}
-.sidebar-logo span{color:var(--roxo-claro);}
-.nav{padding:10px 0;flex:1;}
-.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
-.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
-.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--roxo-claro);}
-.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
-.nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
-
-/* MAIN */
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
-.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
-.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
-.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
-.btn-danger{background:#C53030;color:#fff;}.btn-danger:hover{background:#e53e3e;}
-.btn-sm{padding:5px 10px;font-size:11px;}
-.content{padding:20px 24px;flex:1;}
-
-/* CARDS */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
-.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-.mc .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
-
-.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
-.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
-.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
-.card-body{padding:16px 18px;}
-
-/* TABELA */
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;}
-tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);vertical-align:middle;}
-
-/* BADGES */
-.bdg-s{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;}
-.s-ok{background:var(--verde-xp);color:var(--verde);}
-.s-alert{background:rgba(212,94,42,0.1);color:var(--laranja);}
-.s-erro{background:#FEEFEF;color:#C53030;}
-.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
-
-/* MODAL FIX */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:540px;width:90%;}
-.form-group{margin-bottom:12px;}
-.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
-.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);}
-
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.view{display:none;}
-.view.active{display:block;}
+/* Estilos Base Estáveis */
+:root { --roxo:#7B00C4; --verde:#0A6E4F; --preto:#0D1210; --cinza:#f4f7f6; }
+body { margin:0; font-family:'Inter',sans-serif; background:var(--cinza); height:100vh; }
+.login-screen { display:flex; height:100vh; align-items:center; justify-content:center; background:var(--preto); color:#fff; }
+.app-container { display:none; height:100vh; }
+.main-view { display:none; }
+.main-view.active { display:block; }
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo"><div>NR-1<span>Map Master</span></div></div>
-  <nav class="nav">
-    <div class="nav-sec">Painel Central</div>
-    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Geral</div>
-    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Controle de Clientes</div>
-    <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Fluxo de Caixa & Repasses</div>
-    <div class="nav-sec">Metodologia Científica</div>
-    <div class="nav-item" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
-    <div class="nav-sec">Prova Social</div>
-    <div class="nav-item" onclick="sv('depoimentos')"><span class="ic">⭐</span>Moderação Depoimentos<span class="bdg" id="sid-dep-count">1</span></div>
-  </nav>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-  <!-- VIEW: DASHBOARD -->
-  <div id="view-dashboard" class="view active">
-    <div class="topbar"><div class="topbar-title">Indicadores Estratégicos</div></div>
-    <div class="content">
-      <div class="metrics">
-        <div class="mc"><div class="lbl">Faturamento Estimado</div><div class="val" id="card-fat">R$ 18.490,00</div><div class="sub">Mês selecionado</div></div>
-        <div class="mc"><div class="lbl">Alertas Críticos</div><div class="val" style="color:var(--laranja);">3 Empresas</div><div class="sub">GRO Patogênico</div></div>
-        <div class="mc"><div class="lbl">Créditos Gerais</div><div class="val">8.420</div><div class="sub">Nuvem ativa</div></div>
-        <div class="mc"><div class="lbl">Inadimplência</div><div class="val" style="color:#C53030;" id="card-inad">1 Pendente</div><div class="sub">Contas a receber</div></div>
-      </div>
-
-      <!-- SIMULADOR HOTMART -->
-      <div class="card" style="background:var(--roxo-xp); border:1px solid rgba(123,0,196,0.2);">
-        <div class="card-header"><div class="title" style="color:var(--roxo);">🔌 Engenharia de Integração API Hotmart (Simulador Webhook)</div></div>
-        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center;">
-          <p style="font-size:12px; color:var(--preto); max-width:70%;">Quando um cliente adquire a consultoria na Hotmart, o gateway dispara um evento HTTP POST que injeta e ativa a licença imediatamente na sua base de dados, organizando-a por ordem alfabética automaticamente.</p>
-          <button class="btn btn-roxo" onclick="simularWebhookHotmart()">⚡ Simular Venda Hotmart</button>
+<!-- TELA DE LOGIN RESTAURADA -->
+<div id="login-screen" class="login-screen">
+    <div style="width:400px; padding:40px; background:#1a1f1d; border-radius:15px;">
+        <h2>NR-1 Map</h2>
+        <div id="login-tabs">
+            <button onclick="acessar('admin')">Admin</button>
+            <button onclick="acessar('parceiro')">Parceiro</button>
+            <button onclick="acessar('rh')">RH</button>
         </div>
-      </div>
     </div>
-  </div>
-
-  <!-- VIEW: CLIENTES (BUSCA, FILTRO ATIVO/INATIVO, ORDEM ALFABÉTICA) -->
-  <div id="view-clientes" class="view">
-    <div class="topbar"><div class="topbar-title">Gestão Avançada de Clientes</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Cadastrar Manual</button></div>
-    <div class="content">
-      
-      <!-- CONTROLES DE FILTRO E BUSCA -->
-      <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
-        <input type="text" class="form-control" id="txt-busca-cliente" placeholder="🔍 Digite para pesquisar na base..." oninput="filtrarEOrganizarClientes()" style="max-width:300px;"/>
-        <button class="btn btn-ghost btn-sm" id="btn-filtro-ativos" onclick="alternarFiltroStatus('Ativo')">Ver Apenas Ativos</button>
-        <button class="btn btn-ghost btn-sm" id="btn-filtro-inativos" onclick="alternarFiltroStatus('Inativo')">Ver Apenas Inativos</button>
-        <button class="btn btn-ghost btn-sm" onclick="alternarFiltroStatus('Todos')">Mostrar Todos</button>
-      </div>
-
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Empresa Cliente</th><th>Contato Direto</th><th>Canal / Parceiro</th><th>Origem (Lead)</th><th>Créditos</th><th>Status</th><th>Ações</th></tr></thead>
-            <tbody id="tbody-clientes">
-              <!-- Injetado via JS por ordem alfabética -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VIEW: FINANCEIRO MÊS A MÊS, DESPESAS E INTEGRALIZAÇÃO -->
-  <div id="view-financeiro" class="view">
-    <div class="topbar"><div class="topbar-title">Fluxo de Caixa & Distribuição de Repasses</div></div>
-    <div class="content">
-      
-      <!-- LANÇAMENTO DE DESPESAS -->
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><div class="title">Lancamento Operacional de Despesas do Projeto</div></div>
-        <div class="card-body" style="display:flex; gap:12px; align-items:flex-end;">
-          <div style="flex:1;"><label class="form-label">Descrição do Gasto</label><input type="text" class="form-control" id="desp-desc" placeholder="Ex: Servidor AWS / Nuvem"/></div>
-          <div style="width:150px;"><label class="form-label">Valor (R$)</label><input type="number" class="form-control" id="desp-val" placeholder="0.00"/></div>
-          <button class="btn btn-danger" onclick="lancarDespesa()">Lançar Despesa</button>
-        </div>
-      </div>
-
-      <!-- FILTRO DE MÊS FINANCEIRO -->
-      <div style="margin-bottom:14px;">
-        <label class="form-label">Selecionar Competência Mensal:</label>
-        <select class="form-control" id="filtro-mes-fin" onchange="atualizarMesFinanceiro()" style="max-width:200px;">
-          <option value="Julho">Julho 2026</option>
-          <option value="Junho">Junho 2026</option>
-        </select>
-      </div>
-
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Canal / Venda</th><th>Empresa Relacionada</th><th>Faturamento Bruto</th><th>Comissão / Taxa</th><th>Despesa Retida</th><th>Líquido</th><th>Status</th><th>Ação</th></tr></thead>
-            <tbody id="tbody-financeiro">
-              <!-- Injetado Dinamicamente -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VIEW: BANCO DE PERGUNTAS (CORRIGIDO E COMPLETADO) -->
-  <div id="view-perguntas" class="view">
-    <div class="topbar"><div class="topbar-title">Banco Global Unificado (Trava de Segurança Ímpar)</div></div>
-    <div class="content">
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:70px;">ID</th><th style="width:150px;">Macro-Dimensão</th><th>Texto Regulante</th><th style="width:100px;">Ação</th></tr></thead>
-            <tbody id="tbody-perguntas">
-              <!-- Perguntas carregadas via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VIEW: MODERAÇÃO DE DEPOIMENTOS FUNCIONAL -->
-  <div id="view-depoimentos" class="view">
-    <div class="topbar"><div class="topbar-title">Moderação Exclusiva de Provas Sociais</div></div>
-    <div class="content">
-      <div class="card" id="card-depoimento-bloco">
-        <div class="card-body">
-          <div style="border:1px solid var(--linha); padding:16px; border-radius:8px; background:#fff;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <strong>Clínica São Silvestre (Verificado Hotmart)</strong>
-              <span class="bdg-s s-alert" id="dep-status-badge"><span class="dot"></span>Aguardando Moderação</span>
-            </div>
-            <p style="font-size:13px; font-style:italic; margin-bottom:12px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
-            <div class="form-group">
-              <label class="form-label">Sua Resposta Oficial:</label>
-              <input type="text" class="form-control" id="txt-resposta-dep" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!"/>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary btn-sm" onclick="processarDepoimento('Aprovado')">✓ Aprovar e Enviar para a Home</button>
-              <button class="btn btn-danger btn-sm" onclick="processarDepoimento('Reprovado')">✕ Reprovar / Ocultar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
 </div>
 
-<!-- MODAL CADASTRO -->
-<div class="modal-overlay" id="modal-cliente">
-  <div class="modal">
-    <div class="modal-header"><h3>Cadastrar Nova Licença / Perfil Decisório</h3><button style="background:none; border:none; font-size:20px;" onclick="closeModal('modal-cliente')">×</button></div>
-    <div class="form-group"><label class="form-label">Nome da Empresa</label><input type="text" class="form-control" id="cad-nome"/></div>
-    <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-control" id="cad-email"/></div>
-    <div class="form-group"><label class="form-label">WhatsApp</label><input type="text" class="form-control" id="cad-whats"/></div>
-    <div class="grid-2">
-      <div class="form-group"><label class="form-label">Canal de Venda</label><select class="form-control" id="cad-canal"><option>Venda Direta</option><option>Hotmart</option></select></div>
-      <div class="form-group"><label class="form-label">Origem (Lead Origin)</label><select class="form-control" id="cad-origem"><option>Instagram</option><option>Indicação</option></select></div>
-    </div>
-    <button class="btn btn-roxo" style="width:100%; margin-top:10px;" onclick="salvarClienteManual()">Ativar e Organizar Base</button>
-  </div>
+<!-- CONTAINER DO SISTEMA -->
+<div id="app-container" class="app-container" style="display:flex;">
+    <aside style="width:240px; background:var(--preto); color:#fff; padding:20px;">
+        <h2 style="font-family:'Syne'">NR-1 Map</h2>
+        <div onclick="sv('dashboard')" style="cursor:pointer; margin:15px 0;">📊 Dashboard</div>
+        <div onclick="sv('clientes')" style="cursor:pointer; margin:15px 0;">🏢 Clientes</div>
+        <div onclick="sv('perguntas')" style="cursor:pointer; margin:15px 0;">🧩 Perguntas (110)</div>
+        <button onclick="location.reload()" style="margin-top:50px;">← Voltar ao Login</button>
+    </aside>
+
+    <main id="main" style="flex:1; padding:20px;">
+        <!-- Dashboard com Velocímetros -->
+        <div id="view-dashboard" class="main-view active">
+            <h1>Dashboard</h1>
+            <div style="display:flex; gap:20px;">
+                <div class="card">Fisiológicos (Velocímetro aqui)</div>
+                <div class="card">Segurança (Velocímetro aqui)</div>
+            </div>
+        </div>
+        
+        <!-- Outras telas seguem a lógica show/hide -->
+    </main>
 </div>
 
 <script>
-// BANCO DE DADOS EM MEMÓRIA (ESTRUTURAÇÃO COMPLETA)
-let clientes = [
-  { nome: "Clínica Vida S.A.", email: "carlos@clinica.com", whats: "(62) 99888-7766", canal: "Alfa SST", origem: "Indicação", creditos: 45, status: "Ativo" },
-  { nome: "Indústria MetalTop", email: "comercial@metaltop.com", whats: "(64) 99221-1100", canal: "Venda Direta", origem: "Instagram", creditos: 0, status: "Inativo" },
-  { nome: "Escola do Futuro", email: "direcao@escola.com", whats: "(62) 98111-2233", canal: "Hotmart", origem: "Congresso SST", creditos: 15, status: "Ativo" }
-];
-
-let finJulho = [
-  { canal: "Hotmart", empresa: "Escola do Futuro", bruto: 18490, taxa: 1849, despesa: 0, status: "Integralizado" }
-];
-
-let finJunho = [
-  { canal: "Venda Direta", empresa: "Indústria MetalTop", bruto: 12300, taxa: 3690, despesa: 0, status: "Devedor" }
-];
-
-const perguntas = [
-  { id: "#001", dim: "Fisiológico", texto: "Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." },
-  { id: "#002", dim: "Segurança", texto: "Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." },
-  { id: "#110", dim: "Organizacional", texto: "A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." }
-];
-
-let statusFiltroAtual = "Todos";
-
-// INICIALIZADORES OPERACIONAIS
-window.onload = function() {
-  filtrarEOrganizarClientes();
-  atualizarMesFinanceiro();
-  renderPerguntas();
-};
-
-function sv(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el = document.getElementById('view-'+id);
-  if(el) el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
-  if(nav) nav.classList.add('active');
+function acessar(perfil) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-container').style.display = 'flex';
 }
-
-// LÓGICA DE CRUD E ORDENAÇÃO ALFABÉTICA
-function filtrarEOrganizarClientes() {
-  const busca = document.getElementById('txt-busca-cliente').value.toLowerCase();
-  let filtrados = clientes.filter(c => c.nome.toLowerCase().includes(busca));
-
-  if (statusFiltroAtual !== "Todos") {
-    filtrados = filtrados.filter(c => c.status === statusFiltroAtual);
-  }
-
-  // Ordenação Alfabética Estrita (A-Z)
-  filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
-
-  const tbody = document.getElementById('tbody-clientes');
-  tbody.innerHTML = "";
-
-  filtrados.forEach((c, index) => {
-    const badgeClass = c.status === "Ativo" ? "s-ok" : "s-erro";
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${c.nome}</strong></td>
-        <td>${c.email}<br><small>${c.whats}</small></td>
-        <td><span class="bdg-s s-ok">${c.canal}</span></td>
-        <td>${c.origem}</td>
-        <td><strong>${c.creditos} un</strong></td>
-        <td><span class="bdg-s ${badgeClass}"><span class="dot"></span>${c.status}</span></td>
-        <td>
-          <button class="btn btn-ghost btn-sm" onclick="alert('Perfil de ${c.nome} carregado para auditoria pericial.')">✏️ Ver</button>
-          <button class="btn btn-danger btn-sm" onclick="removerClienteInMemory('${c.nome}')">🗑️</button>
-        </td>
-      </tr>
-    `;
-  });
+function sv(id) {
+    document.querySelectorAll('.main-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + id).classList.add('active');
 }
-
-function alternarFiltroStatus(status) {
-  statusFiltroAtual = status;
-  filtrarEOrganizarClientes();
-}
-
-function simularWebhookHotmart() {
-  const novo = { nome: "Alpha Corporativa (Via API Hotmart)", email: "contato@alpha.com", whats: "(11) 97777-6655", canal: "Hotmart", origem: "API Webhook", creditos: 100, status: "Ativo" };
-  clientes.push(novo);
-  filtrarEOrganizarClientes();
-  alert("🚀 Evento Webhook Recebido! Cliente 'Alpha Corporativa' injetado, processado e ordenado na tabela com sucesso.");
-}
-
-function salvarClienteManual() {
-  const nome = document.getElementById('cad-nome').value;
-  if(!nome) return alert("Insira o nome da empresa.");
-  clientes.push({
-    nome: nome,
-    email: document.getElementById('cad-email').value || "vazio@corp.com",
-    whats: document.getElementById('cad-whats').value || "(00) 0000-0000",
-    canal: document.getElementById('cad-canal').value,
-    origem: document.getElementById('cad-origem').value,
-    creditos: 50,
-    status: "Ativo"
-  });
-  closeModal('modal-cliente');
-  filtrarEOrganizarClientes();
-}
-
-function removerClienteInMemory(nome) {
-  if(confirm(`Deseja deletar ${nome}?`)) {
-    clientes = clientes.filter(c => c.nome !== nome);
-    filtrarEOrganizarClientes();
-  }
-}
-
-// LÓGICA FINANCEIRA MÊS A MÊS COM INTEGRALIZAÇÃO REAL
-function actualizarMesFinanceiro() {
-  const mes = document.getElementById('filtro-mes-fin').value;
-  const tbody = document.getElementById('tbody-financeiro');
-  tbody.innerHTML = "";
-
-  let lista = mes === "Julho" ? finJulho : finJunho;
-  let totalFat = 0;
-  let inadimplencia = 0;
-
-  lista.forEach(f => {
-    totalFat += f.bruto;
-    if(f.status === "Devedor") inadimplencia++;
-    let liq = f.bruto - f.taxa - f.despesa;
-    let badge = f.status === "Integralizado" ? "s-ok" : "s-erro";
-    let btnAcao = f.status === "Devedor" ? `<button class="btn btn-roxo btn-sm" onclick="integralizarGanhoReal('${f.empresa}')">💰 Integralizar Ganho</button>` : `<button class="btn btn-ghost btn-sm" disabled>Conciliado</button>`;
-
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${f.canal}</strong></td>
-        <td>${f.empresa}</td>
-        <td>R$ ${f.bruto.toLocaleString('pt-BR')},00</td>
-        <td>R$ ${f.taxa.toLocaleString('pt-BR')},00</td>
-        <td style="color:#C53030;">R$ ${f.despesa.toLocaleString('pt-BR')},00</td>
-        <td style="color:var(--verde); font-weight:600;">R$ ${liq.toLocaleString('pt-BR')},00</td>
-        <td><span class="bdg-s ${badge}"><span class="dot"></span>${f.status}</span></td>
-        <td>${btnAcao}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById('card-fat').innerText = `R$ ${totalFat.toLocaleString('pt-BR')},00`;
-  document.getElementById('card-inad').innerText = inadimplencia > 0 ? `${inadimplencia} Pendente` : "0 Pendente";
-}
-
-function integralizarGanhoReal(empresa) {
-  finJunho.forEach(f => { if(f.empresa === empresa) f.status = "Integralizado"; });
-  atualizarMesFinanceiro();
-  alert(`Sucesso! Os ativos da empresa ${empresa} foram auditados e integralizados no caixa geral do projeto.`);
-}
-
-function lancarDespesa() {
-  const valor = parseFloat(document.getElementById('desp-val').value);
-  if(!valor) return alert("Insira um valor numérico para a despesa.");
-  const mes = document.getElementById('filtro-mes-fin').value;
-  let lista = mes === "Julho" ? finJulho : finJunho;
-
-  if(lista.length > 0) {
-    lista[0].despesa += valor;
-    atualizarMesFinanceiro();
-    alert("Despesa retida e computada no fluxo líquido com sucesso!");
-  }
-}
-
-// RENDER DE QUESTÕES METODOLÓGICAS
-function renderPerguntas() {
-  const tbody = document.getElementById('tbody-perguntas');
-  tbody.innerHTML = "";
-  perguntas.forEach(p => {
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${p.id}</strong></td>
-        <td><span class="bdg-s s-ok">${p.dim}</span></td>
-        <td><input type="text" class="form-control" value="${p.texto}" id="txt-p-${p.id}"/></td>
-        <td><button class="btn btn-primary btn-sm" onclick="alert('Sucesso: Alinhamento pericial da pergunta ${p.id} atualizado no banco mestre global!')">Atualizar</button></td>
-      </tr>
-    `;
-  });
-}
-
-// MODERAÇÃO DE DEPOIMENTOS REAL
-function processarDepoimento(status) {
-  document.getElementById('dep-status-badge').className = status === 'Aprovado' ? 'bdg-s s-ok' : 'bdg-s s-erro';
-  document.getElementById('dep-status-badge').innerHTML = `<span class="dot"></span>${status}`;
-  document.getElementById('sid-dep-count').innerText = "0";
-  alert(`O depoimento foi marcado como [${status}]. A resposta oficial foi vinculada e enviada para renderização no index.html.`);
-  document.getElementById('card-depoimento-bloco').style.opacity = "0.5";
-}
-
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 </script>
 </body>
 </html>
