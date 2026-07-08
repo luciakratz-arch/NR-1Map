@@ -2,64 +2,401 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<title>NR-1 Map | Sistema Integrado</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Painel Admin Master</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-/* Estilos Base Estáveis */
-:root { --roxo:#7B00C4; --verde:#0A6E4F; --preto:#0D1210; --cinza:#f4f7f6; }
-body { margin:0; font-family:'Inter',sans-serif; background:var(--cinza); height:100vh; }
-.login-screen { display:flex; height:100vh; align-items:center; justify-content:center; background:var(--preto); color:#fff; }
-.app-container { display:none; height:100vh; }
-.main-view { display:none; }
-.main-view.active { display:block; }
+:root{
+  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
+  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
+  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
+  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
+  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
+  --sidebar:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--roxo-claro);}
+.nav{padding:10px 0;flex:1;}
+.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--roxo-claro);}
+.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-danger{background:#C53030;color:#fff;}.btn-danger:hover{background:#e53e3e;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.content{padding:20px 24px;flex:1;}
+
+/* CARDS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
+.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.mc .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+.mc .sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+
+.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
+.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-body{padding:16px 18px;}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);vertical-align:middle;}
+
+/* VELOCIMETROS */
+.gauge-container {display:grid; grid-template-columns:repeat(4,1fr); gap:16px; text-align:center;}
+.gauge-box {background:var(--branco); border:1px solid var(--linha); padding:14px; border-radius:9px;}
+.gauge {width:100px; height:60px; margin:0 auto; position:relative;}
+
+/* BADGES */
+.bdg-s{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;}
+.s-ok{background:var(--verde-xp);color:var(--verde);}
+.s-alert{background:rgba(212,94,42,0.1);color:var(--laranja);}
+.s-erro{background:#FEEFEF;color:#C53030;}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* MODAL FIX */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:540px;width:90%;max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-bottom:1px solid var(--linha);padding-bottom:10px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;font-weight:500;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.view{display:none;}
+.view.active{display:block;}
 </style>
 </head>
 <body>
+<div class="app">
 
-<!-- TELA DE LOGIN RESTAURADA -->
-<div id="login-screen" class="login-screen">
-    <div style="width:400px; padding:40px; background:#1a1f1d; border-radius:15px;">
-        <h2>NR-1 Map</h2>
-        <div id="login-tabs">
-            <button onclick="acessar('admin')">Admin</button>
-            <button onclick="acessar('parceiro')">Parceiro</button>
-            <button onclick="acessar('rh')">RH</button>
+<!-- SIDEBAR MESTRE -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div>NR-1<span>Map Master</span></div></div>
+  <nav class="nav">
+    <div class="nav-sec">Painel Central</div>
+    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Epidemiológico</div>
+    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Controle de Clientes</div>
+    <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Fluxo de Caixa & Repasses</div>
+    <div class="nav-sec">Metodologia Científica</div>
+    <div class="nav-item" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
+    <div class="nav-sec">Comercial & Prova Social</div>
+    <div class="nav-item" onclick="sv('depoimentos')"><span class="ic">⭐</span>Moderação Depoimentos<span class="bdg">3</span></div>
+  </nav>
+</aside>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<main class="main">
+
+  <!-- ===== VIEW: DASHBOARD GLOBAL COM VELOCÍMETROS ===== -->
+  <div id="view-dashboard" class="view active">
+    <div class="topbar"><div class="topbar-title">Indicadores Estratégicos Cross-Enterprise</div></div>
+    <div class="content">
+      <div class="metrics">
+        <div class="mc"><div class="lbl">Faturamento Acumulado</div><div class="val">R$ 24.850</div><div class="sub">Competência atual</div></div>
+        <div class="mc"><div class="lbl">Alertas Críticos</div><div class="val" style="color:var(--laranja);">3 Empresas</div><div class="sub">Alto Sofrimento Ocupacional</div></div>
+        <div class="mc"><div class="lbl">Créditos Globais</div><div class="val">8.420</div><div class="sub">Disponíveis em nuvem</div></div>
+        <div class="mc"><div class="lbl">Inadimplência Ativa</div><div class="val" style="color:#C53030;">1 Pendente</div><div class="sub">Aguardando conciliação</div></div>
+      </div>
+
+      <!-- VELOCÍMETROS DINÂMICOS (SVG) -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div class="title">Balança Psicodinâmica Consolidada (Escala Dejours Global)</div></div>
+        <div class="card-body gauge-container">
+          
+          <div class="gauge-box">
+            <div class="gauge">
+              <svg width="100" height="60">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
+                <path d="M 10 50 A 40 40 0 0 1 45 15" fill="none" stroke="#ef4444" stroke-width="8"/>
+                <line x1="50" y1="50" x2="30" y2="20" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
+                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
+              </svg>
+            </div>
+            <div style="font-size:12px; font-weight:600; margin-top:4px;">Fisiológicos (-0.8)</div>
+            <span class="bdg-s s-erro"><span class="dot"></span>Limite</span>
+          </div>
+
+          <div class="gauge-box">
+            <div class="gauge">
+              <svg width="100" height="60">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
+                <path d="M 10 50 A 40 40 0 0 1 30 30" fill="none" stroke="#ef4444" stroke-width="8"/>
+                <line x1="50" y1="50" x2="20" y2="35" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
+                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
+              </svg>
+            </div>
+            <div style="font-size:12px; font-weight:600; margin-top:4px;">Segurança (-2.4)</div>
+            <span class="bdg-s s-erro"><span class="dot"></span>Patogênico</span>
+          </div>
+
+          <div class="gauge-box">
+            <div class="gauge">
+              <svg width="100" height="60">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
+                <path d="M 10 50 A 40 40 0 0 1 80 40" fill="none" stroke="#10b981" stroke-width="8"/>
+                <line x1="50" y1="50" x2="75" y2="25" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
+                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
+              </svg>
+            </div>
+            <div style="font-size:12px; font-weight:600; margin-top:4px;">Sociais (+2.1)</div>
+            <span class="bdg-s s-ok"><span class="dot"></span>Fértil</span>
+          </div>
+
+          <div class="gauge-box">
+            <div class="gauge">
+              <svg width="100" height="60">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/>
+                <path d="M 10 50 A 40 40 0 0 1 60 20" fill="none" stroke="#f59e0b" stroke-width="8"/>
+                <line x1="50" y1="50" x2="55" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" />
+                <circle cx="50" cy="50" r="4" fill="#2A2E2C"/>
+              </svg>
+            </div>
+            <div style="font-size:12px; font-weight:600; margin-top:4px;">Organizacionais (+0.4)</div>
+            <span class="bdg-s s-alert"><span class="dot"></span>Alerta</span>
+          </div>
+
         </div>
+      </div>
+
+      <!-- QUEM NÃO ESTÁ USANDO -->
+      <div class="card">
+        <div class="card-header"><div class="title">Monitor de Abandono (Clientes Inativos)</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empresa</th><th>Responsável</th><th>Último Acesso</th><th>Status de Uso</th><th>Ação Urgente</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Indústria MetalTop</strong></td><td>Carlos M.</td><td>Há 45 dias</td><td><span class="bdg-s s-erro"><span class="dot"></span>Sistema Abandonado</span></td><td><a href="https://wa.me/5562999999999?text=Identificamos%20inatividade%20no%20seu%20painel%20NR-1%20Map." target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 Chamar WhatsApp</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
+  </div>
+
+  <!-- ===== VIEW: CLIENTES COM PERFIL DE TOMADA DE DECISÃO e LEAD ORIGIN ===== -->
+  <div id="view-clientes" class="view">
+    <div class="topbar"><div class="topbar-title">Base de Empresas & Perfil de Clientes</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Cadastrar Novo Cliente</button></div>
+    <div class="content">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empresa Cliente</th><th>Contato Direto</th><th>Canal de Compra</th><th>Origem Origem (Lead)</th><th>Créditos</th><th>Fidelidade</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Clínica Vida S.A.</strong></td>
+                <td>carlos@clinica.com<br><small>(62) 99888-7766</small></td>
+                <td><span class="bdg-s s-ok">Hotmart</span></td>
+                <td>Indicação Direta</td>
+                <td><strong style="color:var(--verde);">45 un</strong></td>
+                <td>Nível Ouro (12m)</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="alert('Carregando prontuário de decisões...')">✏️ Perfil</button>
+                  <button class="btn btn-danger btn-sm" onclick="confirm('Excluir cliente?')">🗑️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW: FINANCEIRO MÊS A MÊS COM INTEGRALIZAÇÃO ===== -->
+  <div id="view-financeiro" class="view">
+    <div class="topbar"><div class="topbar-title">Fluxo de Caixa & Repasses</div></div>
+    <div class="content">
+      <div class="card">
+        <div class="card-header"><div class="title">Histórico Estatístico Caixa Mês a Mês</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Mês/Ano</th><th>Receita Bruta</th><th>Comissões Parceiros (30%)</th><th>Descontos/Taxas</th><th>Líquido Retido</th><th>Status</th><th>Ação Pericial</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Julho 2026</strong></td>
+                <td>R$ 18.490,00</td>
+                <td>R$ 5.547,00</td>
+                <td>R$ 540,00</td>
+                <td style="font-weight:600; color:var(--verde);">R$ 12.403,00</td>
+                <td><span class="bdg-s s-ok"><span class="dot"></span>Integralizado</span></td>
+                <td><button class="btn btn-ghost btn-sm" disabled>✓ Conciliado</button></td>
+              </tr>
+              <tr style="background:rgba(211,84,42,0.05);">
+                <td><strong>Junho 2026</strong></td>
+                <td>R$ 12.300,00</td>
+                <td>R$ 3.690,00</td>
+                <td>R$ 200,00</td>
+                <td style="font-weight:600; color:var(--laranja);">R$ 8.410,00</td>
+                <td><span class="bdg-s s-erro"><span class="dot"></span>Devedor</span></td>
+                <td><button class="btn btn-roxo btn-sm" onclick="alert('Ganhos integralizados na Tesouraria Geral com Sucesso!')">💰 Integralizar Ganho</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW: AS 110 PERGUNTAS METODOLÓGICAS COMPLETAS ===== -->
+  <div id="view-perguntas" class="view">
+    <div class="topbar"><div class="topbar-title">Banco Global de Perguntas Periciais (110 Questões)</div></div>
+    <div class="content">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:70px;">ID</th><th style="width:140px;">Dimensão Dejours</th><th>Texto Regulante Aplicado para Todos (Editável)</th><th style="width:100px;">Ação</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>#001</strong></td>
+                <td><span class="bdg-s s-ok">Fisiológico</span></td>
+                <td><input type="text" class="form-control" value="Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho." /></td>
+                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 001 atualizada universalmente!')">Atualizar</button></td>
+              </tr>
+              <tr>
+                <td><strong>#002</strong></td>
+                <td><span class="bdg-s s-ok">Segurança</span></td>
+                <td><input type="text" class="form-control" value="Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura." /></td>
+                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 002 atualizada universalmente!')">Atualizar</button></td>
+              </tr>
+              <tr>
+                <td><strong>#110</strong></td>
+                <td><span class="bdg-s s-alert">Organizacional</span></td>
+                <td><input type="text" class="form-control" value="A divisão das tarefas operacionais é feita de maneira transparente e justa em meu departamento." /></td>
+                <td><button class="btn btn-primary btn-sm" onclick="alert('Pergunta 110 atualizada universalmente!')">Atualizar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW: DEPOIMENTOS COM RESPOSTA E STATUS ===== -->
+  <div id="view-depoimentos" class="view">
+    <div class="topbar"><div class="topbar-title">Moderação e Resposta de Provas Sociais</div></div>
+    <div class="content">
+      <div class="card">
+        <div class="card-body">
+          <div style="border:1px solid var(--linha); padding:16px; border-radius:8px; background:#fff; margin-bottom:16px;">
+            <div style="display:flex; justify-content:between; align-items:center; margin-bottom:8px;">
+              <strong>Clínica São Silvestre (Usuário verificado via Hotmart)</strong>
+              <div style="margin-left:auto;"><span class="bdg-s s-alert"><span class="dot"></span>Aguardando Moderação</span></div>
+            </div>
+            <p style="font-size:13px; font-style:italic; margin-bottom:10px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
+            
+            <div class="form-group">
+              <label class="form-label">Sua Resposta Oficial (Aparecerá no Site abaixo do depoimento):</label>
+              <input type="text" class="form-control" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!" id="resp-1"/>
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="alert('Depoimento e sua Resposta publicados na página principal do site!')">✓ Aprovar e Publicar</button>
+              <button class="btn btn-danger btn-sm" onclick="alert('Depoimento reprovado.')">✕ Reprovar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
 </div>
 
-<!-- CONTAINER DO SISTEMA -->
-<div id="app-container" class="app-container" style="display:flex;">
-    <aside style="width:240px; background:var(--preto); color:#fff; padding:20px;">
-        <h2 style="font-family:'Syne'">NR-1 Map</h2>
-        <div onclick="sv('dashboard')" style="cursor:pointer; margin:15px 0;">📊 Dashboard</div>
-        <div onclick="sv('clientes')" style="cursor:pointer; margin:15px 0;">🏢 Clientes</div>
-        <div onclick="sv('perguntas')" style="cursor:pointer; margin:15px 0;">🧩 Perguntas (110)</div>
-        <button onclick="location.reload()" style="margin-top:50px;">← Voltar ao Login</button>
-    </aside>
-
-    <main id="main" style="flex:1; padding:20px;">
-        <!-- Dashboard com Velocímetros -->
-        <div id="view-dashboard" class="main-view active">
-            <h1>Dashboard</h1>
-            <div style="display:flex; gap:20px;">
-                <div class="card">Fisiológicos (Velocímetro aqui)</div>
-                <div class="card">Segurança (Velocímetro aqui)</div>
-            </div>
-        </div>
-        
-        <!-- Outras telas seguem a lógica show/hide -->
-    </main>
+<!-- ===== MODAL CADASTRO DE CLIENTE (CORRIGIDO E SEGURO) ===== -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Cadastrar Nova Licença / Perfil Decisório</h3>
+      <button style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="closeModal('modal-cliente')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome da Empresa Cliente</label>
+      <input type="text" class="form-control" placeholder="Ex: Clínica Geral Goiânia"/>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">E-mail Corporativo</label>
+        <input type="email" class="form-control" placeholder="rh@empresa.com.br"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp de Alertas</label>
+        <input type="text" class="form-control" placeholder="(62) 99999-0000"/>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Canal de Aquisição / Compra</label>
+        <select class="form-control">
+          <option>Hotmart</option>
+          <option>Venda Direta Representante</option>
+          <option>Balcão Corporativo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Onde nos conheceu? (Lead Origin)</label>
+        <select class="form-control">
+          <option>Instagram / Redes Sociais</option>
+          <option>Indicação Pericial de Colega</option>
+          <option>Congresso de SST</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Créditos Iniciais de Disparos</label>
+        <input type="number" class="form-control" value="50"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Programa de Fidelidade (Tag)</label>
+        <select class="form-control">
+          <option>Nível Bronze</option>
+          <option>Nível Prata</option>
+          <option>Nível Ouro Master</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-roxo" style="width:100%; margin-top:14px;" onclick="closeModal('modal-cliente'); alert('✅ Novo cliente cadastrado com sucesso com amarração de métricas periciais!');">Salvar Cliente e Ativar Licença</button>
+  </div>
 </div>
 
 <script>
-function acessar(perfil) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-container').style.display = 'flex';
+function sv(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('view-'+id);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav)nav.classList.add('active');
 }
-function sv(id) {
-    document.querySelectorAll('.main-view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + id).classList.add('active');
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
 }
 </script>
 </body>
