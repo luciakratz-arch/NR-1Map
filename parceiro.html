@@ -499,7 +499,7 @@ function renderPar(){
   modulo.subcats.forEach(function(s){
     var cor = COR_MOD[abaPar] || '#374151';
     html += '<div style="margin-bottom:10px;border:1px solid var(--linha);border-radius:8px;overflow:hidden;">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="var b=this.nextElementSibling,a=b.style.display!=='none';b.style.display=a?'none':'block';">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="toggleParSubcat(this)">';
     html += '<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+s.id+' — '+s.titulo+'</span>';
     html += '<span style="font-size:10px;color:var(--cinza-medio);">'+s.perguntas.length+' perguntas ▸</span></div>';
     html += '<div style="display:none;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
@@ -512,6 +512,12 @@ function renderPar(){
     html += '</tbody></table></div></div>';
   });
   container.innerHTML = html;
+}
+
+function toggleParSubcat(hdr){
+  var body = hdr.nextElementSibling;
+  var aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
 }
 
 var TCALC={unico:[{max:5,val:97},{max:20,val:79},{max:50,val:59},{max:100,val:49}],assinatura:[{max:5,val:35},{max:20,val:25},{max:50,val:20},{max:100,val:16.5}]};
