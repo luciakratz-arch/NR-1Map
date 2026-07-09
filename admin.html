@@ -685,7 +685,7 @@ function renderAdm(){
     html += '</tbody></table>';
     html += '<div style="padding:10px 12px;border-top:1px solid var(--linha);display:flex;gap:8px;">';
     html += '<input class="form-control" id="nova-p-'+s.id.replace('.','_')+'" placeholder="+ Nova pergunta global para esta subcategoria..." style="flex:1;font-size:12px;"/>';
-    html += '<button class="btn btn-primary btn-sm" onclick="addPergAdm(''+s.id+'')">+ Adicionar</button></div>';
+    html += '<button class="btn btn-primary btn-sm" onclick="addPergAdm(this)">+ Adicionar</button></div>';
     html += '</div></div>';
   });
   container.innerHTML = html;
@@ -709,17 +709,17 @@ function atualizarPergAdm(id){
   alert('✅ Pergunta #'+String(id).padStart(3,'0')+' atualizada universalmente!\nEm produção: gravado em nr1map_perguntas/'+id+' no Firestore e propagado para todos os clientes.');
 }
 
-function addPergAdm(subcatId){
-  var inputId = 'nova-p-'+subcatId.replace('.','_');
-  var input = document.getElementById(inputId);
+function addPergAdm(btn){
+  var input = btn.previousElementSibling;
   if(!input || !input.value.trim()) return;
+  var subcatId = input.id.replace('nova-p-','').replace('_','.');
   var novoId = Date.now();
   MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
     if(s.id === subcatId) s.perguntas.push({id:novoId, texto:input.value.trim()});
   }); });
   input.value = '';
   renderAdm();
-  alert('✅ Nova pergunta adicionada ao banco global!\nEm produção: gravado no Firestore e disponível para todos os parceiros e clientes.');
+  alert('Pergunta adicionada ao banco global!');
 }
 
 // CORREÇÃO DOS DEPOIMENTOS DECREMENTANDO A SIDEBAR
