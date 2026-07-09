@@ -79,6 +79,9 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 .form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);}
 .view{display:none;}
 .view.active{display:block;}
+.btn-aba{padding:7px 16px;border-radius:8px;border:1.5px solid var(--linha);background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:var(--cinza-medio);transition:all .15s;}
+.btn-aba:hover{border-color:var(--roxo);color:var(--roxo);}
+.btn-aba.aba-ativa{background:var(--roxo);color:#fff;border-color:var(--roxo);}
 </style>
 </head>
 <body>
@@ -289,37 +292,15 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
     </div>
   </div>
 
-  <!-- ===== VIEW: COPA DE QUESTÕES (SÓ LEITURA PARA O PARCEIRO) ===== -->
+  <!-- ===== VIEW: 101 QUESTÕES (SOMENTE LEITURA PARA O PARCEIRO) ===== -->
   <div id="view-perguntas" class="view">
-    <div class="topbar"><div class="topbar-title">Dicionário de Referência Pericial (110 Perguntas)</div></div>
+    <div class="topbar"><div class="topbar-title">🧩 Banco Global de 101 Perguntas — Consulta (somente leitura)</div></div>
     <div class="content">
-      <div style="background:var(--verde-xp); padding:12px; border-radius:8px; margin-bottom:12px; font-size:12px; color:var(--verde); line-height:1.5;">
-        ℹ️ **Ambiente de Consulta:** Utilize esta lista para realizar auditorias verbais ou dar suporte aos gestores de RH das suas empresas. Alterações estruturais no texto das perguntas competem exclusivamente à Administradora Geral.
+      <div style="background:var(--cinza-claro);border:1px solid var(--linha);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--cinza-medio);line-height:1.6;">
+        ℹ️ Banco global editado exclusivamente pela Admin Master (Dra. Lucia Kratz). Utilize esta lista para consultoria e suporte aos gestores de RH das suas empresas. O RH seleciona quais perguntas usar e pode adicionar perguntas próprias (não visíveis aqui).
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:60px;">ID</th><th style="width:150px;">Macro-Categoria</th><th>Texto de Validação Regulante</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>#001</strong></td>
-                <td><span class="bdg-s s-ok">Fisiológico</span></td>
-                <td style="color:var(--cinza-escuro);">Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.</td>
-              </tr>
-              <tr>
-                <td><strong>#002</strong></td>
-                <td><span class="bdg-s s-ok">Segurança</span></td>
-                <td style="color:var(--cinza-escuro);">Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir de forma segura.</td>
-              </tr>
-              <tr>
-                <td><strong>#003</strong></td>
-                <td><span class="bdg-s s-ok">Organizacional</span></td>
-                <td style="color:var(--cinza-escuro);">Sinto que os canais de diálogo da gerência permitem uma expressão autêntica de ideias sem medo de retaliações ocultas.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="abas-par"></div>
+      <div id="container-par"></div>
     </div>
   </div>
 
@@ -328,14 +309,211 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 
 <script>
 function sv(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el=document.getElementById('view-'+id);
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  var el=document.getElementById('view-'+id);
   if(el)el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var nav=document.querySelector('.nav-item[onclick*="\''+id+'\'"]');
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
+  if(id==='perguntas') renderPar();
 }
+var MODULOS = [
+  {id:'M1',emoji:'🧠',titulo:'Módulo 1 — Fisiológico',sub:'Fatores Higiênicos · Corpo e Mente',subcats:[
+    {id:'1.1',titulo:'Ritmo de Trabalho, Cadência e Pressão de Tempo',perguntas:[
+      {id:1,texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
+      {id:2,texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
+      {id:3,texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
+      {id:4,texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},
+      {id:5,texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},
+      {id:6,texto:'Não sofro pressões agressivas ou cobranças minuto a minuto pelo término de uma tarefa imediata.'},
+    ]},
+    {id:'1.2',titulo:'Limitações Biológicas, Pausas e Espaços de Descompressão',perguntas:[
+      {id:7,texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
+      {id:8,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras ou sofrer restrições.'},
+      {id:9,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},
+      {id:10,texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma e desconectado das tarefas.'},
+      {id:11,texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},
+      {id:12,texto:'A empresa oferece local físico confortável e silencioso projetado para relaxarmos nas pausas.'},
+      {id:13,texto:'A empresa promove ações ou disponibiliza ferramentas práticas para nos ajudar a aliviar a tensão.'},
+    ]},
+    {id:'1.3',titulo:'Stresse, Ansiedade e Esgotamento Psicossomático',perguntas:[
+      {id:14,texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},
+      {id:15,texto:'Consigo dormir bem à noite, sem que preocupações ou estresse do trabalho provoquem insônia ou sono agitado.'},
+      {id:16,texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tensão do emprego.'},
+      {id:17,texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade, taquicardia ou falta de ar geradas pela pressão diária.'},
+      {id:18,texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana, sem ficar pensando nas tarefas pendentes.'},
+      {id:19,texto:'As exigências emocionais do dia a dia profissional não me deixam com sensação de estar à beira de um esgotamento nervoso.'},
+      {id:20,texto:'Sinto que a rotina atual do meu cargo protege e preserva a minha saúde física e mental a longo prazo.'},
+    ]},
+    {id:'1.4',titulo:'Ergonomia de Software, Velocidade de Mudanças e Sobrecarga Cognitiva',perguntas:[
+      {id:21,texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},
+      {id:22,texto:'Os sistemas e softwares adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo para serem compreendidos.'},
+      {id:23,texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada, ardência nos olhos ou dores de cabeça.'},
+      {id:24,texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse mental.'},
+      {id:25,texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas, tecnologias e processos digitais sem me sentir sobrecarregado.'},
+      {id:26,texto:'Quando ocorre falha tecnológica, o suporte técnico resolve de forma ágil, evitando o meu desgaste mental.'},
+      {id:27,texto:'Os processos e fluxos digitais são diretos e simplificados, sem burocracias desnecessárias que gerem cansaço cognitivo.'},
+    ]},
+  ]},
+  {id:'M2',emoji:'🛡️',titulo:'Módulo 2 — Segurança',sub:'Previsibilidade · Confiança · Integridade',subcats:[
+    {id:'2.1',titulo:'Estabilidade Laboral e Empregabilidade',perguntas:[
+      {id:28,texto:'Sinto que meu emprego está seguro e não vivo com medo diário ou constante de ser demitido repentinamente.'},
+      {id:29,texto:'A empresa é clara e transparente sobre os motivos que levam a demissões, eliminando fofocas, boatos ou clima de instabilidade.'},
+      {id:30,texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe, em vez de focar em substituição constante.'},
+      {id:31,texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira essencial.'},
+      {id:32,texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},
+      {id:33,texto:'A estabilidade que sinto no meu emprego atual me dá total segurança para fazer planos financeiros de longo prazo.'},
+    ]},
+    {id:'2.2',titulo:'Clareza de Papéis, Metas e Previsibilidade Organizacional',perguntas:[
+      {id:34,texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara, sem deixar margem para dúvidas.'},
+      {id:35,texto:'As exigências do dia a dia correspondem exatamente à função para a qual fui contratado, sem desvios ou acúmulos confusos.'},
+      {id:36,texto:'As ordens que recebo são unificadas e coerentes, evitando que eu receba comandos contraditórios de supervisores diferentes.'},
+      {id:37,texto:'As metas ou objetivos de entrega exigidos de mim são justos e perfeitamente alcançáveis dentro do horário regular.'},
+      {id:38,texto:'Os objetivos e regras do meu setor permanecem estáveis ao longo do mês, sem mudanças bruscas que estraguem o trabalho já feito.'},
+      {id:39,texto:'Quando a diretoria precisa alterar uma regra ou processo interno, a equipe é avisada com antecedência, permitindo transição tranquila.'},
+    ]},
+    {id:'2.3',titulo:'Segurança Psicológica e Direito ao Erro',perguntas:[
+      {id:40,texto:'Quando cometo uma falha técnica involuntária, a liderança me orienta a corrigir em vez de focar em me culpar ou punir.'},
+      {id:41,texto:'As correções ou feedbacks sobre o meu desempenho são feitos de forma reservada e individual, nunca na frente dos colegas.'},
+      {id:42,texto:'Sinto-me totalmente confortável para admitir que não sei fazer uma tarefa complexa e pedir ajuda ao meu chefe sem ser julgado.'},
+      {id:43,texto:'Posso apontar problemas nos processos do setor ou discordar da gerência profissionalmente, sem medo de sofrer perseguições veladas.'},
+      {id:44,texto:'A empresa estimula e abre espaço real para que nós, funcionários, possamos dar sugestões para melhorar o método de trabalho.'},
+    ]},
+    {id:'2.4',titulo:'Treinamento Ocupacional e Capacitação',perguntas:[
+      {id:45,texto:'Recebi treinamento suficiente e adequado para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},
+      {id:46,texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade real.'},
+      {id:47,texto:'Sempre que um novo equipamento, sistema ou processo é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},
+      {id:48,texto:'Fui claramente instruído sobre quais são os riscos químicos, físicos ou mentais presentes no meu ambiente de trabalho.'},
+      {id:49,texto:'Os treinamentos oferecidos pela empresa possuem linguagem clara, materiais de apoio adequados e são fáceis de compreender.'},
+    ]},
+    {id:'2.5',titulo:'Riscos de Acidentes, Proteção Física e Perigo (NR-1)',perguntas:[
+      {id:50,texto:'Executo minhas atividades diárias com paz de espírito, sem sentir medo ou tensão constante de sofrer um acidente físico.'},
+      {id:51,texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},
+      {id:52,texto:'Os EPIs disponibilizados estão em excelente estado de conservação, vestem bem e não machucam ou atrapalham as tarefas.'},
+      {id:53,texto:'As máquinas, aparelhos e ferramentas operadas no meu setor passam por revisões e manutenções preventivas, operando sem falhas perigosas.'},
+      {id:54,texto:'A infraestrutura do local onde trabalho é segura e livre de riscos visíveis de desabamento ou curto-circuito.'},
+      {id:55,texto:'Recebi treinamento detalhado de segurança antes de ser colocado para operar qualquer equipamento perigoso.'},
+      {id:56,texto:'Sinto-me seguro e respaldado para exercer o Direito de Recusa caso perceba risco grave e iminente para minha vida.'},
+    ]},
+  ]},
+  {id:'M3',emoji:'🤝',titulo:'Módulo 3 — Relacionamentos e Social',sub:'Interpessoal · Cultura · Assédio',subcats:[
+    {id:'3.1',titulo:'Relação com a Liderança Direta',perguntas:[
+      {id:57,texto:'O meu superior direto trata-me com respeito e educação no dia a dia, sem usar tons de voz agressivos ou palavras ofensivas.'},
+      {id:58,texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},
+      {id:59,texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades operacionais antes de tomar decisões sobre o meu setor.'},
+      {id:60,texto:'Considero que o meu superior direto tem competência técnica e conhecimento suficientes para liderar a nossa equipe com segurança.'},
+      {id:61,texto:'Quando enfrento um problema grave ou imprevisto, sinto que posso contar com o apoio prático do meu supervisor.'},
+    ]},
+    {id:'3.2',titulo:'Clima Interpessoal e Relações entre Pares',perguntas:[
+      {id:62,texto:'Os meus colegas de trabalho ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},
+      {id:63,texto:'O convívio diário com a minha equipe é saudável e livre de fofocas, intrigas ou boatos maliciosos.'},
+      {id:64,texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias ou tentativas de prejudicar uns aos outros.'},
+      {id:65,texto:'Sinto-me integrado e acolhido pelo meu grupo de trabalho, sem sofrer qualquer tipo de isolamento ou exclusão social.'},
+      {id:66,texto:'Confio nos colegas do meu setor para realizar as tarefas em conjunto, sem medo de que usem informações contra mim.'},
+    ]},
+    {id:'3.3',titulo:'Fit Cultural e Relações Intergeracionais',perguntas:[
+      {id:67,texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais, permitindo que eu trabalhe em paz com minha consciência.'},
+      {id:68,texto:'Compreendo e concordo com os objetivos gerais da empresa, sentindo que meu esforço diário faz sentido dentro do negócio.'},
+      {id:69,texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações, sem piadas ou exclusão mútua.'},
+      {id:70,texto:'Há equilíbrio saudável entre respeitar o conhecimento dos mais experientes e dar abertura para as visões dos mais jovens.'},
+      {id:71,texto:'Sei exatamente se meu perfil e postura estão alinhados com o que a empresa busca, sem viver na dúvida ou incerteza crônica.'},
+      {id:72,texto:'Recebi retornos claros da gerência sobre minha adaptação à cultura e ao ambiente do time, ajudando-me a me sentir seguro.'},
+    ]},
+    {id:'3.4',titulo:'Reconhecimento e Julgamento de Valor (Dejours)',perguntas:[
+      {id:73,texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário para o sucesso da empresa.'},
+      {id:74,texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade técnica da forma como executo as minhas tarefas.'},
+      {id:75,texto:'A gerência costuma elogiar de forma clara os bons resultados e as entregas bem-feitas pelo meu cargo.'},
+      {id:76,texto:'Sinto que quando me dedico além do normal para resolver um problema, essa dedicação é notada e valorizada pela empresa.'},
+    ]},
+    {id:'3.5',titulo:'Proteção contra Assédio Moral e Sexual',perguntas:[
+      {id:77,texto:'A liderança da empresa não pratica perseguições, piadas humilhantes, cobranças vexatórias ou ameaças psicológicas contra mim ou meus colegas.'},
+      {id:78,texto:'O ambiente de trabalho entre colegas é totalmente livre de exclusões intencionais, linchamentos ou boicotes profissionais.'},
+      {id:79,texto:'O meu local de trabalho é 100% seguro contra comentários invasivos de teor sexual, insinuações abusivas ou convites inoportunos.'},
+      {id:80,texto:'Confio plenamente que se eu denunciar um caso de assédio, a empresa investigará com total sigilo, seriedade e punirá se comprovado.'},
+      {id:81,texto:'Sinto-me seguro para relatar qualquer desvio de conduta ou abuso de poder, sabendo que não sofrerei perseguição ou punição por isso.'},
+    ]},
+  ]},
+  {id:'M4',emoji:'🚀',titulo:'Módulo 4 — Fatores Motivacionais',sub:'Propósito · Identidade · Autonomia',subcats:[
+    {id:'4.1',titulo:'Propósito, Alinhamento de Vida e Significado do Trabalho',perguntas:[
+      {id:82,texto:'Sinto que as tarefas que realizo no meu dia a dia possuem valor real e fazem sentido para mim, indo além de ganhar dinheiro.'},
+      {id:83,texto:'Percebo claramente o impacto positivo que o meu trabalho diário causa na vida dos clientes ou na sociedade.'},
+      {id:84,texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},
+      {id:85,texto:'Consigo enxergar uma conexão direta entre o crescimento da empresa e a realização dos meus próprios objetivos de vida.'},
+      {id:86,texto:'Sinto-me conectado com a missão e o propósito geral da empresa enquanto executo minhas atividades operacionais.'},
+    ]},
+    {id:'4.2',titulo:'Identidade com o Trabalho e Crescimento',perguntas:[
+      {id:87,texto:'As atividades que desempenho no meu cargo aproveitam muito bem as minhas principais habilidades e talentos naturais.'},
+      {id:88,texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês que passa nesta empresa.'},
+      {id:89,texto:'Sinto que as exigências práticas da minha função combinam perfeitamente com o meu jeito de ser e com a minha personalidade.'},
+      {id:90,texto:'Percebo que a realização do meu trabalho me torna uma pessoa melhor, mais madura e mais completa no âmbito pessoal.'},
+      {id:91,texto:'Consigo visualizar um caminho claro de crescimento técnico ou de carreira para mim dentro desta organização.'},
+    ]},
+    {id:'4.3',titulo:'Autonomia Percebida e Espaço de Criação (Dejours)',perguntas:[
+      {id:92,texto:'Tenho autonomia suficiente para tomar decisões importantes sobre a execução das minhas tarefas diárias sem precisar de autorização para tudo.'},
+      {id:93,texto:'A empresa me dá liberdade para ajustar o método ou o jeito de fazer o trabalho quando percebo uma forma mais eficiente.'},
+      {id:94,texto:'Sinto-me encorajado a criar soluções próprias e inovadoras diante dos problemas ou imprevistos que surgem na minha rotina.'},
+      {id:95,texto:'A gerência confia na minha competência técnica, dando-me espaço para trabalhar livre de microgerenciamento constante.'},
+      {id:96,texto:'Consigo gerenciar e priorizar a ordem de execução das minhas entregas ao longo do dia com autonomia.'},
+    ]},
+    {id:'4.4',titulo:'Percepção de Ações Motivadoras da Empresa',perguntas:[
+      {id:97,texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},
+      {id:98,texto:'Os incentivos que a empresa oferece para nossa evolução me deixam mais motivado no dia a dia.'},
+      {id:99,texto:'Percebo que os momentos de integração ou benefícios extras demonstram preocupação real com o nosso bem-estar.'},
+      {id:100,texto:'Quando a equipe supera as expectativas, a empresa costuma retribuir com ações motivadoras que nos fazem sentir especiais.'},
+      {id:101,texto:'As iniciativas e a energia do ambiente de trabalho criadas pela empresa me estimulam a dar o meu melhor.'},
+    ]},
+  ]},
+];
+
+
+var abaPar = 'M1';
+var COR_MOD = {M1:'#0A6E4F',M2:'#2563EB',M3:'#D97706',M4:'#7B00C4'};
+
+function abrirAbaPar(id){
+  abaPar = id;
+  document.querySelectorAll('.btn-aba-par').forEach(function(b){ b.classList.remove('aba-ativa'); });
+  var btn = document.getElementById('par-aba-'+id);
+  if(btn) btn.classList.add('aba-ativa');
+  renderPar();
+}
+
+function renderPar(){
+  var container = document.getElementById('container-par');
+  var abasDiv = document.getElementById('abas-par');
+  if(!container) return;
+  if(abasDiv && abasDiv.children.length === 0){
+    MODULOS.forEach(function(m){
+      var btn = document.createElement('button');
+      btn.className = 'btn-aba btn-aba-par' + (m.id === abaPar ? ' aba-ativa' : '');
+      btn.id = 'par-aba-'+m.id;
+      btn.textContent = m.emoji+' '+m.titulo.replace(/Módulo \d+ — /,'');
+      btn.onclick = (function(id){ return function(){ abrirAbaPar(id); }; })(m.id);
+      abasDiv.appendChild(btn);
+    });
+  }
+  var modulo = null;
+  MODULOS.forEach(function(m){ if(m.id === abaPar) modulo = m; });
+  if(!modulo){ container.innerHTML=''; return; }
+  var html = '';
+  modulo.subcats.forEach(function(s){
+    var cor = COR_MOD[abaPar] || '#374151';
+    html += '<div style="margin-bottom:10px;border:1px solid var(--linha);border-radius:8px;overflow:hidden;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="var b=this.nextElementSibling,a=b.style.display!=='none';b.style.display=a?'none':'block';">';
+    html += '<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+s.id+' — '+s.titulo+'</span>';
+    html += '<span style="font-size:10px;color:var(--cinza-medio);">'+s.perguntas.length+' perguntas ▸</span></div>';
+    html += '<div style="display:none;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
+    html += '<th style="width:55px;padding:7px 12px;background:var(--cinza-claro);text-align:left;font-size:10px;color:var(--cinza-medio);">ID</th>';
+    html += '<th style="padding:7px 12px;background:var(--cinza-claro);text-align:left;font-size:10px;color:var(--cinza-medio);">Texto da Pergunta</th></tr></thead><tbody>';
+    s.perguntas.forEach(function(p){
+      html += '<tr><td style="padding:8px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-medio);font-weight:600;font-family:monospace;">#'+String(p.id).padStart(3,'0')+'</td>';
+      html += '<td style="padding:8px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro,#374151);">'+p.texto+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  });
+  container.innerHTML = html;
+}
+
 var TCALC={unico:[{max:5,val:97},{max:20,val:79},{max:50,val:59},{max:100,val:49}],assinatura:[{max:5,val:35},{max:20,val:25},{max:50,val:20},{max:100,val:16.5}]};
 var FNOMES=['Faixa 1 (até 5)','Faixa 2 (6–20)','Faixa 3 (21–50)','Faixa 4 (51–100)'];
 function calcular(){
