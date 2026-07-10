@@ -386,6 +386,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Clientes / Empresas</div>
         </div>
+        <button class="btn btn-roxo btn-sm" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
       </div>
       <div class="content">
         <div class="card">
@@ -394,12 +395,70 @@ tbody tr:hover td{background:#F5F8F7;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td></tr>
+              <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Plano</th><th>Colaboradores</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="tabela-empresas">
+                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td>Assinatura Mensal</td><td>14</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm" onclick="alert('Acessar painel desta empresa...')">Ver Painel</button></td></tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CADASTRO EMPRESA -->
+    <div class="modal-overlay" id="modal-empresa" onclick="if(event.target===this)fecharModalEmpresa()">
+      <div class="modal" style="max-width:520px;width:95%;">
+        <div class="modal-header">
+          <h3>Nova Empresa / Cliente</h3>
+          <button class="modal-close" onclick="fecharModalEmpresa()">✕</button>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Nome da Empresa *</label>
+            <input class="form-control" id="emp-nome" placeholder="Ex: Clínica Vida S.A."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CNPJ</label>
+            <input class="form-control" id="emp-cnpj" placeholder="00.000.000/0001-00"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Responsável (RH) *</label>
+            <input class="form-control" id="emp-responsavel" placeholder="Nome completo"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail do Responsável *</label>
+            <input class="form-control" id="emp-email" type="email" placeholder="rh@empresa.com.br"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Nº de Colaboradores *</label>
+            <input class="form-control" id="emp-colab" type="number" placeholder="Ex: 25"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Plano *</label>
+            <select class="form-control" id="emp-plano">
+              <option value="">Selecione...</option>
+              <option value="uso-unico-5">Uso Único — até 5 (R$ 97/colab)</option>
+              <option value="uso-unico-20">Uso Único — 6 a 20 (R$ 79/colab)</option>
+              <option value="uso-unico-50">Uso Único — 21 a 50 (R$ 59/colab)</option>
+              <option value="uso-unico-100">Uso Único — 51 a 100 (R$ 49/colab)</option>
+              <option value="mensal-5">Assinatura Mensal — até 5 (R$ 35/colab/mês)</option>
+              <option value="mensal-20">Assinatura Mensal — 6 a 20 (R$ 25/colab/mês)</option>
+              <option value="mensal-50">Assinatura Mensal — 21 a 50 (R$ 20/colab/mês)</option>
+              <option value="mensal-100">Assinatura Mensal — 51 a 100 (R$ 16,50/colab/mês)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Parceiro Responsável (opcional)</label>
+          <input class="form-control" id="emp-parceiro" placeholder="Nome ou ID do parceiro que indicou"/>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="btn btn-ghost" onclick="fecharModalEmpresa()">Cancelar</button>
+          <button class="btn btn-roxo" onclick="salvarEmpresa()">Cadastrar Empresa</button>
         </div>
       </div>
     </div>
@@ -503,6 +562,45 @@ function setLoginTab(tab, el) {
 function entrarAdmin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
+}
+function abrirModalEmpresa() {
+  document.getElementById('modal-empresa').classList.add('open');
+}
+function fecharModalEmpresa() {
+  document.getElementById('modal-empresa').classList.remove('open');
+}
+function salvarEmpresa() {
+  var nome = document.getElementById('emp-nome').value.trim();
+  var responsavel = document.getElementById('emp-responsavel').value.trim();
+  var email = document.getElementById('emp-email').value.trim();
+  var colab = document.getElementById('emp-colab').value.trim();
+  var plano = document.getElementById('emp-plano');
+  var planoText = plano.options[plano.selectedIndex].text;
+
+  if (!nome || !responsavel || !email || !colab || !plano.value) {
+    alert('Preencha todos os campos obrigatórios (*).');
+    return;
+  }
+
+  var tbody = document.getElementById('tabela-empresas');
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td><strong>' + nome + '</strong></td>' +
+    '<td>' + responsavel + '</td>' +
+    '<td>' + email + '</td>' +
+    '<td>' + planoText.split('—')[0].trim() + '</td>' +
+    '<td>' + colab + '</td>' +
+    '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>' +
+    '<td><button class="btn btn-ghost btn-sm" onclick="alert(\'Acessar painel desta empresa...\')">Ver Painel</button></td>';
+  tbody.appendChild(tr);
+
+  // Limpa campos
+  ['emp-nome','emp-cnpj','emp-responsavel','emp-email','emp-colab','emp-parceiro'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('emp-plano').selectedIndex = 0;
+
+  fecharModalEmpresa();
+  alert('✅ Empresa "' + nome + '" cadastrada com sucesso!\n\nEm produção: gravado em nr1map_empresas no Firestore.');
 }
 function entrarParceiro() { window.location.href = 'parceiro.html'; }
 function entrarRH() { window.location.href = 'painel.html'; }
