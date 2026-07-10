@@ -120,7 +120,13 @@ html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:anti
 @media(max-width:768px){.card-body{padding:12px 14px;}}
 @media(max-width:640px){.card-body{padding:10px 12px;}}
 
-/* VELOCIMETROS */
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:28px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--cinza-medio);line-height:1;}
 .gauge-container {display:grid; grid-template-columns:repeat(4,1fr); gap:14px; text-align:center;}
 @media(max-width:1024px){.gauge-container{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:640px){.gauge-container{grid-template-columns:1fr;}}
@@ -386,7 +392,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Clientes / Empresas</div>
         </div>
-        <button class="btn btn-roxo btn-sm" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
+        <button class="btn btn-roxo btn-sm" onclick="abrirModalTipo()">+ Nova Empresa / Cliente</button>
       </div>
       <div class="content">
         <div class="card">
@@ -405,60 +411,199 @@ tbody tr:hover td{background:#F5F8F7;}
       </div>
     </div>
 
-    <!-- MODAL CADASTRO EMPRESA -->
-    <div class="modal-overlay" id="modal-empresa" onclick="if(event.target===this)fecharModalEmpresa()">
-      <div class="modal" style="max-width:520px;width:95%;">
+    <!-- MODAL ESCOLHA TIPO -->
+    <div class="modal-overlay" id="modal-tipo" onclick="if(event.target===this)fecharModalTipo()">
+      <div class="modal" style="max-width:440px;width:95%;">
         <div class="modal-header">
-          <h3>Nova Empresa / Cliente</h3>
-          <button class="modal-close" onclick="fecharModalEmpresa()">✕</button>
+          <h3>Tipo de Cliente</h3>
+          <button class="modal-close" onclick="fecharModalTipo()">✕</button>
+        </div>
+        <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:20px;">Selecione o tipo de cadastro:</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPJ()">
+            🏢 <span><strong style="display:block;font-size:14px;">Empresa (Pessoa Jurídica)</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CNPJ · múltiplos colaboradores · RH responsável</span></span>
+          </button>
+          <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPF()">
+            👤 <span><strong style="display:block;font-size:14px;">Profissional / Pessoa Física</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CPF · contratante individual · MEI ou autônomo</span></span>
+          </button>
+        </div>
+        <div style="margin-top:20px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);">
+          🔗 <strong>Link de auto-cadastro:</strong> Envie para o cliente preencher sozinho →
+          <a href="representantes.html" target="_blank" style="color:var(--verde);font-weight:600;"> representantes.html#formulario</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CADASTRO PJ (EMPRESA) -->
+    <div class="modal-overlay" id="modal-pj" onclick="if(event.target===this)fecharModalPJ()">
+      <div class="modal" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto;">
+        <div class="modal-header">
+          <h3>🏢 Cadastrar Empresa (PJ)</h3>
+          <button class="modal-close" onclick="fecharModalPJ()">✕</button>
+        </div>
+
+        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Dados da Empresa</p>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Razão Social / Nome *</label>
+            <input class="form-control" id="pj-nome" placeholder="Ex: Clínica Vida S.A."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CNPJ *</label>
+            <input class="form-control" id="pj-cnpj" placeholder="00.000.000/0001-00"/>
+          </div>
         </div>
         <div class="grid-2" style="margin-bottom:12px;">
           <div class="form-group">
-            <label class="form-label">Nome da Empresa *</label>
-            <input class="form-control" id="emp-nome" placeholder="Ex: Clínica Vida S.A."/>
+            <label class="form-label">Setor / Ramo de Atividade</label>
+            <input class="form-control" id="pj-setor" placeholder="Ex: Saúde, Indústria..."/>
           </div>
-          <div class="form-group">
-            <label class="form-label">CNPJ</label>
-            <input class="form-control" id="emp-cnpj" placeholder="00.000.000/0001-00"/>
-          </div>
-        </div>
-        <div class="grid-2" style="margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label">Responsável (RH) *</label>
-            <input class="form-control" id="emp-responsavel" placeholder="Nome completo"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">E-mail do Responsável *</label>
-            <input class="form-control" id="emp-email" type="email" placeholder="rh@empresa.com.br"/>
-          </div>
-        </div>
-        <div class="grid-2" style="margin-bottom:12px;">
           <div class="form-group">
             <label class="form-label">Nº de Colaboradores *</label>
-            <input class="form-control" id="emp-colab" type="number" placeholder="Ex: 25"/>
+            <input class="form-control" id="pj-colab" type="number" placeholder="Ex: 25"/>
+          </div>
+        </div>
+
+        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Responsável (RH / Gestor)</p>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Nome do Responsável *</label>
+            <input class="form-control" id="pj-responsavel" placeholder="Nome completo"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Plano *</label>
-            <select class="form-control" id="emp-plano">
+            <label class="form-label">E-mail *</label>
+            <input class="form-control" id="pj-email" type="email" placeholder="rh@empresa.com.br"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">WhatsApp *</label>
+            <input class="form-control" id="pj-whatsapp" placeholder="(62) 9 9999-9999"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Como conheceu o NR-1 Map?</label>
+            <select class="form-control" id="pj-origem">
               <option value="">Selecione...</option>
-              <option value="uso-unico-5">Uso Único — até 5 (R$ 97/colab)</option>
-              <option value="uso-unico-20">Uso Único — 6 a 20 (R$ 79/colab)</option>
-              <option value="uso-unico-50">Uso Único — 21 a 50 (R$ 59/colab)</option>
-              <option value="uso-unico-100">Uso Único — 51 a 100 (R$ 49/colab)</option>
-              <option value="mensal-5">Assinatura Mensal — até 5 (R$ 35/colab/mês)</option>
-              <option value="mensal-20">Assinatura Mensal — 6 a 20 (R$ 25/colab/mês)</option>
-              <option value="mensal-50">Assinatura Mensal — 21 a 50 (R$ 20/colab/mês)</option>
-              <option value="mensal-100">Assinatura Mensal — 51 a 100 (R$ 16,50/colab/mês)</option>
+              <option>Indicação de parceiro/consultor</option>
+              <option>Instagram / Redes Sociais</option>
+              <option>Google / Pesquisa</option>
+              <option>LinkedIn</option>
+              <option>Evento / Palestra</option>
+              <option>E-book / Material gratuito</option>
+              <option>Outro</option>
             </select>
           </div>
         </div>
-        <div class="form-group" style="margin-bottom:16px;">
-          <label class="form-label">Parceiro Responsável (opcional)</label>
-          <input class="form-control" id="emp-parceiro" placeholder="Nome ou ID do parceiro que indicou"/>
+
+        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Plano Contratado</p>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Plano *</label>
+            <select class="form-control" id="pj-plano">
+              <option value="">Selecione...</option>
+              <optgroup label="Uso Único">
+                <option value="uso-unico-5">Até 5 colab. — R$ 97/colab</option>
+                <option value="uso-unico-20">6 a 20 colab. — R$ 79/colab</option>
+                <option value="uso-unico-50">21 a 50 colab. — R$ 59/colab</option>
+                <option value="uso-unico-100">51 a 100 colab. — R$ 49/colab</option>
+              </optgroup>
+              <optgroup label="Assinatura Mensal">
+                <option value="mensal-5">Até 5 colab. — R$ 35/colab/mês</option>
+                <option value="mensal-20">6 a 20 colab. — R$ 25/colab/mês</option>
+                <option value="mensal-50">21 a 50 colab. — R$ 20/colab/mês</option>
+                <option value="mensal-100">51 a 100 colab. — R$ 16,50/colab/mês</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Parceiro que indicou (opcional)</label>
+            <input class="form-control" id="pj-parceiro" placeholder="Nome ou ID do parceiro"/>
+          </div>
         </div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button class="btn btn-ghost" onclick="fecharModalEmpresa()">Cancelar</button>
-          <button class="btn btn-roxo" onclick="salvarEmpresa()">Cadastrar Empresa</button>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn btn-ghost" onclick="fecharModalPJ()">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarPJ()">Cadastrar Empresa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CADASTRO PF (PESSOA FÍSICA) -->
+    <div class="modal-overlay" id="modal-pf" onclick="if(event.target===this)fecharModalPF()">
+      <div class="modal" style="max-width:520px;width:95%;max-height:90vh;overflow-y:auto;">
+        <div class="modal-header">
+          <h3>👤 Cadastrar Pessoa Física (PF)</h3>
+          <button class="modal-close" onclick="fecharModalPF()">✕</button>
+        </div>
+
+        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Dados Pessoais</p>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Nome Completo *</label>
+            <input class="form-control" id="pf-nome" placeholder="Ex: João da Silva"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CPF *</label>
+            <input class="form-control" id="pf-cpf" placeholder="000.000.000-00"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">E-mail *</label>
+            <input class="form-control" id="pf-email" type="email" placeholder="contato@email.com.br"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp *</label>
+            <input class="form-control" id="pf-whatsapp" placeholder="(62) 9 9999-9999"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Profissão / Atuação</label>
+            <input class="form-control" id="pf-profissao" placeholder="Ex: Psicólogo, Consultor SST..."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nº de Colaboradores *</label>
+            <input class="form-control" id="pf-colab" type="number" placeholder="Ex: 5"/>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Plano *</label>
+            <select class="form-control" id="pf-plano">
+              <option value="">Selecione...</option>
+              <optgroup label="Uso Único">
+                <option value="uso-unico-5">Até 5 colab. — R$ 97/colab</option>
+                <option value="uso-unico-20">6 a 20 colab. — R$ 79/colab</option>
+                <option value="uso-unico-50">21 a 50 colab. — R$ 59/colab</option>
+                <option value="uso-unico-100">51 a 100 colab. — R$ 49/colab</option>
+              </optgroup>
+              <optgroup label="Assinatura Mensal">
+                <option value="mensal-5">Até 5 colab. — R$ 35/colab/mês</option>
+                <option value="mensal-20">6 a 20 colab. — R$ 25/colab/mês</option>
+                <option value="mensal-50">21 a 50 colab. — R$ 20/colab/mês</option>
+                <option value="mensal-100">51 a 100 colab. — R$ 16,50/colab/mês</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Como conheceu o NR-1 Map?</label>
+            <select class="form-control" id="pf-origem">
+              <option value="">Selecione...</option>
+              <option>Indicação de parceiro/consultor</option>
+              <option>Instagram / Redes Sociais</option>
+              <option>Google / Pesquisa</option>
+              <option>LinkedIn</option>
+              <option>Evento / Palestra</option>
+              <option>E-book / Material gratuito</option>
+              <option>Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn btn-ghost" onclick="fecharModalPF()">Cancelar</button>
+          <button class="btn btn-roxo" onclick="salvarPF()">Cadastrar Cliente PF</button>
         </div>
       </div>
     </div>
@@ -563,44 +708,70 @@ function entrarAdmin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
 }
-function abrirModalEmpresa() {
-  document.getElementById('modal-empresa').classList.add('open');
-}
-function fecharModalEmpresa() {
-  document.getElementById('modal-empresa').classList.remove('open');
-}
-function salvarEmpresa() {
-  var nome = document.getElementById('emp-nome').value.trim();
-  var responsavel = document.getElementById('emp-responsavel').value.trim();
-  var email = document.getElementById('emp-email').value.trim();
-  var colab = document.getElementById('emp-colab').value.trim();
-  var plano = document.getElementById('emp-plano');
-  var planoText = plano.options[plano.selectedIndex].text;
+function abrirModalTipo(){ document.getElementById('modal-tipo').classList.add('open'); }
+function fecharModalTipo(){ document.getElementById('modal-tipo').classList.remove('open'); }
+function abrirModalPJ(){ document.getElementById('modal-pj').classList.add('open'); }
+function fecharModalPJ(){ document.getElementById('modal-pj').classList.remove('open'); }
+function abrirModalPF(){ document.getElementById('modal-pf').classList.add('open'); }
+function fecharModalPF(){ document.getElementById('modal-pf').classList.remove('open'); }
 
-  if (!nome || !responsavel || !email || !colab || !plano.value) {
+function salvarPJ() {
+  var nome = document.getElementById('pj-nome').value.trim();
+  var cnpj = document.getElementById('pj-cnpj').value.trim();
+  var responsavel = document.getElementById('pj-responsavel').value.trim();
+  var email = document.getElementById('pj-email').value.trim();
+  var whatsapp = document.getElementById('pj-whatsapp').value.trim();
+  var colab = document.getElementById('pj-colab').value.trim();
+  var plano = document.getElementById('pj-plano');
+  var planoText = plano.options[plano.selectedIndex].text;
+  if (!nome || !cnpj || !responsavel || !email || !whatsapp || !colab || !plano.value) {
     alert('Preencha todos os campos obrigatórios (*).');
     return;
   }
-
   var tbody = document.getElementById('tabela-empresas');
   var tr = document.createElement('tr');
-  tr.innerHTML = '<td><strong>' + nome + '</strong></td>' +
-    '<td>' + responsavel + '</td>' +
+  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">CNPJ: ' + cnpj + '</span></td>' +
+    '<td>' + responsavel + '<br/><span style="font-size:10px;color:var(--cinza-medio);">📱 ' + whatsapp + '</span></td>' +
     '<td>' + email + '</td>' +
     '<td>' + planoText.split('—')[0].trim() + '</td>' +
     '<td>' + colab + '</td>' +
     '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>' +
-    '<td><button class="btn btn-ghost btn-sm" onclick="alert(\'Acessar painel desta empresa...\')">Ver Painel</button></td>';
+    '<td><button class="btn btn-ghost btn-sm">Ver Painel</button></td>';
   tbody.appendChild(tr);
+  ['pj-nome','pj-cnpj','pj-setor','pj-responsavel','pj-email','pj-whatsapp','pj-colab','pj-parceiro'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('pj-plano').selectedIndex = 0;
+  document.getElementById('pj-origem').selectedIndex = 0;
+  fecharModalPJ();
+  alert('✅ Empresa "' + nome + '" cadastrada com sucesso!');
+}
 
-  // Limpa campos
-  ['emp-nome','emp-cnpj','emp-responsavel','emp-email','emp-colab','emp-parceiro'].forEach(function(id){
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('emp-plano').selectedIndex = 0;
-
-  fecharModalEmpresa();
-  alert('✅ Empresa "' + nome + '" cadastrada com sucesso!\n\nEm produção: gravado em nr1map_empresas no Firestore.');
+function salvarPF() {
+  var nome = document.getElementById('pf-nome').value.trim();
+  var cpf = document.getElementById('pf-cpf').value.trim();
+  var email = document.getElementById('pf-email').value.trim();
+  var whatsapp = document.getElementById('pf-whatsapp').value.trim();
+  var colab = document.getElementById('pf-colab').value.trim();
+  var plano = document.getElementById('pf-plano');
+  var planoText = plano.options[plano.selectedIndex].text;
+  if (!nome || !cpf || !email || !whatsapp || !colab || !plano.value) {
+    alert('Preencha todos os campos obrigatórios (*).');
+    return;
+  }
+  var tbody = document.getElementById('tabela-empresas');
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">CPF: ' + cpf + '</span></td>' +
+    '<td>' + nome + '<br/><span style="font-size:10px;color:var(--cinza-medio);">📱 ' + whatsapp + '</span></td>' +
+    '<td>' + email + '</td>' +
+    '<td>' + planoText.split('—')[0].trim() + '</td>' +
+    '<td>' + colab + '</td>' +
+    '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>' +
+    '<td><button class="btn btn-ghost btn-sm">Ver Painel</button></td>';
+  tbody.appendChild(tr);
+  ['pf-nome','pf-cpf','pf-email','pf-whatsapp','pf-profissao','pf-colab'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('pf-plano').selectedIndex = 0;
+  document.getElementById('pf-origem').selectedIndex = 0;
+  fecharModalPF();
+  alert('✅ Cliente "' + nome + '" cadastrado com sucesso!');
 }
 function entrarParceiro() { window.location.href = 'parceiro.html'; }
 function entrarRH() { window.location.href = 'painel.html'; }
