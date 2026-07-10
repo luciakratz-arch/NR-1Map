@@ -504,9 +504,9 @@ function entrarAdmin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
 }
-function entrarParceiro() { alert('Redirecionando para parceiro.html...'); }
-function entrarRH() { alert('Redirecionando para painel.html...'); }
-function entrarUser() { alert('Acessando pesquisa do colaborador...'); }
+function entrarParceiro() { window.location.href = 'parceiro.html'; }
+function entrarRH() { window.location.href = 'painel.html'; }
+function entrarUser() { window.location.href = 'colaborador.html'; }
 
 function sair() {
   document.getElementById('app-admin').classList.remove('active');
