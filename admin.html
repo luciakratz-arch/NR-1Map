@@ -525,8 +525,14 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost" onclick="fecharModalPJ()">Cancelar</button>
           <button class="btn btn-primary" onclick="salvarPJ()">Cadastrar Empresa</button>
         </div>
-      </div>
-    </div>
+        <div style="margin-top:16px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;border:1px solid rgba(10,110,79,.2);">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para a empresa</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-control" id="link-pj" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <button class="btn btn-primary btn-sm" onclick="copiarLink('link-pj')">Copiar</button>
+          </div>
+          <p style="font-size:11px;color:var(--verde);margin-top:6px;">📱 Envie este link por WhatsApp para a empresa preencher os dados sozinha.</p>
+        </div>
 
     <!-- MODAL CADASTRO PF (PESSOA FÍSICA) -->
     <div class="modal-overlay" id="modal-pf" onclick="if(event.target===this)fecharModalPF()">
@@ -605,8 +611,14 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost" onclick="fecharModalPF()">Cancelar</button>
           <button class="btn btn-roxo" onclick="salvarPF()">Cadastrar Cliente PF</button>
         </div>
-      </div>
-    </div>
+        <div style="margin-top:16px;padding:12px 14px;background:var(--roxo-xp);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
+          <div style="font-size:11px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o cliente PF</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-control" id="link-pf" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <button class="btn btn-roxo btn-sm" onclick="copiarLink('link-pf')">Copiar</button>
+          </div>
+          <p style="font-size:11px;color:var(--roxo);margin-top:6px;">📱 Envie este link por WhatsApp para o cliente preencher os dados sozinho.</p>
+        </div>
 
     <!-- LEADS -->
     <div id="view-leads" class="view">
@@ -707,6 +719,17 @@ function setLoginTab(tab, el) {
 function entrarAdmin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
+}
+function copiarLink(id) {
+  var input = document.getElementById(id);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(function(){
+    alert('✅ Link copiado!\n\nCole no WhatsApp e envie para o cliente preencher.');
+  }).catch(function(){
+    document.execCommand('copy');
+    alert('✅ Link copiado!');
+  });
 }
 function abrirModalTipo(){ document.getElementById('modal-tipo').classList.add('open'); }
 function fecharModalTipo(){ document.getElementById('modal-tipo').classList.remove('open'); }
