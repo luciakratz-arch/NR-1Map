@@ -134,6 +134,9 @@ tbody tr:last-child td{border-bottom:none;}
 .tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
 .tl-geral{background:var(--roxo);}
 .tl-pulso{background:var(--verde-claro);}
+.btn-qtd{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--linha);background:var(--branco);font-size:12px;font-weight:600;cursor:pointer;color:var(--cinza-medio);transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-qtd:hover{border-color:var(--roxo);color:var(--roxo);}
+.btn-qtd.active{background:var(--roxo);color:#fff;border-color:var(--roxo);}
 .tl-body{flex:1;}
 .tl-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
 .tl-tipo.g{color:var(--roxo);}
@@ -339,13 +342,83 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="topbar-title">Diagnóstico Geral</div>
     </div>
   </div>
-  <div class="content" style="max-width:620px;">
+  <div class="content" style="max-width:640px;">
+
+    <!-- AVISO -->
+    <div style="background:var(--verde-xp);border:1px solid rgba(10,110,79,.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--verde);line-height:1.6;">
+      📋 <strong>Diagnóstico Geral</strong> — aplicado anualmente, semestralmente ou bimestralmente. Envolve todas as dimensões (Dejours, Herzberg, Maslow). Os colaboradores recebem o link via WhatsApp e respondem no próprio celular.
+    </div>
+
+    <!-- CONFIG DISPARO -->
     <div class="card">
-      <div class="card-header"><div class="title">Configurar disparo</div></div>
+      <div class="card-header"><div class="title">⚙️ Configurar Disparo</div></div>
       <div class="card-body">
-        <button class="btn btn-primary" style="width:100%;" onclick="alert('🚀 Diagnóstico Geral disparado com sucesso!')">🚀 Disparar Diagnóstico Geral — 14 colaboradores</button>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Tipo de ciclo</label>
+            <select class="form-control" id="diag-ciclo">
+              <option value="anual">Anual</option>
+              <option value="semestral">Semestral</option>
+              <option value="bimestral">Bimestral</option>
+              <option value="pontual">Pontual (uso único)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de envio</label>
+            <input class="form-control" type="date" id="diag-data"/>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Horário do envio via WhatsApp</label>
+          <select class="form-control" id="diag-horario">
+            <option>07h00 — antes do expediente</option>
+            <option>08h00 — início do expediente</option>
+            <option>12h00 — horário de almoço</option>
+            <option>17h00 — fim do expediente</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Mensagem personalizada (opcional)</label>
+          <input class="form-control" id="diag-msg" placeholder="Ex: Olá! Chegou o momento do nosso diagnóstico anual de bem-estar..."/>
+        </div>
+
+        <!-- RESUMO -->
+        <div style="background:var(--cinza-claro);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.8;">
+          <div>👥 <strong>Colaboradores:</strong> 14 ativos</div>
+          <div>📋 <strong>Perguntas:</strong> Diagnóstico completo (todas as dimensões)</div>
+          <div>📱 <strong>Canal:</strong> WhatsApp → link para colaborador.html</div>
+          <div>🔒 <strong>Sigilo:</strong> respostas vinculadas por código anônimo</div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;" onclick="dispararDiagnostico()">
+          🚀 Disparar Diagnóstico Geral — 14 colaboradores
+        </button>
       </div>
     </div>
+
+    <!-- HISTÓRICO -->
+    <div class="card">
+      <div class="card-header"><div class="title">📋 Histórico de Diagnósticos</div></div>
+      <div class="card-body" style="padding:8px 16px;">
+        <div class="timeline-item" style="align-items:center;">
+          <div class="tl-dot" style="background:var(--verde);"></div>
+          <div class="tl-body">
+            <div class="tl-tipo p" style="font-weight:700;color:var(--verde);">DIAGNÓSTICO GERAL — Jun/2025</div>
+            <div class="tl-desc">12 de 14 responderam · 86% adesão · IBP médio: +1,8</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Diagnóstico Geral Jun/2025')">Ver laudo</button>
+        </div>
+        <div class="timeline-item" style="align-items:center;">
+          <div class="tl-dot" style="background:var(--verde);"></div>
+          <div class="tl-body">
+            <div class="tl-tipo p" style="font-weight:700;color:var(--verde);">DIAGNÓSTICO GERAL — Dez/2024</div>
+            <div class="tl-desc">11 de 14 responderam · 79% adesão · IBP médio: +0,4</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Diagnóstico Geral Dez/2024')">Ver laudo</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -357,35 +430,168 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="topbar-title">Pesquisa Pulso</div>
     </div>
   </div>
-  <div class="content">
-    <div class="ia-box">
+  <div class="content" style="max-width:640px;">
+
+    <!-- SUGESTÃO IA -->
+    <div class="ia-box" style="margin-bottom:16px;">
       <div class="ia-lbl">🤖 SUGESTÃO DA IA</div>
-      <div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div>
-      <div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="alert('Sugestão aceita! Configurando disparo...')">Aceitar sugestão →</button></div>
+      <div class="ia-txt"><strong>Tema sugerido esta semana: Esgotamento / Sobrecarga</strong><br/><span style="font-size:11px;opacity:.8;">Baseado no IBP da semana passada (−0,4) e nas respostas do espaço de fala.</span></div>
+      <div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="aceitarSugestaoIA()">Aceitar sugestão →</button></div>
     </div>
-    
+
+    <!-- CONFIG DISPARO -->
     <div class="card">
-      <div class="card-header"><div class="title">Histórico de Pulsos</div></div>
-      <div class="card-body" style="padding:8px 16px;">
-        <div class="timeline-item" style="align-items: center;">
+      <div class="card-header"><div class="title">⚙️ Configurar Pesquisa Pulso</div></div>
+      <div class="card-body">
+
+        <!-- NÚMERO DE PERGUNTAS -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Quantas perguntas esta semana?</label>
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <button class="btn-qtd active" id="qtd-1" onclick="selecionarQtd(1)">1 pergunta</button>
+            <button class="btn-qtd" id="qtd-2" onclick="selecionarQtd(2)">2 perguntas</button>
+            <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
+          </div>
+        </div>
+
+        <!-- SELEÇÃO DE PERGUNTAS -->
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Pergunta 1 *</label>
+          <select class="form-control" id="pulso-p1">
+            <option value="">Selecione uma pergunta...</option>
+            <optgroup label="Carga de Trabalho">
+              <option>Como você tem se sentido em relação ao seu volume de trabalho esta semana?</option>
+              <option>Você conseguiu cumprir suas tarefas sem se sentir sobrecarregado(a)?</option>
+              <option>O ritmo de trabalho esta semana foi adequado para você?</option>
+            </optgroup>
+            <optgroup label="Reconhecimento">
+              <option>Você se sentiu reconhecido(a) pelo seu trabalho nos últimos dias?</option>
+              <option>Seu esforço foi notado pela liderança esta semana?</option>
+            </optgroup>
+            <optgroup label="Relações e Clima">
+              <option>Como está o clima entre você e seus colegas de equipe?</option>
+              <option>Você se sentiu respeitado(a) no ambiente de trabalho esta semana?</option>
+            </optgroup>
+            <optgroup label="Bem-estar">
+              <option>Como você avalia seu bem-estar geral no trabalho esta semana?</option>
+              <option>Você conseguiu equilibrar trabalho e vida pessoal esta semana?</option>
+            </optgroup>
+            <optgroup label="Liderança">
+              <option>Você se sentiu apoiado(a) pela sua liderança esta semana?</option>
+              <option>As orientações da liderança foram claras e objetivas?</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group" id="grupo-p2" style="margin-bottom:12px;display:none;">
+          <label class="form-label">Pergunta 2</label>
+          <select class="form-control" id="pulso-p2">
+            <option value="">Selecione uma pergunta...</option>
+            <optgroup label="Carga de Trabalho">
+              <option>Como você tem se sentido em relação ao seu volume de trabalho esta semana?</option>
+              <option>Você conseguiu cumprir suas tarefas sem se sentir sobrecarregado(a)?</option>
+              <option>O ritmo de trabalho esta semana foi adequado para você?</option>
+            </optgroup>
+            <optgroup label="Reconhecimento">
+              <option>Você se sentiu reconhecido(a) pelo seu trabalho nos últimos dias?</option>
+              <option>Seu esforço foi notado pela liderança esta semana?</option>
+            </optgroup>
+            <optgroup label="Relações e Clima">
+              <option>Como está o clima entre você e seus colegas de equipe?</option>
+              <option>Você se sentiu respeitado(a) no ambiente de trabalho esta semana?</option>
+            </optgroup>
+            <optgroup label="Bem-estar">
+              <option>Como você avalia seu bem-estar geral no trabalho esta semana?</option>
+              <option>Você conseguiu equilibrar trabalho e vida pessoal esta semana?</option>
+            </optgroup>
+            <optgroup label="Liderança">
+              <option>Você se sentiu apoiado(a) pela sua liderança esta semana?</option>
+              <option>As orientações da liderança foram claras e objetivas?</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group" id="grupo-p3" style="margin-bottom:16px;display:none;">
+          <label class="form-label">Pergunta 3</label>
+          <select class="form-control" id="pulso-p3">
+            <option value="">Selecione uma pergunta...</option>
+            <optgroup label="Carga de Trabalho">
+              <option>Como você tem se sentido em relação ao seu volume de trabalho esta semana?</option>
+              <option>Você conseguiu cumprir suas tarefas sem se sentir sobrecarregado(a)?</option>
+              <option>O ritmo de trabalho esta semana foi adequado para você?</option>
+            </optgroup>
+            <optgroup label="Reconhecimento">
+              <option>Você se sentiu reconhecido(a) pelo seu trabalho nos últimos dias?</option>
+              <option>Seu esforço foi notado pela liderança esta semana?</option>
+            </optgroup>
+            <optgroup label="Relações e Clima">
+              <option>Como está o clima entre você e seus colegas de equipe?</option>
+              <option>Você se sentiu respeitado(a) no ambiente de trabalho esta semana?</option>
+            </optgroup>
+            <optgroup label="Bem-estar">
+              <option>Como você avalia seu bem-estar geral no trabalho esta semana?</option>
+              <option>Você conseguiu equilibrar trabalho e vida pessoal esta semana?</option>
+            </optgroup>
+            <optgroup label="Liderança">
+              <option>Você se sentiu apoiado(a) pela sua liderança esta semana?</option>
+              <option>As orientações da liderança foram claras e objetivas?</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">Data de envio</label>
+            <input class="form-control" type="date" id="pulso-data"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horário</label>
+            <select class="form-control" id="pulso-horario">
+              <option>07h00 — antes do expediente</option>
+              <option>08h00 — início do expediente</option>
+              <option>12h00 — horário de almoço</option>
+              <option>17h00 — fim do expediente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div style="background:var(--cinza-claro);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.8;" id="pulso-resumo">
+          <div>👥 <strong>Colaboradores:</strong> 14 ativos</div>
+          <div>📋 <strong>Perguntas:</strong> <span id="resumo-qtd">1 pergunta</span></div>
+          <div>📱 <strong>Canal:</strong> WhatsApp → link para colaborador.html</div>
+          <div>🔒 <strong>Sigilo:</strong> respostas vinculadas por código anônimo</div>
+        </div>
+
+        <button class="btn btn-roxo" style="width:100%;padding:13px;font-size:14px;" onclick="dispararPulso()">
+          📡 Disparar Pesquisa Pulso — 14 colaboradores
+        </button>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="card">
+      <div class="card-header"><div class="title">📋 Histórico de Pulsos</div></div>
+      <div class="card-body" style="padding:8px 16px;" id="historico-pulsos">
+        <div class="timeline-item" style="align-items:center;">
           <div class="tl-dot tl-pulso"></div>
           <div class="tl-body">
-            <div class="tl-tipo p" style="font-weight:700; color:var(--verde);">PULSO — RECONHECIMENTO</div>
+            <div class="tl-tipo p" style="font-weight:700;color:var(--verde);">PULSO — RECONHECIMENTO · 2 perguntas</div>
             <div class="tl-desc">10 de 14 responderam · 83% adesão</div>
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Reconhecimento (Maio/2025)')">Ver laudo</button>
         </div>
-        
-        <div class="timeline-item" style="align-items: center;">
+        <div class="timeline-item" style="align-items:center;">
           <div class="tl-dot tl-pulso"></div>
           <div class="tl-body">
-            <div class="tl-tipo p" style="font-weight:700; color:var(--verde);">PULSO — ESPAÇO DE FALA</div>
+            <div class="tl-tipo p" style="font-weight:700;color:var(--verde);">PULSO — ESPAÇO DE FALA · 1 pergunta</div>
             <div class="tl-desc">9 de 14 responderam · 75% adesão</div>
           </div>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="visualizarDocumento('Laudo Técnico da Pesquisa Pulso - Tema: Espaço de Fala (Abril/2025)')">Ver laudo</button>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -489,6 +695,44 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
+function selecionarQtd(n) {
+  [1,2,3].forEach(function(i){
+    document.getElementById('qtd-'+i).classList.remove('active');
+    document.getElementById('grupo-p'+(i>1?i:''+(i===1?'':''))).style.display = i <= n ? '' : 'none';
+  });
+  document.getElementById('qtd-'+n).classList.add('active');
+  document.getElementById('grupo-p2').style.display = n >= 2 ? '' : 'none';
+  document.getElementById('grupo-p3').style.display = n >= 3 ? '' : 'none';
+  document.getElementById('resumo-qtd').textContent = n + ' pergunta' + (n > 1 ? 's' : '');
+}
+
+function aceitarSugestaoIA() {
+  document.getElementById('pulso-p1').value = 'Como você tem se sentido em relação ao seu volume de trabalho esta semana?';
+  selecionarQtd(1);
+  alert('✅ Sugestão aceita! Pergunta sobre Esgotamento/Sobrecarga selecionada.');
+}
+
+function dispararPulso() {
+  var p1 = document.getElementById('pulso-p1').value;
+  if (!p1) { alert('Selecione ao menos a Pergunta 1.'); return; }
+  var data = document.getElementById('pulso-data').value;
+  if (!data) { alert('Selecione a data de envio.'); return; }
+  // Adiciona no histórico
+  var tbody = document.getElementById('historico-pulsos');
+  var item = document.createElement('div');
+  item.className = 'timeline-item';
+  item.style.alignItems = 'center';
+  item.innerHTML = '<div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p" style="font-weight:700;color:var(--roxo);">PULSO — DISPARADO AGORA · aguardando respostas</div><div class="tl-desc">0 de 14 responderam · 0% adesão</div></div><span class="bdg bdg-roxo" style="margin-left:auto;font-size:10px;">Novo</span>';
+  tbody.insertBefore(item, tbody.firstChild);
+  alert('📡 Pesquisa Pulso disparada com sucesso!\n\n14 colaboradores receberão o link via WhatsApp no horário configurado.');
+}
+
+function dispararDiagnostico() {
+  var data = document.getElementById('diag-data').value;
+  if (!data) { alert('Selecione a data de envio.'); return; }
+  alert('🚀 Diagnóstico Geral disparado com sucesso!\n\n14 colaboradores receberão o link via WhatsApp.\n\nEles responderão todas as dimensões (Dejours, Herzberg, Maslow) pelo celular.');
+}
+
 function sv(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const el=document.getElementById('view-'+id);
