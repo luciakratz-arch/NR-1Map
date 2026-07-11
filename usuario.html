@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Área do Colaborador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
+  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
+  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
+  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
+  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
+  --sidebar:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+
+/* APP */
+.app{display:flex;height:100dvh;overflow:hidden;background:var(--cinza-claro);}
+@media(max-width:768px){.app{flex-direction:column;}}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
+@media(max-width:768px){.sidebar{width:100%;order:-1;max-height:60px;overflow-x:auto;overflow-y:hidden;flex-direction:row;align-items:center;padding:8px 12px;}}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--verde-claro);}
+.sidebar-perfil{padding:12px 18px;border-bottom:1px solid #1E2A28;}
+.sidebar-perfil .role{font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.sidebar-perfil .nome{font-size:12px;color:#C8D4D0;font-weight:500;}
+.nav{padding:10px 0;flex:1;}
+.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--verde-claro);}
+.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;display:flex;flex-direction:column;gap:6px;}
+.btn-sair{width:100%;padding:8px;background:transparent;border:1px solid #2A2E2C;border-radius:7px;color:#4A5450;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-sair:hover{color:#C8D4D0;border-color:#4A5450;}
+.btn-site{background:rgba(10,110,79,.15);border-color:rgba(10,110,79,.3);color:#12A073;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+@media(max-width:768px){.topbar{padding:0 12px;}}
+.topbar-title-wrapper{display:flex;align-items:center;gap:12px;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.topbar-role{font-size:11px;font-weight:600;padding:3px 12px;border-radius:100px;background:var(--verde-xp);color:var(--verde);}
+.content{padding:24px;flex:1;}
+@media(max-width:768px){.content{padding:16px 12px;}}
+@media(max-width:640px){.content{padding:12px 8px;}}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* CARDS */
+.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
+.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
+.card-body{padding:16px 18px;}
+.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
+.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.mc .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.mc .sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+@media(max-width:768px){.metrics{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.metrics{grid-template-columns:1fr;}}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}
+.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}
+.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}
+.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-danger{background:#C53030;color:#fff;border:none;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* IBP TERMÔMETRO */
+.ibp-strip{height:14px;border-radius:7px;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 50%,#10b981 100%);position:relative;margin:12px 0 6px;}
+.ibp-needle{position:absolute;top:-7px;width:28px;height:28px;background:#fff;border-radius:50%;border:3px solid var(--preto);transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.15);transition:left .6s ease;}
+.ibp-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--cinza-medio);margin-bottom:16px;}
+.ibp-val{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;text-align:center;margin:8px 0 2px;}
+.ibp-zona{text-align:center;font-size:13px;font-weight:600;margin-bottom:16px;}
+
+/* SOCORRO */
+.socorro-card{background:linear-gradient(135deg,var(--roxo),var(--roxo-claro));border-radius:12px;padding:20px;color:#fff;text-align:center;margin-bottom:16px;}
+.socorro-icon{font-size:40px;margin-bottom:10px;}
+.socorro-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+.socorro-sub{font-size:13px;opacity:.85;line-height:1.5;margin-bottom:20px;}
+.btn-socorro{background:#fff;color:var(--roxo);border:none;border-radius:9px;padding:13px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;width:100%;margin-bottom:10px;}
+.btn-socorro:hover{background:#f0e8fc;}
+.btn-socorro-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:9px;padding:11px 24px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;width:100%;}
+
+/* HISTÓRICO */
+.hist-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--linha);}
+.hist-item:last-child{border-bottom:none;}
+.hist-data{font-size:11px;color:var(--cinza-medio);}
+.hist-tipo{font-size:12px;font-weight:500;}
+.hist-ibp{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+
+/* BADGE */
+.bdg{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.bdg-ok{background:var(--verde-xp);color:var(--verde);}
+.bdg-warn{background:var(--laranja-xp);color:var(--laranja);}
+.bdg-roxo{background:var(--roxo-xp);color:var(--roxo);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:28px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--cinza-medio);}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.form-control:focus{outline:none;border-color:var(--verde-claro);}
+textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">NR-1<span>Map</span></div>
+    <div class="sidebar-perfil">
+      <div class="role">Colaborador</div>
+      <div class="nome" id="sb-nome">Identificação anônima</div>
+      <div style="font-size:10px;color:#4A5450;margin-top:2px;" id="sb-empresa">—</div>
+    </div>
+    <div class="nav">
+      <div class="nav-sec">Minha Área</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="sv('dashboard')"><span class="ic">📊</span>Meu Painel</div>
+      <div class="nav-item" id="nav-resultados" onclick="sv('resultados')"><span class="ic">🌡️</span>Meus Resultados</div>
+      <div class="nav-item" id="nav-historico" onclick="sv('historico')"><span class="ic">📋</span>Histórico</div>
+      <div class="nav-item" id="nav-pesquisa" onclick="sv('pesquisa')"><span class="ic">📝</span>Responder Pesquisa</div>
+      <div class="nav-sec">Suporte</div>
+      <div class="nav-item" id="nav-socorro" onclick="sv('socorro')"><span class="ic">🆘</span>Pedir Ajuda</div>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-sair btn-site" onclick="window.location.href='index.html'">🌐 Voltar ao Site</button>
+      <button class="btn-sair" onclick="window.location.href='admin.html'">← Sair</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- VIEW: DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <div class="topbar-title">Meu Painel</div>
+          <span class="topbar-role">Colaborador Anônimo</span>
+        </div>
+        <button class="btn btn-roxo btn-sm" onclick="sv('socorro')">🆘 Pedir Ajuda</button>
+      </div>
+      <div class="content">
+
+        <!-- BOAS VINDAS -->
+        <div style="background:linear-gradient(135deg,var(--verde),var(--verde-claro));border-radius:12px;padding:20px 24px;margin-bottom:20px;color:#fff;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:4px;">Bem-vindo(a)</div>
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;" id="dash-nome">Seu espaço privativo</div>
+          <div style="font-size:13px;opacity:.85;line-height:1.5;">Aqui você acompanha seu bem-estar no trabalho e pode pedir ajuda quando precisar. Tudo é 100% anônimo.</div>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:100px;padding:5px 14px;font-size:11px;margin-top:12px;">🔒 Suas respostas nunca são identificadas ao RH</div>
+        </div>
+
+        <!-- MÉTRICAS -->
+        <div class="metrics">
+          <div class="mc" style="border-top:3px solid var(--verde);">
+            <div class="lbl">IBP Atual</div>
+            <div class="val" style="color:var(--verde);">+1,8</div>
+            <div class="sub">Zona de Prazer no Trabalho</div>
+          </div>
+          <div class="mc" style="border-top:3px solid var(--roxo);">
+            <div class="lbl">Pesquisas Respondidas</div>
+            <div class="val">6</div>
+            <div class="sub">últimos 30 dias</div>
+          </div>
+          <div class="mc" style="border-top:3px solid var(--cinza-medio);">
+            <div class="lbl">Próxima Pesquisa</div>
+            <div class="val" style="font-size:16px;margin-top:4px;">Sex, 18/07</div>
+            <div class="sub">via WhatsApp</div>
+          </div>
+        </div>
+
+        <!-- PRÓXIMA PESQUISA -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">📱 Pesquisa Pulso da Semana</div><div class="subtitle">Você receberá 3 perguntas pelo WhatsApp</div></div>
+            <span class="bdg bdg-ok"><span class="dot"></span>Agendada</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--cinza-medio);line-height:1.6;margin-bottom:14px;">Sua próxima pesquisa será enviada automaticamente via WhatsApp. São apenas 3 perguntas — leva menos de 2 minutos para responder.</p>
+            <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--verde);">
+              📅 <strong>Próximo envio:</strong> Sexta-feira, 18/07/2025 às 08h00<br/>
+              📱 <strong>WhatsApp:</strong> (62) 9 ****-**34<br/>
+              🔗 <strong>Ou acesse agora:</strong> <a href="colaborador.html" style="color:var(--verde);font-weight:600;">responder pesquisa →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÚLTIMO RESULTADO -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">🌡️ Último Resultado</div><div class="subtitle">Pesquisa de Jun/2025</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="sv('resultados')">Ver detalhes</button>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="text-align:center;">
+                <div class="ibp-val" style="font-size:36px;color:var(--verde);">+1,8</div>
+                <div style="font-size:11px;color:var(--verde);font-weight:600;">Prazer no Trabalho</div>
+              </div>
+              <div style="flex:1;">
+                <div class="ibp-strip"><div class="ibp-needle" style="left:68%;"></div></div>
+                <div class="ibp-labels"><span>−5 Sofrimento</span><span>0 Neutro</span><span>+5 Prazer</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW: RESULTADOS -->
+    <div id="view-resultados" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+          <div class="topbar-title">Meus Resultados</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header"><div><div class="title">🌡️ Termômetro Prazer ↔ Sofrimento</div><div class="subtitle">Índice de Balança Psicodinâmica (IBP)</div></div></div>
+          <div class="card-body">
+            <div class="ibp-val" style="color:var(--verde);">+1,8</div>
+            <div class="ibp-zona" style="color:var(--verde);">Zona de Prazer no Trabalho</div>
+            <div class="ibp-strip"><div class="ibp-needle" style="left:68%;"></div></div>
+            <div class="ibp-labels"><span>−5 Sofrimento Patogênico</span><span>0</span><span>+5 Prazer</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><div class="title">📊 Resultado por Dimensão</div><div class="subtitle">Última pesquisa — Jun/2025</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>🏃 Carga de Trabalho</span><span style="font-weight:600;color:var(--laranja);">+0,5</span></div>
+                <div style="height:6px;border-radius:3px;background:var(--cinza-claro);"><div style="width:55%;height:100%;border-radius:3px;background:var(--laranja);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>🛡️ Segurança e Estabilidade</span><span style="font-weight:600;color:var(--verde);">+2,5</span></div>
+                <div style="height:6px;border-radius:3px;background:var(--cinza-claro);"><div style="width:75%;height:100%;border-radius:3px;background:var(--verde);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>🤝 Relações e Clima</span><span style="font-weight:600;color:var(--verde);">+2,0</span></div>
+                <div style="height:6px;border-radius:3px;background:var(--cinza-claro);"><div style="width:70%;height:100%;border-radius:3px;background:var(--verde);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>✨ Sentido e Reconhecimento</span><span style="font-weight:600;color:var(--verde);">+1,5</span></div>
+                <div style="height:6px;border-radius:3px;background:var(--cinza-claro);"><div style="width:65%;height:100%;border-radius:3px;background:var(--verde);"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: PESQUISA -->
+    <div id="view-pesquisa" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+          <div class="topbar-title">Responder Pesquisa</div>
+        </div>
+      </div>
+      <div class="content">
+
+        <!-- AVISO SIGILO -->
+        <div style="background:linear-gradient(135deg,rgba(10,110,79,.1),rgba(18,160,115,.08));border:1px solid rgba(18,160,115,.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:22px;flex-shrink:0;">🔒</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--verde);margin-bottom:4px;">Suas respostas são sigilosas</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.6;">Cada resposta é vinculada ao seu código pessoal de colaborador — nunca ao seu nome ou e-mail. O RH vê apenas dados agrupados da equipe, sem identificação individual.</div>
+          </div>
+        </div>
+
+        <!-- OPÇÕES DE RESPOSTA -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">📝 Pesquisa Pulso — Semana atual</div><div class="subtitle">3 perguntas · menos de 2 minutos</div></div>
+            <span class="bdg bdg-roxo"><span class="dot"></span>Disponível</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:16px;line-height:1.6;">
+              Seu código de pesquisa: <strong style="font-family:monospace;background:var(--cinza-claro);padding:2px 8px;border-radius:4px;color:var(--preto);">COL-4821</strong><br/>
+              Este código vincula suas respostas ao seu perfil de forma anônima.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn btn-primary" style="justify-content:center;padding:13px;" onclick="sv('pesquisa-form')">
+                📝 Responder aqui na plataforma
+              </button>
+              <a href="colaborador.html" target="_blank" style="text-decoration:none;">
+                <button class="btn btn-ghost" style="width:100%;justify-content:center;padding:13px;">
+                  📱 Abrir versão mobile (link WhatsApp)
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW: PESQUISA FORM -->
+    <div id="view-pesquisa-form" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('pesquisa')">← Voltar</button>
+          <div class="topbar-title">Pesquisa Pulso</div>
+        </div>
+        <span style="font-size:11px;color:var(--cinza-medio);">Pergunta <span id="perg-num">1</span> de 3</span>
+      </div>
+      <div class="content" style="max-width:640px;">
+
+        <div style="background:var(--verde-xp);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:var(--verde);">
+          🔒 Código COL-4821 · Respostas vinculadas ao seu perfil com sigilo total
+        </div>
+
+        <!-- BARRA DE PROGRESSO -->
+        <div style="height:4px;background:var(--linha);border-radius:2px;margin-bottom:24px;overflow:hidden;">
+          <div id="prog-pesquisa" style="height:100%;background:var(--verde);border-radius:2px;width:33%;transition:width .3s;"></div>
+        </div>
+
+        <div id="container-perguntas"></div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-ghost" id="btn-anterior" onclick="pergAnterior()" style="display:none;">← Anterior</button>
+          <button class="btn btn-primary" id="btn-proximo" onclick="pergProxima()" style="flex:1;justify-content:center;padding:12px;">Próxima →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: HISTÓRICO -->
+    <div id="view-historico" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+          <div class="topbar-title">Histórico de Respostas</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header"><div><div class="title">📋 Suas Pesquisas</div><div class="subtitle">Todas as respostas anônimas registradas</div></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Tipo</th><th>IBP</th><th>Zona</th><th>Ação</th></tr></thead>
+              <tbody>
+                <tr><td>Jun/2025</td><td>Diagnóstico Geral</td><td style="font-weight:700;color:var(--verde);">+1,8</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td><button class="btn btn-ghost btn-sm" onclick="sv('resultados')">Ver</button></td></tr>
+                <tr><td>Mai/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">+0,2</td><td><span class="bdg bdg-warn"><span class="dot"></span>Neutro</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+                <tr><td>Mai/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">−0,4</td><td><span class="bdg bdg-warn"><span class="dot"></span>Defesa Oculta</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+                <tr><td>Abr/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">−1,8</td><td><span class="bdg bdg-warn"><span class="dot"></span>Sofrimento</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+                <tr><td>Mar/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--verde);">+2,1</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: PESQUISA CONCLUÍDA -->
+    <div id="view-pesquisa-concluida" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <div class="topbar-title">Pesquisa Enviada</div>
+        </div>
+      </div>
+      <div class="content" style="max-width:640px;text-align:center;padding-top:40px;">
+        <div style="font-size:60px;margin-bottom:16px;">✅</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Respostas enviadas!</div>
+        <div style="font-size:14px;color:var(--cinza-medio);line-height:1.6;margin-bottom:24px;">Suas respostas foram registradas com sigilo total sob o código <strong>COL-4821</strong>.<br/>Seu IBP será atualizado em breve.</div>
+        <div style="background:var(--verde-xp);border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:12px;color:var(--verde);line-height:1.6;">
+          🔒 Seus dados nunca são associados ao seu nome pelo RH.<br/>Apenas você tem acesso ao seu histórico individual.
+        </div>
+        <button class="btn btn-primary" style="padding:12px 28px;" onclick="sv('resultados')">Ver meus resultados →</button>
+      </div>
+    </div>
+
+    <!-- VIEW: SOCORRO -->
+    <div id="view-socorro" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+          <div class="topbar-title">Pedir Ajuda</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="socorro-card">
+          <div class="socorro-icon">🆘</div>
+          <div class="socorro-title">Canal de Acolhimento</div>
+          <div class="socorro-sub">Se você está passando por um momento difícil no trabalho ou na vida pessoal, você não precisa enfrentar isso sozinho(a). Acione o suporte — de forma 100% anônima.</div>
+          <button class="btn-socorro" onclick="abrirSocorro()">🤝 Acionar suporte agora</button>
+          <button class="btn-socorro-ghost" onclick="abrirSocorroAnonimo()">💬 Enviar mensagem anônima</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><div class="title">📞 Recursos de Apoio</div><div class="subtitle">Canais de ajuda disponíveis</div></div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--cinza-claro);border-radius:8px;">
+              <span style="font-size:24px;">📞</span>
+              <div><div style="font-size:13px;font-weight:600;">CVV — Centro de Valorização da Vida</div><div style="font-size:12px;color:var(--cinza-medio);">Ligue 188 · 24 horas · gratuito</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--cinza-claro);border-radius:8px;">
+              <span style="font-size:24px;">💬</span>
+              <div><div style="font-size:13px;font-weight:600;">Psicóloga responsável</div><div style="font-size:12px;color:var(--cinza-medio);">Dra. Lucia Kratz · CRP 09/20590 · via plataforma</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--cinza-claro);border-radius:8px;">
+              <span style="font-size:24px;">🟢</span>
+              <div><div style="font-size:13px;font-weight:600;">WhatsApp de emergência</div><div style="font-size:12px;color:var(--cinza-medio);">Disponível via acionamento pela plataforma</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL SOCORRO -->
+<div class="modal-overlay" id="modal-socorro" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🆘 Acionar Suporte</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-socorro').classList.remove('open')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;line-height:1.6;">Seu pedido de ajuda será recebido pela psicóloga responsável. Sua identidade <strong>não será revelada ao RH</strong>.</p>
+    <div class="form-group">
+      <label class="form-label">O que está acontecendo? (opcional)</label>
+      <textarea class="form-control" id="socorro-msg" placeholder="Conte um pouco sobre o que está sentindo... Não há resposta certa ou errada."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Como prefere ser contatado(a)?</label>
+      <select class="form-control" id="socorro-contato">
+        <option>Via plataforma (mensagem anônima)</option>
+        <option>Via WhatsApp (confidencial)</option>
+        <option>Prefiro não ser contatado(a) por enquanto</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-socorro').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-roxo" onclick="enviarSocorro()">Enviar pedido de ajuda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MENSAGEM ANÔNIMA -->
+<div class="modal-overlay" id="modal-anonimo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💬 Mensagem Anônima</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-anonimo').classList.remove('open')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;line-height:1.6;">Sua mensagem será recebida pela gestão <strong>sem nenhuma identificação</strong>. Use para relatar situações, sugerir melhorias ou expressar o que está sentindo.</p>
+    <div class="form-group">
+      <label class="form-label">Sua mensagem</label>
+      <textarea class="form-control" id="anonimo-msg" placeholder="Escreva aqui..." style="min-height:120px;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-anonimo').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarAnonimo()">Enviar anonimamente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var pergAtual = 0;
+var respostas = {};
+
+var perguntas = [
+  { texto: 'Como você tem se sentido em relação ao seu volume de trabalho esta semana?', cat: 'Carga de Trabalho' },
+  { texto: 'Você se sentiu reconhecido(a) pelo seu trabalho nos últimos dias?', cat: 'Reconhecimento' },
+  { texto: 'Como está o clima entre você e seus colegas de equipe?', cat: 'Relações no Trabalho' }
+];
+
+var likertOpcoes = [
+  { val: 5, label: 'Muito bem / Concordo totalmente' },
+  { val: 4, label: 'Bem / Concordo' },
+  { val: 3, label: 'Neutro / Indiferente' },
+  { val: 2, label: 'Mal / Discordo' },
+  { val: 1, label: 'Muito mal / Discordo totalmente' }
+];
+
+function renderPergunta() {
+  var p = perguntas[pergAtual];
+  var html = '<div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">' + p.cat + '</div>';
+  html += '<div style="font-size:16px;color:var(--preto);line-height:1.55;margin-bottom:20px;font-weight:400;">' + p.texto + '</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+  likertOpcoes.forEach(function(op) {
+    var sel = respostas[pergAtual] === op.val;
+    html += '<div onclick="selecionarOpcao(' + op.val + ')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:10px;border:1.5px solid ' + (sel ? 'var(--verde)' : 'var(--linha)') + ';background:' + (sel ? 'var(--verde-xp)' : 'var(--branco)') + ';cursor:pointer;transition:all .15s;">';
+    html += '<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid ' + (sel ? 'var(--verde)' : 'var(--linha)') + ';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:' + (sel ? '#fff' : 'var(--cinza-medio)') + ';background:' + (sel ? 'var(--verde)' : 'transparent') + ';flex-shrink:0;">' + op.val + '</div>';
+    html += '<span style="font-size:13px;color:var(--cinza-escuro);">' + op.label + '</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('container-perguntas').innerHTML = html;
+  document.getElementById('perg-num').textContent = pergAtual + 1;
+  document.getElementById('prog-pesquisa').style.width = ((pergAtual + 1) / perguntas.length * 100) + '%';
+  document.getElementById('btn-anterior').style.display = pergAtual > 0 ? 'flex' : 'none';
+  document.getElementById('btn-proximo').textContent = pergAtual === perguntas.length - 1 ? '✅ Enviar respostas' : 'Próxima →';
+}
+
+function selecionarOpcao(val) {
+  respostas[pergAtual] = val;
+  renderPergunta();
+}
+
+function pergProxima() {
+  if (!respostas[pergAtual]) { alert('Por favor selecione uma opção antes de continuar.'); return; }
+  if (pergAtual < perguntas.length - 1) {
+    pergAtual++;
+    renderPergunta();
+  } else {
+    // Enviar
+    sv('pesquisa-concluida');
+  }
+}
+
+function pergAnterior() {
+  if (pergAtual > 0) { pergAtual--; renderPergunta(); }
+}
+
+function sv(id) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  if (id === 'pesquisa-form') { pergAtual = 0; respostas = {}; renderPergunta(); }
+}
+
+function abrirSocorro(){ document.getElementById('modal-socorro').classList.add('open'); }
+function abrirSocorroAnonimo(){ document.getElementById('modal-anonimo').classList.add('open'); }
+
+function enviarSocorro() {
+  document.getElementById('modal-socorro').classList.remove('open');
+  alert('✅ Pedido de ajuda enviado com segurança.\n\nA psicóloga responsável receberá sua mensagem e entrará em contato conforme sua preferência.\n\nVocê não está sozinho(a).');
+}
+
+function enviarAnonimo() {
+  document.getElementById('modal-anonimo').classList.remove('open');
+  alert('✅ Mensagem anônima enviada com sucesso.\n\nSua identidade está protegida. A gestão receberá sua mensagem sem nenhuma identificação.');
+}
+</script>
+</body>
+</html>
