@@ -279,7 +279,8 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="nav-item" id="nav-depoimentos" onclick="sv('depoimentos')"><span class="ic">⭐</span>Depoimentos<span class="bdg-nav" id="sid-dep-count">2</span></div>
     </nav>
     <div class="sidebar-bottom">
-      <button class="btn-sair" onclick="sair()">← Sair</button>
+      <button class="btn-sair" onclick="window.location.href='index.html'" style="margin-bottom:6px;">🌐 Voltar ao Site</button>
+      <button class="btn-sair" onclick="sair()">← Voltar ao Login</button>
     </div>
   </aside>
 
@@ -627,8 +628,62 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Leads Captados</div>
         </div>
+        <span style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">4 leads aguardando contato</span>
       </div>
-      <div class="content"><div class="card"><div class="card-body">Painel de Leads Ativo.</div></div></div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">Leads do Formulário Landing Page</div><div class="subtitle">Empresas que demonstraram interesse via site</div></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Nº Colab.</th><th>Como Conheceu</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Mariana Lima</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Saúde & Bem-Estar Ltda</span></td>
+                  <td>mariana@saudebem.com.br</td>
+                  <td><a href="https://wa.me/5562991234567" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9123-4567</a></td>
+                  <td>32</td>
+                  <td>Instagram</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">há 1h</td>
+                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
+                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.closest('tr').querySelector('.dot').style.background='var(--verde)';this.closest('tr').querySelector('span.bdg').textContent=' Contatado';this.textContent='✓'">Contatar</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Roberto Alves</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Construtora Alves ME</span></td>
+                  <td>roberto@constralves.com.br</td>
+                  <td><a href="https://wa.me/5562998765432" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9876-5432</a></td>
+                  <td>18</td>
+                  <td>Google</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">há 3h</td>
+                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
+                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Fernanda Costa</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">RH Consultoria</span></td>
+                  <td>fernanda@rhconsult.com.br</td>
+                  <td><a href="https://wa.me/5562994561234" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9456-1234</a></td>
+                  <td>7</td>
+                  <td>LinkedIn</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">ontem</td>
+                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
+                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Paulo Mendes</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Indústria Mendes S.A.</span></td>
+                  <td>paulo@mendes.ind.br</td>
+                  <td><a href="https://wa.me/5562987654321" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 8765-4321</a></td>
+                  <td>85</td>
+                  <td>E-book</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">2 dias</td>
+                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
+                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- LAUDOS -->
@@ -638,8 +693,49 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Laudos Gerados</div>
         </div>
+        <button class="btn btn-primary btn-sm" onclick="alert('Em produção: gera novo laudo técnico NR-1 em PDF.')">+ Gerar Laudo</button>
       </div>
-      <div class="content"><div class="card"><div class="card-body">Histórico de Laudos Técnicos em SST.</div></div></div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="title">Histórico de Laudos Técnicos</div><div class="subtitle">Laudos gerados via plataforma — formato PDF NR-1</div></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Empresa</th><th>Tipo</th><th>IBP Geral</th><th>Colaboradores</th><th>Data Geração</th><th>Status</th><th>Ação</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Clínica Vida S.A.</strong></td>
+                  <td>Diagnóstico Geral</td>
+                  <td><span style="color:var(--verde);font-weight:700;">+2,4</span></td>
+                  <td>14</td>
+                  <td>Jun/2025</td>
+                  <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver PDF</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Construtora Alves ME</strong></td>
+                  <td>Pesquisa Pulso</td>
+                  <td><span style="color:var(--laranja);font-weight:700;">−1,8</span></td>
+                  <td>18</td>
+                  <td>Mai/2025</td>
+                  <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver PDF</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Indústria Mendes S.A.</strong></td>
+                  <td>Diagnóstico Geral</td>
+                  <td><span style="color:var(--cinza-medio);font-weight:700;">0,0</span></td>
+                  <td>85</td>
+                  <td>Mai/2025</td>
+                  <td><span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span></td>
+                  <td><button class="btn btn-roxo btn-sm" onclick="alert('Em produção: finaliza e envia laudo.')">Finalizar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- BANCO DE 101 PERGUNTAS (ADMIN MASTER — edição global) -->
