@@ -94,6 +94,14 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 .btn-aba:hover{border-color:var(--roxo);color:var(--roxo);}
 .btn-aba.aba-ativa{background:var(--roxo);color:#fff;border-color:var(--roxo);}
 
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:28px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--cinza-medio);line-height:1;}
+
 /* RESPONSIVIDADE MOBILE */
 @media(max-width:1024px){
   [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2, 1fr) !important;}
@@ -197,13 +205,13 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 
   <!-- ===== VIEW: MEUS CLIENTES (CRUD ISOLADO + CRÉDITOS) ===== -->
   <div id="view-clientes" class="view">
-    <div class="topbar"><div class="topbar-title">Gestão de Empresas Clientes Sob Minha Tutela</div><button class="btn btn-roxo btn-sm" onclick="alert('Cadastrar nova empresa vinculada diretamente ao seu ID de parceiro...')">+ Cadastrar Empresa</button></div>
+    <div class="topbar"><div class="topbar-title">Gestão de Empresas Clientes Sob Minha Tutela</div><button class="btn btn-roxo btn-sm" onclick="abrirModalTipoParceiro()">+ Cadastrar Empresa / Cliente</button></div>
     <div class="content">
       <div class="card">
         <div class="table-wrap">
           <table>
             <thead><tr><th>Empresa Cliente</th><th>Créditos Cadastrados</th><th>Vidas Ativas</th><th>Status do Plano</th><th>Ações Comerciais</th><th>Suporte Direto</th></tr></thead>
-            <tbody>
+            <tbody id="tabela-parceiro-clientes">
               <tr id="p-row-1">
                 <td><strong>Clínica Vida S.A.</strong></td>
                 <td><input type="number" class="form-control" value="45" style="width:75px; padding:4px;" onchange="alert('Solicitação de alteração enviada à Administração Master.')"/></td>
@@ -218,6 +226,165 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ESCOLHA TIPO PARCEIRO -->
+  <div class="modal-overlay" id="modal-tipo-parceiro" onclick="if(event.target===this)fecharModalTipoParceiro()">
+    <div class="modal" style="max-width:440px;width:95%;">
+      <div class="modal-header">
+        <h3>Tipo de Cliente</h3>
+        <button class="modal-close" onclick="fecharModalTipoParceiro()">✕</button>
+      </div>
+      <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:20px;">Selecione o tipo de cadastro:</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipoParceiro();abrirModalPJParceiro()">
+          🏢 <span><strong style="display:block;font-size:14px;">Empresa (Pessoa Jurídica)</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CNPJ · múltiplos colaboradores · RH responsável</span></span>
+        </button>
+        <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipoParceiro();abrirModalPFParceiro()">
+          👤 <span><strong style="display:block;font-size:14px;">Profissional / Pessoa Física</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CPF · contratante individual · MEI ou autônomo</span></span>
+        </button>
+      </div>
+      <div style="margin-top:20px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);">
+        🔗 <strong>Link de auto-cadastro:</strong> Envie para o cliente preencher sozinho →
+        <a href="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" target="_blank" style="color:var(--verde);font-weight:600;"> abrir formulário</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PJ PARCEIRO -->
+  <div class="modal-overlay" id="modal-pj-parceiro" onclick="if(event.target===this)fecharModalPJParceiro()">
+    <div class="modal" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto;">
+      <div class="modal-header">
+        <h3>🏢 Cadastrar Empresa (PJ)</h3>
+        <button class="modal-close" onclick="fecharModalPJParceiro()">✕</button>
+      </div>
+      <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Dados da Empresa</p>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Razão Social / Nome *</label><input class="form-control" id="ppj-nome" placeholder="Ex: Clínica Vida S.A."/></div>
+        <div class="form-group"><label class="form-label">CNPJ *</label><input class="form-control" id="ppj-cnpj" placeholder="00.000.000/0001-00"/></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Setor / Ramo de Atividade</label><input class="form-control" id="ppj-setor" placeholder="Ex: Saúde, Indústria..."/></div>
+        <div class="form-group"><label class="form-label">Nº de Colaboradores *</label><input class="form-control" id="ppj-colab" type="number" placeholder="Ex: 25"/></div>
+      </div>
+      <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Responsável (RH / Gestor)</p>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Nome do Responsável *</label><input class="form-control" id="ppj-responsavel" placeholder="Nome completo"/></div>
+        <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="ppj-email" type="email" placeholder="rh@empresa.com.br"/></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">WhatsApp *</label><input class="form-control" id="ppj-whatsapp" placeholder="(62) 9 9999-9999"/></div>
+        <div class="form-group"><label class="form-label">Como conheceu o NR-1 Map?</label>
+          <select class="form-control" id="ppj-origem">
+            <option value="">Selecione...</option>
+            <option>Indicação deste parceiro</option>
+            <option>Instagram / Redes Sociais</option>
+            <option>Google / Pesquisa</option>
+            <option>LinkedIn</option>
+            <option>Evento / Palestra</option>
+            <option>E-book / Material gratuito</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Plano Contratado</p>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Plano *</label>
+        <select class="form-control" id="ppj-plano">
+          <option value="">Selecione...</option>
+          <optgroup label="Uso Único">
+            <option value="uso-unico-5">Até 5 colab. — R$ 97/colab</option>
+            <option value="uso-unico-20">6 a 20 colab. — R$ 79/colab</option>
+            <option value="uso-unico-50">21 a 50 colab. — R$ 59/colab</option>
+            <option value="uso-unico-100">51 a 100 colab. — R$ 49/colab</option>
+          </optgroup>
+          <optgroup label="Assinatura Mensal">
+            <option value="mensal-5">Até 5 colab. — R$ 35/colab/mês</option>
+            <option value="mensal-20">6 a 20 colab. — R$ 25/colab/mês</option>
+            <option value="mensal-50">21 a 50 colab. — R$ 20/colab/mês</option>
+            <option value="mensal-100">51 a 100 colab. — R$ 16,50/colab/mês</option>
+          </optgroup>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button class="btn btn-ghost" onclick="fecharModalPJParceiro()">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarPJParceiro()">Cadastrar Empresa</button>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;border:1px solid rgba(10,110,79,.2);">
+        <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para a empresa</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-control" id="link-ppj" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:#fff;"/>
+          <button class="btn btn-primary btn-sm" onclick="copiarLinkParceiro('link-ppj')">Copiar</button>
+        </div>
+        <p style="font-size:11px;color:var(--verde);margin-top:6px;">📱 Envie por WhatsApp para a empresa preencher sozinha.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PF PARCEIRO -->
+  <div class="modal-overlay" id="modal-pf-parceiro" onclick="if(event.target===this)fecharModalPFParceiro()">
+    <div class="modal" style="max-width:520px;width:95%;max-height:90vh;overflow-y:auto;">
+      <div class="modal-header">
+        <h3>👤 Cadastrar Pessoa Física (PF)</h3>
+        <button class="modal-close" onclick="fecharModalPFParceiro()">✕</button>
+      </div>
+      <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Dados Pessoais</p>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Nome Completo *</label><input class="form-control" id="ppf-nome" placeholder="Ex: João da Silva"/></div>
+        <div class="form-group"><label class="form-label">CPF *</label><input class="form-control" id="ppf-cpf" placeholder="000.000.000-00"/></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="ppf-email" type="email" placeholder="contato@email.com.br"/></div>
+        <div class="form-group"><label class="form-label">WhatsApp *</label><input class="form-control" id="ppf-whatsapp" placeholder="(62) 9 9999-9999"/></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Profissão / Atuação</label><input class="form-control" id="ppf-profissao" placeholder="Ex: Psicólogo, Consultor SST..."/></div>
+        <div class="form-group"><label class="form-label">Nº de Colaboradores *</label><input class="form-control" id="ppf-colab" type="number" placeholder="Ex: 5"/></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div class="form-group"><label class="form-label">Plano *</label>
+          <select class="form-control" id="ppf-plano">
+            <option value="">Selecione...</option>
+            <optgroup label="Uso Único">
+              <option value="uso-unico-5">Até 5 colab. — R$ 97/colab</option>
+              <option value="uso-unico-20">6 a 20 colab. — R$ 79/colab</option>
+              <option value="uso-unico-50">21 a 50 colab. — R$ 59/colab</option>
+              <option value="uso-unico-100">51 a 100 colab. — R$ 49/colab</option>
+            </optgroup>
+            <optgroup label="Assinatura Mensal">
+              <option value="mensal-5">Até 5 colab. — R$ 35/colab/mês</option>
+              <option value="mensal-20">6 a 20 colab. — R$ 25/colab/mês</option>
+              <option value="mensal-50">21 a 50 colab. — R$ 20/colab/mês</option>
+              <option value="mensal-100">51 a 100 colab. — R$ 16,50/colab/mês</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Como conheceu o NR-1 Map?</label>
+          <select class="form-control" id="ppf-origem">
+            <option value="">Selecione...</option>
+            <option>Indicação deste parceiro</option>
+            <option>Instagram / Redes Sociais</option>
+            <option>Google / Pesquisa</option>
+            <option>LinkedIn</option>
+            <option>Evento / Palestra</option>
+            <option>E-book / Material gratuito</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button class="btn btn-ghost" onclick="fecharModalPFParceiro()">Cancelar</button>
+        <button class="btn btn-roxo" onclick="salvarPFParceiro()">Cadastrar Cliente PF</button>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--roxo-xp);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
+        <div style="font-size:11px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o cliente PF</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-control" id="link-ppf" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:#fff;"/>
+          <button class="btn btn-roxo btn-sm" onclick="copiarLinkParceiro('link-ppf')">Copiar</button>
+        </div>
+        <p style="font-size:11px;color:var(--roxo);margin-top:6px;">📱 Envie por WhatsApp para o cliente preencher sozinho.</p>
       </div>
     </div>
   </div>
@@ -337,6 +504,82 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 </div>
 
 <script>
+function abrirModalTipoParceiro(){ document.getElementById('modal-tipo-parceiro').classList.add('open'); }
+function fecharModalTipoParceiro(){ document.getElementById('modal-tipo-parceiro').classList.remove('open'); }
+function abrirModalPJParceiro(){ document.getElementById('modal-pj-parceiro').classList.add('open'); }
+function fecharModalPJParceiro(){ document.getElementById('modal-pj-parceiro').classList.remove('open'); }
+function abrirModalPFParceiro(){ document.getElementById('modal-pf-parceiro').classList.add('open'); }
+function fecharModalPFParceiro(){ document.getElementById('modal-pf-parceiro').classList.remove('open'); }
+
+function copiarLinkParceiro(id) {
+  var input = document.getElementById(id);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(function(){
+    alert('✅ Link copiado! Cole no WhatsApp e envie para o cliente.');
+  }).catch(function(){
+    document.execCommand('copy');
+    alert('✅ Link copiado!');
+  });
+}
+
+function salvarPJParceiro() {
+  var nome = document.getElementById('ppj-nome').value.trim();
+  var cnpj = document.getElementById('ppj-cnpj').value.trim();
+  var responsavel = document.getElementById('ppj-responsavel').value.trim();
+  var email = document.getElementById('ppj-email').value.trim();
+  var whatsapp = document.getElementById('ppj-whatsapp').value.trim();
+  var colab = document.getElementById('ppj-colab').value.trim();
+  var plano = document.getElementById('ppj-plano');
+  if (!nome || !cnpj || !responsavel || !email || !whatsapp || !colab || !plano.value) {
+    alert('Preencha todos os campos obrigatórios (*).'); return;
+  }
+  var tbody = document.getElementById('tabela-parceiro-clientes');
+  var rowId = 'p-row-' + Date.now();
+  var tr = document.createElement('tr');
+  tr.id = rowId;
+  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CNPJ: ' + cnpj + '</span></td>' +
+    '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;" onchange="alert(\'Solicitação enviada à Administração Master.\')"/></td>' +
+    '<td>' + colab + '</td>' +
+    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+    '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button> <button class="btn btn-danger btn-sm" onclick="if(confirm(\'Desvincular?\'))this.closest(\'tr\').remove();">Desvincular</button></td>' +
+    '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
+  tbody.appendChild(tr);
+  ['ppj-nome','ppj-cnpj','ppj-setor','ppj-responsavel','ppj-email','ppj-whatsapp','ppj-colab'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('ppj-plano').selectedIndex = 0;
+  document.getElementById('ppj-origem').selectedIndex = 0;
+  fecharModalPJParceiro();
+  alert('✅ Empresa "' + nome + '" cadastrada na sua carteira!');
+}
+
+function salvarPFParceiro() {
+  var nome = document.getElementById('ppf-nome').value.trim();
+  var cpf = document.getElementById('ppf-cpf').value.trim();
+  var email = document.getElementById('ppf-email').value.trim();
+  var whatsapp = document.getElementById('ppf-whatsapp').value.trim();
+  var colab = document.getElementById('ppf-colab').value.trim();
+  var plano = document.getElementById('ppf-plano');
+  if (!nome || !cpf || !email || !whatsapp || !colab || !plano.value) {
+    alert('Preencha todos os campos obrigatórios (*).'); return;
+  }
+  var tbody = document.getElementById('tabela-parceiro-clientes');
+  var rowId = 'p-row-' + Date.now();
+  var tr = document.createElement('tr');
+  tr.id = rowId;
+  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CPF: ' + cpf + '</span></td>' +
+    '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;" onchange="alert(\'Solicitação enviada à Administração Master.\')"/></td>' +
+    '<td>' + colab + '</td>' +
+    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+    '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button> <button class="btn btn-danger btn-sm" onclick="if(confirm(\'Desvincular?\'))this.closest(\'tr\').remove();">Desvincular</button></td>' +
+    '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
+  tbody.appendChild(tr);
+  ['ppf-nome','ppf-cpf','ppf-email','ppf-whatsapp','ppf-profissao','ppf-colab'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('ppf-plano').selectedIndex = 0;
+  document.getElementById('ppf-origem').selectedIndex = 0;
+  fecharModalPFParceiro();
+  alert('✅ Cliente "' + nome + '" cadastrado na sua carteira!');
+}
+
 function sv(id){
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   var el=document.getElementById('view-'+id);
