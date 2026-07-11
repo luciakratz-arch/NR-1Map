@@ -250,10 +250,16 @@ tbody tr:hover td{background:#F5F8F7;}
 
     <!-- USUÁRIO -->
     <div id="login-user">
-      <label class="login-field-label">Código de acesso</label>
-      <input class="login-input" placeholder="Ex: NR1-A2B3C4" id="user-codigo" style="letter-spacing:.1em;font-size:16px;text-align:center;"/>
-      <button class="login-btn" onclick="entrarUser()">Acessar pesquisa</button>
-      <p class="login-hint">Código recebido por WhatsApp · qualquer código funciona no demo</p>
+      <label class="login-field-label">E-mail</label>
+      <input class="login-input" type="email" placeholder="seu@email.com" id="user-email"/>
+      <label class="login-field-label">Senha</label>
+      <input class="login-input" type="password" placeholder="••••••••" id="user-senha"/>
+      <button class="login-btn" onclick="entrarUser()">Entrar na minha área</button>
+      <p class="login-hint">Cadastro feito pelo link recebido da empresa · use qualquer senha para demo</p>
+      <div style="margin-top:16px;padding:12px 14px;background:rgba(10,110,79,.12);border:1px solid rgba(18,160,115,.2);border-radius:9px;font-size:11px;color:#12A073;line-height:1.6;text-align:center;">
+        🔒 Suas respostas são guardadas com sigilo absoluto.<br/>
+        Seu nome nunca é associado aos resultados que o RH visualiza.
+      </div>
     </div>
   </div>
 </div>
@@ -894,7 +900,7 @@ function salvarPF() {
 }
 function entrarParceiro() { window.location.href = 'parceiro.html'; }
 function entrarRH() { window.location.href = 'painel.html'; }
-function entrarUser() { window.location.href = 'colaborador.html'; }
+function entrarUser() { window.location.href = 'usuario.html'; }
 
 function sair() {
   document.getElementById('app-admin').classList.remove('active');
