@@ -374,21 +374,255 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
       </div>
       <div class="content">
-        <div class="metrics">
-          <div class="mc verde"><div class="lbl">Receita do mês</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12%</div></div>
-          <div class="mc verde"><div class="lbl">Receita total acumulada</div><div class="val">R$ 18.290</div><div class="sub">desde o início</div></div>
-          <div class="mc"><div class="lbl">Ticket médio</div><div class="val">R$ 274</div><div class="sub">por venda</div></div>
+
+        <!-- TABS -->
+        <div class="tabs" style="margin-bottom:20px;">
+          <div class="tab active" onclick="swTab(this,'fin-resumo')">📊 Resumo</div>
+          <div class="tab" onclick="swTab(this,'fin-pendentes')">⏳ Aprovações Pendentes <span id="badge-pend" style="background:var(--roxo);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;">3</span></div>
+          <div class="tab" onclick="swTab(this,'fin-historico')">📋 Histórico de Vendas</div>
+          <div class="tab" onclick="swTab(this,'fin-caixa')">💸 Fluxo de Caixa</div>
+          <div class="tab" onclick="swTab(this,'fin-config')">⚙️ Configurações</div>
         </div>
-        <div class="card">
-          <div class="card-header">
-            <div><div class="title">Fechamento Mensal</div><div class="subtitle">Junho de 2026</div></div>
+
+        <!-- RESUMO -->
+        <div id="fin-resumo" class="view active">
+          <div class="metrics" style="grid-template-columns:repeat(4,1fr);">
+            <div class="mc verde"><div class="lbl">Receita Bruta (mês)</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12% vs. mês anterior</div></div>
+            <div class="mc"><div class="lbl">Taxa MP (~4,99%)</div><div class="val" style="color:var(--laranja);">− R$ 192</div><div class="sub">descontado automaticamente</div></div>
+            <div class="mc"><div class="lbl">Comissões Parceiros</div><div class="val" style="color:var(--laranja);">− R$ 562</div><div class="sub">30% sobre vendas via parceiro</div></div>
+            <div class="mc verde"><div class="lbl">Receita Líquida</div><div class="val">R$ 3.086</div><div class="sub">disponível para retirada</div></div>
           </div>
-          <div class="card-body">
-            <div style="background:var(--verde-xp);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--verde);">
-              <strong>Junho 2026:</strong> 14 vendas · Receita: <strong>R$ 3.840,00</strong>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="title">Saldo no Mercado Pago</div></div>
+              <div class="card-body">
+                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--verde);">R$ 3.086,00</div>
+                <div style="font-size:12px;color:var(--cinza-medio);margin-top:4px;">Disponível para retirada</div>
+                <button class="btn btn-primary" style="margin-top:14px;width:100%;" onclick="swTab(document.querySelector('.tab:nth-child(4)'),'fin-caixa')">💸 Registrar Retirada</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="title">Vendas por Tipo (mês)</div></div>
+              <div class="card-body">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Diretas (PJ)</span><span style="font-weight:700;color:var(--verde);">R$ 2.175,00</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Diretas (PF)</span><span style="font-weight:700;color:var(--verde);">R$ 780,00</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Via Parceiro (PJ)</span><span style="font-weight:700;color:var(--roxo);">R$ 675,00 <span style="font-size:10px;color:var(--laranja);">(-30%)</span></span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px;"><span>Via Parceiro (PF)</span><span style="font-weight:700;color:var(--roxo);">R$ 210,00 <span style="font-size:10px;color:var(--laranja);">(-30%)</span></span></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- APROVAÇÕES PENDENTES -->
+        <div id="fin-pendentes" class="view">
+          <div style="background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--roxo);">
+            ⚡ Essas vendas foram processadas pelo Mercado Pago. Verifique e aprove para liberar o acesso ao cliente.
+          </div>
+
+          <!-- VENDA DIRETA PJ PENDENTE -->
+          <div class="card" id="pend-1">
+            <div class="card-header">
+              <div>
+                <div class="title">🏢 Venda Direta — Pessoa Jurídica</div>
+                <div class="subtitle">Mercado Pago · Pago em 12/07/2026 às 08:14</div>
+              </div>
+              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
+            </div>
+            <div class="card-body">
+              <div class="grid-2" style="margin-bottom:12px;">
+                <div style="font-size:12px;line-height:1.8;"><strong>Empresa:</strong> Farmácia Central Ltda<br/><strong>CNPJ:</strong> 12.345.678/0001-90<br/><strong>Responsável:</strong> Ana Beatriz Costa<br/><strong>E-mail:</strong> ana@farmaciacentral.com.br<br/><strong>WhatsApp:</strong> (62) 9 9111-2222</div>
+                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Assinatura Mensal — Faixa 2 (6-20 colab.)<br/><strong>Colaboradores:</strong> 12<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 300,00</span><br/><strong>Forma pag.:</strong> Pix<br/><strong>Taxa MP:</strong> <span style="color:var(--verde);">R$ 0,00 (0%)</span><br/><strong>Líquido:</strong> <span style="color:var(--verde);font-weight:700;">R$ 300,00</span><br/><strong>Parceiro:</strong> Nenhum (venda direta)</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="aprovarVenda('pend-1','Farmácia Central Ltda')">✅ Aprovar e Liberar Acesso</button>
+                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
+                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VENDA DIRETA PF PENDENTE -->
+          <div class="card" id="pend-2">
+            <div class="card-header">
+              <div>
+                <div class="title">👤 Venda Direta — Pessoa Física</div>
+                <div class="subtitle">Mercado Pago · Pago em 12/07/2026 às 09:32</div>
+              </div>
+              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
+            </div>
+            <div class="card-body">
+              <div class="grid-2" style="margin-bottom:12px;">
+                <div style="font-size:12px;line-height:1.8;"><strong>Nome:</strong> João Carlos Mendes<br/><strong>CPF:</strong> 123.456.789-00<br/><strong>E-mail:</strong> joao@email.com.br<br/><strong>WhatsApp:</strong> (62) 9 9333-4444<br/><strong>Profissão:</strong> Consultor SST</div>
+                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Uso Único — Faixa 1 (até 5 colab.)<br/><strong>Colaboradores:</strong> 4<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 388,00</span><br/><strong>Taxa MP (4,99%):</strong> <span style="color:var(--laranja);">− R$ 19,36</span><br/><strong>Líquido:</strong> <span style="color:var(--verde);font-weight:700;">R$ 368,64</span><br/><strong>Parceiro:</strong> Nenhum (venda direta)</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="aprovarVenda('pend-2','João Carlos Mendes')">✅ Aprovar e Liberar Acesso</button>
+                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
+                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VENDA VIA PARCEIRO PJ PENDENTE -->
+          <div class="card" id="pend-3">
+            <div class="card-header">
+              <div>
+                <div class="title">🤝 Venda via Parceiro — Pessoa Jurídica</div>
+                <div class="subtitle">Mercado Pago · Pago em 11/07/2026 às 15:47</div>
+              </div>
+              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
+            </div>
+            <div class="card-body">
+              <div class="grid-2" style="margin-bottom:12px;">
+                <div style="font-size:12px;line-height:1.8;"><strong>Empresa:</strong> Logística Rápida S.A.<br/><strong>CNPJ:</strong> 98.765.432/0001-10<br/><strong>Responsável:</strong> Pedro Oliveira<br/><strong>E-mail:</strong> pedro@logisticarapida.com.br<br/><strong>WhatsApp:</strong> (62) 9 9555-6666</div>
+                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Assinatura Mensal — Faixa 3 (21-50 colab.)<br/><strong>Colaboradores:</strong> 35<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 700,00</span><br/><strong>Taxa MP (4,99%):</strong> <span style="color:var(--laranja);">− R$ 34,93</span><br/><strong>Comissão parceiro (30%):</strong> <span style="color:var(--laranja);">− R$ 210,00</span><br/><strong>Líquido Lucia:</strong> <span style="color:var(--verde);font-weight:700;">R$ 455,07</span><br/><strong>Parceiro:</strong> Alfa SST Consultoria</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="aprovarVenda('pend-3','Logística Rápida S.A.')">✅ Aprovar e Liberar Acesso</button>
+                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
+                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO DE VENDAS -->
+        <div id="fin-historico" class="view">
+          <div class="card">
+            <div class="card-header">
+              <div><div class="title">Histórico de Vendas</div><div class="subtitle">Todas as vendas aprovadas</div></div>
+              <button class="btn btn-ghost btn-sm" onclick="exportarHistorico()">⬇️ Exportar CSV</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Tipo</th><th>Plano</th><th>Bruto</th><th>Taxa MP</th><th>Comissão</th><th>Líquido</th><th>Créditos</th><th>Usados</th><th>Saldo</th></tr></thead>
+                <tbody id="tabela-historico-fin">
+                  <tr>
+                    <td>Jun/2026</td>
+                    <td><strong>Clínica Vida S.A.</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">PJ · Direta</span></td>
+                    <td>Assinatura Mensal</td>
+                    <td>Faixa 2</td>
+                    <td style="color:var(--verde);font-weight:600;">R$ 375,00</td>
+                    <td style="color:var(--laranja);">− R$ 18,71</td>
+                    <td style="color:var(--cinza-medio);">—</td>
+                    <td style="color:var(--verde);font-weight:700;">R$ 356,29</td>
+                    <td>45</td><td>14</td><td style="font-weight:700;">31</td>
+                  </tr>
+                  <tr>
+                    <td>Mai/2026</td>
+                    <td><strong>Alfa SST Consultoria</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">PJ · Via Parceiro</span></td>
+                    <td>Uso Único</td>
+                    <td>Faixa 3</td>
+                    <td style="color:var(--verde);font-weight:600;">R$ 1.180,00</td>
+                    <td style="color:var(--laranja);">− R$ 58,88</td>
+                    <td style="color:var(--laranja);">− R$ 354,00</td>
+                    <td style="color:var(--verde);font-weight:700;">R$ 767,12</td>
+                    <td>20</td><td>20</td><td style="font-weight:700;color:var(--cinza-medio);">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- FLUXO DE CAIXA -->
+        <div id="fin-caixa" class="view">
+          <div class="grid-2" style="margin-bottom:16px;">
+            <div class="card">
+              <div class="card-header"><div class="title">💸 Registrar Retirada</div></div>
+              <div class="card-body">
+                <div class="form-group"><label class="form-label">Valor a retirar (R$) *</label><input class="form-control" id="ret-valor" type="number" placeholder="Ex: 1500.00"/></div>
+                <div class="form-group"><label class="form-label">Data da transferência *</label><input class="form-control" id="ret-data" type="date"/></div>
+                <div class="form-group"><label class="form-label">Destino</label>
+                  <select class="form-control" id="ret-destino">
+                    <option>Conta bancária PF (Lucia Kratz)</option>
+                    <option>Conta bancária PJ (A!Equipe)</option>
+                    <option>Caixa físico</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Observação</label><input class="form-control" id="ret-obs" placeholder="Ex: Pagamento fornecedores Julho"/></div>
+                <button class="btn btn-primary" style="width:100%;" onclick="registrarRetirada()">✅ Confirmar Retirada</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="title">📊 Saldo MP em Tempo Real</div></div>
+              <div class="card-body">
+                <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--verde);" id="saldo-mp">R$ 3.086,00</div>
+                <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:16px;">Saldo disponível no Mercado Pago</div>
+                <div style="font-size:12px;line-height:2;border-top:1px solid var(--linha);padding-top:12px;">
+                  <div style="display:flex;justify-content:space-between;"><span>Total entradas (mês)</span><span style="color:var(--verde);font-weight:600;">+ R$ 3.840,00</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Taxas MP</span><span style="color:var(--laranja);">− R$ 192,00</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Comissões parceiros</span><span style="color:var(--laranja);">− R$ 562,00</span></div>
+                  <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--linha);padding-top:8px;"><span>Saldo líquido</span><span style="color:var(--verde);">R$ 3.086,00</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="title">Histórico de Retiradas</div><div class="subtitle">Transferências do Mercado Pago para conta/caixa</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Valor</th><th>Destino</th><th>Saldo MP antes</th><th>Saldo MP depois</th><th>Observação</th><th>Ações</th></tr></thead>
+                <tbody id="tabela-retiradas">
+                  <tr>
+                    <td>05/07/2026</td>
+                    <td style="color:var(--laranja);font-weight:700;">R$ 2.500,00</td>
+                    <td>Conta bancária PJ</td>
+                    <td>R$ 5.586,00</td>
+                    <td>R$ 3.086,00</td>
+                    <td>Pagamento fornecedores Julho</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  </tr>
+                  <tr>
+                    <td>01/06/2026</td>
+                    <td style="color:var(--laranja);font-weight:700;">R$ 3.200,00</td>
+                    <td>Conta bancária PF</td>
+                    <td>R$ 6.843,00</td>
+                    <td>R$ 3.643,00</td>
+                    <td>Retirada mensal Junho</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div id="fin-config" class="view">
+          <div class="card" style="max-width:560px;">
+            <div class="card-header"><div class="title">⚙️ Taxas do Mercado Pago</div><div class="subtitle">Conforme sua conta Lucia Kratz · Jul/2026</div></div>
+            <div class="card-body">
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:2;">
+                <div style="display:flex;justify-content:space-between;"><span>💳 Cartão crédito à vista</span><span id="cfg-credito-avista" style="font-weight:700;">4,98%</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>💳 Cartão crédito 2x–6x</span><span id="cfg-credito-2a6" style="font-weight:700;">2,99%</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>💳 Cartão crédito 7x–12x</span><span id="cfg-credito-7a12" style="font-weight:700;">3,09%</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>💳 Cartão crédito 13x–18x</span><span id="cfg-credito-13a18" style="font-weight:700;">3,19%</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>💳 Cartão débito</span><span id="cfg-debito" style="font-weight:700;">1,99%</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🟢 Pix</span><span id="cfg-pix" style="font-weight:700;color:var(--verde);">0,00%</span></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Crédito à vista (%)</label><input class="form-control" id="inp-credito-avista" type="number" step="0.01" value="4.98"/></div>
+                <div class="form-group"><label class="form-label">Crédito 2x–6x (%)</label><input class="form-control" id="inp-credito-2a6" type="number" step="0.01" value="2.99"/></div>
+                <div class="form-group"><label class="form-label">Crédito 7x–12x (%)</label><input class="form-control" id="inp-credito-7a12" type="number" step="0.01" value="3.09"/></div>
+                <div class="form-group"><label class="form-label">Crédito 13x–18x (%)</label><input class="form-control" id="inp-credito-13a18" type="number" step="0.01" value="3.19"/></div>
+                <div class="form-group"><label class="form-label">Débito (%)</label><input class="form-control" id="inp-debito" type="number" step="0.01" value="1.99"/></div>
+                <div class="form-group"><label class="form-label">Pix (%)</label><input class="form-control" id="inp-pix" type="number" step="0.01" value="0.00"/></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Comissão Parceiros (%)</label>
+                <input class="form-control" id="cfg-comissao" type="number" step="0.01" value="30"/>
+              </div>
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Conta bancária padrão para retirada</label>
+                <input class="form-control" id="cfg-conta" placeholder="Ex: Bradesco · Ag 1234 · CC 56789-0"/>
+              </div>
+              <button class="btn btn-primary" onclick="salvarConfig()">Salvar configurações</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1008,6 +1242,59 @@ function sair() {
 }
 
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
+function aprovarVenda(cardId, nome) {
+  if(confirm('Aprovar venda de "' + nome + '" e liberar acesso?')) {
+    document.getElementById(cardId).remove();
+    var badge = document.getElementById('badge-pend');
+    if(badge) badge.textContent = Math.max(0, parseInt(badge.textContent) - 1);
+    alert('✅ Acesso liberado para "' + nome + '"!\n\nEm produção: cadastro criado no Firestore e e-mail/WhatsApp enviado ao cliente.');
+  }
+}
+
+function registrarRetirada() {
+  var valor = document.getElementById('ret-valor').value;
+  var data = document.getElementById('ret-data').value;
+  var destino = document.getElementById('ret-destino').value;
+  var obs = document.getElementById('ret-obs').value;
+  if(!valor || !data) { alert('Preencha o valor e a data.'); return; }
+
+  var saldoEl = document.getElementById('saldo-mp');
+  var saldoAtual = parseFloat(saldoEl.textContent.replace('R$ ','').replace('.','').replace(',','.'));
+  var valorNum = parseFloat(valor);
+  var saldoNovo = saldoAtual - valorNum;
+
+  var dataFmt = new Date(data).toLocaleDateString('pt-BR');
+  var tbody = document.getElementById('tabela-retiradas');
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + dataFmt + '</td>' +
+    '<td style="color:var(--laranja);font-weight:700;">R$ ' + valorNum.toFixed(2).replace('.',',') + '</td>' +
+    '<td>' + destino + '</td>' +
+    '<td>R$ ' + saldoAtual.toFixed(2).replace('.',',') + '</td>' +
+    '<td>R$ ' + saldoNovo.toFixed(2).replace('.',',') + '</td>' +
+    '<td>' + (obs || '—') + '</td>' +
+    '<td><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>';
+  tbody.insertBefore(tr, tbody.firstChild);
+
+  saldoEl.textContent = 'R$ ' + saldoNovo.toFixed(2).replace('.',',');
+  document.getElementById('ret-valor').value = '';
+  document.getElementById('ret-obs').value = '';
+  alert('✅ Retirada de R$ ' + valorNum.toFixed(2).replace('.',',') + ' registrada!\nSaldo MP atualizado: R$ ' + saldoNovo.toFixed(2).replace('.',','));
+}
+
+function exportarHistorico() {
+  alert('Em produção: exporta a tabela de vendas em formato CSV.');
+}
+
+function salvarConfig() {
+  document.getElementById('cfg-credito-avista').textContent = document.getElementById('inp-credito-avista').value + '%';
+  document.getElementById('cfg-credito-2a6').textContent = document.getElementById('inp-credito-2a6').value + '%';
+  document.getElementById('cfg-credito-7a12').textContent = document.getElementById('inp-credito-7a12').value + '%';
+  document.getElementById('cfg-credito-13a18').textContent = document.getElementById('inp-credito-13a18').value + '%';
+  document.getElementById('cfg-debito').textContent = document.getElementById('inp-debito').value + '%';
+  document.getElementById('cfg-pix').textContent = document.getElementById('inp-pix').value + '%';
+  alert('✅ Taxas salvas!\n\nPix: 0%\nDébito: 1,99%\nCrédito à vista: 4,98%\nComissão parceiros: ' + document.getElementById('cfg-comissao').value + '%');
+}
+
 function excluirItem(btn) {
   if(confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
     var row = btn.closest('tr');
