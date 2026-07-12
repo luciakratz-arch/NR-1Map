@@ -410,7 +410,7 @@ tbody tr:hover td{background:#F5F8F7;}
             <table>
               <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Plano</th><th>Colaboradores</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="tabela-empresas">
-                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td>Assinatura Mensal</td><td>14</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td><button class="btn btn-ghost btn-sm" onclick="alert('Acessar painel desta empresa...')">Ver Painel</button></td></tr>
+                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td>Assinatura Mensal</td><td>14</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre painel desta empresa.')">Ver Painel</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -647,7 +647,7 @@ tbody tr:hover td{background:#F5F8F7;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Nº Colab.</th><th>Como Conheceu</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead>
+              <thead><tr><th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Nº Colab.</th><th>Como Conheceu</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody>
                 <tr>
                   <td><strong>Mariana Lima</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Saúde & Bem-Estar Ltda</span></td>
@@ -657,7 +657,7 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>Instagram</td>
                   <td style="font-size:11px;color:var(--cinza-medio);">há 1h</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.closest('tr').querySelector('.dot').style.background='var(--verde)';this.closest('tr').querySelector('span.bdg').textContent=' Contatado';this.textContent='✓'">Contatar</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.closest('tr').querySelector('.dot').style.background='var(--verde)';this.closest('tr').querySelector('span.bdg').textContent=' Contatado';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Roberto Alves</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Construtora Alves ME</span></td>
@@ -667,7 +667,7 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>Google</td>
                   <td style="font-size:11px;color:var(--cinza-medio);">há 3h</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Fernanda Costa</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">RH Consultoria</span></td>
@@ -677,7 +677,7 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>LinkedIn</td>
                   <td style="font-size:11px;color:var(--cinza-medio);">ontem</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Paulo Mendes</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Indústria Mendes S.A.</span></td>
@@ -687,7 +687,7 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>E-book</td>
                   <td style="font-size:11px;color:var(--cinza-medio);">2 dias</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -712,7 +712,7 @@ tbody tr:hover td{background:#F5F8F7;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Empresa</th><th>Tipo</th><th>IBP Geral</th><th>Colaboradores</th><th>Data Geração</th><th>Status</th><th>Ação</th></tr></thead>
+              <thead><tr><th>Empresa</th><th>Tipo</th><th>IBP Geral</th><th>Colaboradores</th><th>Data Geração</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody>
                 <tr>
                   <td><strong>Clínica Vida S.A.</strong></td>
@@ -721,7 +721,11 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>14</td>
                   <td>Jun/2025</td>
                   <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
-                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver PDF</button></td>
+                  <td style="display:flex;gap:6px;">
+                    <button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver</button>
+                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
+                  </td>
                 </tr>
                 <tr>
                   <td><strong>Construtora Alves ME</strong></td>
@@ -730,7 +734,11 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>18</td>
                   <td>Mai/2025</td>
                   <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
-                  <td><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver PDF</button></td>
+                  <td style="display:flex;gap:6px;">
+                    <button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver</button>
+                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
+                  </td>
                 </tr>
                 <tr>
                   <td><strong>Indústria Mendes S.A.</strong></td>
@@ -739,7 +747,11 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td>85</td>
                   <td>Mai/2025</td>
                   <td><span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span></td>
-                  <td><button class="btn btn-roxo btn-sm" onclick="alert('Em produção: finaliza e envia laudo.')">Finalizar</button></td>
+                  <td style="display:flex;gap:6px;">
+                    <button class="btn btn-roxo btn-sm" onclick="alert('Em produção: finaliza e envia laudo.')">Finalizar</button>
+                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -798,6 +810,8 @@ tbody tr:hover td{background:#F5F8F7;}
                 </div>
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <button class="btn btn-primary btn-sm" onclick="aprovarDepMestre()">✓ Aprovar e Publicar</button>
+                  <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'depoimento')">✏️ Editar</button>
+                  <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
                 </div>
               </div>
             </div>
@@ -912,6 +926,24 @@ function sair() {
 }
 
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
+function excluirItem(btn) {
+  if(confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
+    btn.closest('tr') ? btn.closest('tr').remove() : btn.closest('.card').remove();
+  }
+}
+
+function editarItem(btn, tipo) {
+  var row = btn.closest('tr');
+  if(!row) { alert('Em produção: abre formulário de edição.'); return; }
+  var cells = row.querySelectorAll('td');
+  var valores = [];
+  cells.forEach(function(td, i) {
+    if(i < cells.length - 1) valores.push(td.innerText.trim());
+  });
+  var novo = prompt('Editar ' + tipo + ':\n\nValores atuais:\n' + valores.join(' | ') + '\n\nEm produção: abre modal de edição completo.');
+  if(novo !== null) alert('✅ Em produção: salvo no Firestore.');
+}
+
 function sv(id) {
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
   var targetView = document.getElementById('view-' + id);
