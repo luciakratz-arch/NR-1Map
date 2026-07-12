@@ -385,7 +385,7 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <!-- RESUMO -->
-        <div id="fin-resumo" class="view active">
+        <div id="fin-resumo" style="display:block">
           <div class="metrics" style="grid-template-columns:repeat(4,1fr);">
             <div class="mc verde"><div class="lbl">Receita Bruta (mês)</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12% vs. mês anterior</div></div>
             <div class="mc"><div class="lbl">Taxa MP (~4,99%)</div><div class="val" style="color:var(--laranja);">− R$ 192</div><div class="sub">descontado automaticamente</div></div>
@@ -414,7 +414,7 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <!-- APROVAÇÕES PENDENTES -->
-        <div id="fin-pendentes" class="view">
+        <div id="fin-pendentes" style="display:none">
           <div style="background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--roxo);">
             ⚡ Essas vendas foram processadas pelo Mercado Pago. Verifique e aprove para liberar o acesso ao cliente.
           </div>
@@ -487,7 +487,7 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <!-- HISTÓRICO DE VENDAS -->
-        <div id="fin-historico" class="view">
+        <div id="fin-historico" style="display:none">
           <div class="card">
             <div class="card-header">
               <div><div class="title">Histórico de Vendas</div><div class="subtitle">Todas as vendas aprovadas</div></div>
@@ -526,7 +526,7 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <!-- FLUXO DE CAIXA -->
-        <div id="fin-caixa" class="view">
+        <div id="fin-caixa" style="display:none">
           <div class="grid-2" style="margin-bottom:16px;">
             <div class="card">
               <div class="card-header"><div class="title">💸 Registrar Retirada</div></div>
@@ -590,7 +590,7 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <!-- CONFIGURAÇÕES -->
-        <div id="fin-config" class="view">
+        <div id="fin-config" style="display:none">
           <div class="card" style="max-width:560px;">
             <div class="card-header"><div class="title">⚙️ Taxas do Mercado Pago</div><div class="subtitle">Conforme sua conta Lucia Kratz · Jul/2026</div></div>
             <div class="card-body">
@@ -1027,7 +1027,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <div class="tab active" onclick="swTab(this,'dep-pend')">⏳ Pendentes</div>
         </div>
 
-        <div id="dep-pend" class="view active">
+        <div id="dep-pend" style="display:block">
           <div class="card" id="dep-card-mestre">
             <div class="card-body">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
@@ -1402,6 +1402,9 @@ function swTab(tab, targetId) {
   var parent = tab.closest('.content');
   parent.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
   tab.classList.add('active');
+  parent.querySelectorAll('[id^="fin-"],[id^="dep-"],[id^="t-"]').forEach(function(v) { v.style.display = 'none'; });
+  var target = document.getElementById(targetId);
+  if(target) target.style.display = 'block';
 }
 
 
