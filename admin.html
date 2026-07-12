@@ -1306,10 +1306,42 @@ function excluirItem(btn) {
 
 function editarItem(btn, tipo) {
   var row = btn.closest('tr');
-  if(!row) return;
-  var cells = Array.from(row.querySelectorAll('td'));
+  var card = btn.closest('.card');
+
+  if(tipo === 'empresa') {
+    // Pode vir de tabela (row) ou card de aprovação pendente
+    if(row) {
+      var cells = Array.from(row.querySelectorAll('td'));
+      document.getElementById('edit-emp-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
+      document.getElementById('edit-emp-resp').value = cells[1].innerText.trim();
+      document.getElementById('edit-emp-email').value = cells[2].innerText.trim();
+      document.getElementById('edit-emp-plano').value = cells[3].innerText.trim();
+      document.getElementById('edit-emp-colab').value = cells[4].innerText.trim();
+      window._editRow = row;
+      window._editCard = null;
+    } else if(card) {
+      // Vem do card de aprovação pendente — pega os dados do card
+      var linhas = card.querySelectorAll('.card-body strong');
+      var dados = {};
+      linhas.forEach(function(el) {
+        var label = el.innerText.replace(':','').trim();
+        var valor = el.parentNode.innerText.replace(el.innerText,'').trim();
+        dados[label] = valor;
+      });
+      document.getElementById('edit-emp-nome').value = dados['Empresa'] || dados['Nome'] || '';
+      document.getElementById('edit-emp-resp').value = dados['Responsável'] || '';
+      document.getElementById('edit-emp-email').value = dados['E-mail'] || '';
+      document.getElementById('edit-emp-plano').value = dados['Plano'] || '';
+      document.getElementById('edit-emp-colab').value = dados['Colaboradores'] || '';
+      window._editRow = null;
+      window._editCard = card;
+    }
+    document.getElementById('modal-edit-empresa').classList.add('open');
+  }
 
   if(tipo === 'lead') {
+    if(!row) return;
+    var cells = Array.from(row.querySelectorAll('td'));
     document.getElementById('edit-lead-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
     document.getElementById('edit-lead-email').value = cells[1].innerText.trim();
     document.getElementById('edit-lead-whatsapp').value = cells[2].innerText.trim().replace('📱','').trim();
@@ -1319,17 +1351,9 @@ function editarItem(btn, tipo) {
     document.getElementById('modal-edit-lead').classList.add('open');
   }
 
-  if(tipo === 'empresa') {
-    document.getElementById('edit-emp-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
-    document.getElementById('edit-emp-resp').value = cells[1].innerText.trim();
-    document.getElementById('edit-emp-email').value = cells[2].innerText.trim();
-    document.getElementById('edit-emp-plano').value = cells[3].innerText.trim();
-    document.getElementById('edit-emp-colab').value = cells[4].innerText.trim();
-    window._editRow = row;
-    document.getElementById('modal-edit-empresa').classList.add('open');
-  }
-
   if(tipo === 'laudo') {
+    if(!row) return;
+    var cells = Array.from(row.querySelectorAll('td'));
     document.getElementById('edit-laudo-empresa').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
     document.getElementById('edit-laudo-tipo').value = cells[1].innerText.trim();
     document.getElementById('edit-laudo-data').value = cells[4].innerText.trim();
@@ -1338,12 +1362,25 @@ function editarItem(btn, tipo) {
   }
 
   if(tipo === 'depoimento') {
-    var card = btn.closest('.card');
-    var p = card ? card.querySelector('p') : null;
+    var c = btn.closest('.card');
+    var p = c ? c.querySelector('p') : null;
     document.getElementById('edit-dep-texto').value = p ? p.innerText.replace(/^"|"$/g,'').trim() : '';
-    window._editCard = card;
+    window._editCard = c;
     document.getElementById('modal-edit-dep').classList.add('open');
   }
+}
+
+function salvarEditEmpresa() {
+  if(window._editRow) {
+    var cells = Array.from(window._editRow.querySelectorAll('td'));
+    cells[0].innerHTML = '<strong>' + document.getElementById('edit-emp-nome').value + '</strong>';
+    cells[1].innerText = document.getElementById('edit-emp-resp').value;
+    cells[2].innerText = document.getElementById('edit-emp-email').value;
+    cells[3].innerText = document.getElementById('edit-emp-plano').value;
+    cells[4].innerText = document.getElementById('edit-emp-colab').value;
+  }
+  document.getElementById('modal-edit-empresa').classList.remove('open');
+  alert('✅ Dados atualizados!');
 }
 
 function salvarEditLead() {
@@ -1356,18 +1393,6 @@ function salvarEditLead() {
   cells[3].innerText = document.getElementById('edit-lead-colab').value;
   cells[4].innerText = document.getElementById('edit-lead-origem').value;
   document.getElementById('modal-edit-lead').classList.remove('open');
-}
-
-function salvarEditEmpresa() {
-  var row = window._editRow;
-  if(!row) return;
-  var cells = row.querySelectorAll('td');
-  cells[0].innerHTML = '<strong>' + document.getElementById('edit-emp-nome').value + '</strong>';
-  cells[1].innerText = document.getElementById('edit-emp-resp').value;
-  cells[2].innerText = document.getElementById('edit-emp-email').value;
-  cells[3].innerText = document.getElementById('edit-emp-plano').value;
-  cells[4].innerText = document.getElementById('edit-emp-colab').value;
-  document.getElementById('modal-edit-empresa').classList.remove('open');
 }
 
 function salvarEditLaudo() {
