@@ -823,6 +823,88 @@ tbody tr:hover td{background:#F5F8F7;}
   </main>
 </div>
 
+<!-- MODAL EDITAR LEAD -->
+<div class="modal-overlay" id="modal-edit-lead" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:500px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Lead</h3><button class="modal-close" onclick="document.getElementById('modal-edit-lead').classList.remove('open')">✕</button></div>
+    <div class="form-group"><label class="form-label">Nome / Empresa *</label><input class="form-control" id="edit-lead-nome"/></div>
+    <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="edit-lead-email" type="email"/></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="edit-lead-whatsapp"/></div>
+      <div class="form-group"><label class="form-label">Nº Colaboradores</label><input class="form-control" id="edit-lead-colab" type="number"/></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Como Conheceu</label>
+      <select class="form-control" id="edit-lead-origem">
+        <option>Instagram / Redes Sociais</option><option>Google / Pesquisa</option><option>LinkedIn</option>
+        <option>Indicação de parceiro/consultor</option><option>Evento / Palestra</option><option>E-book / Material gratuito</option><option>Outro</option>
+      </select>
+    </div>
+    <input type="hidden" id="edit-lead-row"/>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-lead').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditLead()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR EMPRESA -->
+<div class="modal-overlay" id="modal-edit-empresa" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:520px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Empresa</h3><button class="modal-close" onclick="document.getElementById('modal-edit-empresa').classList.remove('open')">✕</button></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome da Empresa *</label><input class="form-control" id="edit-emp-nome"/></div>
+      <div class="form-group"><label class="form-label">Responsável *</label><input class="form-control" id="edit-emp-resp"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="edit-emp-email" type="email"/></div>
+      <div class="form-group"><label class="form-label">Nº Colaboradores</label><input class="form-control" id="edit-emp-colab" type="number"/></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Plano</label>
+      <select class="form-control" id="edit-emp-plano">
+        <option>Assinatura Mensal</option><option>Uso Único</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-empresa').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditEmpresa()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR LAUDO -->
+<div class="modal-overlay" id="modal-edit-laudo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:460px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Laudo</h3><button class="modal-close" onclick="document.getElementById('modal-edit-laudo').classList.remove('open')">✕</button></div>
+    <div class="form-group"><label class="form-label">Empresa</label><input class="form-control" id="edit-laudo-empresa"/></div>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select class="form-control" id="edit-laudo-tipo">
+          <option>Diagnóstico Geral</option><option>Pesquisa Pulso</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Data</label><input class="form-control" id="edit-laudo-data" placeholder="Ex: Jun/2025"/></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-laudo').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditLaudo()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR DEPOIMENTO -->
+<div class="modal-overlay" id="modal-edit-dep" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:460px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Depoimento</h3><button class="modal-close" onclick="document.getElementById('modal-edit-dep').classList.remove('open')">✕</button></div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Texto do depoimento</label>
+      <textarea class="form-control" id="edit-dep-texto" style="min-height:100px;resize:vertical;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-dep').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditDep()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // LOGIN DE QUATRO PERFIS PRESERVADO
 var loginTab = 'user';
@@ -928,20 +1010,95 @@ function sair() {
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
 function excluirItem(btn) {
   if(confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
-    btn.closest('tr') ? btn.closest('tr').remove() : btn.closest('.card').remove();
+    var row = btn.closest('tr');
+    var card = btn.closest('.card');
+    if(row) row.remove();
+    else if(card) card.remove();
   }
 }
 
 function editarItem(btn, tipo) {
   var row = btn.closest('tr');
-  if(!row) { alert('Em produção: abre formulário de edição.'); return; }
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+
+  if(tipo === 'lead') {
+    document.getElementById('edit-lead-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
+    document.getElementById('edit-lead-email').value = cells[1].innerText.trim();
+    document.getElementById('edit-lead-whatsapp').value = cells[2].innerText.trim().replace('📱','').trim();
+    document.getElementById('edit-lead-colab').value = cells[3].innerText.trim();
+    document.getElementById('edit-lead-origem').value = cells[4].innerText.trim();
+    window._editRow = row;
+    document.getElementById('modal-edit-lead').classList.add('open');
+  }
+
+  if(tipo === 'empresa') {
+    document.getElementById('edit-emp-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
+    document.getElementById('edit-emp-resp').value = cells[1].innerText.trim();
+    document.getElementById('edit-emp-email').value = cells[2].innerText.trim();
+    document.getElementById('edit-emp-plano').value = cells[3].innerText.trim();
+    document.getElementById('edit-emp-colab').value = cells[4].innerText.trim();
+    window._editRow = row;
+    document.getElementById('modal-edit-empresa').classList.add('open');
+  }
+
+  if(tipo === 'laudo') {
+    document.getElementById('edit-laudo-empresa').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
+    document.getElementById('edit-laudo-tipo').value = cells[1].innerText.trim();
+    document.getElementById('edit-laudo-data').value = cells[4].innerText.trim();
+    window._editRow = row;
+    document.getElementById('modal-edit-laudo').classList.add('open');
+  }
+
+  if(tipo === 'depoimento') {
+    var card = btn.closest('.card');
+    var p = card ? card.querySelector('p') : null;
+    document.getElementById('edit-dep-texto').value = p ? p.innerText.replace(/^"|"$/g,'').trim() : '';
+    window._editCard = card;
+    document.getElementById('modal-edit-dep').classList.add('open');
+  }
+}
+
+function salvarEditLead() {
+  var row = window._editRow;
+  if(!row) return;
   var cells = row.querySelectorAll('td');
-  var valores = [];
-  cells.forEach(function(td, i) {
-    if(i < cells.length - 1) valores.push(td.innerText.trim());
-  });
-  var novo = prompt('Editar ' + tipo + ':\n\nValores atuais:\n' + valores.join(' | ') + '\n\nEm produção: abre modal de edição completo.');
-  if(novo !== null) alert('✅ Em produção: salvo no Firestore.');
+  cells[0].innerHTML = '<strong>' + document.getElementById('edit-lead-nome').value + '</strong>';
+  cells[1].innerText = document.getElementById('edit-lead-email').value;
+  cells[2].innerHTML = '<a href="https://wa.me/55' + document.getElementById('edit-lead-whatsapp').value.replace(/\D/g,'') + '" target="_blank" style="color:#25D366;font-weight:600;">📱 ' + document.getElementById('edit-lead-whatsapp').value + '</a>';
+  cells[3].innerText = document.getElementById('edit-lead-colab').value;
+  cells[4].innerText = document.getElementById('edit-lead-origem').value;
+  document.getElementById('modal-edit-lead').classList.remove('open');
+}
+
+function salvarEditEmpresa() {
+  var row = window._editRow;
+  if(!row) return;
+  var cells = row.querySelectorAll('td');
+  cells[0].innerHTML = '<strong>' + document.getElementById('edit-emp-nome').value + '</strong>';
+  cells[1].innerText = document.getElementById('edit-emp-resp').value;
+  cells[2].innerText = document.getElementById('edit-emp-email').value;
+  cells[3].innerText = document.getElementById('edit-emp-plano').value;
+  cells[4].innerText = document.getElementById('edit-emp-colab').value;
+  document.getElementById('modal-edit-empresa').classList.remove('open');
+}
+
+function salvarEditLaudo() {
+  var row = window._editRow;
+  if(!row) return;
+  var cells = row.querySelectorAll('td');
+  cells[0].innerHTML = '<strong>' + document.getElementById('edit-laudo-empresa').value + '</strong>';
+  cells[1].innerText = document.getElementById('edit-laudo-tipo').value;
+  cells[4].innerText = document.getElementById('edit-laudo-data').value;
+  document.getElementById('modal-edit-laudo').classList.remove('open');
+}
+
+function salvarEditDep() {
+  var card = window._editCard;
+  if(!card) return;
+  var p = card.querySelector('p');
+  if(p) p.innerText = '"' + document.getElementById('edit-dep-texto').value + '"';
+  document.getElementById('modal-edit-dep').classList.remove('open');
 }
 
 function sv(id) {
