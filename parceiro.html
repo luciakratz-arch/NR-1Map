@@ -211,18 +211,22 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Empresa Cliente</th><th>Créditos Cadastrados</th><th>Vidas Ativas</th><th>Status do Plano</th><th>Ações Comerciais</th><th>Suporte Direto</th></tr></thead>
+            <thead><tr><th>Empresa Cliente</th><th>Créditos Cadastrados</th><th>Vidas Ativas</th><th>Status do Plano</th><th>Ações Comerciais</th><th>Suporte Direto</th><th>Editar / Excluir</th></tr></thead>
             <tbody id="tabela-parceiro-clientes">
               <tr id="p-row-1">
                 <td><strong>Clínica Vida S.A.</strong></td>
                 <td><input type="number" class="form-control" value="45" style="width:75px; padding:4px;" onchange="alert('Solicitação de alteração enviada à Administração Master.')"/></td>
                 <td>14</td>
                 <td><span class="bdg-s s-ok"><span class="dot"></span>Mensal Ativo</span></td>
-                <td>
+                <td style="display:flex;gap:6px;">
                   <button class="btn btn-ghost btn-sm" onclick="location.href='painel.html'">Ver Painel RH →</button>
-                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Deseja desvincular esta empresa da sua carteira comercial?')) document.getElementById('p-row-1').remove();">Desvincular</button>
+                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Deseja desvincular esta empresa?')) document.getElementById('p-row-1').remove();">Desvincular</button>
                 </td>
-                <td><a href="https://wa.me/5562999999999?text=Olá%20Equipe%20Vida!%20Sou%20seu%20consultor%20SST.%20Como%20está%20o%20andamento%20do%20plano%205W2H?" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>
+                <td><a href="https://wa.me/5562999999999" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>
+                <td style="display:flex;gap:6px;">
+                  <button class="btn btn-ghost btn-sm" onclick="editarClienteParceiro(this)">✏️ Editar</button>
+                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este cliente da carteira?'))this.closest('tr').remove()">🗑️</button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -504,7 +508,58 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 </main>
 </div>
 
+<!-- MODAL EDITAR CLIENTE PARCEIRO -->
+<div class="modal-overlay" id="modal-edit-cliente-parceiro" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:520px;width:95%;">
+    <div class="modal-header">
+      <h3>✏️ Editar Cliente</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-edit-cliente-parceiro').classList.remove('open')">✕</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome / Empresa *</label><input class="form-control" id="edit-parc-nome"/></div>
+      <div class="form-group"><label class="form-label">Responsável</label><input class="form-control" id="edit-parc-resp"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">E-mail</label><input class="form-control" id="edit-parc-email" type="email"/></div>
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="edit-parc-whatsapp"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="form-group"><label class="form-label">Nº Colaboradores</label><input class="form-control" id="edit-parc-colab" type="number"/></div>
+      <div class="form-group"><label class="form-label">Plano</label>
+        <select class="form-control" id="edit-parc-plano">
+          <option>Assinatura Mensal</option>
+          <option>Uso Único</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cliente-parceiro').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditClienteParceiro()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <script>
+function editarClienteParceiro(btn) {
+  var row = btn.closest('tr');
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+  document.getElementById('edit-parc-nome').value = cells[0].querySelector('strong') ? cells[0].querySelector('strong').innerText.trim() : cells[0].innerText.trim();
+  document.getElementById('edit-parc-colab').value = cells[2].innerText.trim();
+  window._editRowParceiro = row;
+  document.getElementById('modal-edit-cliente-parceiro').classList.add('open');
+}
+
+function salvarEditClienteParceiro() {
+  var row = window._editRowParceiro;
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+  cells[0].innerHTML = '<strong>' + document.getElementById('edit-parc-nome').value + '</strong>';
+  cells[2].innerText = document.getElementById('edit-parc-colab').value;
+  document.getElementById('modal-edit-cliente-parceiro').classList.remove('open');
+  alert('✅ Cliente atualizado!');
+}
+
 function abrirModalTipoParceiro(){ document.getElementById('modal-tipo-parceiro').classList.add('open'); }
 function fecharModalTipoParceiro(){ document.getElementById('modal-tipo-parceiro').classList.remove('open'); }
 function abrirModalPJParceiro(){ document.getElementById('modal-pj-parceiro').classList.add('open'); }
