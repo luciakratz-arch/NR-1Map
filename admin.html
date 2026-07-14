@@ -282,7 +282,7 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="nav-sec">Conteúdo</div>
       <div class="nav-item" id="nav-laudos" onclick="sv('laudos')"><span class="ic">📄</span>Laudos Gerados</div>
       <div class="nav-item" id="nav-perguntas" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
-      <div class="nav-item" id="nav-depoimentos" onclick="sv('depoimentos')"><span class="ic">⭐</span>Depoimentos<span class="bdg-nav" id="sid-dep-count">2</span></div>
+      <div class="nav-item" id="nav-depoimentos" onclick="sv('depoimentos')"><span class="ic">⭐</span>Depoimentos<span class="bdg-nav" id="sid-dep-count">1</span></div>
     </nav>
     <div class="sidebar-bottom">
       <button class="btn-sair" onclick="window.location.href='index.html'" style="margin-bottom:6px;">🌐 Voltar ao Site</button>
@@ -874,7 +874,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Leads Captados</div>
         </div>
-        <span style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">4 leads aguardando contato</span>
+        <span id="leads-badge-topbar" style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">4 leads aguardando contato</span>
       </div>
       <div class="content">
         <div class="card">
@@ -884,16 +884,16 @@ tbody tr:hover td{background:#F5F8F7;}
           <div class="table-wrap">
             <table>
               <thead><tr><th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Nº Colab.</th><th>Como Conheceu</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody>
+              <tbody id="tabela-leads">
                 <tr>
                   <td><strong>Mariana Lima</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Saúde & Bem-Estar Ltda</span></td>
                   <td>mariana@saudebem.com.br</td>
                   <td><a href="https://wa.me/5562991234567" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9123-4567</a></td>
                   <td>32</td>
                   <td>Instagram</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">há 1h</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">12/07/2026 08:14</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.closest('tr').querySelector('.dot').style.background='var(--verde)';this.closest('tr').querySelector('span.bdg').textContent=' Contatado';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Roberto Alves</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Construtora Alves ME</span></td>
@@ -901,9 +901,9 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td><a href="https://wa.me/5562998765432" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9876-5432</a></td>
                   <td>18</td>
                   <td>Google</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">há 3h</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">12/07/2026 09:32</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Fernanda Costa</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">RH Consultoria</span></td>
@@ -911,9 +911,9 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td><a href="https://wa.me/5562994561234" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9456-1234</a></td>
                   <td>7</td>
                   <td>LinkedIn</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">ontem</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">11/07/2026 15:47</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
                 </tr>
                 <tr>
                   <td><strong>Paulo Mendes</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Indústria Mendes S.A.</span></td>
@@ -921,9 +921,9 @@ tbody tr:hover td{background:#F5F8F7;}
                   <td><a href="https://wa.me/5562987654321" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 8765-4321</a></td>
                   <td>85</td>
                   <td>E-book</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">2 dias</td>
+                  <td style="font-size:11px;color:var(--cinza-medio);">10/07/2026 11:20</td>
                   <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="this.closest('tr').querySelector('.bdg').className='bdg bdg-ok';this.textContent='✓'">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1244,6 +1244,32 @@ function sair() {
 }
 
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
+function atualizarBadgeLeads() {
+  var total = document.querySelectorAll('#tabela-leads tr').length;
+  var novos = document.querySelectorAll('#tabela-leads .bdg-roxo').length;
+  var navBadge = document.querySelector('#nav-leads .bdg-nav');
+  if(navBadge) { navBadge.textContent = total; if(total===0) navBadge.style.display='none'; }
+  var topBadge = document.getElementById('leads-badge-topbar');
+  if(topBadge) topBadge.textContent = novos + ' lead' + (novos!==1?'s':'') + ' aguardando contato';
+}
+
+function contatarLead(btn) {
+  var row = btn.closest('tr');
+  var bdg = row.querySelector('.bdg');
+  var dot = row.querySelector('.dot');
+  if(bdg) { bdg.className = 'bdg bdg-ok'; bdg.innerHTML = '<span class="dot"></span> Contatado'; }
+  btn.textContent = '✓';
+  btn.disabled = true;
+  atualizarBadgeLeads();
+}
+
+function excluirLead(btn) {
+  if(confirm('Excluir este lead?')) {
+    btn.closest('tr').remove();
+    atualizarBadgeLeads();
+  }
+}
+
 function recalcularResumo() {
   var rows = document.querySelectorAll('#tabela-historico-fin tr');
   var totalBruto = 0, totalTaxa = 0, totalComissao = 0, totalLiquido = 0;
@@ -1749,12 +1775,16 @@ function addPergAdm(btn){
   alert('Pergunta adicionada ao banco global!');
 }
 
-// CORREÇÃO DOS DEPOIMENTOS DECREMENTANDO A SIDEBAR
 function aprovarDepMestre() {
   var card = document.getElementById('dep-card-mestre');
-  card.style.opacity = '0.4';
-  document.getElementById('sid-dep-count').innerText = "1"; 
-  alert('Depoimento e resposta oficial publicados na página principal!');
+  if(card) card.remove();
+  var badge = document.getElementById('sid-dep-count');
+  if(badge) {
+    var novo = Math.max(0, (parseInt(badge.textContent)||0) - 1);
+    badge.textContent = novo;
+    if(novo === 0) badge.style.display = 'none';
+  }
+  alert('✅ Depoimento aprovado e publicado na página principal!');
 }
 </script>
 </body>
