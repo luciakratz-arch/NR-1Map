@@ -495,7 +495,7 @@ tbody tr:hover td{background:#F5F8F7;}
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Data</th><th>Cliente</th><th>Tipo</th><th>Plano</th><th>Bruto</th><th>Taxa MP</th><th>Comissão</th><th>Líquido</th><th>Créditos</th><th>Usados</th><th>Saldo</th></tr></thead>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Tipo</th><th>Plano</th><th>Bruto</th><th>Taxa MP</th><th>Comissão</th><th>Líquido</th><th>Créditos</th><th>Usados</th><th>Saldo</th><th>Ações</th></tr></thead>
                 <tbody id="tabela-historico-fin">
                   <tr>
                     <td>Jun/2026</td>
@@ -507,6 +507,7 @@ tbody tr:hover td{background:#F5F8F7;}
                     <td style="color:var(--cinza-medio);">—</td>
                     <td style="color:var(--verde);font-weight:700;">R$ 356,29</td>
                     <td>45</td><td>14</td><td style="font-weight:700;">31</td>
+                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                   </tr>
                   <tr>
                     <td>Mai/2026</td>
@@ -518,6 +519,7 @@ tbody tr:hover td{background:#F5F8F7;}
                     <td style="color:var(--laranja);">− R$ 354,00</td>
                     <td style="color:var(--verde);font-weight:700;">R$ 767,12</td>
                     <td>20</td><td>20</td><td style="font-weight:700;color:var(--cinza-medio);">0</td>
+                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -572,7 +574,7 @@ tbody tr:hover td{background:#F5F8F7;}
                     <td>R$ 5.586,00</td>
                     <td>R$ 3.086,00</td>
                     <td>Pagamento fornecedores Julho</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarRetirada(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                   </tr>
                   <tr>
                     <td>01/06/2026</td>
@@ -581,7 +583,7 @@ tbody tr:hover td{background:#F5F8F7;}
                     <td>R$ 6.843,00</td>
                     <td>R$ 3.643,00</td>
                     <td>Retirada mensal Junho</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
+                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarRetirada(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -1242,12 +1244,85 @@ function sair() {
 }
 
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
+function recalcularResumo() {
+  var rows = document.querySelectorAll('#tabela-historico-fin tr');
+  var totalBruto = 0, totalTaxa = 0, totalComissao = 0, totalLiquido = 0;
+
+  rows.forEach(function(row) {
+    var cells = row.querySelectorAll('td');
+    if(cells.length < 8) return;
+    var parseBR = function(el) {
+      var t = el.innerText.replace('R$','').replace(/\./g,'').replace(',','.').replace('−','').replace('—','0').trim();
+      return parseFloat(t) || 0;
+    };
+    totalBruto     += parseBR(cells[4]);
+    totalTaxa      += parseBR(cells[5]);
+    totalComissao  += parseBR(cells[6]);
+    totalLiquido   += parseBR(cells[7]);
+  });
+
+  var fmt = function(v) { return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); };
+
+  // Atualiza resumo
+  var els = document.querySelectorAll('.mc .val');
+  if(els[0]) els[0].innerText = fmt(totalBruto);
+  if(els[1]) els[1].innerText = '− ' + fmt(totalTaxa);
+  if(els[2]) els[2].innerText = '− ' + fmt(totalComissao);
+  if(els[3]) els[3].innerText = fmt(totalLiquido);
+
+  // Atualiza saldo MP
+  var saldoEl = document.getElementById('saldo-mp');
+  if(saldoEl) saldoEl.innerText = fmt(totalLiquido);
+}
+
+function editarRetirada(btn) {
+  var row = btn.closest('tr');
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+  var novoValor = prompt('Editar observação da retirada:\n\nData: ' + cells[0].innerText + '\nValor: ' + cells[1].innerText + '\nDestino: ' + cells[2].innerText + '\n\nObservação atual: ' + cells[5].innerText, cells[5].innerText);
+  if(novoValor !== null) cells[5].innerText = novoValor;
+}
+
 function aprovarVenda(cardId, nome) {
   if(confirm('Aprovar venda de "' + nome + '" e liberar acesso?')) {
-    document.getElementById(cardId).remove();
+    var card = document.getElementById(cardId);
+    // Pega dados do card para adicionar no histórico
+    var textos = card ? card.innerText : '';
+    var valorMatch = textos.match(/Valor pago[:\s]+R\$\s*([\d.,]+)/);
+    var taxaMatch = textos.match(/Taxa MP[^:]*[:\s]+[−-]?\s*R\$\s*([\d.,]+)/);
+    var liquMatch = textos.match(/Líquido[:\s]+R\$\s*([\d.,]+)/);
+    var valor = valorMatch ? 'R$ ' + valorMatch[1] : '—';
+    var taxa = taxaMatch ? '− R$ ' + taxaMatch[1] : '—';
+    var liquido = liquMatch ? 'R$ ' + liquMatch[1] : '—';
+
+    // Adiciona no histórico
+    var tbody = document.getElementById('tabela-historico-fin');
+    if(tbody) {
+      var tr = document.createElement('tr');
+      var hoje = new Date().toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
+      tr.innerHTML = '<td>' + hoje + '</td>' +
+        '<td><strong>' + nome + '</strong></td>' +
+        '<td>—</td><td>—</td>' +
+        '<td style="color:var(--verde);font-weight:600;">' + valor + '</td>' +
+        '<td style="color:var(--laranja);">' + taxa + '</td>' +
+        '<td style="color:var(--cinza-medio);">—</td>' +
+        '<td style="color:var(--verde);font-weight:700;">' + liquido + '</td>' +
+        '<td>—</td><td>0</td><td>—</td>' +
+        '<td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarItem(this,\'laudo\')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    // Remove card e atualiza badge
+    if(card) card.remove();
     var badge = document.getElementById('badge-pend');
-    if(badge) badge.textContent = Math.max(0, parseInt(badge.textContent) - 1);
-    alert('✅ Acesso liberado para "' + nome + '"!\n\nEm produção: cadastro criado no Firestore e e-mail/WhatsApp enviado ao cliente.');
+    if(badge) {
+      var novo = Math.max(0, (parseInt(badge.textContent) || 0) - 1);
+      badge.textContent = novo;
+      if(novo === 0) badge.style.display = 'none';
+    }
+
+    recalcularResumo();
+    alert('✅ Acesso liberado para "' + nome + '"!\n\nVenda adicionada ao Histórico de Vendas.');
   }
 }
 
@@ -1296,11 +1371,23 @@ function salvarConfig() {
 }
 
 function excluirItem(btn) {
-  if(confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
+  if(confirm('Tem certeza que deseja excluir este item?')) {
     var row = btn.closest('tr');
     var card = btn.closest('.card');
-    if(row) row.remove();
-    else if(card) card.remove();
+    if(row) {
+      row.remove();
+    } else if(card) {
+      // Se é um card de aprovação pendente, atualiza o badge
+      var badge = document.getElementById('badge-pend');
+      if(badge) {
+        var atual = parseInt(badge.textContent) || 0;
+        var novo = Math.max(0, atual - 1);
+        badge.textContent = novo;
+        if(novo === 0) badge.style.display = 'none';
+      }
+      card.remove();
+    }
+    recalcularResumo();
   }
 }
 
