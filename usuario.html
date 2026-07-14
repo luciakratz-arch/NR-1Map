@@ -370,13 +370,13 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
           <div class="card-header"><div><div class="title">📋 Suas Pesquisas</div><div class="subtitle">Todas as respostas anônimas registradas</div></div></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Data</th><th>Tipo</th><th>IBP</th><th>Zona</th><th>Ação</th></tr></thead>
-              <tbody>
-                <tr><td>Jun/2025</td><td>Diagnóstico Geral</td><td style="font-weight:700;color:var(--verde);">+1,8</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td><button class="btn btn-ghost btn-sm" onclick="sv('resultados')">Ver</button></td></tr>
-                <tr><td>Mai/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">+0,2</td><td><span class="bdg bdg-warn"><span class="dot"></span>Neutro</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
-                <tr><td>Mai/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">−0,4</td><td><span class="bdg bdg-warn"><span class="dot"></span>Defesa Oculta</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
-                <tr><td>Abr/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--laranja);">−1,8</td><td><span class="bdg bdg-warn"><span class="dot"></span>Sofrimento</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
-                <tr><td>Mar/2025</td><td>Pesquisa Pulso</td><td style="font-weight:700;color:var(--verde);">+2,1</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td><button class="btn btn-ghost btn-sm">Ver</button></td></tr>
+              <thead><tr><th>Data</th><th>Tipo</th><th>IBP</th><th>Zona</th><th>Ações</th></tr></thead>
+              <tbody id="tbody-historico-usuario">
+                <tr><td>12/06/2025</td><td><span style="background:var(--verde-xp);color:var(--verde);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Diagnóstico Geral</span></td><td style="font-weight:700;color:var(--verde);">+1,8</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="sv('resultados')">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
+                <tr><td>05/05/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">+0,2</td><td><span class="bdg bdg-warn"><span class="dot"></span>Neutro</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
+                <tr><td>28/04/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">−0,4</td><td><span class="bdg bdg-warn"><span class="dot"></span>Defesa Oculta</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
+                <tr><td>14/04/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">−1,8</td><td><span class="bdg bdg-warn"><span class="dot"></span>Sofrimento</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
+                <tr><td>10/03/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--verde);">+2,1</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -537,7 +537,32 @@ function pergProxima() {
     pergAtual++;
     renderPergunta();
   } else {
-    // Enviar
+    // Calcular IBP médio das respostas
+    var soma = 0;
+    var total = 0;
+    Object.keys(respostas).forEach(function(k) { soma += respostas[k]; total++; });
+    var media = total > 0 ? (soma / total - 3).toFixed(1) : '0,0';
+    var mediaNum = parseFloat(media);
+    var zona = mediaNum >= 1.5 ? 'Prazer' : mediaNum >= 0 ? 'Neutro' : mediaNum >= -1.5 ? 'Defesa Oculta' : 'Sofrimento';
+    var cor = mediaNum >= 1 ? 'var(--verde)' : mediaNum >= 0 ? 'var(--laranja)' : 'var(--laranja)';
+    var bdgClass = mediaNum >= 1 ? 'bdg bdg-ok' : 'bdg bdg-warn';
+    var sinal = mediaNum >= 0 ? '+' : '';
+
+    // Adiciona no histórico
+    var tbody = document.getElementById('tbody-historico-usuario');
+    if(tbody) {
+      var hoje = new Date().toLocaleDateString('pt-BR');
+      var tipo = perguntas.length > 5 ? 'Diagnóstico Geral' : 'Pesquisa Pulso';
+      var tipoCor = perguntas.length > 5 ? 'var(--verde)' : 'var(--roxo)';
+      var tipoBg = perguntas.length > 5 ? 'var(--verde-xp)' : 'var(--roxo-xp)';
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + hoje + '</td>' +
+        '<td><span style="background:' + tipoBg + ';color:' + tipoCor + ';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' + tipo + '</span></td>' +
+        '<td style="font-weight:700;color:' + cor + ';">' + sinal + media.replace('.',',') + '</td>' +
+        '<td><span class="' + bdgClass + '"><span class="dot"></span>' + zona + '</span></td>' +
+        '<td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="sv(\'resultados\')">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm(\'Excluir?\'))this.closest(\'tr\').remove()">🗑️</button></td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
     sv('pesquisa-concluida');
   }
 }
