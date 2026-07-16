@@ -211,6 +211,83 @@
     .como-step { grid-template-columns: 44px 1fr; gap: 16px; }
     .prova-grid { grid-template-columns: 1fr 1fr; }
     .criadora-inner { flex-direction: column; }
+
+    /* ——— PREÇOS / CALCULADORA ——— */
+    /* Cards seletores: empilhados em coluna única */
+    .planos-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Calculadora: slider + input em coluna */
+    #slider-n { min-width: 100% !important; }
+    #input-n { width: 56px !important; }
+
+    /* Tabela de faixas: 2 colunas no mobile, oculta coluna "Exemplo" */
+    .tf-head,
+    #tf-row-1, #tf-row-2, #tf-row-3, #tf-row-4 {
+      grid-template-columns: 1fr 1fr !important;
+      font-size: 11px !important;
+    }
+    .tf-ex-col,
+    #tf-row-1 span:last-child,
+    #tf-row-2 span:last-child,
+    #tf-row-3 span:last-child,
+    #tf-row-4 span:last-child {
+      display: none !important;
+    }
+
+    /* Calc valor: fonte menor */
+    #calc-total { font-size: 34px !important; }
+
+    /* ——— DEPOIMENTOS / CARROSSEL ——— */
+    .dep-track-grid {
+      grid-template-columns: 1fr !important;
+    }
+    /* Setas do carrossel: ocultas no mobile */
+    .dep-track-grid + button,
+    .dep-track-grid ~ button {
+      display: none !important;
+    }
+
+    /* ——— MODAL DEPOIMENTO ——— */
+    #modal-dep > div {
+      padding: 20px !important;
+      max-width: 95vw !important;
+    }
+
+    /* ——— FORMULÁRIO LEADS (4 passos) ——— */
+    /* Grid de opções de porte: 1 coluna */
+    #l-porte-opts {
+      grid-template-columns: 1fr !important;
+    }
+    /* Grid de opções de conformidade: 2 colunas (era 3) */
+    #l-nivel-opts {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    /* Grid de preocupação: 1 coluna */
+    #l-concern-opts {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* ——— SEÇÃO PREÇOS PÓS-CTA ——— */
+    /* Incluso: 1 coluna */
+    .incluso-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Padding geral das seções */
+    .dor, .como, .entrega, .precos, .prova, .faq,
+    .cta-final, .criadora {
+      padding-left: 4% !important;
+      padding-right: 4% !important;
+    }
+  }
+
+  /* ——— TABLET (641-768px): carrossel 2 colunas ——— */
+  @media (max-width: 768px) and (min-width: 641px) {
+    .dep-track-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
   }
 </style>
 </head>
@@ -635,7 +712,7 @@ async function enviarLead() {
 
     <!-- CARROSSEL -->
     <div style="position:relative;">
-      <div id="dep-track" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;overflow:hidden;">
+      <div id="dep-track" class="dep-track-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;overflow:hidden;">
 
         <!-- Card 1 -->
         <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
@@ -812,7 +889,7 @@ async function enviarDep() {
   <p style="font-size:15px;color:var(--cinza-medio);max-width:560px;line-height:1.65;margin-bottom:40px;">Clique na opção desejada e simule o valor exato pelo número de colaboradores.</p>
 
   <!-- CARDS SELETORES -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;margin-bottom:36px;">
+  <div class="planos-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;margin-bottom:36px;">
 
     <!-- CARD ASSINATURA — selecionado por padrão -->
     <div id="card-mensal" onclick="selectOpcao('mensal')" style="border:2.5px solid var(--verde);border-radius:14px;padding:24px;cursor:pointer;background:var(--verde-xp);position:relative;transition:all .2s;">
@@ -869,8 +946,8 @@ async function enviarDep() {
 
     <!-- TABELA DE FAIXAS INLINE -->
     <div id="tabela-faixas" style="border-radius:9px;overflow:hidden;border:1px solid #2A2E2C;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#181D1B;padding:8px 14px;font-size:10px;font-weight:600;color:#4A5450;text-transform:uppercase;letter-spacing:.06em;">
-        <span>Colaboradores</span><span style="text-align:center;">Por pessoa</span><span style="text-align:right;">Exemplo</span>
+      <div class="tf-head" style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#181D1B;padding:8px 14px;font-size:10px;font-weight:600;color:#4A5450;text-transform:uppercase;letter-spacing:.06em;">
+        <span>Colaboradores</span><span style="text-align:center;">Por pessoa</span><span class="tf-ex-col" style="text-align:right;">Exemplo</span>
       </div>
       <div id="tf-row-1" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
       <div id="tf-row-2" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
@@ -886,7 +963,7 @@ async function enviarDep() {
   <!-- INCLUSO -->
   <div style="max-width:720px;background:var(--cinza-claro);border-radius:10px;padding:18px 22px;border:1px solid var(--linha);">
     <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;">Incluído em todos os planos</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;font-size:12px;color:var(--cinza-medio);">
+    <div class="incluso-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;font-size:12px;color:var(--cinza-medio);">
       <span>✓ Diagnóstico Geral (Maslow + Herzberg + Dejours)</span>
       <span>✓ Laudo Técnico Psicossocial</span>
       <span>✓ Mapa de Risco Psicossocial</span>
