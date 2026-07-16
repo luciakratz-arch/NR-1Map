@@ -1116,14 +1116,37 @@ function setLoginTab(tab, el) {
 }
 
 function entrarAdmin() {
+  var email = document.getElementById('adm-email').value.trim();
   var senha = document.getElementById('adm-senha').value;
-  if (senha !== '1234') {
-    alert('Senha incorreta.');
-    return;
-  }
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-admin').classList.add('active');
-  carregarLeads();
+  if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
+
+  var btn = document.querySelector('#login-admin .login-btn');
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+
+  window.nr1mapAuth.signInWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      // Verifica se é o e-mail admin autorizado
+      var emailAutorizado = 'luciakratz@gmail.com';
+      if (cred.user.email !== emailAutorizado) {
+        window.nr1mapAuth.signOut();
+        alert('Acesso negado. Use a conta administradora.');
+        btn.textContent = 'Entrar como Admin';
+        btn.disabled = false;
+        return;
+      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-admin').classList.add('active');
+      carregarLeads();
+    })
+    .catch(function(e) {
+      var msg = 'Erro ao entrar.';
+      if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'E-mail ou senha incorretos.';
+      else if (e.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos.';
+      alert(msg);
+      btn.textContent = 'Entrar como Admin';
+      btn.disabled = false;
+    });
 }
 function copiarLink(id) {
   var input = document.getElementById(id);
@@ -1206,6 +1229,7 @@ function entrarRH() { window.location.href = 'painel.html'; }
 function entrarUser() { window.location.href = 'usuario.html'; }
 
 function sair() {
+  if (window.nr1mapAuth) window.nr1mapAuth.signOut();
   document.getElementById('app-admin').classList.remove('active');
   document.getElementById('login-screen').style.display = 'flex';
 }
@@ -1769,6 +1793,7 @@ function aprovarDepMestre() {
      FIREBASE SDK — NR-1 Map (PSI Entrevista Inicial)
      ═══════════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
 (function() {
@@ -1783,7 +1808,8 @@ function aprovarDepMestre() {
   };
   var app;
   try { app = firebase.app('nr1map'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map'); }
-  window.nr1mapDb = firebase.firestore(app);
+  window.nr1mapDb   = firebase.firestore(app);
+  window.nr1mapAuth = firebase.auth(app);
 })();
 
 // ── Carrega leads reais do Firestore ──────────────────────────
