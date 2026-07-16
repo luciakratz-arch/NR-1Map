@@ -885,46 +885,7 @@ tbody tr:hover td{background:#F5F8F7;}
             <table>
               <thead><tr><th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Nº Colab.</th><th>Como Conheceu</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="tabela-leads">
-                <tr>
-                  <td><strong>Mariana Lima</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Saúde & Bem-Estar Ltda</span></td>
-                  <td>mariana@saudebem.com.br</td>
-                  <td><a href="https://wa.me/5562991234567" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9123-4567</a></td>
-                  <td>32</td>
-                  <td>Instagram</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">12/07/2026 08:14</td>
-                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
-                </tr>
-                <tr>
-                  <td><strong>Roberto Alves</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Construtora Alves ME</span></td>
-                  <td>roberto@constralves.com.br</td>
-                  <td><a href="https://wa.me/5562998765432" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9876-5432</a></td>
-                  <td>18</td>
-                  <td>Google</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">12/07/2026 09:32</td>
-                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
-                </tr>
-                <tr>
-                  <td><strong>Fernanda Costa</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">RH Consultoria</span></td>
-                  <td>fernanda@rhconsult.com.br</td>
-                  <td><a href="https://wa.me/5562994561234" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 9456-1234</a></td>
-                  <td>7</td>
-                  <td>LinkedIn</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">11/07/2026 15:47</td>
-                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
-                </tr>
-                <tr>
-                  <td><strong>Paulo Mendes</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">Indústria Mendes S.A.</span></td>
-                  <td>paulo@mendes.ind.br</td>
-                  <td><a href="https://wa.me/5562987654321" target="_blank" style="color:#25D366;font-weight:600;">📱 (62) 9 8765-4321</a></td>
-                  <td>85</td>
-                  <td>E-book</td>
-                  <td style="font-size:11px;color:var(--cinza-medio);">10/07/2026 11:20</td>
-                  <td><span class="bdg bdg-roxo"><span class="dot"></span>Novo</span></td>
-                  <td style="display:flex;gap:6px;"><button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'lead')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>
-                </tr>
+                <!-- Preenchido dinamicamente pelo Firestore (nr1map_leads) -->
               </tbody>
             </table>
           </div>
@@ -1155,8 +1116,14 @@ function setLoginTab(tab, el) {
 }
 
 function entrarAdmin() {
+  var senha = document.getElementById('adm-senha').value;
+  if (senha !== '1234') {
+    alert('Senha incorreta.');
+    return;
+  }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-admin').classList.add('active');
+  carregarLeads();
 }
 function copiarLink(id) {
   var input = document.getElementById(id);
@@ -1255,18 +1222,28 @@ function atualizarBadgeLeads() {
 
 function contatarLead(btn) {
   var row = btn.closest('tr');
+  var docId = row.dataset.id;
   var bdg = row.querySelector('.bdg');
-  var dot = row.querySelector('.dot');
   if(bdg) { bdg.className = 'bdg bdg-ok'; bdg.innerHTML = '<span class="dot"></span> Contatado'; }
   btn.textContent = '✓';
   btn.disabled = true;
   atualizarBadgeLeads();
+  // Atualiza status no Firestore
+  if(docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_leads').doc(docId).update({ status: 'contatado' }).catch(function(e){ console.log('Erro update lead:', e); });
+  }
 }
 
 function excluirLead(btn) {
   if(confirm('Excluir este lead?')) {
-    btn.closest('tr').remove();
+    var row = btn.closest('tr');
+    var docId = row.dataset.id;
+    row.remove();
     atualizarBadgeLeads();
+    // Remove do Firestore
+    if(docId && window.nr1mapDb) {
+      window.nr1mapDb.collection('nr1map_leads').doc(docId).delete().catch(function(e){ console.log('Erro delete lead:', e); });
+    }
   }
 }
 
@@ -1785,6 +1762,86 @@ function aprovarDepMestre() {
     if(novo === 0) badge.style.display = 'none';
   }
   alert('✅ Depoimento aprovado e publicado na página principal!');
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     FIREBASE SDK — NR-1 Map (PSI Entrevista Inicial)
+     ═══════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+(function() {
+  var firebaseConfig = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1",
+    measurementId: "G-M39SQ1HHE8"
+  };
+  var app;
+  try { app = firebase.app('nr1map'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map'); }
+  window.nr1mapDb = firebase.firestore(app);
+})();
+
+// ── Carrega leads reais do Firestore ──────────────────────────
+function carregarLeads() {
+  if (!window.nr1mapDb) return;
+  var tbody = document.getElementById('tabela-leads');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_leads')
+    .orderBy('data', 'desc')
+    .get()
+    .then(function(snap) {
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum lead captado ainda.</td></tr>';
+        atualizarBadgeLeads();
+        return;
+      }
+      tbody.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var status = d.status || 'novo';
+        var bdgClass = status === 'contatado' ? 'bdg bdg-ok' : 'bdg bdg-roxo';
+        var bdgLabel = status === 'contatado' ? 'Contatado' : 'Novo';
+        var btnContatar = status === 'contatado'
+          ? '<button class="btn btn-ghost btn-sm" disabled>✓</button>'
+          : '<button class="btn btn-roxo btn-sm" onclick="contatarLead(this)">Contatar</button>';
+        // Formata data
+        var dataStr = '';
+        if (d.data) {
+          try {
+            var dt = new Date(d.data);
+            dataStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+          } catch(e) { dataStr = d.data; }
+        }
+        // Formata WhatsApp
+        var wpp = d.whatsapp || '';
+        var wppLink = wpp ? '<a href="https://wa.me/55' + wpp.replace(/\D/g,'') + '" target="_blank" style="color:#25D366;font-weight:600;">📱 ' + wpp + '</a>' : '—';
+        var tr = document.createElement('tr');
+        tr.dataset.id = doc.id;
+        tr.innerHTML =
+          '<td><strong>' + (d.nome||'—') + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">' + (d.empresa||'') + '</span></td>' +
+          '<td>' + (d.email||'—') + '</td>' +
+          '<td>' + wppLink + '</td>' +
+          '<td>' + (d.porte||'—') + '</td>' +
+          '<td>' + (d.segmento||'—') + '</td>' +
+          '<td style="font-size:11px;color:var(--cinza-medio);">' + dataStr + '</td>' +
+          '<td><span class="' + bdgClass + '"><span class="dot"></span>' + bdgLabel + '</span></td>' +
+          '<td style="display:flex;gap:6px;">' + btnContatar + '<button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>';
+        tbody.appendChild(tr);
+      });
+      atualizarBadgeLeads();
+    })
+    .catch(function(e) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#e53935;">Erro ao carregar leads: ' + e.message + '</td></tr>';
+      console.log('Erro carregarLeads:', e);
+    });
 }
 </script>
 </body>
