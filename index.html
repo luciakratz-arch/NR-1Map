@@ -682,20 +682,14 @@ async function enviarLead() {
     data: new Date().toISOString()
   };
 
-  // SUBSTITUA ESTA URL PELO WEBHOOK DO MAKE OU N8N
-  var WEBHOOK_URL = 'COLE_AQUI_A_URL_DO_WEBHOOK_MAKE_OU_N8N';
-
+  // Salva lead no Firestore — coleção nr1map_leads
   try {
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await window.nr1mapDb.collection('nr1map_leads').add(payload);
   } catch(e) {
-    console.log('Webhook error:', e);
+    console.log('Firestore lead error:', e);
   }
 
-  // Mostra confirmação independente do webhook
+  // Mostra confirmação independente do resultado
   leadStep(4);
 }
 </script>
@@ -858,15 +852,12 @@ async function enviarDep() {
     return;
   }
 
-  // SUBSTITUA PELO WEBHOOK DO MAKE/N8N
-  var WEBHOOK_DEP = 'COLE_AQUI_URL_WEBHOOK_DEPOIMENTOS';
+  // Salva depoimento no Firestore — coleção nr1map_depoimentos
   try {
-    await fetch(WEBHOOK_DEP, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-  } catch(e) {}
+    await window.nr1mapDb.collection('nr1map_depoimentos').add(payload);
+  } catch(e) {
+    console.log('Firestore dep error:', e);
+  }
 
   fecharFormDep();
   alert('✅ Depoimento enviado! Será publicado após aprovação.');
@@ -1152,6 +1143,37 @@ function assinarAgora() {
   var tipo = window.opcaoAtiva || 'mensal';
   irParaCheckout(qtd, tipo);
 }
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     FIREBASE SDK — NR-1 Map (PSI Entrevista Inicial)
+     Firestore: coleções prefixadas com nr1map_
+     ═══════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+(function() {
+  var firebaseConfig = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1",
+    measurementId: "G-M39SQ1HHE8"
+  };
+
+  // Inicializa apenas se ainda não inicializado (evita conflito com outros apps no mesmo projeto)
+  var app;
+  try {
+    app = firebase.app('nr1map');
+  } catch(e) {
+    app = firebase.initializeApp(firebaseConfig, 'nr1map');
+  }
+
+  // Expõe o Firestore globalmente para as funções da página
+  window.nr1mapDb = firebase.firestore(app);
+})();
 </script>
 
 </body>
