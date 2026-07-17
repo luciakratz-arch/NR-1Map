@@ -241,7 +241,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <nav class="nav">
     <div class="nav-sec">Visão geral</div>
     <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
-    <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg">14</span></div>
+    <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg" id="bdg-colab">0</span></div>
     <div class="nav-sec">Empresa</div>
     <div class="nav-item" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
     <div class="nav-sec">Pesquisas</div>
@@ -299,7 +299,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
 
     <div class="metrics">
-      <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val">14</div><div class="sub">2 inativos</div></div>
+      <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val" id="mc-colab-ativos">0</div><div class="sub" id="mc-colab-inativos">0 inativos</div></div>
       <div class="mc"><div class="lbl">Índice Prazer</div><div class="val">58</div><div class="delta down">▼ 4 pts vs. anterior</div></div>
       <div class="mc"><div class="lbl">Índice Sofrimento</div><div class="val">72</div><div class="delta down">▲ 8 pts vs. anterior</div></div>
       <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val">83%</div><div class="delta up">▲ 11% vs. anterior</div></div>
@@ -407,7 +407,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
     <div class="card">
       <div class="card-header">
-        <div><div class="title">Lista de colaboradores</div><div class="subtitle">14 ativos · 2 inativos</div></div>
+        <div><div class="title">Lista de colaboradores</div><div class="subtitle" id="sub-colab">0 ativos · 0 inativos</div></div>
         <div style="display:flex;gap:6px;">
           <button class="btn btn-ghost btn-sm" onclick="ordenar('nome')">A→Z Nome</button>
           <button class="btn btn-ghost btn-sm" onclick="ordenar('admissao')">↕ Admissão</button>
@@ -430,14 +430,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
             </tr>
           </thead>
           <tbody id="tbody-colab">
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0001</td><td>Psicólogo · 2515-10</td><td>Clínico</td><td>Goiânia</td><td>03/01/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="Ana Costa" data-status="ativo"><td>Ana Costa</td><td>11 9 9999-0002</td><td>Téc. Enf. · 3222-05</td><td>UTI</td><td>Goiânia</td><td>15/03/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0003</td><td>Médico · 2251-05</td><td>Clínico</td><td>Brasília</td><td>01/06/2021</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="Carlos M." data-status="ativo"><td>Carlos M.</td><td>carlos@clinica.com</td><td>Analista RH · 2524-05</td><td>RH</td><td>Goiânia</td><td>10/09/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0005</td><td>Téc. Enf. · 3222-05</td><td>Emergência</td><td>Brasília</td><td>20/02/2024</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0006</td><td>Ass. Adm. · 4110-10</td><td>Recepção</td><td>Belo Horizonte</td><td>05/07/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-erro"><span class="dot"></span>Erro envio</span></td><td><button class="btn btn-danger btn-sm">Corrigir</button><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir?'))this.closest('tr').remove()">🗑️</button></td></tr>
-            <tr data-nome="Pedro Lima" data-status="inativo" class="inativo"><td>Pedro Lima</td><td>pedro@clinica.com</td><td>Médico · 2251-05</td><td>Clínico</td><td>Goiânia</td><td>01/01/2020</td><td>30/04/2025</td><td><span class="bdg-s s-inativo"><span class="dot"></span>Inativo</span></td><td>—</td><td><button class="btn btn-ghost btn-sm">Reativar</button><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir?'))this.closest('tr').remove()">🗑️</button></td></tr>
-          </tbody>
+              <!-- Colaboradores carregados do Firestore -->
+            </tbody>
         </table>
       </div>
     </div>
