@@ -240,24 +240,24 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
   <nav class="nav">
     <div class="nav-sec">Visão geral</div>
-    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
-    <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg">14</span></div>
+    <div class="nav-item active" data-view="dashboard" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-item" data-view="colaboradores" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg">14</span></div>
     <div class="nav-sec">Empresa</div>
-    <div class="nav-item" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
+    <div class="nav-item" data-view="cargos" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
     <div class="nav-sec">Pesquisas</div>
-    <div class="nav-item" onclick="sv('planejamento')"><span class="ic">🗓</span>Planejamento</div>
-    <div class="nav-item" onclick="sv('metodologia')"><span class="ic">🔬</span>Metodologia Científica</div>
-    <div class="nav-item" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
-    <div class="nav-item" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
-    <div class="nav-item" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg">1</span></div>
+    <div class="nav-item" data-view="planejamento" onclick="sv('planejamento')"><span class="ic">🗓</span>Planejamento</div>
+    <div class="nav-item" data-view="metodologia" onclick="sv('metodologia')"><span class="ic">🔬</span>Metodologia Científica</div>
+    <div class="nav-item" data-view="modulos" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
+    <div class="nav-item" data-view="diagnostico" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
+    <div class="nav-item" data-view="pulso" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg">1</span></div>
     <div class="nav-sec">Configurações</div>
-    <div class="nav-item" onclick="sv('cobranding')"><span class="ic">🎨</span>Co-Branding (Logo)</div>
+    <div class="nav-item" data-view="cobranding" onclick="sv('cobranding')"><span class="ic">🎨</span>Co-Branding (Logo)</div>
     <div class="nav-sec">Referência</div>
-    <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
+    <div class="nav-item" data-view="nr1" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
     <div class="nav-sec">Resultados</div>
-    <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
-    <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
-    <div class="nav-item" onclick="sv('relatorios')"><span class="ic">📄</span>Relatórios</div>
+    <div class="nav-item" data-view="plano-acao" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
+    <div class="nav-item" data-view="historico" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
+    <div class="nav-item" data-view="relatorios" onclick="sv('relatorios')"><span class="ic">📄</span>Relatórios</div>
   </nav>
   <div class="sidebar-bottom">
     <div class="s-user">
@@ -1559,12 +1559,15 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el=document.getElementById('view-'+id);
-  if(el)el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
-  if(nav)nav.classList.add('active');
+  document.querySelectorAll('.view').forEach(function(v){
+    v.style.display='none';
+    v.classList.remove('active');
+  });
+  var el=document.getElementById('view-'+id);
+  if(el){ el.style.display='block'; el.classList.add('active'); }
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var nav=document.querySelector('.nav-item[data-view="'+id+'"]');
+  if(nav) nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos') renderRH();
 }
@@ -1986,12 +1989,13 @@ function exportarOrgPDF() {
   alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  atualizarTodosSinalizadores();
-  atualizarBadgePendentes();
-  renderHistorico();
-  renderCargos();
-  setTimeout(dispararVelocimetros, 200);
+document.addEventListener('DOMContentLoaded', function(){
+  try{ atualizarTodosSinalizadores(); }catch(e){}
+  try{ atualizarBadgePendentes(); }catch(e){}
+  try{ renderHistorico(); }catch(e){}
+  try{ renderCargos(); }catch(e){}
+  try{ setTimeout(dispararVelocimetros,200); }catch(e){}
+  sv('dashboard');
 });
 </script>
 </body>
