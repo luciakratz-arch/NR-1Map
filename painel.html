@@ -1996,25 +1996,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script>
-(function(){
-  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
-  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
-  window.nr1mapDb=firebase.firestore(app);
-  window.nr1mapAuth=firebase.auth(app);
-  var uid=sessionStorage.getItem('nr1map_rh_uid');
-  if(uid){
-    window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
-    .then(function(snap){
-      if(snap.empty)return;
-      var e=snap.docs[0].data();e.id=snap.docs[0].id;window.nr1mapEmpresa=e;
-      document.querySelector('.sidebar-empresa .nome').textContent=e.nome||'—';
-      document.querySelector('.sidebar-empresa .plano').textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
-      document.querySelector('.nm').textContent=e.responsavel||'—';
-    }).catch(function(e){console.log(e);});
-  }
-})();
-</script>
