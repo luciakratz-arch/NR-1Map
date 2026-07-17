@@ -42,7 +42,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-clar
 .s-user .cg{font-size:10px;color:#4A5450;}
 
 /* MAIN */
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.main{flex:1;overflow:hidden;position:relative;}
 .topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
 .topbar-actions{display:flex;gap:8px;align-items:center;}
@@ -215,7 +215,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .d-opt .d-lb{font-size:12px;font-weight:500;}
 
 /* VIEWS */
-.view{display:none;}
+.view{display:none;position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:var(--branco);}
 .view.active{display:block;}
 
 /* MODAL */
