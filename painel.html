@@ -1559,16 +1559,13 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  // Esconde apenas views principais (filhas diretas do main)
-  var main = document.querySelector('.main');
-  if(main){
-    Array.from(main.children).forEach(function(v){
-      if(v.classList.contains('view')){
-        v.style.display='none';
-        v.classList.remove('active');
-      }
-    });
-  }
+  // Esconde apenas views de nível superior (id começa com 'view-')
+  document.querySelectorAll('.view').forEach(function(v){
+    if(v.id && v.id.indexOf('view-')===0){
+      v.style.display='none';
+      v.classList.remove('active');
+    }
+  });
   // Mostra a view alvo
   var el=document.getElementById('view-'+id);
   if(el){
