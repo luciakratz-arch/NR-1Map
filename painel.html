@@ -430,13 +430,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
             </tr>
           </thead>
           <tbody id="tbody-colab">
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0001</td><td>Psicólogo · 2515-10</td><td>Clínico</td><td>Goiânia</td><td>03/01/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="Ana Costa" data-status="ativo"><td>Ana Costa</td><td>11 9 9999-0002</td><td>Téc. Enf. · 3222-05</td><td>UTI</td><td>Goiânia</td><td>15/03/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0003</td><td>Médico · 2251-05</td><td>Clínico</td><td>Brasília</td><td>01/06/2021</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="Carlos M." data-status="ativo"><td>Carlos M.</td><td>carlos@clinica.com</td><td>Analista RH · 2524-05</td><td>RH</td><td>Goiânia</td><td>10/09/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0005</td><td>Téc. Enf. · 3222-05</td><td>Emergência</td><td>Brasília</td><td>20/02/2024</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm">✏</button></td></tr>
-            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0006</td><td>Ass. Adm. · 4110-10</td><td>Recepção</td><td>Belo Horizonte</td><td>05/07/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-erro"><span class="dot"></span>Erro envio</span></td><td><button class="btn btn-danger btn-sm">Corrigir</button></td></tr>
-            <tr data-nome="Pedro Lima" data-status="inativo" class="inativo"><td>Pedro Lima</td><td>pedro@clinica.com</td><td>Médico · 2251-05</td><td>Clínico</td><td>Goiânia</td><td>01/01/2020</td><td>30/04/2025</td><td><span class="bdg-s s-inativo"><span class="dot"></span>Inativo</span></td><td>—</td><td><button class="btn btn-ghost btn-sm">Reativar</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0001</td><td>Psicólogo · 2515-10</td><td>Clínico</td><td>Goiânia</td><td>03/01/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="Ana Costa" data-status="ativo"><td>Ana Costa</td><td>11 9 9999-0002</td><td>Téc. Enf. · 3222-05</td><td>UTI</td><td>Goiânia</td><td>15/03/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0003</td><td>Médico · 2251-05</td><td>Clínico</td><td>Brasília</td><td>01/06/2021</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="Carlos M." data-status="ativo"><td>Carlos M.</td><td>carlos@clinica.com</td><td>Analista RH · 2524-05</td><td>RH</td><td>Goiânia</td><td>10/09/2023</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-ok"><span class="dot"></span>Respondeu</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0005</td><td>Téc. Enf. · 3222-05</td><td>Emergência</td><td>Brasília</td><td>20/02/2024</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir colaborador?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="—" data-status="ativo"><td>—</td><td>11 9 9999-0006</td><td>Ass. Adm. · 4110-10</td><td>Recepção</td><td>Belo Horizonte</td><td>05/07/2022</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-erro"><span class="dot"></span>Erro envio</span></td><td><button class="btn btn-danger btn-sm">Corrigir</button><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir?'))this.closest('tr').remove()">🗑️</button></td></tr>
+            <tr data-nome="Pedro Lima" data-status="inativo" class="inativo"><td>Pedro Lima</td><td>pedro@clinica.com</td><td>Médico · 2251-05</td><td>Clínico</td><td>Goiânia</td><td>01/01/2020</td><td>30/04/2025</td><td><span class="bdg-s s-inativo"><span class="dot"></span>Inativo</span></td><td>—</td><td><button class="btn btn-ghost btn-sm">Reativar</button><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir?'))this.closest('tr').remove()">🗑️</button></td></tr>
           </tbody>
         </table>
       </div>
@@ -1391,6 +1391,50 @@ textarea.form-control{resize:vertical;min-height:70px;}
   </div>
 </div>
 
+<!-- MODAL EDITAR COLABORADOR -->
+<div class="modal-overlay" id="modal-edit-colab" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:540px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Colaborador</h3><button class="modal-close" onclick="document.getElementById('modal-edit-colab').classList.remove('open')">✕</button></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-control" id="ec-nome" placeholder="Anônimo se vazio"/></div>
+      <div class="form-group"><label class="form-label">WhatsApp / E-mail</label><input class="form-control" id="ec-contato"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Cargo (CBO)</label><input class="form-control" id="ec-cargo"/></div>
+      <div class="form-group"><label class="form-label">Departamento</label><input class="form-control" id="ec-depto"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Unidade</label><input class="form-control" id="ec-unidade"/></div>
+      <div class="form-group"><label class="form-label">Data Admissão</label><input class="form-control" id="ec-admissao" type="date"/></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Status</label>
+      <select class="form-control" id="ec-status">
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-colab').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditColab()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CARGO -->
+<div class="modal-overlay" id="modal-edit-cargo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:460px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Cargo</h3><button class="modal-close" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">✕</button></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome do Cargo *</label><input class="form-control" id="edit-cargo-nome"/></div>
+      <div class="form-group"><label class="form-label">CBO</label><input class="form-control" id="edit-cargo-cbo"/></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditCargo()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function selecionarQtd(n){
   [1,2,3].forEach(function(i){
@@ -1458,6 +1502,60 @@ function toggleRHSubcat(hdr){
   body.style.display=aberto?'none':'block';
   var seta=hdr.querySelector('span:last-child');
   if(seta)seta.textContent=seta.textContent.replace(aberto?'▾':'▸',aberto?'▸':'▾');
+}
+
+function editarColab(btn) {
+  var row = btn.closest('tr');
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+  document.getElementById('ec-nome').value = cells[0].innerText.trim() === '—' ? '' : cells[0].innerText.trim();
+  document.getElementById('ec-contato').value = cells[1].innerText.trim();
+  document.getElementById('ec-cargo').value = cells[2].innerText.trim();
+  document.getElementById('ec-depto').value = cells[3].innerText.trim();
+  document.getElementById('ec-unidade').value = cells[4].innerText.trim();
+  document.getElementById('ec-admissao').value = '';
+  document.getElementById('ec-status').value = row.dataset.status || 'ativo';
+  window._editColabRow = row;
+  document.getElementById('modal-edit-colab').classList.add('open');
+}
+
+function salvarEditColab() {
+  var row = window._editColabRow;
+  if(!row) return;
+  var cells = Array.from(row.querySelectorAll('td'));
+  var nome = document.getElementById('ec-nome').value.trim() || '—';
+  cells[0].innerText = nome;
+  cells[1].innerText = document.getElementById('ec-contato').value.trim();
+  cells[2].innerText = document.getElementById('ec-cargo').value.trim();
+  cells[3].innerText = document.getElementById('ec-depto').value.trim();
+  cells[4].innerText = document.getElementById('ec-unidade').value.trim();
+  row.dataset.nome = nome;
+  document.getElementById('modal-edit-colab').classList.remove('open');
+  alert('✅ Colaborador atualizado!');
+}
+
+function editarCargo(id) {
+  var cargo = null;
+  for(var i=0; i<cargos.length; i++) { if(cargos[i].id === id) { cargo = cargos[i]; break; } }
+  if(!cargo) return;
+  document.getElementById('edit-cargo-nome').value = cargo.nome;
+  document.getElementById('edit-cargo-cbo').value = cargo.cbo;
+  window._editCargoId = id;
+  document.getElementById('modal-edit-cargo').classList.add('open');
+}
+
+function salvarEditCargo() {
+  var id = window._editCargoId;
+  for(var i=0; i<cargos.length; i++) {
+    if(cargos[i].id === id) {
+      cargos[i].nome = document.getElementById('edit-cargo-nome').value.trim();
+      cargos[i].cbo = document.getElementById('edit-cargo-cbo').value.trim();
+      break;
+    }
+  }
+  renderCargos();
+  document.getElementById('modal-edit-cargo').classList.remove('open');
+  alert('✅ Cargo atualizado!');
 }
 
 function sv(id){
@@ -1726,7 +1824,7 @@ function renderCargos() {
     html += '<td><span style="background:' + nvCor + '22;color:' + nvCor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + nvNome + '</span></td>';
     html += '<td style="font-size:12px;">' + supNome + '</td>';
     html += '<td style="text-align:center;font-size:12px;">' + c.n + '</td>';
-    html += '<td><button class="btn btn-ghost btn-sm" onclick="delCargo(\'' + c.id + '\')">✕</button></td>';
+    html += '<td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarCargo(\'' + c.id + '\')">✏️</button><button class="btn btn-danger btn-sm" onclick="delCargo(\'' + c.id + '\')">🗑️</button></td>';
     html += '</tr>';
   }
   tbody.innerHTML = html;
@@ -1898,3 +1996,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
+  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
+  window.nr1mapDb=firebase.firestore(app);
+  window.nr1mapAuth=firebase.auth(app);
+  var uid=sessionStorage.getItem('nr1map_rh_uid');
+  if(uid){
+    window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+    .then(function(snap){
+      if(snap.empty)return;
+      var e=snap.docs[0].data();e.id=snap.docs[0].id;window.nr1mapEmpresa=e;
+      document.querySelector('.sidebar-empresa .nome').textContent=e.nome||'—';
+      document.querySelector('.sidebar-empresa .plano').textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+      document.querySelector('.nm').textContent=e.responsavel||'—';
+    }).catch(function(e){console.log(e);});
+  }
+})();
+</script>
