@@ -1559,17 +1559,21 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  // Esconde todas
-  document.querySelectorAll('.view').forEach(function(v){
-    v.style.display='none';
-    v.classList.remove('active');
-  });
-  // Mostra a alvo
+  // Esconde apenas views principais (filhas diretas do main)
+  var main = document.querySelector('.main');
+  if(main){
+    Array.from(main.children).forEach(function(v){
+      if(v.classList.contains('view')){
+        v.style.display='none';
+        v.classList.remove('active');
+      }
+    });
+  }
+  // Mostra a view alvo
   var el=document.getElementById('view-'+id);
   if(el){
     el.style.display='block';
     el.classList.add('active');
-    el.scrollTop=0;
   }
   // Atualiza nav
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
