@@ -1568,6 +1568,8 @@ function sv(id){
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   var nav=document.querySelector('.nav-item[data-view="'+id+'"]');
   if(nav) nav.classList.add('active');
+  var mainEl = document.querySelector('.main');
+  if(mainEl) mainEl.scrollTop = 0;
   window.scrollTo(0,0);
   if(id==='modulos') renderRH();
 }
