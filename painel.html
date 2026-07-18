@@ -2156,21 +2156,26 @@ function carregarEmpresa(uid, email) {
     if(!snap.empty){
       var e=snap.docs[0].data(); e.id=snap.docs[0].id;
       aplicarEmpresa(e);
-      return;
+    } else {
+      // Usa uid como empresaId diretamente
+      aplicarEmpresa({
+        id: uid,
+        uid: uid,
+        email: email,
+        nome: 'Minha Empresa',
+        responsavel: email,
+        tipo: 'mensal',
+        faixa: 'Faixa 2'
+      });
     }
-    var novaEmpresa = {
-      uid: uid, email: email,
-      nome: 'A! Equipe Desenvolvimento Humano e Cultural',
-      responsavel: 'Lucia Kratz',
-      tipo: 'mensal', faixa: 'Faixa 2',
-      ativo: true, criadoEm: new Date().toISOString()
-    };
-    window.nr1mapDb.collection('nr1map_empresas').add(novaEmpresa)
-    .then(function(doc){
-      novaEmpresa.id = doc.id;
-      aplicarEmpresa(novaEmpresa);
-    }).catch(function(err){ console.log('Erro criar empresa:', err); });
-  }).catch(function(err){console.log(err);});
+  }).catch(function(err){
+    // Fallback sem Firestore
+    aplicarEmpresa({
+      id: uid, uid: uid, email: email,
+      nome: 'Minha Empresa', responsavel: email,
+      tipo: 'mensal', faixa: 'Faixa 2'
+    });
+  });
 }
 
 function aplicarEmpresa(e) {
