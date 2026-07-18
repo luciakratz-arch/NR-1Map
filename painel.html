@@ -2173,7 +2173,6 @@ function salvarNovoColab() {
   });
 
   function carregarEmpresa(uid, email) {
-    // Busca primeiro em nr1map_empresas, depois em nself_empresas como fallback
     window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
     .then(function(snap){
       if(!snap.empty){
@@ -2181,25 +2180,23 @@ function salvarNovoColab() {
         aplicarEmpresa(e);
         return;
       }
-      // Fallback: busca por email em nself_empresas
-      return window.nr1mapDb.collection('nself_empresas').where('email','==',email).limit(1).get()
-      .then(function(snap2){
-        if(!snap2.empty){
-          var e=snap2.docs[0].data(); e.id=snap2.docs[0].id;
-          // Cria automaticamente em nr1map_empresas
-          window.nr1mapDb.collection('nr1map_empresas').doc(e.id).set({
-            uid: uid,
-            nome: e.nome||e.nomeEmpresa||'—',
-            responsavel: e.responsavel||e.nomeContato||'—',
-            email: email,
-            tipo: 'mensal',
-            faixa: 'Faixa 2',
-            ativo: true,
-            criadoEm: new Date().toISOString()
-          }).catch(function(err){console.log('Erro criar empresa:', err);});
-          aplicarEmpresa({id:e.id, nome:e.nome||e.nomeEmpresa||'—', responsavel:e.responsavel||e.nomeContato||'—', tipo:'mensal', faixa:'Faixa 2'});
-        }
-      });
+      // Cria empresa automaticamente na primeira vez
+      var novaEmpresa = {
+        uid: uid,
+        email: email,
+        nome: 'A! Equipe Desenvolvimento Humano e Cultural',
+        responsavel: 'Lucia Kratz',
+        tipo: 'mensal',
+        faixa: 'Faixa 2',
+        ativo: true,
+        criadoEm: new Date().toISOString()
+      };
+      window.nr1mapDb.collection('nr1map_empresas').add(novaEmpresa)
+      .then(function(doc){
+        novaEmpresa.id = doc.id;
+        aplicarEmpresa(novaEmpresa);
+        console.log('Empresa criada automaticamente:', doc.id);
+      }).catch(function(err){ console.log('Erro criar empresa:', err); });
     }).catch(function(err){console.log(err);});
   }
 
