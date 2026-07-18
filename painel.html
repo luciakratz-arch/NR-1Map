@@ -2010,7 +2010,8 @@ function salvarCargo() {
   var repId = document.getElementById('nc-reporta').value || null;
   if (!nome) { alert('Informe o nome do cargo.'); return; }
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
-  var empresaId = window.nr1mapEmpresa ? window.nr1mapEmpresa.id : 'default';
+  if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
+  var empresaId = window.nr1mapEmpresa.id;
   var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
