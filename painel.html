@@ -550,7 +550,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="form-group" style="position:relative;">
         <div class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
           CBO (busca por nome ou código)
-          <a href="https://www.ocupacoes.com.br/cbosite/pages/pesquisas/pesquisaRapida.jsf" target="_blank" style="font-size:10px;color:var(--verde);text-decoration:none;font-weight:600;">🔍 Buscar no site MTE →</a>
+          <a href="https://www.ocupacoes.com.br/" target="_blank" style="font-size:10px;color:var(--verde);text-decoration:none;font-weight:600;">🔍 Buscar no site MTE →</a>
         </div>
         <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
         <div id="nc-cbo-drop" style="position:absolute;z-index:9999!important;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
@@ -2148,26 +2148,37 @@ function salvarNovoColab() {
   window.nr1mapDb=firebase.firestore(app);
   window.nr1mapAuth=firebase.auth(app);
 
-  // Usa onAuthStateChanged para detectar sessão ativa
+  // Tenta detectar sessão ativa
   window.nr1mapAuth.onAuthStateChanged(function(user){
     if(user){
-      // Usuário já autenticado — carrega empresa
-      window.nr1mapDb.collection('nr1map_empresas').where('uid','==',user.uid).limit(1).get()
-      .then(function(snap){
-        if(snap.empty) return;
-        var e=snap.docs[0].data(); e.id=snap.docs[0].id;
-        window.nr1mapEmpresa=e;
-        var nomeEl = document.querySelector('.sidebar-empresa .nome');
-        var planoEl = document.querySelector('.sidebar-empresa .plano');
-        var nmEl = document.querySelector('.nm');
-        if(nomeEl) nomeEl.textContent=e.nome||'—';
-        if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
-        if(nmEl) nmEl.textContent=e.responsavel||'—';
-        carregarCargos(e.id);
-      }).catch(function(err){console.log(err);});
+      carregarEmpresa(user.uid);
+    } else {
+      // Sem sessão ativa — tenta re-autenticar com credenciais do sessionStorage
+      var email = sessionStorage.getItem('nr1map_rh_email');
+      var pwd = sessionStorage.getItem('nr1map_rh_pwd');
+      if(email && pwd){
+        window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
+          .then(function(c){ carregarEmpresa(c.user.uid); })
+          .catch(function(e){ console.log('Re-auth falhou:', e); });
+      }
     }
-    // Se não autenticado, o painel ainda funciona (acesso direto via URL)
   });
+
+  function carregarEmpresa(uid) {
+    window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+    .then(function(snap){
+      if(snap.empty) return;
+      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
+      window.nr1mapEmpresa=e;
+      var nomeEl=document.querySelector('.sidebar-empresa .nome');
+      var planoEl=document.querySelector('.sidebar-empresa .plano');
+      var nmEl=document.querySelector('.nm');
+      if(nomeEl) nomeEl.textContent=e.nome||'—';
+      if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+      if(nmEl) nmEl.textContent=e.responsavel||'—';
+      carregarCargos(e.id);
+    }).catch(function(err){console.log(err);});
+  }
 })();
 
 function carregarCargos(empresaId) {
