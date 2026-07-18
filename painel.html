@@ -1385,24 +1385,24 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="modal">
     <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" id="nc-nome" placeholder="Nome do colaborador"/></div>
-      <div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" id="nc-contato" placeholder="11 9 9999-0000"/></div>
+      <div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" id="colab-nome" placeholder="Nome do colaborador"/></div>
+      <div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" id="colab-contato" placeholder="11 9 9999-0000"/></div>
     </div>
     <div class="form-group"><div class="form-label">Cargo / CBO *</div>
       <div style="position:relative;">
-        <input class="form-control" id="nc-cbo-input" placeholder="Digite o cargo ou código CBO..." autocomplete="off"
+        <input class="form-control" id="colab-cbo-input" placeholder="Digite o cargo ou código CBO..." autocomplete="off"
           oninput="buscarCBOColab(this.value)" onfocus="buscarCBOColab(this.value)"/>
-        <div id="nc-cbo-drop-colab" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+        <div id="colab-cbo-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
       </div>
-      <input type="hidden" id="nc-cbo-valor"/>
+      <input type="hidden" id="colab-cbo-valor"/>
     </div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="nc-depto" placeholder="Ex: UTI"/></div>
-      <div class="form-group"><div class="form-label">Unidade / Filial</div><input class="form-control" id="nc-unidade" placeholder="Ex: Goiânia"/></div>
+      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="colab-depto" placeholder="Ex: UTI"/></div>
+      <div class="form-group"><div class="form-label">Unidade / Filial</div><input class="form-control" id="colab-unidade" placeholder="Ex: Goiânia"/></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="nc-admissao"/></div>
-      <div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control" id="nc-demissao"/></div>
+      <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="colab-admissao"/></div>
+      <div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control" id="colab-demissao"/></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button>
@@ -2090,7 +2090,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function buscarCBOColab(q) {
-  var div = document.getElementById('nc-cbo-drop-colab');
+  var div = document.getElementById('colab-cbo-drop');
   if (!div) return;
   q = (q||'').toLowerCase().trim();
   var db = (typeof CBO_DATABASE !== 'undefined') ? CBO_DATABASE : [];
@@ -2106,8 +2106,8 @@ function buscarCBOColab(q) {
     d.addEventListener('mouseover', function(){ this.style.background='#f9fafb'; });
     d.addEventListener('mouseout', function(){ this.style.background=''; });
     d.addEventListener('click', function(){
-      document.getElementById('nc-cbo-input').value = r.titulo + ' · ' + r.cbo;
-      document.getElementById('nc-cbo-valor').value = r.cbo;
+      document.getElementById('colab-cbo-input').value = r.titulo + ' · ' + r.cbo;
+      document.getElementById('colab-cbo-valor').value = r.cbo;
       div.style.display = 'none';
     });
     div.appendChild(d);
@@ -2122,12 +2122,12 @@ function selCBOColab(el) {
   document.getElementById('nc-cbo-drop-colab').style.display = 'none';
 }
 function salvarNovoColab() {
-  var nome = (document.getElementById('nc-nome')||{}).value || '';
-  var contato = (document.getElementById('nc-contato')||{}).value || '';
-  var cargo = (document.getElementById('nc-cbo-input')||{}).value || '';
-  var depto = (document.getElementById('nc-depto')||{}).value || '';
-  var unidade = (document.getElementById('nc-unidade')||{}).value || '';
-  var admissao = (document.getElementById('nc-admissao')||{}).value || '';
+  var nome = (document.getElementById('colab-nome')||{}).value || '';
+  var contato = (document.getElementById('colab-contato')||{}).value || '';
+  var cargo = (document.getElementById('colab-cbo-input')||{}).value || '';
+  var depto = (document.getElementById('colab-depto')||{}).value || '';
+  var unidade = (document.getElementById('colab-unidade')||{}).value || '';
+  var admissao = (document.getElementById('colab-admissao')||{}).value || '';
   if (!contato) { alert('Informe WhatsApp ou e-mail do colaborador.'); return; }
   var tbody = document.getElementById('tbody-colab');
   var tr = document.createElement('tr');
