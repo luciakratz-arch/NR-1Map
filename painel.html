@@ -1428,6 +1428,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="form-group"><label class="form-label">Nome do Cargo *</label><input class="form-control" id="edit-cargo-nome"/></div>
       <div class="form-group"><label class="form-label">CBO</label><input class="form-control" id="edit-cargo-cbo"/></div>
     </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nível Hierárquico</label><select class="form-control" id="edit-cargo-nivel"></select></div>
+      <div class="form-group"><label class="form-label">Reporta a</label><select class="form-control" id="edit-cargo-reporta"></select></div>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
       <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarEditCargo()">Salvar alterações</button>
@@ -1540,6 +1544,25 @@ function editarCargo(id) {
   if(!cargo) return;
   document.getElementById('edit-cargo-nome').value = cargo.nome;
   document.getElementById('edit-cargo-cbo').value = cargo.cbo;
+  // Popula select de Nível
+  var selNivel = document.getElementById('edit-cargo-nivel');
+  selNivel.innerHTML = '<option value="">— Sem nível —</option>';
+  niveisHier.forEach(function(nv){
+    var opt = document.createElement('option');
+    opt.value = nv.id; opt.textContent = nv.nome;
+    if(nv.id === cargo.nvId) opt.selected = true;
+    selNivel.appendChild(opt);
+  });
+  // Popula select de Reporta a
+  var selRep = document.getElementById('edit-cargo-reporta');
+  selRep.innerHTML = '<option value="">— Nenhum (topo) —</option>';
+  cargos.forEach(function(c){
+    if(c.id === id) return;
+    var opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.nome;
+    if(c.id === cargo.repId) opt.selected = true;
+    selRep.appendChild(opt);
+  });
   window._editCargoId = id;
   document.getElementById('modal-edit-cargo').classList.add('open');
 }
@@ -1550,6 +1573,8 @@ function salvarEditCargo() {
     if(cargos[i].id === id) {
       cargos[i].nome = document.getElementById('edit-cargo-nome').value.trim();
       cargos[i].cbo = document.getElementById('edit-cargo-cbo').value.trim();
+      cargos[i].nvId = document.getElementById('edit-cargo-nivel').value || null;
+      cargos[i].repId = document.getElementById('edit-cargo-reporta').value || null;
       break;
     }
   }
@@ -1775,13 +1800,7 @@ var niveisHier = [
   {id:'nv5',nome:'Operacional',cor:'#DC2626'},
 ];
 
-var cargos = [
-  {id:'c1',nome:'Diretora Geral',cbo:'1111-05',nvId:'nv1',repId:null,n:1},
-  {id:'c2',nome:'Gestora de RH',cbo:'1411-05',nvId:'nv2',repId:'c1',n:1},
-  {id:'c3',nome:'Psicóloga',cbo:'2515-10',nvId:'nv3',repId:'c2',n:3},
-  {id:'c4',nome:'Analista de RH',cbo:'2524-05',nvId:'nv4',repId:'c2',n:2},
-  {id:'c5',nome:'Auxiliar Adm.',cbo:'4110-10',nvId:'nv5',repId:'c2',n:4},
-];
+var cargos = [];
 
 function swCargos(aba) {
   document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
