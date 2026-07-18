@@ -1225,7 +1225,29 @@ function salvarPF() {
   alert('✅ Cliente "' + nome + '" cadastrado com sucesso!');
 }
 function entrarParceiro() { window.location.href = 'parceiro.html'; }
-function entrarRH() { window.location.href = 'painel.html'; }
+function entrarRH() {
+  var email = document.getElementById('rh-email').value.trim();
+  var senha = document.getElementById('rh-senha').value;
+  if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
+  var btn = document.querySelector('#login-rh .login-btn');
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  window.nr1mapAuth.signInWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      // Passa credenciais via sessionStorage para o painel usar
+      sessionStorage.setItem('nr1map_rh_uid', cred.user.uid);
+      sessionStorage.setItem('nr1map_rh_email', cred.user.email);
+      sessionStorage.setItem('nr1map_rh_pwd', senha);
+      window.location.href = 'painel.html';
+    })
+    .catch(function(e) {
+      var msg = 'E-mail ou senha incorretos.';
+      if (e.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos.';
+      alert(msg);
+      btn.textContent = 'Entrar como Gestor RH';
+      btn.disabled = false;
+    });
+}
 function entrarUser() { window.location.href = 'usuario.html'; }
 
 function sair() {
