@@ -229,6 +229,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
 </style>
+<script src="cbo-database.js"></script>
 </head>
 <body>
 <div class="app">
@@ -1935,28 +1936,39 @@ function buscarCBO(query) {
   var div = document.getElementById('nc-cbo-drop');
   if (!div) return;
   var q = (query || '').toLowerCase().trim();
+  var db = (typeof CBO_DATABASE !== 'undefined') ? CBO_DATABASE : [];
   var res = q.length === 0
-    ? BANCO_CBO.slice(0, 12)
-    : BANCO_CBO.filter(function(x){ return x.n.toLowerCase().indexOf(q) > -1 || x.c.indexOf(q) > -1; }).slice(0, 10);
+    ? db.slice(0, 12)
+    : db.filter(function(x){ return x.titulo.toLowerCase().indexOf(q) > -1 || x.cbo.indexOf(q) > -1; }).slice(0, 15);
   if (!res.length) { div.style.display = 'none'; return; }
   var html = '';
-  for (var i=0; i<res.length; i++) {
-    html += '<div onclick="selCBO(\'' + res[i].c + '\',\'' + res[i].n.replace(/'/g,"&#39;") + '\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">';
-    html += '<span style="font-weight:600;">' + res[i].n + '</span> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + res[i].c + '</span></div>';
-  }
-  if (q.length === 0) html += '<div style="padding:7px 14px;font-size:10px;color:#9ca3af;">' + BANCO_CBO.length + ' cargos disponíveis — digite para filtrar</div>';
+  res.forEach(function(r) {
+    var t = r.titulo.replace(/'/g, "&#39;");
+    var d1 = document.createElement('div');
+    d1.dataset.cbo = r.cbo;
+    d1.dataset.titulo = r.titulo;
+    d1.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;';
+    d1.onmouseover = function(){ this.style.background='#f9fafb'; };
+    d1.onmouseout = function(){ this.style.background=''; };
+    d1.onclick = function(){ selCBO(this); };
+    d1.innerHTML = '<strong>' + r.titulo + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.cbo + '</span>';
+    html += d1.outerHTML;
+  });
+  if (q.length === 0) html += '<div style="padding:7px 14px;font-size:10px;color:#9ca3af;">' + db.length + ' cargos disponíveis — digite para filtrar</div>';
   div.innerHTML = html;
   div.style.display = 'block';
   setTimeout(function(){
-    document.addEventListener('click', function fechar(e) {
-      if (!div.contains(e.target) && e.target.id !== 'nc-cbo-busca') { div.style.display='none'; document.removeEventListener('click',fechar); }
+    document.addEventListener('click', function fechar(e){
+      if (!div.contains(e.target) && e.target.id !== 'nc-cbo-busca'){ div.style.display='none'; document.removeEventListener('click',fechar); }
     });
   }, 100);
 }
-function selCBO(codigo, nome) {
+function selCBO(el) {
+  var codigo = el.dataset.cbo;
+  var nome = el.dataset.titulo;
   document.getElementById('nc-cbo-busca').value = nome + ' · ' + codigo;
   document.getElementById('nc-cbo-val').value = codigo;
-  document.getElementById('nc-cbo-drop-colab').style.display = 'none';
+  document.getElementById('nc-cbo-drop').style.display = 'none';
 }
 function salvarCargo() {
   var nome = document.getElementById('nc-nome').value.trim();
@@ -2039,18 +2051,30 @@ function buscarCBOColab(q) {
   var div = document.getElementById('nc-cbo-drop-colab');
   if (!div) return;
   q = (q||'').toLowerCase().trim();
+  var db = (typeof CBO_DATABASE !== 'undefined') ? CBO_DATABASE : [];
   var res = q.length === 0
-    ? BANCO_CBO.slice(0,12)
-    : BANCO_CBO.filter(function(x){ return x.n.toLowerCase().indexOf(q)>-1 || x.c.indexOf(q)>-1; }).slice(0,10);
+    ? db.slice(0,12)
+    : db.filter(function(x){ return x.titulo.toLowerCase().indexOf(q)>-1 || x.cbo.indexOf(q)>-1; }).slice(0,10);
   if (!res.length) { div.style.display='none'; return; }
   var html='';
   res.forEach(function(r){
-    html += '<div onclick="selCBOColab(\'' + r.c + '\',\'' + r.n.replace(/'/g,"&#39;") + '\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'"><strong>' + r.n + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.c + '</span></div>';
+    var t = r.titulo.replace(/'/g,"&#39;");
+    var d2 = document.createElement('div');
+    d2.dataset.cbo = r.cbo;
+    d2.dataset.titulo = r.titulo;
+    d2.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;';
+    d2.onmouseover = function(){ this.style.background='#f9fafb'; };
+    d2.onmouseout = function(){ this.style.background=''; };
+    d2.onclick = function(){ selCBOColab(this); };
+    d2.innerHTML = '<strong>' + r.titulo + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.cbo + '</span>';
+    html += d2.outerHTML;
   });
-  div.innerHTML = html;
-  div.style.display = 'block';
+  div.innerHTML=html;
+  div.style.display='block';
 }
-function selCBOColab(codigo, nome) {
+function selCBOColab(el) {
+  var codigo = el.dataset.cbo;
+  var nome = el.dataset.titulo;
   document.getElementById('nc-cbo-input').value = nome + ' · ' + codigo;
   document.getElementById('nc-cbo-valor').value = codigo;
   document.getElementById('nc-cbo-drop-colab').style.display = 'none';
