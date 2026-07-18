@@ -579,61 +579,196 @@ function copiarLinkParceiro(id) {
   });
 }
 
+/* ── Firebase helpers (parceiro) ── */
+function gerarSenhaPar() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  var s = '';
+  for (var i = 0; i < 10; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  return s;
+}
+
+function exibirCredenciaisPar(email, senha) {
+  document.getElementById('par-cred-email').textContent = email;
+  document.getElementById('par-cred-senha').textContent = senha;
+  window._parCredAtual = { email: email, senha: senha };
+  document.getElementById('modal-cred-parceiro').classList.add('open');
+}
+
+function copiarCredenciaisPar() {
+  var c = window._parCredAtual || {};
+  var texto = '🔐 Acesso NR-1 Map\n\nE-mail: ' + (c.email||'') + '\nSenha: ' + (c.senha||'') + '\nLink: painel.html';
+  navigator.clipboard.writeText(texto).then(function(){
+    alert('✅ Credenciais copiadas!\n\nCole no WhatsApp e envie ao cliente.');
+  }).catch(function(){ alert('Copie manualmente:\n\n' + texto); });
+}
+
+function _getParSecondaryAuth() {
+  var cfg = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+  };
+  var app;
+  try { app = firebase.app('nr1map-par-secondary'); }
+  catch(e) { app = firebase.initializeApp(cfg, 'nr1map-par-secondary'); }
+  return firebase.auth(app);
+}
+
 function salvarPJParceiro() {
-  var nome = document.getElementById('ppj-nome').value.trim();
-  var cnpj = document.getElementById('ppj-cnpj').value.trim();
-  var responsavel = document.getElementById('ppj-responsavel').value.trim();
-  var email = document.getElementById('ppj-email').value.trim();
-  var whatsapp = document.getElementById('ppj-whatsapp').value.trim();
-  var colab = document.getElementById('ppj-colab').value.trim();
-  var plano = document.getElementById('ppj-plano');
-  if (!nome || !cnpj || !responsavel || !email || !whatsapp || !colab || !plano.value) {
+  var nome       = document.getElementById('ppj-nome').value.trim();
+  var cnpj       = document.getElementById('ppj-cnpj').value.trim();
+  var setor      = document.getElementById('ppj-setor') ? document.getElementById('ppj-setor').value.trim() : '';
+  var responsavel= document.getElementById('ppj-responsavel').value.trim();
+  var email      = document.getElementById('ppj-email').value.trim();
+  var whatsapp   = document.getElementById('ppj-whatsapp').value.trim();
+  var colab      = document.getElementById('ppj-colab').value.trim();
+  var plano      = document.getElementById('ppj-plano');
+  var planoValue = plano.value;
+  var planoText  = plano.options[plano.selectedIndex].text;
+  var origemEl   = document.getElementById('ppj-origem');
+  var origem     = origemEl ? origemEl.value : '';
+
+  if (!nome || !cnpj || !responsavel || !email || !whatsapp || !colab || !planoValue) {
     alert('Preencha todos os campos obrigatórios (*).'); return;
   }
-  var tbody = document.getElementById('tabela-parceiro-clientes');
-  var rowId = 'p-row-' + Date.now();
-  var tr = document.createElement('tr');
-  tr.id = rowId;
-  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CNPJ: ' + cnpj + '</span></td>' +
-    '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;" onchange="alert(\'Solicitação enviada à Administração Master.\')"/></td>' +
-    '<td>' + colab + '</td>' +
-    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
-    '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button> <button class="btn btn-danger btn-sm" onclick="if(confirm(\'Desvincular?\'))this.closest(\'tr\').remove();">Desvincular</button></td>' +
-    '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
-  tbody.appendChild(tr);
-  ['ppj-nome','ppj-cnpj','ppj-setor','ppj-responsavel','ppj-email','ppj-whatsapp','ppj-colab'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('ppj-plano').selectedIndex = 0;
-  document.getElementById('ppj-origem').selectedIndex = 0;
-  fecharModalPJParceiro();
-  alert('✅ Empresa "' + nome + '" cadastrada na sua carteira!');
+  if (!window.nr1mapDb) { alert('Erro: Firebase não carregado.'); return; }
+
+  var btn = document.querySelector('#modal-pj-parceiro .btn-primary');
+  btn.textContent = 'Criando acesso...'; btn.disabled = true;
+
+  var senha = gerarSenhaPar();
+  var parceiroUid = window._parceiroUid || 'parceiro-anonimo';
+
+  _getParSecondaryAuth().createUserWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      return window.nr1mapDb.collection('nr1map_empresas').doc(uid).set({
+        uid: uid,
+        tipo: 'pj',
+        nome: nome,
+        cnpj: cnpj,
+        setor: setor || '',
+        responsavel: responsavel,
+        email: email,
+        whatsapp: whatsapp,
+        numColaboradores: parseInt(colab) || 0,
+        plano: planoValue,
+        planoLabel: planoText,
+        parceiro: parceiroUid,
+        origem: origem || '',
+        status: 'pendente',
+        criadoEm: new Date().toISOString(),
+        criadoPor: 'parceiro'
+      });
+    })
+    .then(function() {
+      ['ppj-nome','ppj-cnpj','ppj-setor','ppj-responsavel','ppj-email','ppj-whatsapp','ppj-colab'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.value = '';
+      });
+      document.getElementById('ppj-plano').selectedIndex = 0;
+      if(origemEl) origemEl.selectedIndex = 0;
+      btn.textContent = 'Cadastrar Empresa'; btn.disabled = false;
+      fecharModalPJParceiro();
+      // Linha visual imediata
+      var tbody = document.getElementById('tabela-parceiro-clientes');
+      if(tbody) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CNPJ: ' + cnpj + '</span></td>' +
+          '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;"/></td>' +
+          '<td>' + colab + '</td>' +
+          '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+          '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button></td>' +
+          '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
+        tbody.appendChild(tr);
+      }
+      exibirCredenciaisPar(email, senha);
+    })
+    .catch(function(e) {
+      btn.textContent = 'Cadastrar Empresa'; btn.disabled = false;
+      var msg = 'Erro ao criar acesso.';
+      if (e.code === 'auth/email-already-in-use') msg = 'E-mail já cadastrado.';
+      alert('❌ ' + msg + '\n' + e.message);
+    });
 }
 
 function salvarPFParceiro() {
-  var nome = document.getElementById('ppf-nome').value.trim();
-  var cpf = document.getElementById('ppf-cpf').value.trim();
-  var email = document.getElementById('ppf-email').value.trim();
-  var whatsapp = document.getElementById('ppf-whatsapp').value.trim();
-  var colab = document.getElementById('ppf-colab').value.trim();
-  var plano = document.getElementById('ppf-plano');
-  if (!nome || !cpf || !email || !whatsapp || !colab || !plano.value) {
+  var nome       = document.getElementById('ppf-nome').value.trim();
+  var cpf        = document.getElementById('ppf-cpf').value.trim();
+  var profissao  = document.getElementById('ppf-profissao') ? document.getElementById('ppf-profissao').value.trim() : '';
+  var email      = document.getElementById('ppf-email').value.trim();
+  var whatsapp   = document.getElementById('ppf-whatsapp').value.trim();
+  var colab      = document.getElementById('ppf-colab').value.trim();
+  var plano      = document.getElementById('ppf-plano');
+  var planoValue = plano.value;
+  var planoText  = plano.options[plano.selectedIndex].text;
+  var origemEl   = document.getElementById('ppf-origem');
+  var origem     = origemEl ? origemEl.value : '';
+  var devolutivaEl = document.getElementById('ppf-devolutiva');
+  var devolutiva = devolutivaEl ? devolutivaEl.value : 'sem';
+
+  if (!nome || !cpf || !email || !whatsapp || !colab || !planoValue) {
     alert('Preencha todos os campos obrigatórios (*).'); return;
   }
-  var tbody = document.getElementById('tabela-parceiro-clientes');
-  var rowId = 'p-row-' + Date.now();
-  var tr = document.createElement('tr');
-  tr.id = rowId;
-  tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CPF: ' + cpf + '</span></td>' +
-    '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;" onchange="alert(\'Solicitação enviada à Administração Master.\')"/></td>' +
-    '<td>' + colab + '</td>' +
-    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
-    '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button> <button class="btn btn-danger btn-sm" onclick="if(confirm(\'Desvincular?\'))this.closest(\'tr\').remove();">Desvincular</button></td>' +
-    '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
-  tbody.appendChild(tr);
-  ['ppf-nome','ppf-cpf','ppf-email','ppf-whatsapp','ppf-profissao','ppf-colab'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('ppf-plano').selectedIndex = 0;
-  document.getElementById('ppf-origem').selectedIndex = 0;
-  fecharModalPFParceiro();
-  alert('✅ Cliente "' + nome + '" cadastrado na sua carteira!');
+  if (!window.nr1mapDb) { alert('Erro: Firebase não carregado.'); return; }
+
+  var btn = document.querySelector('#modal-pf-parceiro .btn-roxo');
+  btn.textContent = 'Criando acesso...'; btn.disabled = true;
+
+  var senha = gerarSenhaPar();
+  var parceiroUid = window._parceiroUid || 'parceiro-anonimo';
+
+  _getParSecondaryAuth().createUserWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      return window.nr1mapDb.collection('nr1map_usuarios_pf').doc(uid).set({
+        uid: uid,
+        tipo: 'pf',
+        nome: nome,
+        cpf: cpf,
+        profissao: profissao || '',
+        email: email,
+        whatsapp: whatsapp,
+        numColaboradores: parseInt(colab) || 0,
+        plano: planoValue,
+        planoLabel: planoText,
+        devolutiva: devolutiva,
+        parceiro: parceiroUid,
+        origem: origem || '',
+        status: 'pendente',
+        criadoEm: new Date().toISOString(),
+        criadoPor: 'parceiro'
+      });
+    })
+    .then(function() {
+      ['ppf-nome','ppf-cpf','ppf-email','ppf-whatsapp','ppf-profissao','ppf-colab'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.value = '';
+      });
+      document.getElementById('ppf-plano').selectedIndex = 0;
+      if(origemEl) origemEl.selectedIndex = 0;
+      btn.textContent = 'Cadastrar Cliente PF'; btn.disabled = false;
+      fecharModalPFParceiro();
+      var tbody = document.getElementById('tabela-parceiro-clientes');
+      if(tbody) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CPF: ' + cpf + '</span></td>' +
+          '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;"/></td>' +
+          '<td>' + colab + '</td>' +
+          '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+          '<td><button class="btn btn-ghost btn-sm" onclick="location.href=\'painel.html\'">Ver Painel RH →</button></td>' +
+          '<td><a href="https://wa.me/55' + whatsapp.replace(/\D/g,'') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>';
+        tbody.appendChild(tr);
+      }
+      exibirCredenciaisPar(email, senha);
+    })
+    .catch(function(e) {
+      btn.textContent = 'Cadastrar Cliente PF'; btn.disabled = false;
+      var msg = 'Erro ao criar acesso.';
+      if (e.code === 'auth/email-already-in-use') msg = 'E-mail já cadastrado.';
+      alert('❌ ' + msg + '\n' + e.message);
+    });
 }
 
 function sv(id){
@@ -861,6 +996,60 @@ function calcular(){
   document.getElementById('res-comissao').textContent='R$ '+com.toFixed(2).replace('.',',')+suf;
   document.getElementById('res-faixa').textContent=FNOMES[idx];
 }
+</script>
+
+<!-- ===== MODAL CREDENCIAIS (PARCEIRO) ===== -->
+<div class="modal-overlay" id="modal-cred-parceiro" onclick="if(event.target===this)this.classList.remove('open')" style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:480px;width:95%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="font-size:16px;font-weight:700;">✅ Acesso criado com sucesso!</h3>
+      <button onclick="document.getElementById('modal-cred-parceiro').classList.remove('open')" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6B7370;">✕</button>
+    </div>
+    <p style="font-size:13px;color:#6B7370;margin-bottom:16px;">Envie estas credenciais para o cliente acessar o painel:</p>
+    <div style="background:#E4F5EF;border:1px solid #12A073;border-radius:10px;padding:16px;margin-bottom:16px;">
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:#0A6E4F;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">E-mail de acesso</div>
+        <div id="par-cred-email" style="font-size:14px;font-weight:600;color:#0D1210;word-break:break-all;"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#0A6E4F;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Senha temporária</div>
+        <div id="par-cred-senha" style="font-size:14px;font-weight:600;color:#0D1210;font-family:monospace;letter-spacing:.1em;"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6B7370;margin-bottom:16px;">🔗 Link: <strong>painel.html</strong></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="document.getElementById('modal-cred-parceiro').classList.remove('open')" style="padding:8px 16px;border:1px solid #D8E2DF;border-radius:8px;background:#fff;cursor:pointer;">Fechar</button>
+      <button onclick="copiarCredenciaisPar()" style="padding:8px 16px;background:#0A6E4F;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">📋 Copiar credenciais</button>
+    </div>
+  </div>
+</div>
+
+<style>
+#modal-cred-parceiro.open { display:flex !important; }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+(function() {
+  var firebaseConfig = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+  };
+  var app;
+  try { app = firebase.app('nr1map-par'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map-par'); }
+  window.nr1mapDb   = firebase.firestore(app);
+  window.nr1mapAuth = firebase.auth(app);
+
+  // Detecta UID do parceiro logado via sessionStorage (set pelo admin ao redirecionar)
+  var uid = sessionStorage.getItem('nr1map_parceiro_uid');
+  if (uid) window._parceiroUid = uid;
+})();
 </script>
 </body>
 </html>
