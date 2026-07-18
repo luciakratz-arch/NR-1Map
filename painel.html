@@ -1388,13 +1388,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" id="colab-nome" placeholder="Nome do colaborador"/></div>
       <div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" id="colab-contato" placeholder="11 9 9999-0000"/></div>
     </div>
-    <div class="form-group"><div class="form-label">Cargo / CBO *</div>
-      <div style="position:relative;">
-        <input class="form-control" id="colab-cbo-input" placeholder="Digite o cargo ou código CBO..." autocomplete="off"
-          oninput="buscarCBOColab(this.value)" onfocus="buscarCBOColab(this.value)"/>
-        <div id="colab-cbo-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
-      </div>
-      <input type="hidden" id="colab-cbo-valor"/>
+    <div class="form-group"><div class="form-label">Cargo *</div>
+      <select class="form-control" id="colab-cargo-select">
+        <option value="">Selecione o cargo...</option>
+      </select>
+      <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Cadastre os cargos primeiro em Cargos / Organograma</div>
     </div>
     <div class="form-row">
       <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="colab-depto" placeholder="Ex: UTI"/></div>
@@ -1884,7 +1882,7 @@ function renderCargos() {
     html += '</tr>';
   }
   tbody.innerHTML = html;
-  // Atualiza selects do modal
+  // Atualiza selects do modal de novo cargo
   var selNv = document.getElementById('nc-nivel');
   if (selNv) {
     var opNv = '<option value="">Selecione o nível...</option>';
@@ -1896,6 +1894,15 @@ function renderCargos() {
     var opRep = '<option value="">— Nenhum (topo) —</option>';
     for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
     selRep.innerHTML = opRep;
+  }
+  // Popula select de cargos no modal de colaborador
+  var selCargo = document.getElementById('colab-cargo-select');
+  if (selCargo) {
+    var opCargo = '<option value="">Selecione o cargo...</option>';
+    for (var m=0; m<cargos.length; m++) {
+      opCargo += '<option value="' + cargos[m].nome + ' · ' + cargos[m].cbo + '">' + cargos[m].nome + ' · ' + cargos[m].cbo + '</option>';
+    }
+    selCargo.innerHTML = opCargo;
   }
 }
 
@@ -2124,7 +2131,7 @@ function selCBOColab(el) {
 function salvarNovoColab() {
   var nome = (document.getElementById('colab-nome')||{}).value || '';
   var contato = (document.getElementById('colab-contato')||{}).value || '';
-  var cargo = (document.getElementById('colab-cbo-input')||{}).value || '';
+  var cargo = (document.getElementById('colab-cargo-select')||{}).value || '';
   var depto = (document.getElementById('colab-depto')||{}).value || '';
   var unidade = (document.getElementById('colab-unidade')||{}).value || '';
   var admissao = (document.getElementById('colab-admissao')||{}).value || '';
@@ -2183,9 +2190,10 @@ function salvarNovoColab() {
 
 function carregarCargos(empresaId) {
   if (!window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-cargos');
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#9ca3af;">Carregando...</td></tr>';
   window.nr1mapDb.collection('nr1map_cargos')
     .where('empresaId','==',empresaId)
-    .orderBy('criadoEm')
     .get()
     .then(function(snap){
       cargos = [];
@@ -2194,7 +2202,10 @@ function carregarCargos(empresaId) {
         cargos.push(d);
       });
       renderCargos();
-    }).catch(function(e){ console.log('Erro carregarCargos:', e); });
+    }).catch(function(e){ 
+      console.log('Erro carregarCargos:', e);
+      if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
+    });
 }
 </script>
 </body>
