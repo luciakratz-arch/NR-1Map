@@ -2150,28 +2150,6 @@ function salvarNovoColab() {
 
 <!-- FIREBASE SDK -->
 <script>
-(function(){
-  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
-  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
-  window.nr1mapDb=firebase.firestore(app);
-  window.nr1mapAuth=firebase.auth(app);
-
-  // Tenta detectar sessão ativa
-  window.nr1mapAuth.onAuthStateChanged(function(user){
-    if(user){
-      window.carregarEmpresa(user.uid, user.email);
-    } else {
-      var email = sessionStorage.getItem('nr1map_rh_email');
-      var pwd = sessionStorage.getItem('nr1map_rh_pwd');
-      if(email && pwd){
-        window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
-          .then(function(c){ window.carregarEmpresa(c.user.uid, c.user.email); })
-          .catch(function(e){ console.log('Re-auth falhou:', e); });
-      }
-    }
-  });
-})();
-
 function carregarEmpresa(uid, email) {
   window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
   .then(function(snap){
@@ -2225,6 +2203,27 @@ function carregarCargos(empresaId) {
       if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
     });
 }
+
+(function(){
+  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
+  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
+  window.nr1mapDb=firebase.firestore(app);
+  window.nr1mapAuth=firebase.auth(app);
+
+  window.nr1mapAuth.onAuthStateChanged(function(user){
+    if(user){
+      carregarEmpresa(user.uid, user.email);
+    } else {
+      var email = sessionStorage.getItem('nr1map_rh_email');
+      var pwd = sessionStorage.getItem('nr1map_rh_pwd');
+      if(email && pwd){
+        window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
+          .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
+          .catch(function(e){ console.log('Re-auth falhou:', e); });
+      }
+    }
+  });
+})();
 </script>
 </body>
 </html>
