@@ -546,7 +546,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="form-group" style="position:relative;">
         <div class="form-label">CBO (busca por nome ou código)</div>
         <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
-        <div id="nc-cbo-drop" style="position:absolute;z-index:9999;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
+        <div id="nc-cbo-drop" style="position:absolute;z-index:9999!important;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
         <input type="hidden" id="nc-cbo-val"/>
       </div>
       <div class="form-group"><div class="form-label">Nível hierárquico *</div>
@@ -1383,7 +1383,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div style="position:relative;">
         <input class="form-control" id="nc-cbo-input" placeholder="Digite o cargo ou código CBO..." autocomplete="off"
           oninput="buscarCBOColab(this.value)" onfocus="buscarCBOColab(this.value)"/>
-        <div id="nc-cbo-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+        <div id="nc-cbo-drop-colab" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
       </div>
       <input type="hidden" id="nc-cbo-valor"/>
     </div>
@@ -1956,7 +1956,7 @@ function buscarCBO(query) {
 function selCBO(codigo, nome) {
   document.getElementById('nc-cbo-busca').value = nome + ' · ' + codigo;
   document.getElementById('nc-cbo-val').value = codigo;
-  document.getElementById('nc-cbo-drop').style.display = 'none';
+  document.getElementById('nc-cbo-drop-colab').style.display = 'none';
 }
 function salvarCargo() {
   var nome = document.getElementById('nc-nome').value.trim();
@@ -2036,7 +2036,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function buscarCBOColab(q) {
-  var div = document.getElementById('nc-cbo-drop');
+  var div = document.getElementById('nc-cbo-drop-colab');
   if (!div) return;
   q = (q||'').toLowerCase().trim();
   var res = q.length === 0
@@ -2053,7 +2053,7 @@ function buscarCBOColab(q) {
 function selCBOColab(codigo, nome) {
   document.getElementById('nc-cbo-input').value = nome + ' · ' + codigo;
   document.getElementById('nc-cbo-valor').value = codigo;
-  document.getElementById('nc-cbo-drop').style.display = 'none';
+  document.getElementById('nc-cbo-drop-colab').style.display = 'none';
 }
 function salvarNovoColab() {
   var nome = (document.getElementById('nc-nome')||{}).value || '';
