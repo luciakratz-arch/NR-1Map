@@ -2159,33 +2159,59 @@ function salvarNovoColab() {
   // Tenta detectar sessão ativa
   window.nr1mapAuth.onAuthStateChanged(function(user){
     if(user){
-      carregarEmpresa(user.uid);
+      carregarEmpresa(user.uid, user.email);
     } else {
       // Sem sessão ativa — tenta re-autenticar com credenciais do sessionStorage
       var email = sessionStorage.getItem('nr1map_rh_email');
       var pwd = sessionStorage.getItem('nr1map_rh_pwd');
       if(email && pwd){
         window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
-          .then(function(c){ carregarEmpresa(c.user.uid); })
+          .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
           .catch(function(e){ console.log('Re-auth falhou:', e); });
       }
     }
   });
 
-  function carregarEmpresa(uid) {
+  function carregarEmpresa(uid, email) {
+    // Busca primeiro em nr1map_empresas, depois em nself_empresas como fallback
     window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
     .then(function(snap){
-      if(snap.empty) return;
-      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
-      window.nr1mapEmpresa=e;
-      var nomeEl=document.querySelector('.sidebar-empresa .nome');
-      var planoEl=document.querySelector('.sidebar-empresa .plano');
-      var nmEl=document.querySelector('.nm');
-      if(nomeEl) nomeEl.textContent=e.nome||'—';
-      if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
-      if(nmEl) nmEl.textContent=e.responsavel||'—';
-      carregarCargos(e.id);
+      if(!snap.empty){
+        var e=snap.docs[0].data(); e.id=snap.docs[0].id;
+        aplicarEmpresa(e);
+        return;
+      }
+      // Fallback: busca por email em nself_empresas
+      return window.nr1mapDb.collection('nself_empresas').where('email','==',email).limit(1).get()
+      .then(function(snap2){
+        if(!snap2.empty){
+          var e=snap2.docs[0].data(); e.id=snap2.docs[0].id;
+          // Cria automaticamente em nr1map_empresas
+          window.nr1mapDb.collection('nr1map_empresas').doc(e.id).set({
+            uid: uid,
+            nome: e.nome||e.nomeEmpresa||'—',
+            responsavel: e.responsavel||e.nomeContato||'—',
+            email: email,
+            tipo: 'mensal',
+            faixa: 'Faixa 2',
+            ativo: true,
+            criadoEm: new Date().toISOString()
+          }).catch(function(err){console.log('Erro criar empresa:', err);});
+          aplicarEmpresa({id:e.id, nome:e.nome||e.nomeEmpresa||'—', responsavel:e.responsavel||e.nomeContato||'—', tipo:'mensal', faixa:'Faixa 2'});
+        }
+      });
     }).catch(function(err){console.log(err);});
+  }
+
+  function aplicarEmpresa(e) {
+    window.nr1mapEmpresa = e;
+    var nomeEl=document.querySelector('.sidebar-empresa .nome');
+    var planoEl=document.querySelector('.sidebar-empresa .plano');
+    var nmEl=document.querySelector('.nm');
+    if(nomeEl) nomeEl.textContent=e.nome||'—';
+    if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+    if(nmEl) nmEl.textContent=e.responsavel||'—';
+    carregarCargos(e.id);
   }
 })();
 
