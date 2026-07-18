@@ -230,6 +230,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
 </style>
 <script src="cbo-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app">
@@ -1601,6 +1604,12 @@ function salvarEditCargo() {
       break;
     }
   }
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').doc(id).update({
+      nome: cargos[i].nome, cbo: cargos[i].cbo,
+      nvId: cargos[i].nvId, repId: cargos[i].repId
+    }).catch(function(e){ console.log(e); });
+  }
   renderCargos();
   document.getElementById('modal-edit-cargo').classList.remove('open');
   alert('✅ Cargo atualizado!');
@@ -1928,6 +1937,9 @@ function delNivel(id) {
   renderNiveis(); renderCargos();
 }
 function delCargo(id) {
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').doc(id).delete().catch(function(e){ console.log(e); });
+  }
   cargos = cargos.filter(function(c){ return c.id !== id; });
   renderCargos();
 }
@@ -1977,12 +1989,28 @@ function salvarCargo() {
   var repId = document.getElementById('nc-reporta').value || null;
   if (!nome) { alert('Informe o nome do cargo.'); return; }
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
-  cargos.push({id:'c'+Date.now(), nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0});
-  fecharModal('modal-novo-cargo');
-  document.getElementById('nc-nome').value = '';
-  document.getElementById('nc-cbo-busca').value = '';
-  document.getElementById('nc-cbo-val').value = '';
-  renderCargos();
+  var empresaId = window.nr1mapEmpresa ? window.nr1mapEmpresa.id : 'default';
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
+      .then(function(doc) {
+        novoCargo.id = doc.id;
+        cargos.push(novoCargo);
+        fecharModal('modal-novo-cargo');
+        document.getElementById('nc-nome').value = '';
+        document.getElementById('nc-cbo-busca').value = '';
+        document.getElementById('nc-cbo-val').value = '';
+        renderCargos();
+      }).catch(function(e){ alert('Erro ao salvar: ' + e.message); });
+  } else {
+    novoCargo.id = 'c'+Date.now();
+    cargos.push(novoCargo);
+    fecharModal('modal-novo-cargo');
+    document.getElementById('nc-nome').value = '';
+    document.getElementById('nc-cbo-busca').value = '';
+    document.getElementById('nc-cbo-val').value = '';
+    renderCargos();
+  }
 }
 
 function renderOrg() {
@@ -2095,6 +2123,45 @@ function salvarNovoColab() {
   tbody.appendChild(tr);
   fecharModal('modal-novo-colab');
   alert('✅ Colaborador cadastrado!');
+}
+</script>
+
+<!-- FIREBASE SDK -->
+<script>
+(function(){
+  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
+  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
+  window.nr1mapDb=firebase.firestore(app);
+  window.nr1mapAuth=firebase.auth(app);
+  var uid=sessionStorage.getItem('nr1map_rh_uid');
+  if(uid){
+    window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+    .then(function(snap){
+      if(snap.empty) return;
+      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
+      window.nr1mapEmpresa=e;
+      document.querySelector('.sidebar-empresa .nome').textContent=e.nome||'—';
+      document.querySelector('.sidebar-empresa .plano').textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+      document.querySelector('.nm').textContent=e.responsavel||'—';
+      carregarCargos(e.id);
+    }).catch(function(e){console.log(e);});
+  }
+})();
+
+function carregarCargos(empresaId) {
+  if (!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_cargos')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm')
+    .get()
+    .then(function(snap){
+      cargos = [];
+      snap.forEach(function(doc){
+        var d = doc.data(); d.id = doc.id;
+        cargos.push(d);
+      });
+      renderCargos();
+    }).catch(function(e){ console.log('Erro carregarCargos:', e); });
 }
 </script>
 </body>
