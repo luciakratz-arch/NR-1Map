@@ -1372,11 +1372,30 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <div class="modal-overlay" id="modal-novo-colab">
   <div class="modal">
     <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" placeholder="Nome do colaborador"/></div><div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" placeholder="11 9 9999-0000"/></div></div>
-    <div class="form-group"><div class="form-label">Cargo / CBO *</div><select class="form-control"><option value="">Selecione o cargo...</option><option>Psicólogo · 2515-10</option><option>Téc. Enfermagem · 3222-05</option><option>Médico · 2251-05</option><option>Analista RH · 2524-05</option><option>Ass. Administrativo · 4110-10</option></select></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Departamento</div><input class="form-control" placeholder="Ex: UTI"/></div><div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control"/></div></div>
-    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="fecharModal('modal-novo-colab');alert('✅ Colaborador cadastrado!')">Salvar</button></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" id="nc-nome" placeholder="Nome do colaborador"/></div>
+      <div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" id="nc-contato" placeholder="11 9 9999-0000"/></div>
+    </div>
+    <div class="form-group"><div class="form-label">Cargo / CBO *</div>
+      <div style="position:relative;">
+        <input class="form-control" id="nc-cbo-input" placeholder="Digite o cargo ou código CBO..." autocomplete="off"
+          oninput="buscarCBOColab(this.value)" onfocus="buscarCBOColab(this.value)"/>
+        <div id="nc-cbo-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+      </div>
+      <input type="hidden" id="nc-cbo-valor"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="nc-depto" placeholder="Ex: UTI"/></div>
+      <div class="form-group"><div class="form-label">Unidade / Filial</div><input class="form-control" id="nc-unidade" placeholder="Ex: Goiânia"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="nc-admissao"/></div>
+      <div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control" id="nc-demissao"/></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="salvarNovoColab()">Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -2012,6 +2031,44 @@ document.addEventListener('DOMContentLoaded', function() {
   renderCargos();
   setTimeout(dispararVelocimetros, 200);
 });
+
+function buscarCBOColab(q) {
+  var div = document.getElementById('nc-cbo-drop');
+  if (!div) return;
+  q = (q||'').toLowerCase().trim();
+  var res = q.length === 0
+    ? BANCO_CBO.slice(0,12)
+    : BANCO_CBO.filter(function(x){ return x.n.toLowerCase().indexOf(q)>-1 || x.c.indexOf(q)>-1; }).slice(0,10);
+  if (!res.length) { div.style.display='none'; return; }
+  var html='';
+  res.forEach(function(r){
+    html += '<div onclick="selCBOColab(\'' + r.c + '\',\'' + r.n.replace(/'/g,"&#39;") + '\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'"><strong>' + r.n + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.c + '</span></div>';
+  });
+  div.innerHTML = html;
+  div.style.display = 'block';
+}
+function selCBOColab(codigo, nome) {
+  document.getElementById('nc-cbo-input').value = nome + ' · ' + codigo;
+  document.getElementById('nc-cbo-valor').value = codigo;
+  document.getElementById('nc-cbo-drop').style.display = 'none';
+}
+function salvarNovoColab() {
+  var nome = (document.getElementById('nc-nome')||{}).value || '';
+  var contato = (document.getElementById('nc-contato')||{}).value || '';
+  var cargo = (document.getElementById('nc-cbo-input')||{}).value || '';
+  var depto = (document.getElementById('nc-depto')||{}).value || '';
+  var unidade = (document.getElementById('nc-unidade')||{}).value || '';
+  var admissao = (document.getElementById('nc-admissao')||{}).value || '';
+  if (!contato) { alert('Informe WhatsApp ou e-mail do colaborador.'); return; }
+  var tbody = document.getElementById('tbody-colab');
+  var tr = document.createElement('tr');
+  tr.dataset.nome = nome || '—';
+  tr.dataset.status = 'ativo';
+  tr.innerHTML = '<td>' + (nome||'—') + '</td><td>' + contato + '</td><td>' + cargo + '</td><td>' + depto + '</td><td>' + unidade + '</td><td>' + admissao + '</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm(\'Excluir colaborador?\'))this.closest(\'tr\').remove()">🗑️</button></td>';
+  tbody.appendChild(tr);
+  fecharModal('modal-novo-colab');
+  alert('✅ Colaborador cadastrado!');
+}
 </script>
 </body>
 </html>
