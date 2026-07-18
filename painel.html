@@ -2147,19 +2147,27 @@ function salvarNovoColab() {
   var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
   window.nr1mapDb=firebase.firestore(app);
   window.nr1mapAuth=firebase.auth(app);
-  var uid=sessionStorage.getItem('nr1map_rh_uid');
-  if(uid){
-    window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
-    .then(function(snap){
-      if(snap.empty) return;
-      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
-      window.nr1mapEmpresa=e;
-      document.querySelector('.sidebar-empresa .nome').textContent=e.nome||'—';
-      document.querySelector('.sidebar-empresa .plano').textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
-      document.querySelector('.nm').textContent=e.responsavel||'—';
-      carregarCargos(e.id);
-    }).catch(function(e){console.log(e);});
-  }
+
+  // Usa onAuthStateChanged para detectar sessão ativa
+  window.nr1mapAuth.onAuthStateChanged(function(user){
+    if(user){
+      // Usuário já autenticado — carrega empresa
+      window.nr1mapDb.collection('nr1map_empresas').where('uid','==',user.uid).limit(1).get()
+      .then(function(snap){
+        if(snap.empty) return;
+        var e=snap.docs[0].data(); e.id=snap.docs[0].id;
+        window.nr1mapEmpresa=e;
+        var nomeEl = document.querySelector('.sidebar-empresa .nome');
+        var planoEl = document.querySelector('.sidebar-empresa .plano');
+        var nmEl = document.querySelector('.nm');
+        if(nomeEl) nomeEl.textContent=e.nome||'—';
+        if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+        if(nmEl) nmEl.textContent=e.responsavel||'—';
+        carregarCargos(e.id);
+      }).catch(function(err){console.log(err);});
+    }
+    // Se não autenticado, o painel ainda funciona (acesso direto via URL)
+  });
 })();
 
 function carregarCargos(empresaId) {
