@@ -4,87 +4,87 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>NR-1 Map — Área do Colaborador</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1a1a2e;-webkit-font-smoothing:antialiased;}
-
-/* MOBILE FRAME */
+html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1a1a2e;-webkit-font-smoothing:antialiased;}
 .app{max-width:420px;margin:0 auto;min-height:100vh;background:#f0f4f8;position:relative;display:flex;flex-direction:column;}
-
-/* HEADER */
 .header{background:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8ecf0;position:sticky;top:0;z-index:50;}
 .header-logo{font-size:15px;font-weight:600;letter-spacing:-.3px;}
 .header-logo span{color:#10b981;}
-.header-user{display:flex;align-items:center;gap:8px;}
 .avatar{width:32px;height:32px;border-radius:50%;background:#e0f2fe;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0369a1;}
-.header-name{font-size:12px;color:#6b7280;}
-
-/* NAV BOTTOM */
 .nav-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#fff;border-top:1px solid #e8ecf0;display:flex;z-index:50;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;transition:all .15s;border:none;background:transparent;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;border:none;background:transparent;}
 .nav-item .ni{font-size:20px;}
-.nav-item .nl{font-size:10px;color:#9ca3af;font-family:'Inter',sans-serif;}
+.nav-item .nl{font-size:10px;color:#9ca3af;font-family:"Inter",sans-serif;}
 .nav-item.active .nl{color:#10b981;font-weight:600;}
-.nav-item.active .ni-svg{color:#10b981;}
-
-/* MAIN */
 .main{flex:1;padding:16px;padding-bottom:80px;overflow-y:auto;}
-
-/* VIEWS */
 .view{display:none;}
 .view.active{display:block;}
-
-/* CARDS */
 .card{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:16px;margin-bottom:14px;}
 .card-title{font-size:14px;font-weight:600;color:#111827;margin-bottom:4px;}
 .card-sub{font-size:12px;color:#6b7280;margin-bottom:14px;line-height:1.5;}
-
-/* WELCOME */
 .welcome-hero{background:linear-gradient(135deg,#0A6E4F,#12A073);border-radius:16px;padding:20px;margin-bottom:16px;color:#fff;}
 .welcome-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:6px;}
 .welcome-title{font-size:20px;font-weight:600;margin-bottom:4px;}
 .welcome-sub{font-size:13px;opacity:.8;line-height:1.5;}
 .welcome-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:100px;padding:5px 12px;font-size:11px;margin-top:12px;}
-
-/* PESQUISA LIKERT */
-.pesquisa-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.pesquisa-prog{font-size:12px;color:#6b7280;}
-.prog-bar{height:4px;background:#e8ecf0;border-radius:2px;margin-bottom:20px;overflow:hidden;}
-.prog-fill{height:100%;background:#10b981;border-radius:2px;transition:width .3s;}
-.pergunta-num{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin-bottom:8px;}
-.pergunta-texto{font-size:15px;color:#111827;line-height:1.55;margin-bottom:20px;font-weight:400;}
-.likert-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
-.likert-opt{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:10px;border:1.5px solid #e8ecf0;cursor:pointer;transition:all .15s;}
-.likert-opt:hover{border-color:#10b981;background:#f0fdf4;}
-.likert-opt.selected{border-color:#10b981;background:#f0fdf4;}
-.likert-opt.selected .l-circle{background:#10b981;border-color:#10b981;color:#fff;}
-.l-circle{width:30px;height:30px;border-radius:50%;border:1.5px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#6b7280;flex-shrink:0;transition:all .15s;}
-.l-label{font-size:13px;color:#374151;}
-.btn-nav-perg{display:flex;gap:10px;margin-top:4px;}
-.btn-prev{flex:1;padding:13px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;font-size:14px;font-weight:500;cursor:pointer;color:#6b7280;}
-.btn-next{flex:2;padding:13px;border-radius:10px;border:none;background:#10b981;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
-.btn-next:disabled{background:#d1d5db;cursor:not-allowed;}
-
-/* TOKEN / MAGIC LINK */
+/* OTP */
 .token-card{background:#fff;border-radius:16px;border:1px solid #e8ecf0;padding:24px;text-align:center;margin-bottom:16px;}
 .token-icon{font-size:40px;margin-bottom:12px;}
 .token-title{font-size:18px;font-weight:600;color:#111827;margin-bottom:8px;}
 .token-sub{font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:20px;}
 .otp-wrap{display:flex;gap:8px;justify-content:center;margin-bottom:20px;}
-.otp-input{width:44px;height:52px;border-radius:10px;border:1.5px solid #e8ecf0;text-align:center;font-size:20px;font-weight:600;color:#111827;font-family:'Inter',sans-serif;}
+.otp-input{width:44px;height:52px;border-radius:10px;border:1.5px solid #e8ecf0;text-align:center;font-size:20px;font-weight:600;color:#111827;font-family:"Inter",sans-serif;}
 .otp-input:focus{outline:none;border-color:#10b981;}
-.btn-primary{width:100%;padding:14px;border-radius:10px;border:none;background:#10b981;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-primary{width:100%;padding:14px;border-radius:10px;border:none;background:#10b981;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;}
 .btn-primary:hover{background:#059669;}
-.btn-ghost{width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;color:#6b7280;font-size:14px;cursor:pointer;margin-top:8px;font-family:'Inter',sans-serif;}
-
-/* TERMÔMETRO */
+.btn-ghost{width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;color:#6b7280;font-size:14px;cursor:pointer;margin-top:8px;font-family:"Inter",sans-serif;}
+/* ORIENTAÇÃO */
+.orient-hero{background:linear-gradient(135deg,#0A6E4F,#12A073);border-radius:16px;padding:22px;margin-bottom:16px;color:#fff;text-align:center;}
+.orient-icon{font-size:48px;margin-bottom:10px;}
+.orient-title{font-size:18px;font-weight:600;margin-bottom:8px;}
+.orient-sub{font-size:13px;opacity:.85;line-height:1.6;}
+.termo-demo{background:#fff;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #e8ecf0;}
+.termo-demo-label{font-size:13px;font-weight:600;color:#111827;text-align:center;margin-bottom:16px;}
+.slider-wrap{padding:0 8px;}
+.slider-track{position:relative;height:12px;border-radius:6px;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 50%,#10b981 100%);margin-bottom:6px;}
+.slider-thumb-demo{position:absolute;top:-8px;width:28px;height:28px;background:#fff;border-radius:50%;border:3px solid #374151;transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.2);left:50%;}
+.slider-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:16px;}
+.zona-pills{display:flex;flex-direction:column;gap:8px;}
+.zona-pill{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;}
+/* PESQUISA EM BLOCOS */
+.bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.bloco-prog-txt{font-size:12px;color:#6b7280;}
+.bloco-badge{font-size:11px;color:#10b981;font-weight:600;background:#f0fdf4;padding:3px 10px;border-radius:20px;}
+.prog-bar{height:5px;background:#e8ecf0;border-radius:3px;margin-bottom:20px;overflow:hidden;}
+.prog-fill{height:100%;background:#10b981;border-radius:3px;transition:width .4s;}
+.pergunta-card{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:16px;margin-bottom:12px;}
+.pergunta-num-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin-bottom:6px;}
+.pergunta-texto-bloco{font-size:14px;color:#111827;line-height:1.55;margin-bottom:16px;font-weight:400;}
+/* TERMÔMETRO INTERATIVO */
+.termo-interativo{position:relative;padding:16px 12px 8px;}
+.termo-valor-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:4px;transition:color .3s;}
+.termo-zona-display{text-align:center;font-size:12px;font-weight:500;margin-bottom:14px;transition:color .3s;}
+.slider-input{-webkit-appearance:none;appearance:none;width:100%;height:12px;border-radius:6px;outline:none;cursor:pointer;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 50%,#10b981 100%);}
+.slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #374151;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:grab;}
+.slider-input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #374151;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:grab;}
+.slider-input:active::-webkit-slider-thumb{cursor:grabbing;}
+.slider-labels-row{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-top:6px;}
+.btn-nav-bloco{display:flex;gap:10px;margin-top:16px;}
+.btn-prev-bloco{flex:1;padding:13px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;font-size:14px;font-weight:500;cursor:pointer;color:#6b7280;}
+.btn-next-bloco{flex:2;padding:13px;border-radius:10px;border:none;background:#10b981;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-next-bloco:disabled{background:#d1d5db;cursor:not-allowed;}
+/* TERMÔMETRO PESSOAL */
 .termo-hero{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:16px;margin-bottom:14px;}
 .termo-ibp-val{font-size:40px;font-weight:600;text-align:center;margin:8px 0 4px;}
 .termo-zona{text-align:center;font-size:13px;font-weight:500;margin-bottom:16px;}
 .termo-strip{height:12px;border-radius:6px;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 50%,#10b981 100%);position:relative;margin:0 8px 6px;}
-.termo-needle{position:absolute;top:-6px;width:24px;height:24px;background:#fff;border-radius:50%;border:3px solid #374151;transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.15);transition:left .6s ease;}
+.termo-needle{position:absolute;top:-8px;width:28px;height:28px;background:#fff;border-radius:50%;border:3px solid #374151;transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.15);transition:left .6s ease;}
 .termo-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;padding:0 8px;margin-bottom:16px;}
 .historico-list{display:flex;flex-direction:column;gap:8px;}
 .hist-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;}
@@ -92,68 +92,34 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1
 .hist-mes{font-size:12px;color:#6b7280;flex:1;}
 .hist-ibp{font-size:13px;font-weight:600;}
 .hist-zona{font-size:11px;color:#9ca3af;}
-.privado-badge{display:inline-flex;align-items:center;gap:5px;background:#fef3c7;color:#92400e;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:500;margin-bottom:12px;}
-
-/* COMPARTILHAR */
-.share-card{background:linear-gradient(135deg,#fef3c7,#fff);border:1px solid #fde68a;border-radius:14px;padding:16px;margin-bottom:14px;}
-.share-title{font-size:14px;font-weight:600;color:#92400e;margin-bottom:6px;}
-.share-sub{font-size:12px;color:#78350f;line-height:1.5;margin-bottom:14px;}
-.btn-share{width:100%;padding:12px;border-radius:10px;border:none;background:#f59e0b;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
-
 /* ESPAÇO DE FALA */
-.sugestao-textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:14px;font-family:'Inter',sans-serif;color:#111827;resize:none;min-height:100px;line-height:1.5;}
+.sugestao-textarea{width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:14px;font-family:"Inter",sans-serif;color:#111827;resize:none;min-height:100px;line-height:1.5;}
 .sugestao-textarea:focus{outline:none;border-color:#10b981;}
 .char-count{font-size:11px;color:#9ca3af;text-align:right;margin-top:4px;}
 .categoria-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-.chip{padding:6px 12px;border-radius:100px;border:1.5px solid #e8ecf0;font-size:12px;color:#374151;cursor:pointer;transition:all .15s;}
+.chip{padding:6px 12px;border-radius:100px;border:1.5px solid #e8ecf0;font-size:12px;color:#374151;cursor:pointer;}
 .chip.sel{background:#10b981;border-color:#10b981;color:#fff;}
-.sugestoes-enviadas{margin-top:6px;}
-.sug-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:#f9fafb;border-radius:10px;margin-bottom:8px;}
-.sug-icon{font-size:16px;flex-shrink:0;}
-.sug-texto{font-size:12px;color:#4b5563;line-height:1.5;}
-.sug-meta{font-size:10px;color:#9ca3af;margin-top:3px;}
-
 /* CANAL ACOLHIMENTO */
 .canal-hero{background:linear-gradient(135deg,#7B00C4,#9B30E0);border-radius:14px;padding:18px;margin-bottom:14px;color:#fff;text-align:center;}
-.canal-icon{font-size:36px;margin-bottom:10px;}
-.canal-title{font-size:16px;font-weight:600;margin-bottom:6px;}
-.canal-sub{font-size:12px;opacity:.85;line-height:1.55;}
-.canal-opcoes{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
-.canal-opt{display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border-radius:12px;border:1.5px solid #e8ecf0;cursor:pointer;transition:all .15s;}
+.canal-opt{display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border-radius:12px;border:1.5px solid #e8ecf0;cursor:pointer;margin-bottom:10px;}
 .canal-opt:hover{border-color:#7B00C4;background:#faf5ff;}
-.canal-opt-icon{font-size:24px;flex-shrink:0;}
-.canal-opt-title{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px;}
-.canal-opt-sub{font-size:11px;color:#6b7280;line-height:1.4;}
-.btn-canal{width:100%;padding:14px;border-radius:10px;border:none;background:#7B00C4;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;}
-.btn-canal:hover{background:#6900a8;}
-.sigilo-note{font-size:11px;color:#6b7280;text-align:center;line-height:1.5;padding:10px;}
-
-/* CONQUISTAS */
-.streak-card{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fbbf24;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;}
-.streak-num{font-size:36px;font-weight:700;color:#92400e;}
-.streak-label{font-size:12px;color:#78350f;margin-top:2px;}
-
-/* MODAL CONFIRMAÇÃO */
+/* CONCLUÍDO */
+.concluido-wrap{text-align:center;padding:40px 16px;}
+.concluido-icon{font-size:64px;margin-bottom:16px;}
+.concluido-title{font-size:20px;font-weight:600;color:#111827;margin-bottom:8px;}
+.concluido-sub{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:24px;}
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:420px;}
 .modal-handle{width:40px;height:4px;background:#e8ecf0;border-radius:2px;margin:0 auto 20px;}
-.modal-title{font-size:18px;font-weight:600;color:#111827;margin-bottom:8px;}
-.modal-sub{font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:20px;}
-.modal-btns{display:flex;flex-direction:column;gap:8px;}
-.btn-confirm{padding:14px;border-radius:10px;border:none;background:#7B00C4;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
-.btn-cancel{padding:14px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;color:#6b7280;font-size:14px;cursor:pointer;}
-
-/* CONCLUÍDO */
-.concluido-wrap{text-align:center;padding:32px 16px;}
-.concluido-icon{font-size:60px;margin-bottom:16px;}
-.concluido-title{font-size:20px;font-weight:600;color:#111827;margin-bottom:8px;}
-.concluido-sub{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:24px;}
+/* STREAK */
+.streak-card{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fbbf24;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;}
 </style>
 </head>
 <body>
 
-<!-- ===== TELA DE ACESSO (Magic Link / OTP) ===== -->
+<!-- ===== TELA LOGIN OTP ===== -->
 <div id="screen-login" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:#f0f4f8;">
   <div style="width:100%;max-width:380px;">
     <div style="text-align:center;margin-bottom:32px;">
@@ -172,58 +138,114 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1
         <input class="otp-input" maxlength="1" id="o5" oninput="otpNext(this,'o6')" type="number"/>
         <input class="otp-input" maxlength="1" id="o6" oninput="otpNext(this,null)" type="number"/>
       </div>
-      <button class="btn-primary" onclick="entrarApp()">Acessar minha área →</button>
-      <button class="btn-ghost" onclick="alert('Um novo código será enviado ao seu WhatsApp em instantes.')">Reenviar código via WhatsApp</button>
+      <div id="otp-erro" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none;">Código inválido ou expirado. Solicite um novo.</div>
+      <button class="btn-primary" id="btn-entrar" onclick="entrarApp()">Acessar minha área →</button>
+      <button class="btn-ghost" onclick="reenviarCodigo()">Reenviar código via WhatsApp</button>
     </div>
     <p style="text-align:center;font-size:11px;color:#9ca3af;margin-top:16px;line-height:1.5;">Suas respostas são 100% anônimas.<br/>O RH não tem acesso à sua identificação.</p>
   </div>
+</div>
+
+<!-- ===== TELA ORIENTAÇÃO ===== -->
+<div id="screen-orientacao" style="display:none;max-width:420px;margin:0 auto;min-height:100vh;padding:24px;background:#f0f4f8;">
+  <div class="orient-hero">
+    <div class="orient-icon">🌡️</div>
+    <div class="orient-title">Como funciona sua pesquisa</div>
+    <div class="orient-sub">Você vai responder perguntas sobre seu bem-estar no trabalho.<br/>Para cada uma, arraste o termômetro indicando como você se sente.</div>
+  </div>
+
+  <div class="termo-demo">
+    <div class="termo-demo-label">Experimente o termômetro abaixo:</div>
+    <div class="slider-wrap">
+      <div id="demo-valor" style="text-align:center;font-size:28px;font-weight:700;color:#f59e0b;margin-bottom:4px;">0</div>
+      <div id="demo-zona" style="text-align:center;font-size:12px;font-weight:500;color:#92400e;margin-bottom:14px;">Zona de Defesa Oculta</div>
+      <input type="range" class="slider-input" min="-50" max="50" value="0" oninput="demoSlider(this)" style="width:100%;"/>
+      <div class="slider-labels-row">
+        <span>−5<br/>Sofrimento</span>
+        <span style="text-align:center;">0<br/>Neutro</span>
+        <span style="text-align:right;">+5<br/>Prazer</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="zona-pills">
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#fee2e2;border-radius:10px;border-left:4px solid #ef4444;">
+      <span style="font-size:20px;flex-shrink:0;">😔</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:2px;">Sofrimento Patogênico (−5 a −1,5)</div>
+        <div style="font-size:11px;color:#7f1d1d;line-height:1.5;">Arraste para a esquerda quando algo está te prejudicando de verdade no trabalho.</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#fef3c7;border-radius:10px;border-left:4px solid #f59e0b;">
+      <span style="font-size:20px;flex-shrink:0;">😐</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:2px;">Defesa Oculta (−1,4 a +1,4)</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.5;">Zona intermediária — nem bom, nem ruim. Pode esconder cansaço acumulado.</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#dcfce7;border-radius:10px;border-left:4px solid #10b981;">
+      <span style="font-size:20px;flex-shrink:0;">😊</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:2px;">Terreno Fértil (+1,5 a +5)</div>
+        <div style="font-size:11px;color:#14532d;line-height:1.5;">Arraste para a direita quando você sente prazer, propósito e bem-estar no trabalho.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;background:#fff;border-radius:12px;padding:14px;border:1px solid #e8ecf0;font-size:12px;color:#6b7280;line-height:1.6;text-align:center;">
+    🔒 Suas respostas são <strong>100% anônimas</strong>.<br/>
+    O RH nunca sabe quem respondeu — apenas vê os dados agrupados da equipe.
+  </div>
+
+  <button class="btn-primary" style="margin-top:20px;" onclick="iniciarPesquisa()">Entendi, vamos começar! →</button>
 </div>
 
 <!-- ===== APP PRINCIPAL ===== -->
 <div id="screen-app" style="display:none;">
 <div class="app">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-logo">NR-1<span>Map</span></div>
-    <div class="header-user">
-      <div class="header-name">Colaborador Anônimo</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="font-size:12px;color:#6b7280;" id="hdr-empresa">—</div>
       <div class="avatar">CA</div>
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
   <div class="main">
 
-    <!-- ===== VIEW: HOME ===== -->
+    <!-- HOME -->
     <div class="view active" id="view-home">
       <div class="welcome-hero">
         <div class="welcome-tag">Bem-vindo(a)</div>
         <div class="welcome-title">Seu espaço privativo</div>
-        <div class="welcome-sub">Aqui você responde pesquisas, acompanha seu bem-estar e fala o que pensa — com total anonimato.</div>
+        <div class="welcome-sub">Responda pesquisas, acompanhe seu bem-estar e fale o que pensa — com total anonimato.</div>
         <div class="welcome-badge">🔒 100% anônimo · RH não identifica você</div>
       </div>
 
-      <!-- PESQUISA ATIVA -->
-      <div class="card" style="border-left:4px solid #10b981;">
+      <div id="card-pesquisa-ativa" class="card" style="border-left:4px solid #10b981;display:none;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <span style="font-size:18px;">📡</span>
           <div>
-            <div class="card-title" style="margin-bottom:0;">Pesquisa Pulso — Esta semana</div>
-            <div style="font-size:11px;color:#10b981;font-weight:500;">3 perguntas · Expira em 47h</div>
+            <div class="card-title" style="margin-bottom:0;" id="tipo-pesquisa-label">Pesquisa Ativa</div>
+            <div style="font-size:11px;color:#10b981;font-weight:500;" id="pesquisa-info">Carregando...</div>
           </div>
         </div>
-        <div class="card-sub">Sua opinião desta semana sobre ritmo e bem-estar no trabalho.</div>
-        <button class="btn-primary" onclick="iniciarPesquisa()">Responder agora →</button>
+        <div class="card-sub" id="pesquisa-desc">Sua opinião sobre o ambiente de trabalho.</div>
+        <button class="btn-primary" onclick="irParaOrientacao()">Responder agora →</button>
       </div>
 
-      <!-- STREAK -->
-      <div class="streak-card">
-        <div class="streak-num">🔥 4</div>
-        <div class="streak-label">semanas respondendo seguidas</div>
+      <div id="card-sem-pesquisa" class="card" style="text-align:center;display:none;">
+        <div style="font-size:32px;margin-bottom:8px;">✅</div>
+        <div class="card-title">Tudo em dia!</div>
+        <div class="card-sub">Não há pesquisas pendentes no momento. Você será notificado via WhatsApp quando houver.</div>
       </div>
 
-      <!-- ACESSO RÁPIDO -->
+      <div class="streak-card" id="streak-card" style="display:none;">
+        <div style="font-size:36px;font-weight:700;color:#92400e;" id="streak-num">🔥 0</div>
+        <div style="font-size:12px;color:#78350f;margin-top:2px;">semanas respondendo seguidas</div>
+      </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div class="card" style="cursor:pointer;text-align:center;" onclick="showView('termometro')">
           <div style="font-size:28px;margin-bottom:6px;">🌡️</div>
@@ -238,93 +260,60 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1
       </div>
     </div>
 
-    <!-- ===== VIEW: PESQUISA ===== -->
+    <!-- PESQUISA EM BLOCOS -->
     <div class="view" id="view-pesquisa">
-      <div id="pesquisa-conteudo"></div>
+      <div id="bloco-conteudo"></div>
     </div>
 
-    <!-- ===== VIEW: CONCLUÍDO ===== -->
+    <!-- CONCLUÍDO -->
     <div class="view" id="view-concluido">
       <div class="concluido-wrap">
         <div class="concluido-icon">✅</div>
         <div class="concluido-title">Obrigado pela resposta!</div>
-        <div class="concluido-sub">Sua contribuição foi registrada de forma anônima. O próximo pulso chegará via WhatsApp na semana que vem.</div>
+        <div class="concluido-sub">Sua contribuição foi registrada de forma anônima e já está contribuindo para o diagnóstico da sua empresa.</div>
         <button class="btn-primary" onclick="showView('home')">Voltar ao início</button>
       </div>
     </div>
 
-    <!-- ===== VIEW: TERMÔMETRO ===== -->
+    <!-- TERMÔMETRO PESSOAL -->
     <div class="view" id="view-termometro">
-      <div class="privado-badge">🔒 Visível apenas para você</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button onclick="showView('home')" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280;">←</button>
+        <div style="font-size:14px;font-weight:600;color:#111827;">Meu Termômetro</div>
+        <div style="font-size:11px;color:#6b7280;background:#fef3c7;padding:3px 10px;border-radius:20px;margin-left:auto;">🔒 Só você vê</div>
+      </div>
 
       <div class="termo-hero">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">Seu IBP atual</div>
-        <div class="termo-ibp-val col-a" id="termo-val" style="color:#f59e0b;">−0.4</div>
-        <div class="termo-zona" id="termo-zona" style="color:#92400e;">Zona de Defesa Oculta</div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;text-align:center;">Seu IBP atual</div>
+        <div class="termo-ibp-val" id="termo-val" style="color:#f59e0b;">—</div>
+        <div class="termo-zona" id="termo-zona" style="color:#92400e;">Aguardando respostas</div>
         <div class="termo-strip">
-          <div class="termo-needle" id="termo-needle" style="left:48%"></div>
+          <div class="termo-needle" id="termo-needle" style="left:50%;"></div>
         </div>
         <div class="termo-labels">
           <span>−5<br/>Sofrimento</span>
-          <span style="text-align:center;">0<br/>Defesa</span>
+          <span style="text-align:center;">0<br/>Neutro</span>
           <span style="text-align:right;">+5<br/>Prazer</span>
-        </div>
-        <div style="font-size:11px;color:#6b7280;line-height:1.5;background:#f9fafb;border-radius:8px;padding:10px;">
-          <strong style="color:#92400e;">O que isso significa?</strong> Você está na zona de defesa — possíveis mecanismos de adaptação ao sofrimento. Responder o pulso semanal ajuda a monitorar sua evolução.
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">📈 Histórico dos últimos 6 meses</div>
-        <div class="card-sub">Evolução do seu bem-estar psicossocial ao longo do tempo.</div>
-        <div class="historico-list">
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#10b981;"></div>
-            <div style="flex:1;"><div class="hist-mes">Junho 2025</div><div class="hist-zona">Prazer no trabalho</div></div>
-            <div class="hist-ibp" style="color:#10b981;">+1.8</div>
-          </div>
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#f59e0b;"></div>
-            <div style="flex:1;"><div class="hist-mes">Maio 2025</div><div class="hist-zona">Zona de defesa</div></div>
-            <div class="hist-ibp" style="color:#f59e0b;">+0.2</div>
-          </div>
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#f59e0b;"></div>
-            <div style="flex:1;"><div class="hist-mes">Abril 2025</div><div class="hist-zona">Zona de defesa</div></div>
-            <div class="hist-ibp" style="color:#f59e0b;">−0.4</div>
-          </div>
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#ef4444;"></div>
-            <div style="flex:1;"><div class="hist-mes">Março 2025</div><div class="hist-zona">Sofrimento criativo</div></div>
-            <div class="hist-ibp" style="color:#ef4444;">−1.8</div>
-          </div>
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#ef4444;"></div>
-            <div style="flex:1;"><div class="hist-mes">Fevereiro 2025</div><div class="hist-zona">Sofrimento patogênico</div></div>
-            <div class="hist-ibp" style="color:#ef4444;">−2.4</div>
-          </div>
-          <div class="hist-item">
-            <div class="hist-dot" style="background:#10b981;"></div>
-            <div style="flex:1;"><div class="hist-mes">Janeiro 2025</div><div class="hist-zona">Prazer no trabalho</div></div>
-            <div class="hist-ibp" style="color:#10b981;">+2.1</div>
-          </div>
+        <div class="card-title">📈 Histórico</div>
+        <div class="historico-list" id="historico-lista">
+          <div style="text-align:center;color:#9ca3af;font-size:13px;padding:20px;">Nenhuma resposta registrada ainda.</div>
         </div>
-      </div>
-
-      <!-- COMPARTILHAR VOLUNTARIAMENTE -->
-      <div class="share-card">
-        <div class="share-title">💛 Compartilhar com o RH</div>
-        <div class="share-sub">Se você quiser receber apoio da empresa ou criar um Plano de Ação Individualizado, pode compartilhar voluntariamente seu diagnóstico. O RH verá apenas o gráfico — nunca sua identidade.</div>
-        <button class="btn-share" onclick="abrirModalShare()">Compartilhar meu diagnóstico voluntariamente</button>
       </div>
     </div>
 
-    <!-- ===== VIEW: ESPAÇO DE FALA ===== -->
+    <!-- ESPAÇO DE FALA -->
     <div class="view" id="view-fala">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button onclick="showView('home')" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280;">←</button>
+        <div style="font-size:14px;font-weight:600;color:#111827;">Espaço de Fala</div>
+      </div>
       <div class="card">
-        <div class="card-title">💬 Espaço de Fala Digital</div>
-        <div class="card-sub">Envie sugestões e propostas de melhoria para o seu setor. Suas contribuições chegam ao RH de forma anônima e agrupada.</div>
-
+        <div class="card-title">💬 Sugestão anônima</div>
+        <div class="card-sub">Sua contribuição chega ao RH de forma agrupada — nunca identificada.</div>
         <div style="font-size:12px;font-weight:500;color:#374151;margin-bottom:8px;">Categoria</div>
         <div class="categoria-chips" id="cat-chips">
           <div class="chip sel" onclick="selCat(this)">Processos</div>
@@ -334,95 +323,44 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1
           <div class="chip" onclick="selCat(this)">Ferramentas</div>
           <div class="chip" onclick="selCat(this)">Outro</div>
         </div>
-
-        <div style="font-size:12px;font-weight:500;color:#374151;margin-bottom:6px;">Sua sugestão</div>
-        <textarea class="sugestao-textarea" id="sug-texto" placeholder="Descreva sua ideia ou sugestão de melhoria para o setor..." maxlength="500" oninput="contarChars(this)"></textarea>
+        <textarea class="sugestao-textarea" id="sug-texto" placeholder="Descreva sua sugestão..." maxlength="500" oninput="contarChars(this)"></textarea>
         <div class="char-count" id="char-count">0 / 500</div>
-        <button class="btn-primary" style="margin-top:12px;" onclick="enviarSugestao()">Enviar sugestão anonimamente →</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title">✅ Suas sugestões enviadas</div>
-        <div class="sugestoes-enviadas" id="sugestoes-lista">
-          <div class="sug-item">
-            <div class="sug-icon">💡</div>
-            <div>
-              <div class="sug-texto">"Seria ótimo ter reuniões de alinhamento quinzenais para reduzir retrabalho."</div>
-              <div class="sug-meta">Processos · há 2 semanas · Anônimo</div>
-            </div>
-          </div>
-          <div class="sug-item">
-            <div class="sug-icon">💡</div>
-            <div>
-              <div class="sug-texto">"Mais pausas programadas durante o turno ajudariam na concentração."</div>
-              <div class="sug-meta">Bem-estar · há 1 mês · Anônimo</div>
-            </div>
-          </div>
-        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="enviarSugestao()">Enviar anonimamente →</button>
       </div>
     </div>
 
-    <!-- ===== VIEW: ACOLHIMENTO ===== -->
+    <!-- ACOLHIMENTO -->
     <div class="view" id="view-acolhimento">
       <div class="canal-hero">
-        <div class="canal-icon">🫶</div>
-        <div class="canal-title">Canal de Acolhimento</div>
-        <div class="canal-sub">Você não está sozinho(a). Este canal é seguro, sigiloso e conecta você à consultoria responsável.</div>
+        <div style="font-size:36px;margin-bottom:10px;">🫶</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Canal de Acolhimento</div>
+        <div style="font-size:12px;opacity:.85;line-height:1.55;">Você não está sozinho(a). Este canal é seguro, sigiloso e conecta você à consultoria responsável.</div>
       </div>
-
-      <div class="canal-opcoes">
-        <div class="canal-opt" onclick="abrirChamado('apoio')">
-          <div class="canal-opt-icon">🧠</div>
-          <div>
-            <div class="canal-opt-title">Solicitar apoio psicológico</div>
-            <div class="canal-opt-sub">Quero conversar com um profissional de saúde mental vinculado à consultoria.</div>
-          </div>
-          <div style="color:#d1d5db;font-size:18px;">›</div>
-        </div>
-        <div class="canal-opt" onclick="abrirChamado('assedio')">
-          <div class="canal-opt-icon">🛡️</div>
-          <div>
-            <div class="canal-opt-title">Denúncia de assédio moral ou sexual</div>
-            <div class="canal-opt-sub">Relato sigiloso de situação de abuso ou constrangimento no trabalho.</div>
-          </div>
-          <div style="color:#d1d5db;font-size:18px;">›</div>
-        </div>
-        <div class="canal-opt" onclick="abrirChamado('emergencia')">
-          <div class="canal-opt-icon">🆘</div>
-          <div>
-            <div class="canal-opt-title">Situação de emergência emocional</div>
-            <div class="canal-opt-sub">Estou passando por uma crise e preciso de apoio imediato.</div>
-          </div>
-          <div style="color:#d1d5db;font-size:18px;">›</div>
-        </div>
+      <div class="canal-opt" onclick="abrirChamado('apoio')">
+        <span style="font-size:24px;">🧠</span>
+        <div><div style="font-size:13px;font-weight:600;color:#111827;">Solicitar apoio psicológico</div><div style="font-size:11px;color:#6b7280;">Quero conversar com um profissional de saúde mental.</div></div>
+        <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
-
-      <div class="sigilo-note">🔒 Todos os chamados são tratados com sigilo absoluto pela consultoria responsável. Sua identidade é protegida.</div>
-
-      <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;border:1.5px solid #e8ecf0;">
-          <span style="font-size:24px;">📞</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111827;">CVV — Centro de Valorização da Vida</div>
-            <div style="font-size:12px;color:#6b7280;">Ligue <strong>188</strong> · 24 horas · gratuito · sigiloso</div>
-          </div>
+      <div class="canal-opt" onclick="abrirChamado('assedio')">
+        <span style="font-size:24px;">🛡️</span>
+        <div><div style="font-size:13px;font-weight:600;color:#111827;">Denúncia de assédio</div><div style="font-size:11px;color:#6b7280;">Relato sigiloso de situação de abuso no trabalho.</div></div>
+        <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
+      </div>
+      <div class="canal-opt" onclick="abrirChamado('emergencia')">
+        <span style="font-size:24px;">🆘</span>
+        <div><div style="font-size:13px;font-weight:600;color:#111827;">Situação de emergência emocional</div><div style="font-size:11px;color:#6b7280;">Estou em crise e preciso de apoio imediato.</div></div>
+        <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:#6b7280;margin:14px 0;line-height:1.5;">🔒 Todos os chamados são tratados com sigilo absoluto.</div>
+      <a href="https://wa.me/5562991546757" target="_blank" style="text-decoration:none;">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f0fdf4;border-radius:12px;border:1.5px solid #bbf7d0;">
+          <span style="font-size:24px;">🟢</span>
+          <div><div style="font-size:13px;font-weight:600;color:#166534;">WhatsApp de emergência</div><div style="font-size:12px;color:#16a34a;">Toque para acionar agora</div></div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;border:1.5px solid #e8ecf0;">
-          <span style="font-size:24px;">💬</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111827;">Psicóloga responsável</div>
-            <div style="font-size:12px;color:#6b7280;">Dra. Lucia Kratz · CRP 09/20590 · via plataforma</div>
-          </div>
-        </div>
-        <a href="https://wa.me/556299154675" target="_blank" style="text-decoration:none;">
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f0fdf4;border-radius:12px;border:1.5px solid #bbf7d0;cursor:pointer;">
-            <span style="font-size:24px;">🟢</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:#166534;">WhatsApp de emergência</div>
-              <div style="font-size:12px;color:#16a34a;">Toque para acionar via WhatsApp agora</div>
-            </div>
-          </div>
-        </a>
+      </a>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;border:1.5px solid #e8ecf0;">
+        <span style="font-size:24px;">📞</span>
+        <div><div style="font-size:13px;font-weight:600;color:#111827;">CVV</div><div style="font-size:12px;color:#6b7280;">Ligue <strong>188</strong> · 24h · gratuito · sigiloso</div></div>
       </div>
     </div>
 
@@ -444,116 +382,179 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:#f0f4f8;color:#1
     </button>
   </div>
 
-</div><!-- /app -->
-</div><!-- /screen-app -->
-
-<!-- MODAL COMPARTILHAR -->
-<div class="modal-overlay" id="modal-share">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Compartilhar diagnóstico</div>
-    <div class="modal-sub">Ao confirmar, o RH terá acesso apenas ao seu gráfico de evolução IBP — sem nenhum dado que permita sua identificação. Seu consentimento será registrado com data, hora e IP para garantia legal.</div>
-    <div class="modal-btns">
-      <button class="btn-confirm" onclick="confirmarShare()">Confirmar compartilhamento voluntário</button>
-      <button class="btn-cancel" onclick="fecharModal('modal-share')">Cancelar</button>
-    </div>
-  </div>
 </div>
+</div><!-- /screen-app -->
 
 <!-- MODAL CHAMADO -->
 <div class="modal-overlay" id="modal-chamado">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="chamado-title">Abrir chamado</div>
-    <div class="modal-sub" id="chamado-sub">Descreva brevemente a situação. A consultoria responsável entrará em contato em até 24 horas.</div>
-    <textarea class="sugestao-textarea" id="chamado-texto" placeholder="Descreva o que está acontecendo (opcional)..." style="margin-bottom:14px;"></textarea>
-    <div class="modal-btns">
-      <button class="btn-confirm" style="background:#7B00C4;" onclick="confirmarChamado()">Enviar chamado com sigilo</button>
-      <button class="btn-cancel" onclick="fecharModal('modal-chamado')">Cancelar</button>
+    <div class="modal-title" id="modal-cham-titulo">Solicitar apoio</div>
+    <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:16px;">Descreva brevemente sua situação. Você será contactado pela consultoria com total sigilo.</div>
+    <textarea style="width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:80px;" id="cham-texto" placeholder="Opcional — você pode enviar sem texto também."></textarea>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+      <button style="padding:14px;border-radius:10px;border:none;background:#7B00C4;color:#fff;font-size:14px;font-weight:600;cursor:pointer;" onclick="confirmarChamado()">Enviar chamado com sigilo</button>
+      <button style="padding:14px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;color:#6b7280;font-size:14px;cursor:pointer;" onclick="document.getElementById('modal-chamado').classList.remove('open')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ===== PESQUISA — perguntas exemplo =====
-var perguntas = [
-  { texto: "Consigo executar minhas tarefas diárias em uma velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.", cat: "Ritmo de Trabalho" },
-  { texto: "Os prazos que me são concedidos para a entrega dos meus trabalhos são realistas e possíveis de cumprir.", cat: "Prazos" },
-  { texto: "Ao encerrar o meu expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.", cat: "Bem-estar" }
+
+// ===== BANCO DE PERGUNTAS (101) =====
+var BANCO_PERGUNTAS = [
+  // M1 - Fisiológico
+  {id:1,modId:'M1',subcatId:'1.1',texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
+  {id:2,modId:'M1',subcatId:'1.1',texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
+  {id:3,modId:'M1',subcatId:'1.1',texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
+  {id:4,modId:'M1',subcatId:'1.1',texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},
+  {id:5,modId:'M1',subcatId:'1.1',texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},
+  {id:6,modId:'M1',subcatId:'1.1',texto:'Não sofro pressões agressivas ou cobranças minuto a minuto pelo término de uma tarefa imediata.'},
+  {id:7,modId:'M1',subcatId:'1.2',texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
+  {id:8,modId:'M1',subcatId:'1.2',texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras.'},
+  {id:9,modId:'M1',subcatId:'1.2',texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},
+  {id:10,modId:'M1',subcatId:'1.2',texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma.'},
+  {id:11,modId:'M1',subcatId:'1.2',texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},
+  {id:12,modId:'M1',subcatId:'1.2',texto:'A empresa oferece local físico confortável e silencioso projetado para relaxarmos nas pausas.'},
+  {id:13,modId:'M1',subcatId:'1.2',texto:'A empresa promove ações ou disponibiliza ferramentas práticas para nos ajudar a aliviar a tensão.'},
+  {id:14,modId:'M1',subcatId:'1.3',texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},
+  {id:15,modId:'M1',subcatId:'1.3',texto:'Consigo dormir bem à noite, sem que preocupações do trabalho provoquem insônia ou sono agitado.'},
+  {id:16,modId:'M1',subcatId:'1.3',texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tensão do emprego.'},
+  {id:17,modId:'M1',subcatId:'1.3',texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade geradas pela pressão diária.'},
+  {id:18,modId:'M1',subcatId:'1.3',texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana.'},
+  {id:19,modId:'M1',subcatId:'1.3',texto:'As exigências emocionais do dia a dia não me deixam com sensação de estar à beira de um esgotamento nervoso.'},
+  {id:20,modId:'M1',subcatId:'1.3',texto:'Sinto que a rotina atual do meu cargo protege e preserva a minha saúde física e mental a longo prazo.'},
+  {id:21,modId:'M1',subcatId:'1.4',texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},
+  {id:22,modId:'M1',subcatId:'1.4',texto:'Os sistemas adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo.'},
+  {id:23,modId:'M1',subcatId:'1.4',texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada ou dores de cabeça.'},
+  {id:24,modId:'M1',subcatId:'1.4',texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse.'},
+  {id:25,modId:'M1',subcatId:'1.4',texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas e processos digitais.'},
+  {id:26,modId:'M1',subcatId:'1.4',texto:'Quando ocorre falha tecnológica, o suporte técnico resolve de forma ágil, evitando o meu desgaste mental.'},
+  {id:27,modId:'M1',subcatId:'1.4',texto:'Os processos e fluxos digitais são diretos e simplificados, sem burocracias desnecessárias que gerem cansaço cognitivo.'},
+  // M2 - Segurança
+  {id:28,modId:'M2',subcatId:'2.1',texto:'Sinto que meu emprego está seguro e não vivo com medo diário de ser demitido repentinamente.'},
+  {id:29,modId:'M2',subcatId:'2.1',texto:'A empresa é clara e transparente sobre os motivos que levam a demissões.'},
+  {id:30,modId:'M2',subcatId:'2.1',texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe.'},
+  {id:31,modId:'M2',subcatId:'2.1',texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira.'},
+  {id:32,modId:'M2',subcatId:'2.1',texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},
+  {id:33,modId:'M2',subcatId:'2.1',texto:'A estabilidade que sinto no meu emprego me dá segurança para fazer planos financeiros de longo prazo.'},
+  {id:34,modId:'M2',subcatId:'2.2',texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara.'},
+  {id:35,modId:'M2',subcatId:'2.2',texto:'As exigências do dia a dia correspondem à função para a qual fui contratado, sem desvios confusos.'},
+  {id:36,modId:'M2',subcatId:'2.2',texto:'As ordens que recebo são coerentes, evitando que eu receba comandos contraditórios.'},
+  {id:37,modId:'M2',subcatId:'2.2',texto:'As metas exigidas de mim são justas e alcançáveis dentro do horário regular.'},
+  {id:38,modId:'M2',subcatId:'2.2',texto:'Os objetivos permanecem estáveis ao longo do mês, sem mudanças bruscas.'},
+  {id:39,modId:'M2',subcatId:'2.2',texto:'Quando a diretoria precisa alterar uma regra, a equipe é avisada com antecedência.'},
+  {id:40,modId:'M2',subcatId:'2.3',texto:'Quando cometo uma falha, a liderança me orienta a corrigir em vez de me culpar ou punir.'},
+  {id:41,modId:'M2',subcatId:'2.3',texto:'Os feedbacks sobre o meu desempenho são feitos de forma reservada e individual.'},
+  {id:42,modId:'M2',subcatId:'2.3',texto:'Sinto-me confortável para admitir que não sei fazer uma tarefa e pedir ajuda sem ser julgado.'},
+  {id:43,modId:'M2',subcatId:'2.3',texto:'Posso apontar problemas nos processos do setor sem medo de sofrer perseguições veladas.'},
+  {id:44,modId:'M2',subcatId:'2.3',texto:'A empresa estimula e abre espaço real para que funcionários deem sugestões de melhoria.'},
+  {id:45,modId:'M2',subcatId:'2.4',texto:'Recebi treinamento suficiente para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},
+  {id:46,modId:'M2',subcatId:'2.4',texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade.'},
+  {id:47,modId:'M2',subcatId:'2.4',texto:'Quando um novo sistema é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},
+  {id:48,modId:'M2',subcatId:'2.4',texto:'Fui instruído sobre quais são os riscos presentes no meu ambiente de trabalho.'},
+  {id:49,modId:'M2',subcatId:'2.4',texto:'Os treinamentos possuem linguagem clara e materiais de apoio adequados.'},
+  {id:50,modId:'M2',subcatId:'2.5',texto:'Executo minhas atividades sem sentir medo ou tensão constante de sofrer um acidente físico.'},
+  {id:51,modId:'M2',subcatId:'2.5',texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},
+  {id:52,modId:'M2',subcatId:'2.5',texto:'Os EPIs disponibilizados estão em excelente estado de conservação.'},
+  {id:53,modId:'M2',subcatId:'2.5',texto:'As máquinas e ferramentas passam por revisões e manutenções preventivas regulares.'},
+  {id:54,modId:'M2',subcatId:'2.5',texto:'A infraestrutura do local onde trabalho é segura.'},
+  {id:55,modId:'M2',subcatId:'2.5',texto:'Recebi treinamento detalhado de segurança antes de ser colocado para operar qualquer equipamento perigoso.'},
+  {id:56,modId:'M2',subcatId:'2.5',texto:'Sinto-me seguro para exercer o Direito de Recusa caso perceba risco grave e iminente para minha vida.'},
+  // M3 - Relacionamentos
+  {id:57,modId:'M3',subcatId:'3.1',texto:'O meu superior direto trata-me com respeito e educação no dia a dia.'},
+  {id:58,modId:'M3',subcatId:'3.1',texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},
+  {id:59,modId:'M3',subcatId:'3.1',texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades antes de tomar decisões.'},
+  {id:60,modId:'M3',subcatId:'3.1',texto:'Considero que o meu superior direto tem competência técnica suficiente para liderar a nossa equipe.'},
+  {id:61,modId:'M3',subcatId:'3.1',texto:'Quando enfrento um problema grave, sinto que posso contar com o apoio prático do meu supervisor.'},
+  {id:62,modId:'M3',subcatId:'3.2',texto:'Os meus colegas ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},
+  {id:63,modId:'M3',subcatId:'3.2',texto:'O convívio diário com a minha equipe é saudável e livre de fofocas ou boatos maliciosos.'},
+  {id:64,modId:'M3',subcatId:'3.2',texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias.'},
+  {id:65,modId:'M3',subcatId:'3.2',texto:'Sinto-me integrado e acolhido pelo meu grupo de trabalho, sem sofrer qualquer tipo de isolamento.'},
+  {id:66,modId:'M3',subcatId:'3.2',texto:'Confio nos colegas do meu setor para realizar as tarefas em conjunto.'},
+  {id:67,modId:'M3',subcatId:'3.3',texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais.'},
+  {id:68,modId:'M3',subcatId:'3.3',texto:'Compreendo e concordo com os objetivos gerais da empresa.'},
+  {id:69,modId:'M3',subcatId:'3.3',texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações.'},
+  {id:70,modId:'M3',subcatId:'3.3',texto:'Há equilíbrio saudável entre respeitar o conhecimento dos mais experientes e dar abertura para os mais jovens.'},
+  {id:71,modId:'M3',subcatId:'3.3',texto:'Sei exatamente se meu perfil e postura estão alinhados com o que a empresa busca.'},
+  {id:72,modId:'M3',subcatId:'3.3',texto:'Recebi retornos claros da gerência sobre minha adaptação à cultura e ao ambiente do time.'},
+  {id:73,modId:'M3',subcatId:'3.4',texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário.'},
+  {id:74,modId:'M3',subcatId:'3.4',texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade das minhas tarefas.'},
+  {id:75,modId:'M3',subcatId:'3.4',texto:'A gerência costuma elogiar de forma clara os bons resultados das entregas.'},
+  {id:76,modId:'M3',subcatId:'3.4',texto:'Quando me dedico além do normal, essa dedicação é notada e valorizada pela empresa.'},
+  {id:77,modId:'M3',subcatId:'3.5',texto:'A liderança não pratica perseguições, piadas humilhantes ou ameaças psicológicas.'},
+  {id:78,modId:'M3',subcatId:'3.5',texto:'O ambiente de trabalho é livre de exclusões intencionais ou boicotes profissionais.'},
+  {id:79,modId:'M3',subcatId:'3.5',texto:'O meu local de trabalho é seguro contra comentários de teor sexual ou insinuações abusivas.'},
+  {id:80,modId:'M3',subcatId:'3.5',texto:'Confio que se eu denunciar um assédio, a empresa investigará com total sigilo e seriedade.'},
+  {id:81,modId:'M3',subcatId:'3.5',texto:'Sinto-me seguro para relatar qualquer desvio de conduta sem medo de punição.'},
+  // M4 - Motivacional
+  {id:82,modId:'M4',subcatId:'4.1',texto:'Sinto que as tarefas que realizo possuem valor real e fazem sentido para mim.'},
+  {id:83,modId:'M4',subcatId:'4.1',texto:'Percebo claramente o impacto positivo que o meu trabalho causa na vida dos clientes ou na sociedade.'},
+  {id:84,modId:'M4',subcatId:'4.1',texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},
+  {id:85,modId:'M4',subcatId:'4.1',texto:'Consigo enxergar uma conexão direta entre o crescimento da empresa e a realização dos meus objetivos de vida.'},
+  {id:86,modId:'M4',subcatId:'4.1',texto:'Sinto-me conectado com a missão e o propósito geral da empresa enquanto executo minhas atividades.'},
+  {id:87,modId:'M4',subcatId:'4.2',texto:'As atividades que desempenho aproveitam muito bem as minhas principais habilidades e talentos.'},
+  {id:88,modId:'M4',subcatId:'4.2',texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês nesta empresa.'},
+  {id:89,modId:'M4',subcatId:'4.2',texto:'Sinto que as exigências da minha função combinam com o meu jeito de ser e personalidade.'},
+  {id:90,modId:'M4',subcatId:'4.2',texto:'A realização do meu trabalho me torna uma pessoa melhor e mais madura.'},
+  {id:91,modId:'M4',subcatId:'4.2',texto:'Consigo visualizar um caminho claro de crescimento de carreira para mim dentro desta organização.'},
+  {id:92,modId:'M4',subcatId:'4.3',texto:'Tenho autonomia suficiente para tomar decisões sobre a execução das minhas tarefas sem precisar de autorização para tudo.'},
+  {id:93,modId:'M4',subcatId:'4.3',texto:'A empresa me dá liberdade para ajustar o método quando percebo uma forma mais eficiente.'},
+  {id:94,modId:'M4',subcatId:'4.3',texto:'Sinto-me encorajado a criar soluções próprias diante dos problemas que surgem na minha rotina.'},
+  {id:95,modId:'M4',subcatId:'4.3',texto:'A gerência confia na minha competência, dando-me espaço livre de microgerenciamento constante.'},
+  {id:96,modId:'M4',subcatId:'4.3',texto:'Consigo gerenciar e priorizar a ordem de execução das minhas entregas ao longo do dia com autonomia.'},
+  {id:97,modId:'M4',subcatId:'4.4',texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},
+  {id:98,modId:'M4',subcatId:'4.4',texto:'Os incentivos que a empresa oferece me deixam mais motivado no dia a dia.'},
+  {id:99,modId:'M4',subcatId:'4.4',texto:'Os momentos de integração demonstram preocupação real com o nosso bem-estar.'},
+  {id:100,modId:'M4',subcatId:'4.4',texto:'Quando a equipe supera as expectativas, a empresa retribui com ações motivadoras.'},
+  {id:101,modId:'M4',subcatId:'4.4',texto:'As iniciativas da empresa me estimulam a dar o meu melhor.'}
 ];
 
-var likertLabels = [
-  { val:1, label:"Discordo totalmente" },
-  { val:2, label:"Discordo parcialmente" },
-  { val:3, label:"Nem concordo nem discordo" },
-  { val:4, label:"Concordo parcialmente" },
-  { val:5, label:"Concordo totalmente" }
-];
+// ===== FIREBASE =====
+var firebaseConfig = {
+  apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+  authDomain: "entrevista-inicial.firebaseapp.com",
+  projectId: "entrevista-inicial",
+  storageBucket: "entrevista-inicial.firebasestorage.app",
+  messagingSenderId: "437375609844",
+  appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+};
+var fbApp;
+try { fbApp = firebase.app('nr1map-colab'); } catch(e) { fbApp = firebase.initializeApp(firebaseConfig, 'nr1map-colab'); }
+var db = firebase.firestore(fbApp);
 
-var respostas = {};
-var pergAtual = 0;
-
-function iniciarPesquisa() {
-  pergAtual = 0;
-  respostas = {};
-  showView('pesquisa');
-  renderPergunta();
-}
-
-function renderPergunta() {
-  var p = perguntas[pergAtual];
-  var total = perguntas.length;
-  var pct = Math.round(((pergAtual) / total) * 100);
-
-  var html = '<div class="pesquisa-header">' +
-    '<span class="pesquisa-prog">Pergunta ' + (pergAtual+1) + ' de ' + total + '</span>' +
-    '<span style="font-size:11px;color:#10b981;font-weight:500;">Pulso Semanal</span>' +
-    '</div>' +
-    '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>' +
-    '<div class="pergunta-num">' + p.cat + '</div>' +
-    '<div class="pergunta-texto">' + p.texto + '</div>' +
-    '<div class="likert-wrap">';
-
-  likertLabels.forEach(function(l) {
-    var sel = respostas[pergAtual] === l.val ? ' selected' : '';
-    html += '<div class="likert-opt' + sel + '" onclick="selecionarResposta(' + l.val + ')">' +
-      '<div class="l-circle">' + l.val + '</div>' +
-      '<div class="l-label">' + l.label + '</div>' +
-      '</div>';
-  });
-
-  html += '</div>';
-  html += '<div class="btn-nav-perg">';
-  if (pergAtual > 0) html += '<button class="btn-prev" onclick="pergAnterior()">← Voltar</button>';
-  html += '<button class="btn-next" id="btn-prox" onclick="proxPergunta()" ' + (respostas[pergAtual] ? '' : 'disabled') + '>' +
-    (pergAtual === total - 1 ? 'Enviar ✓' : 'Próxima →') + '</button>';
-  html += '</div>';
-
-  document.getElementById('pesquisa-conteudo').innerHTML = html;
-}
-
-function selecionarResposta(val) {
-  respostas[pergAtual] = val;
-  renderPergunta();
-}
-
-function proxPergunta() {
-  if (pergAtual < perguntas.length - 1) {
-    pergAtual++;
-    renderPergunta();
-  } else {
-    // Calcular IBP: (media - 3) * 2.5
-    var soma = 0;
-    Object.values(respostas).forEach(function(v) { soma += v; });
-    var media = soma / perguntas.length;
-    var ibp = (media - 3) * 2.5;
-    showView('concluido');
+// ===== LEITURA AUTOMÁTICA DO TOKEN NA URL =====
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var tokenUrl = params.get('token');
+  if (tokenUrl) {
+    // Token veio na URL — valida direto, sem mostrar tela de OTP
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-orientacao').style.display = 'none';
+    // Mostra loading
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="screen-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#f0f4f8;gap:16px;">' +
+      '<div style="font-size:40px;">🔐</div>' +
+      '<div style="font-size:15px;font-weight:600;color:#111827;">Verificando seu acesso...</div>' +
+      '<div style="font-size:12px;color:#9ca3af;">Aguarde um momento</div>' +
+      '</div>'
+    );
+    // Aguarda Firebase carregar
+    setTimeout(function() { validarToken(tokenUrl); }, 800);
   }
-}
+})();
 
-function pergAnterior() {
-  if (pergAtual > 0) { pergAtual--; renderPergunta(); }
-}
+// ===== ESTADO GLOBAL =====
+var _token = null;         // OTP digitado
+var _empresaId = null;     // uid da empresa
+var _empresaNome = '';
+var _tipoPesquisa = '';    // 'pulso' | 'robusta'
+var _pesquisaId = null;    // doc id da pesquisa ativa
+var _perguntas = [];       // pool embaralhado
+var _blocos = [];          // [[p,p,p,p,p,p,p], ...]
+var _blocoAtual = 0;
+var _respostas = {};       // {perguntaId: valor -5 a +5}
+var _streak = 0;
 
 // ===== OTP =====
 function otpNext(el, nextId) {
@@ -561,77 +562,491 @@ function otpNext(el, nextId) {
   if (el.value && nextId) document.getElementById(nextId).focus();
 }
 
+function getOTP() {
+  return ['o1','o2','o3','o4','o5','o6'].map(function(id){
+    return document.getElementById(id).value;
+  }).join('');
+}
+
 function entrarApp() {
+  var codigo = getOTP();
+  if (codigo.length < 6) { alert('Digite o código completo de 6 dígitos.'); return; }
+  var btn = document.getElementById('btn-entrar');
+  btn.textContent = 'Verificando...'; btn.disabled = true;
+  document.getElementById('otp-erro').style.display = 'none';
+  validarToken(codigo);
+}
+
+function validarToken(codigo) {
+  // Busca token no Firestore
+  db.collection('nr1map_tokens').where('codigo', '==', codigo)
+    .where('usado', '==', false)
+    .get()
+    .then(function(snap) {
+      if (snap.empty) {
+        document.getElementById('otp-erro').style.display = 'block';
+        btn.textContent = 'Acessar minha área →'; btn.disabled = false;
+        return;
+      }
+      var doc = snap.docs[0];
+      var data = doc.data();
+      // Verifica expiração (48h)
+      var expira = data.criadoEm ? new Date(data.criadoEm).getTime() + 48*3600*1000 : 0;
+      if (Date.now() > expira) {
+        document.getElementById('otp-erro').style.display = 'block';
+        btn.textContent = 'Acessar minha área →'; btn.disabled = false;
+        return;
+      }
+      _token = codigo;
+      _empresaId = data.empresaId;
+      _tipoPesquisa = data.tipo || 'pulso';
+      _pesquisaId = doc.id;
+      _empresaNome = data.empresaNome || '';
+      // Não marca como usado ainda — só após envio das respostas
+      carregarApp();
+    })
+    .catch(function(e) {
+      console.log(e);
+      btn.textContent = 'Acessar minha área →'; btn.disabled = false;
+      alert('Erro ao verificar código. Tente novamente.');
+    });
+}
+
+function reenviarCodigo() {
+  alert('Um novo código será enviado ao seu WhatsApp em instantes.');
+}
+
+// ===== CARREGAR APP =====
+function carregarApp() {
   document.getElementById('screen-login').style.display = 'none';
+  var loading = document.getElementById('screen-loading');
+  if (loading) loading.remove();
   document.getElementById('screen-app').style.display = 'block';
+  document.getElementById('hdr-empresa').textContent = _empresaNome;
+
+  // Carrega seleções da empresa e pesquisa ativa
+  Promise.all([
+    db.collection('nr1map_selecoes').doc(_empresaId).get(),
+    db.collection('nr1map_streak').doc(_empresaId + '_' + _pesquisaId).get()
+  ]).then(function(results) {
+    var selDoc = results[0];
+    var strDoc = results[1];
+
+    if (strDoc.exists) _streak = strDoc.data().streak || 0;
+    if (_streak > 0) {
+      document.getElementById('streak-card').style.display = 'block';
+      document.getElementById('streak-num').textContent = '🔥 ' + _streak;
+    }
+
+    var selecionadas = selDoc.exists ? (selDoc.data().selecionadas || []) : [];
+    var textosCustom = selDoc.exists ? (selDoc.data().textos || {}) : {};
+    var propriasExtra = selDoc.exists ? (selDoc.data().proprias || []) : [];
+
+    if (selecionadas.length === 0) {
+      document.getElementById('card-sem-pesquisa').style.display = 'block';
+      return;
+    }
+
+    // Monta banco completo de perguntas (todas as 101 + próprias)
+    var bancoPorId = {};
+    BANCO_PERGUNTAS.forEach(function(p) {
+      bancoPorId[String(p.id)] = {
+        id: String(p.id),
+        texto: textosCustom[String(p.id)] || p.texto,
+        subcatId: p.subcatId,
+        modId: p.modId
+      };
+    });
+    propriasExtra.forEach(function(p) {
+      bancoPorId[p.id] = { id: p.id, texto: p.texto, subcatId: p.subcatId, modId: p.modId };
+    });
+
+    // Pool das selecionadas
+    var pool = [];
+    selecionadas.forEach(function(pid) {
+      if (bancoPorId[String(pid)]) pool.push(bancoPorId[String(pid)]);
+    });
+
+    // Trava ímpar por subcategoria
+    var porSubcat = {};
+    pool.forEach(function(p) {
+      if (!porSubcat[p.subcatId]) porSubcat[p.subcatId] = [];
+      porSubcat[p.subcatId].push(p);
+    });
+    var poolValido = [];
+    var travarErro = false;
+    Object.keys(porSubcat).forEach(function(sc) {
+      var n = porSubcat[sc].length;
+      if (n % 2 === 0) { travarErro = true; }
+      poolValido = poolValido.concat(porSubcat[sc]);
+    });
+    if (travarErro) {
+      console.warn('Trava impar: alguma subcategoria tem numero par de perguntas. Usando pool sem bloqueio.');
+    }
+
+    // Embaralhamento total (Fisher-Yates)
+    for (var i = poolValido.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = poolValido[i]; poolValido[i] = poolValido[j]; poolValido[j] = tmp;
+    }
+    _perguntas = poolValido;
+
+    // Divide em blocos de 7
+    _blocos = [];
+    for (var k = 0; k < _perguntas.length; k += 7) {
+      _blocos.push(_perguntas.slice(k, k + 7));
+    }
+
+    // Exibe card de pesquisa ativa
+    var label = _tipoPesquisa === 'robusta' ? 'Pesquisa Robusta' : 'Pesquisa Pulso — Esta semana';
+    var info = _perguntas.length + ' perguntas · ' + _blocos.length + ' blocos de 7';
+    document.getElementById('tipo-pesquisa-label').textContent = label;
+    document.getElementById('pesquisa-info').textContent = info;
+    document.getElementById('card-pesquisa-ativa').style.display = 'block';
+
+    // Carrega histórico pessoal
+    carregarHistorico();
+  }).catch(function(e) { console.log(e); });
+}
+
+function carregarHistorico() {
+  db.collection('nr1map_respostas_colab').doc(_empresaId + '_' + _pesquisaId)
+    .get().then(function(doc) {
+      if (!doc.exists) return;
+      var hist = doc.data().historico || [];
+      var lista = document.getElementById('historico-lista');
+      if (hist.length === 0) return;
+      lista.innerHTML = '';
+      hist.slice(-6).reverse().forEach(function(h) {
+        var cor = h.ibp >= 1.5 ? '#10b981' : h.ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+        var zona = h.ibp >= 1.5 ? 'Terreno Fértil' : h.ibp <= -1.5 ? 'Sofrimento Patogênico' : 'Defesa Oculta';
+        var item = document.createElement('div');
+        item.className = 'hist-item';
+        item.innerHTML = '<div class="hist-dot" style="background:'+cor+';"></div>' +
+          '<div style="flex:1;"><div class="hist-mes">'+h.data+'</div><div class="hist-zona">'+zona+'</div></div>' +
+          '<div class="hist-ibp" style="color:'+cor+';">'+(h.ibp>0?'+':'')+h.ibp.toFixed(1)+'</div>';
+        lista.appendChild(item);
+      });
+      // Atualiza agulha do termômetro com IBP mais recente
+      var ultimo = hist[hist.length - 1];
+      if (ultimo) atualizarTermometro(ultimo.ibp);
+    }).catch(function(){});
 }
 
 // ===== NAVEGAÇÃO =====
 function showView(id) {
-  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-  document.getElementById('view-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-  var nav = document.getElementById('nav-' + id);
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('view-'+id).classList.add('active');
+  var nav = document.getElementById('nav-'+id);
   if (nav) nav.classList.add('active');
-  window.scrollTo(0, 0);
 }
 
-// ===== SUGESTÕES =====
+function irParaOrientacao() {
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-orientacao').style.display = 'block';
+}
+
+// ===== DEMO SLIDER (tela orientação) =====
+function demoSlider(input) {
+  var val = parseInt(input.value) / 10;
+  var rounded = Math.round(val * 10) / 10;
+  document.getElementById('demo-valor').textContent = (rounded > 0 ? '+' : '') + rounded.toFixed(1);
+  var cor, zona;
+  if (val >= 1.5) { cor = '#10b981'; zona = 'Terreno Fértil'; }
+  else if (val <= -1.5) { cor = '#ef4444'; zona = 'Sofrimento Patogênico'; }
+  else { cor = '#f59e0b'; zona = 'Defesa Oculta'; }
+  document.getElementById('demo-valor').style.color = cor;
+  document.getElementById('demo-zona').style.color = cor;
+  document.getElementById('demo-zona').textContent = zona;
+}
+
+// ===== PESQUISA =====
+function iniciarPesquisa() {
+  _blocoAtual = 0;
+  _respostas = {};
+  document.getElementById('screen-orientacao').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'block';
+  showView('pesquisa');
+  renderBloco();
+}
+
+function renderBloco() {
+  var bloco = _blocos[_blocoAtual];
+  var totalPergs = _perguntas.length;
+  var pergInicioBloco = _blocoAtual * 7;
+  var pct = Math.round((pergInicioBloco / totalPergs) * 100);
+
+  var container = document.getElementById('bloco-conteudo');
+  container.innerHTML = '';
+
+  // Header do bloco
+  var hdr = document.createElement('div');
+  hdr.className = 'bloco-header';
+  hdr.innerHTML = '<span class="bloco-prog-txt">Bloco ' + (_blocoAtual+1) + ' de ' + _blocos.length + '</span>' +
+    '<span class="bloco-badge">' + bloco.length + ' perguntas</span>';
+  container.appendChild(hdr);
+
+  // Barra de progresso geral
+  var barWrap = document.createElement('div');
+  barWrap.className = 'prog-bar';
+  barWrap.innerHTML = '<div class="prog-fill" style="width:'+pct+'%"></div>';
+  container.appendChild(barWrap);
+
+  // Cards de perguntas
+  bloco.forEach(function(p, idx) {
+    var card = document.createElement('div');
+    card.className = 'pergunta-card';
+    card.id = 'pcard-' + p.id;
+
+    var num = document.createElement('div');
+    num.className = 'pergunta-num-badge';
+    num.textContent = 'Pergunta ' + (pergInicioBloco + idx + 1) + ' de ' + totalPergs;
+    card.appendChild(num);
+
+    var txt = document.createElement('div');
+    txt.className = 'pergunta-texto-bloco';
+    txt.textContent = p.texto;
+    card.appendChild(txt);
+
+    // Termômetro interativo
+    var termoWrap = document.createElement('div');
+    termoWrap.className = 'termo-interativo';
+
+    var valAtual = _respostas[p.id] !== undefined ? _respostas[p.id] : null;
+    var valSlider = valAtual !== null ? Math.round(valAtual * 10) : 0;
+
+    var valDisp = document.createElement('div');
+    valDisp.className = 'termo-valor-display';
+    valDisp.id = 'val-' + p.id;
+    valDisp.style.color = '#9ca3af';
+    valDisp.textContent = valAtual !== null ? (valAtual > 0 ? '+' : '') + valAtual.toFixed(1) : 'Arraste o termômetro';
+    valDisp.style.fontSize = valAtual !== null ? '28px' : '14px';
+    termoWrap.appendChild(valDisp);
+
+    var zonaDisp = document.createElement('div');
+    zonaDisp.className = 'termo-zona-display';
+    zonaDisp.id = 'zona-' + p.id;
+    zonaDisp.style.color = '#9ca3af';
+    zonaDisp.textContent = valAtual !== null ? getZona(valAtual).nome : '';
+    termoWrap.appendChild(zonaDisp);
+
+    var slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'slider-input';
+    slider.min = '-50'; slider.max = '50'; slider.step = '1';
+    slider.value = String(valSlider);
+    slider.dataset.pid = p.id;
+    slider.oninput = (function(pid, vd, zd) {
+      return function() {
+        var v = parseInt(this.value) / 10;
+        var z = getZona(v);
+        vd.textContent = (v > 0 ? '+' : '') + v.toFixed(1);
+        vd.style.color = z.cor;
+        vd.style.fontSize = '28px';
+        zd.textContent = z.nome;
+        zd.style.color = z.cor;
+        _respostas[pid] = v;
+        verificarBlocoCompleto();
+      };
+    })(p.id, valDisp, zonaDisp);
+    termoWrap.appendChild(slider);
+
+    var labelsRow = document.createElement('div');
+    labelsRow.className = 'slider-labels-row';
+    labelsRow.innerHTML = '<span>−5<br/>Sofrimento</span><span style="text-align:center;">0<br/>Neutro</span><span style="text-align:right;">+5<br/>Prazer</span>';
+    termoWrap.appendChild(labelsRow);
+
+    card.appendChild(termoWrap);
+    container.appendChild(card);
+  });
+
+  // Navegação do bloco
+  var nav = document.createElement('div');
+  nav.className = 'btn-nav-bloco';
+  if (_blocoAtual > 0) {
+    var btnPrev = document.createElement('button');
+    btnPrev.className = 'btn-prev-bloco';
+    btnPrev.textContent = '← Bloco anterior';
+    btnPrev.onclick = function() { _blocoAtual--; renderBloco(); window.scrollTo(0,0); };
+    nav.appendChild(btnPrev);
+  }
+  var btnNext = document.createElement('button');
+  btnNext.className = 'btn-next-bloco';
+  btnNext.id = 'btn-prox-bloco';
+  btnNext.textContent = _blocoAtual === _blocos.length - 1 ? 'Enviar respostas ✓' : 'Próximo bloco →';
+  btnNext.disabled = !blocoCompleto();
+  btnNext.onclick = function() {
+    if (_blocoAtual < _blocos.length - 1) {
+      _blocoAtual++;
+      renderBloco();
+      window.scrollTo(0,0);
+    } else {
+      enviarRespostas();
+    }
+  };
+  nav.appendChild(btnNext);
+  container.appendChild(nav);
+
+  if (valAtual !== null) verificarBlocoCompleto();
+}
+
+function getZona(v) {
+  if (v >= 1.5) return { nome: 'Terreno Fértil', cor: '#10b981' };
+  if (v <= -1.5) return { nome: 'Sofrimento Patogênico', cor: '#ef4444' };
+  return { nome: 'Defesa Oculta', cor: '#f59e0b' };
+}
+
+function blocoCompleto() {
+  var bloco = _blocos[_blocoAtual];
+  for (var i = 0; i < bloco.length; i++) {
+    if (_respostas[bloco[i].id] === undefined) return false;
+  }
+  return true;
+}
+
+function verificarBlocoCompleto() {
+  var btn = document.getElementById('btn-prox-bloco');
+  if (btn) btn.disabled = !blocoCompleto();
+}
+
+// ===== ENVIAR RESPOSTAS =====
+function enviarRespostas() {
+  var btn = document.getElementById('btn-prox-bloco');
+  if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+
+  // Calcula IBP por subcategoria e geral
+  var porSubcat = {};
+  _perguntas.forEach(function(p) {
+    if (_respostas[p.id] === undefined) return;
+    if (!porSubcat[p.subcatId]) porSubcat[p.subcatId] = { soma: 0, n: 0, modId: p.modId };
+    porSubcat[p.subcatId].soma += _respostas[p.id];
+    porSubcat[p.subcatId].n++;
+  });
+
+  var ibpSubcats = {};
+  var somaGeral = 0, nGeral = 0;
+  Object.keys(porSubcat).forEach(function(sc) {
+    var media = porSubcat[sc].soma / porSubcat[sc].n;
+    ibpSubcats[sc] = { ibp: Math.round(media * 100) / 100, modId: porSubcat[sc].modId };
+    somaGeral += media;
+    nGeral++;
+  });
+  var ibpGeral = Math.round((somaGeral / nGeral) * 100) / 100;
+  var zona = getZona(ibpGeral);
+
+  var agora = new Date();
+  var dataStr = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  var payload = {
+    empresaId: _empresaId,
+    pesquisaId: _pesquisaId,
+    tipo: _tipoPesquisa,
+    respostas: _respostas,
+    ibpSubcats: ibpSubcats,
+    ibpGeral: ibpGeral,
+    zona: zona.nome,
+    respondidoEm: agora.toISOString()
+  };
+
+  // Salva resposta anônima
+  var refResp = db.collection('nr1map_respostas').doc(_empresaId)
+    .collection('ciclos').doc(_pesquisaId)
+    .collection('anonimos').doc();
+
+  // Histórico pessoal (por token — ligado ao aparelho, não à identidade)
+  var refHist = db.collection('nr1map_respostas_colab').doc(_empresaId + '_' + _pesquisaId);
+
+  // Invalida token
+  db.collection('nr1map_tokens').where('codigo', '==', _token).get()
+    .then(function(snap) {
+      var batch = db.batch();
+      // Salva resposta agregada
+      batch.set(refResp, payload);
+      // Invalida token
+      if (!snap.empty) {
+        batch.update(snap.docs[0].ref, { usado: true, usadoEm: agora.toISOString() });
+      }
+      return batch.commit();
+    })
+    .then(function() {
+      // Histórico pessoal (merge)
+      return refHist.set({
+        historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr }),
+        streak: (_streak + 1)
+      }, { merge: true });
+    })
+    .then(function() {
+      atualizarTermometro(ibpGeral);
+      showView('concluido');
+      // Esconde card de pesquisa ativa
+      document.getElementById('card-pesquisa-ativa').style.display = 'none';
+      document.getElementById('card-sem-pesquisa').style.display = 'block';
+    })
+    .catch(function(e) {
+      console.log(e);
+      if (btn) { btn.textContent = 'Enviar respostas ✓'; btn.disabled = false; }
+      alert('Erro ao enviar respostas. Tente novamente.');
+    });
+}
+
+// ===== TERMÔMETRO PESSOAL =====
+function atualizarTermometro(ibp) {
+  var z = getZona(ibp);
+  var el = document.getElementById('termo-val');
+  var ez = document.getElementById('termo-zona');
+  var needle = document.getElementById('termo-needle');
+  if (el) { el.textContent = (ibp > 0 ? '+' : '') + ibp.toFixed(1); el.style.color = z.cor; }
+  if (ez) { ez.textContent = z.nome; ez.style.color = z.cor; }
+  if (needle) { var pct = ((ibp + 5) / 10) * 100; needle.style.left = pct + '%'; }
+}
+
+// ===== ESPAÇO DE FALA =====
 function selCat(el) {
-  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('sel'); });
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
 }
-
 function contarChars(el) {
   document.getElementById('char-count').textContent = el.value.length + ' / 500';
 }
-
 function enviarSugestao() {
   var texto = document.getElementById('sug-texto').value.trim();
-  if (!texto) { alert('Escreva sua sugestão antes de enviar.'); return; }
-  var cat = document.querySelector('.chip.sel');
-  var catNome = cat ? cat.textContent : 'Outro';
-  var lista = document.getElementById('sugestoes-lista');
-  var novo = document.createElement('div');
-  novo.className = 'sug-item';
-  novo.innerHTML = '<div class="sug-icon">💡</div><div><div class="sug-texto">"' + texto + '"</div><div class="sug-meta">' + catNome + ' · agora · Anônimo</div></div>';
-  lista.insertBefore(novo, lista.firstChild);
-  document.getElementById('sug-texto').value = '';
-  document.getElementById('char-count').textContent = '0 / 500';
-  alert('✅ Sugestão enviada anonimamente ao RH!');
+  var cat = '';
+  document.querySelectorAll('.chip.sel').forEach(function(c){ cat = c.textContent; });
+  if (!texto) { alert('Digite sua sugestão antes de enviar.'); return; }
+  db.collection('nr1map_sugestoes').add({
+    empresaId: _empresaId,
+    categoria: cat,
+    texto: texto,
+    criadoEm: new Date().toISOString()
+  }).then(function() {
+    document.getElementById('sug-texto').value = '';
+    document.getElementById('char-count').textContent = '0 / 500';
+    alert('Sugestão enviada com sucesso!');
+  }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
 }
 
-// ===== SHARE =====
-function abrirModalShare() {
-  document.getElementById('modal-share').classList.add('open');
-}
-
-function confirmarShare() {
-  fecharModal('modal-share');
-  alert('✅ Diagnóstico compartilhado voluntariamente!\n\nConsentimento registrado com:\n• Data e hora UTC\n• IP de origem\n• UUID de validação\n\nO RH verá apenas seu gráfico — sem identificação.');
-}
-
-// ===== CHAMADO =====
-var tipoChamado = '';
+// ===== CANAL DE ACOLHIMENTO =====
+var _tipoChamado = '';
 function abrirChamado(tipo) {
-  tipoChamado = tipo;
-  var titles = { apoio:'Solicitar apoio psicológico', assedio:'Denúncia de assédio', emergencia:'Emergência emocional' };
-  document.getElementById('chamado-title').textContent = titles[tipo] || 'Abrir chamado';
+  _tipoChamado = tipo;
+  var titulos = { apoio: 'Solicitar apoio psicológico', assedio: 'Denúncia de assédio', emergencia: 'Emergência emocional' };
+  document.getElementById('modal-cham-titulo').textContent = titulos[tipo] || 'Chamado';
   document.getElementById('modal-chamado').classList.add('open');
 }
-
 function confirmarChamado() {
-  fecharModal('modal-chamado');
-  alert('🫶 Chamado registrado com sigilo!\n\nA consultoria responsável entrará em contato em até 24 horas.\n\nVocê não está sozinho(a).');
+  var texto = document.getElementById('cham-texto').value.trim();
+  db.collection('nr1map_chamados').add({
+    empresaId: _empresaId,
+    tipo: _tipoChamado,
+    texto: texto || '(sem descrição)',
+    criadoEm: new Date().toISOString()
+  }).then(function() {
+    document.getElementById('modal-chamado').classList.remove('open');
+    document.getElementById('cham-texto').value = '';
+    alert('Chamado registrado com sigilo. A consultoria entrará em contato em breve.');
+  }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
 }
-
-function fecharModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// Demonstração: entrar direto no app para preview
-// Remover em produção e usar autenticação real
-// entrarApp();
 </script>
 </body>
 </html>
