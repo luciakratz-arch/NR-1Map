@@ -542,33 +542,31 @@ textarea.form-control{resize:vertical;min-height:70px;}
 </div>
 
 <!-- Modal novo cargo -->
-<div id="modal-novo-cargo" class="modal">
-  <div class="modal-box" style="max-width:460px;">
+<div id="modal-novo-cargo" class="modal-overlay" onclick="if(event.target===this)fecharModal('modal-novo-cargo')">
+  <div class="modal" style="max-width:460px;width:95%;">
     <div class="modal-header"><h3>Novo cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
-      <div class="form-group" style="position:relative;">
-        <div class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
-          CBO (busca por nome ou código)
-          <a href="https://www.ocupacoes.com.br/" target="_blank" style="font-size:10px;color:var(--verde);text-decoration:none;font-weight:600;">🔍 Buscar no site MTE →</a>
-        </div>
-        <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
-        <div id="nc-cbo-drop" style="position:absolute;z-index:9999!important;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
-        <input type="hidden" id="nc-cbo-val"/>
-        <div style="margin-top:6px;font-size:11px;color:var(--cinza-medio);">Não encontrou? Digite o código CBO manualmente abaixo:</div>
-        <input class="form-control" id="nc-cbo-manual" placeholder="Ex: 2515-10" style="margin-top:4px;font-size:12px;" oninput="document.getElementById('nc-cbo-val').value=this.value"/>
+    <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
+    <div class="form-group" style="position:relative;">
+      <div class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        CBO (busca por nome ou código)
+        <a href="https://www.ocupacoes.com.br/" target="_blank" style="font-size:10px;color:var(--verde);text-decoration:none;font-weight:600;">🔍 Buscar no site MTE →</a>
       </div>
-      <div class="form-group"><div class="form-label">Nível hierárquico *</div>
-        <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
-        <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
-      </div>
-      <div class="form-group"><div class="form-label">Reporta a</div>
-        <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
-      </div>
+      <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
+      <div id="nc-cbo-drop" style="position:absolute;z-index:9999!important;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
+      <input type="hidden" id="nc-cbo-val"/>
+      <div style="margin-top:6px;font-size:11px;color:var(--cinza-medio);">Não encontrou? Digite o código CBO manualmente abaixo:</div>
+      <input class="form-control" id="nc-cbo-manual" placeholder="Ex: 2515-10" style="margin-top:4px;font-size:12px;" oninput="document.getElementById('nc-cbo-val').value=this.value"/>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCargo()">Salvar cargo</button>
+    <div class="form-group"><div class="form-label">Nível hierárquico *</div>
+      <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
+      <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
+    </div>
+    <div class="form-group"><div class="form-label">Reporta a</div>
+      <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="salvarCargo()">Salvar cargo</button>
     </div>
   </div>
 </div>
