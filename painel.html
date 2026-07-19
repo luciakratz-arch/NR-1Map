@@ -1271,13 +1271,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title-wrapper">
       <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
-      <div class="topbar-title">🧩 Banco Global de 101 Perguntas — Consulta</div>
+      <div class="topbar-title">🧩 Módulos e Perguntas — Selecionar</div>
     </div>
-    <span style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">👁 Somente leitura — edição pelo Admin</span>
+    <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
   </div>
   <div class="content">
     <div style="background:var(--cinza-claro);border:1px solid var(--linha);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--cinza-medio);line-height:1.6;">
-      ℹ️ Banco global editado exclusivamente pela Admin Master (Dra. Lucia Kratz). Utilize esta lista para selecionar quais perguntas serão enviadas — ou adicione perguntas próprias nos módulos abaixo.
+      Selecione as perguntas que serão enviadas aos seus colaboradores. Mínimo de 3 por subcategoria recomendado.
     </div>
     <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="abas-rh"></div>
     <div id="container-rh"></div>
@@ -1486,6 +1486,35 @@ var MODULOS=[
   {id:'M4',emoji:'🚀',titulo:'Módulo 4 — Fatores Motivacionais',sub:'Propósito · Identidade · Autonomia',subcats:[{id:'4.1',titulo:'Propósito, Alinhamento de Vida e Significado do Trabalho',perguntas:[{id:82,texto:'Sinto que as tarefas que realizo possuem valor real e fazem sentido para mim.'},{id:83,texto:'Percebo claramente o impacto positivo que o meu trabalho causa na vida dos clientes ou na sociedade.'},{id:84,texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},{id:85,texto:'Consigo enxergar uma conexão direta entre o crescimento da empresa e a realização dos meus objetivos de vida.'},{id:86,texto:'Sinto-me conectado com a missão e o propósito geral da empresa enquanto executo minhas atividades.'}]},{id:'4.2',titulo:'Identidade com o Trabalho e Crescimento',perguntas:[{id:87,texto:'As atividades que desempenho aproveitam muito bem as minhas principais habilidades e talentos.'},{id:88,texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês nesta empresa.'},{id:89,texto:'Sinto que as exigências da minha função combinam com o meu jeito de ser e personalidade.'},{id:90,texto:'A realização do meu trabalho me torna uma pessoa melhor e mais madura.'},{id:91,texto:'Consigo visualizar um caminho claro de crescimento de carreira para mim dentro desta organização.'}]},{id:'4.3',titulo:'Autonomia Percebida e Espaço de Criação (Dejours)',perguntas:[{id:92,texto:'Tenho autonomia suficiente para tomar decisões sobre a execução das minhas tarefas sem precisar de autorização para tudo.'},{id:93,texto:'A empresa me dá liberdade para ajustar o método quando percebo uma forma mais eficiente.'},{id:94,texto:'Sinto-me encorajado a criar soluções próprias diante dos problemas que surgem na minha rotina.'},{id:95,texto:'A gerência confia na minha competência, dando-me espaço livre de microgerenciamento constante.'},{id:96,texto:'Consigo gerenciar e priorizar a ordem de execução das minhas entregas ao longo do dia com autonomia.'}]},{id:'4.4',titulo:'Percepção de Ações Motivadoras da Empresa',perguntas:[{id:97,texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},{id:98,texto:'Os incentivos que a empresa oferece me deixam mais motivado no dia a dia.'},{id:99,texto:'Os momentos de integração demonstram preocupação real com o nosso bem-estar.'},{id:100,texto:'Quando a equipe supera as expectativas, a empresa retribui com ações motivadoras.'},{id:101,texto:'As iniciativas da empresa me estimulam a dar o meu melhor.'}]}]},
 ];
 
+var _rhSel = new Set();
+
+function rhToggle(pid, checked){
+  if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
+  // Atualiza contador da subcategoria no header
+  var allChk = document.querySelectorAll('#container-rh input[type=checkbox]');
+  // salva no Firestore se disponivel
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(eid && window.nr1mapDb){
+    window.nr1mapDb.collection('nr1map_selecoes').doc(eid)
+      .set({selecionadas:Array.from(_rhSel),atualizadoEm:new Date().toISOString()},{merge:true})
+      .catch(function(e){console.log(e);});
+  }
+  var el=document.getElementById('rh-total-sel');
+  if(el) el.textContent=_rhSel.size+' selecionada'+(_rhSel.size!==1?'s':'');
+}
+
+function _carregarRHSel(){
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(!eid||!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_selecoes').doc(eid).get()
+    .then(function(doc){
+      if(doc.exists && doc.data().selecionadas){
+        _rhSel = new Set(doc.data().selecionadas.map(String));
+        renderRH();
+      }
+    }).catch(function(){});
+}
+
 function renderRH(){
   var container=document.getElementById('container-rh');
   var abasDiv=document.getElementById('abas-rh');
@@ -1510,21 +1539,44 @@ function renderRH(){
   if(!modulo){container.innerHTML='';return;}
   var cor=COR_MOD[abaRH]||'#374151';
   var html='';
+  var sel = _rhSel;
   modulo.subcats.forEach(function(s){
+    var nSel = s.perguntas.filter(function(p){return sel.has(String(p.id));}).length;
+    var corCnt = nSel>=3?'var(--verde)':'var(--laranja)';
     html+='<div style="margin-bottom:10px;border:1px solid var(--linha);border-radius:8px;overflow:hidden;">';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="toggleRHSubcat(this)">';
     html+='<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+s.id+' — '+s.titulo+'</span>';
-    html+='<span style="font-size:10px;color:var(--cinza-medio);">'+s.perguntas.length+' perguntas ▸</span></div>';
-    html+='<div style="display:none;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
-    html+='<th style="width:55px;padding:7px 12px;background:var(--cinza-claro);text-align:left;font-size:10px;color:var(--cinza-medio);">ID</th>';
-    html+='<th style="padding:7px 12px;background:var(--cinza-claro);text-align:left;font-size:10px;color:var(--cinza-medio);">Texto da Pergunta</th></tr></thead><tbody>';
-    s.perguntas.forEach(function(p){
-      html+='<tr><td style="padding:8px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-medio);font-weight:600;font-family:monospace;">#'+String(p.id).padStart(3,'0')+'</td>';
-      html+='<td style="padding:8px 12px;border-bottom:1px solid var(--linha);">'+p.texto+'</td></tr>';
-    });
-    html+='</tbody></table></div></div>';
+    html+='<span style="font-size:11px;font-weight:600;color:'+corCnt+';">'+nSel+'/'+s.perguntas.length+' ▸</span></div>';
+    html+='<div style="display:none;" id="sc-body-'+s.id+'"></div>';
+    html+='</div>';
   });
   container.innerHTML=html;
+
+  // Preenche cada subcategoria via DOM (evita aspas aninhadas)
+  modulo.subcats.forEach(function(s){
+    var body=document.getElementById('sc-body-'+s.id);
+    if(!body) return;
+    s.perguntas.forEach(function(p){
+      var pid=String(p.id);
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--linha);background:#fff;';
+      var chk=document.createElement('input');
+      chk.type='checkbox'; chk.checked=sel.has(pid);
+      chk.style.cssText='margin-top:3px;accent-color:var(--verde);flex-shrink:0;';
+      chk.onchange=(function(pid){return function(){rhToggle(pid,this.checked);};})(pid);
+      var num=document.createElement('span');
+      num.style.cssText='font-size:11px;font-weight:600;color:var(--cinza-medio);font-family:monospace;flex-shrink:0;min-width:30px;';
+      num.textContent='#'+String(p.id).padStart(3,'0');
+      var txt=document.createElement('span');
+      txt.style.cssText='font-size:12px;line-height:1.5;';
+      txt.textContent=p.texto;
+      row.appendChild(chk); row.appendChild(num); row.appendChild(txt);
+      body.appendChild(row);
+    });
+  });
+
+  var el=document.getElementById('rh-total-sel');
+  if(el) el.textContent=sel.size+' selecionada'+(sel.size!==1?'s':'');
 }
 
 function toggleRHSubcat(hdr){
@@ -1624,7 +1676,7 @@ function sv(id){
   const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
-  if(id==='modulos') renderRH();
+  if(id==='modulos'){ renderRH(); _carregarRHSel(); }
 }
 function swTab(tab,targetId){
   parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
