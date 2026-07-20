@@ -291,6 +291,14 @@
     }
   }
 </style>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A6E4F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NR-1 Map">
+<link rel="apple-touch-icon" href="nr1maps logo 512.png">
 </head>
 <body>
 
@@ -1177,5 +1185,14 @@ function assinarAgora() {
 })();
 </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/NR-1Map/sw.js')
+      .then(function(reg) { console.log('[NR-1 Map] SW registrado:', reg.scope); })
+      .catch(function(err) { console.log('[NR-1 Map] SW falhou:', err); });
+  });
+}
+</script>
 </body>
 </html>
