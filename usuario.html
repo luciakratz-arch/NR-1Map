@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Área do Colaborador</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -129,6 +132,16 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
 .form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
 .form-control:focus{outline:none;border-color:var(--verde-claro);}
 textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
+
+.freq-group{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.freq-btn-u{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid var(--linha);background:var(--branco);cursor:pointer;font-family:Inter,sans-serif;text-align:left;width:100%;}
+.freq-btn-u:hover{border-color:var(--verde);}
+.freq-btn-u.sel-s,.freq-btn-u.sel-m{border-color:var(--verde);background:var(--verde-xp);}
+.freq-btn-u.sel-n{border-color:var(--laranja);background:var(--laranja-xp);}
+.freq-btn-u.sel-p,.freq-btn-u.sel-r{border-color:#C53030;background:#FFF0F0;}
+.freq-dot-u{width:12px;height:12px;border-radius:50%;flex-shrink:0;background:var(--linha);}
+.freq-label-u{font-size:13px;font-weight:500;color:var(--cinza-escuro);}
+.freq-sub-u{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
 </style>
 </head>
 <body>
@@ -139,7 +152,7 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
     <div class="sidebar-logo">NR-1<span>Map</span></div>
     <div class="sidebar-perfil">
       <div class="role">Colaborador</div>
-      <div class="nome" id="sb-nome">Identificação anônima</div>
+      <div class="nome" id="sb-nome">Colaborador</div>
       <div style="font-size:10px;color:#4A5450;margin-top:2px;" id="sb-empresa">—</div>
     </div>
     <div class="nav">
@@ -182,9 +195,9 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
         <!-- MÉTRICAS -->
         <div class="metrics">
           <div class="mc" style="border-top:3px solid var(--verde);">
-            <div class="lbl">IBP Atual</div>
+            <div class="lbl">Bem-estar atual</div>
             <div class="val" style="color:var(--verde);">+1,8</div>
-            <div class="sub">Zona de Prazer no Trabalho</div>
+            <div class="sub">Você está bem!</div>
           </div>
           <div class="mc" style="border-top:3px solid var(--roxo);">
             <div class="lbl">Pesquisas Respondidas</div>
@@ -224,11 +237,11 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
             <div style="display:flex;align-items:center;gap:20px;">
               <div style="text-align:center;">
                 <div class="ibp-val" style="font-size:36px;color:var(--verde);">+1,8</div>
-                <div style="font-size:11px;color:var(--verde);font-weight:600;">Prazer no Trabalho</div>
+                <div style="font-size:11px;color:var(--verde);font-weight:600;">Você está bem</div>
               </div>
               <div style="flex:1;">
                 <div class="ibp-strip"><div class="ibp-needle" style="left:68%;"></div></div>
-                <div class="ibp-labels"><span>−5 Sofrimento</span><span>0 Neutro</span><span>+5 Prazer</span></div>
+                <div class="ibp-labels"><span>− Difícil</span><span>0 Neutro</span><span>+ Bem-estar</span></div>
               </div>
             </div>
           </div>
@@ -247,17 +260,17 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
       </div>
       <div class="content">
         <div class="card">
-          <div class="card-header"><div><div class="title">🌡️ Termômetro Prazer ↔ Sofrimento</div><div class="subtitle">Índice de Balança Psicodinâmica (IBP)</div></div></div>
+          <div class="card-header"><div><div class="title">🌡️ Como você está no trabalho</div><div class="subtitle">Seu índice de bem-estar</div></div></div>
           <div class="card-body">
             <div class="ibp-val" style="color:var(--verde);">+1,8</div>
-            <div class="ibp-zona" style="color:var(--verde);">Zona de Prazer no Trabalho</div>
+            <div class="ibp-zona" style="color:var(--verde);">Você está bem!</div>
             <div class="ibp-strip"><div class="ibp-needle" style="left:68%;"></div></div>
-            <div class="ibp-labels"><span>−5 Sofrimento Patogênico</span><span>0</span><span>+5 Prazer</span></div>
+            <div class="ibp-labels"><span>− Difícil</span><span>0</span><span>+ Bem-estar</span></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-header"><div><div class="title">📊 Resultado por Dimensão</div><div class="subtitle">Última pesquisa — Jun/2025</div></div></div>
+          <div class="card-header"><div><div class="title">📊 Como você se sente em cada área</div><div class="subtitle">Última pesquisa — Jun/2025</div></div></div>
           <div class="card-body">
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div>
@@ -370,11 +383,11 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
           <div class="card-header"><div><div class="title">📋 Suas Pesquisas</div><div class="subtitle">Todas as respostas anônimas registradas</div></div></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Data</th><th>Tipo</th><th>IBP</th><th>Zona</th><th>Ações</th></tr></thead>
+              <thead><tr><th>Data</th><th>Tipo</th><th>Índice</th><th>Como estava</th><th>Ações</th></tr></thead>
               <tbody id="tbody-historico-usuario">
                 <tr><td>12/06/2025</td><td><span style="background:var(--verde-xp);color:var(--verde);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Diagnóstico Geral</span></td><td style="font-weight:700;color:var(--verde);">+1,8</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="sv('resultados')">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
                 <tr><td>05/05/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">+0,2</td><td><span class="bdg bdg-warn"><span class="dot"></span>Neutro</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
-                <tr><td>28/04/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">−0,4</td><td><span class="bdg bdg-warn"><span class="dot"></span>Defesa Oculta</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
+                <tr><td>28/04/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">−0,4</td><td><span class="bdg bdg-warn"><span class="dot"></span>Vale observar</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
                 <tr><td>14/04/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--laranja);">−1,8</td><td><span class="bdg bdg-warn"><span class="dot"></span>Sofrimento</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
                 <tr><td>10/03/2025</td><td><span style="background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Pesquisa Pulso</span></td><td style="font-weight:700;color:var(--verde);">+2,1</td><td><span class="bdg bdg-ok"><span class="dot"></span>Prazer</span></td><td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este registro?'))this.closest('tr').remove()">🗑️</button></td></tr>
               </tbody>
@@ -394,7 +407,7 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
       <div class="content" style="max-width:640px;text-align:center;padding-top:40px;">
         <div style="font-size:60px;margin-bottom:16px;">✅</div>
         <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;">Respostas enviadas!</div>
-        <div style="font-size:14px;color:var(--cinza-medio);line-height:1.6;margin-bottom:24px;">Suas respostas foram registradas com sigilo total sob o código <strong>COL-4821</strong>.<br/>Seu IBP será atualizado em breve.</div>
+        <div style="font-size:14px;color:var(--cinza-medio);line-height:1.6;margin-bottom:24px;">Suas respostas foram registradas com sigilo total sob o código <strong>COL-4821</strong>.<br/>Seu índice de bem-estar será atualizado em breve.</div>
         <div style="background:var(--verde-xp);border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:12px;color:var(--verde);line-height:1.6;">
           🔒 Seus dados nunca são associados ao seu nome pelo RH.<br/>Apenas você tem acesso ao seu histórico individual.
         </div>
@@ -489,86 +502,321 @@ textarea.form-control{resize:vertical;min-height:80px;line-height:1.5;}
 </div>
 
 <script>
+// ===== FIREBASE =====
+var firebaseConfig = {
+  apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+  authDomain: "entrevista-inicial.firebaseapp.com",
+  projectId: "entrevista-inicial",
+  storageBucket: "entrevista-inicial.firebasestorage.app",
+  messagingSenderId: "437375609844",
+  appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+};
+var fbApp;
+try { fbApp = firebase.app('nr1map-usuario'); } catch(e) { fbApp = firebase.initializeApp(firebaseConfig, 'nr1map-usuario'); }
+var db = firebase.firestore(fbApp);
+
+// ===== ESTADO — uid vem do sessionStorage (login feito no admin.html) =====
+var _uid = sessionStorage.getItem('nr1map_user_uid');
+var _userData = {};
+var _perguntas = [];
+var _blocos = [];
+var _blocoAtual = 0;
+var _respostas = {};
+var _respostasFreq = {};
+
+// Redireciona se não tiver sessão
+if (!_uid) { window.location.href = 'admin.html'; }
+
+// Carrega dados ao abrir
+window.addEventListener('DOMContentLoaded', function() {
+  if (_uid) carregarUsuario();
+});
+
+var FREQ_OPCOES = [
+  { key:'sempre',    label:'Sempre',               sub:'ou quase sempre',            cor:'var(--verde)',   cls:'sel-s' },
+  { key:'maioria',   label:'Na maioria das vezes',  sub:'',                           cor:'var(--verde)',   cls:'sel-m' },
+  { key:'metade',    label:'Na metade das vezes',   sub:'às vezes sim, às vezes não', cor:'var(--laranja)', cls:'sel-n' },
+  { key:'poucas',    label:'Poucas vezes',           sub:'',                           cor:'#C53030',        cls:'sel-p' },
+  { key:'raramente', label:'Raramente',              sub:'ou quase nunca',             cor:'#C53030',        cls:'sel-r' }
+];
+
+var BANCO_PERGUNTAS = [
+  {id:1,modId:'M1',subcatId:'1.1',texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},
+  {id:2,modId:'M1',subcatId:'1.1',texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},
+  {id:3,modId:'M1',subcatId:'1.1',texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},
+  {id:4,modId:'M1',subcatId:'1.1',texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},
+  {id:5,modId:'M1',subcatId:'1.1',texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},
+  {id:6,modId:'M1',subcatId:'1.1',texto:'Não sofro pressões agressivas ou cobranças minuto a minuto pelo término de uma tarefa imediata.'},
+  {id:7,modId:'M1',subcatId:'1.2',texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},
+  {id:8,modId:'M1',subcatId:'1.2',texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras.'},
+  {id:9,modId:'M1',subcatId:'1.2',texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},
+  {id:10,modId:'M1',subcatId:'1.2',texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma.'},
+  {id:11,modId:'M1',subcatId:'1.2',texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},
+  {id:12,modId:'M1',subcatId:'1.2',texto:'A empresa oferece local físico confortável e silencioso projetado para relaxarmos nas pausas.'},
+  {id:13,modId:'M1',subcatId:'1.2',texto:'A empresa promove ações ou disponibiliza ferramentas práticas para nos ajudar a aliviar a tensão.'},
+  {id:14,modId:'M1',subcatId:'1.3',texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},
+  {id:15,modId:'M1',subcatId:'1.3',texto:'Consigo dormir bem à noite, sem que preocupações do trabalho provoquem insônia ou sono agitado.'},
+  {id:16,modId:'M1',subcatId:'1.3',texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tensão do emprego.'},
+  {id:17,modId:'M1',subcatId:'1.3',texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade geradas pela pressão diária.'},
+  {id:18,modId:'M1',subcatId:'1.3',texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana.'},
+  {id:19,modId:'M1',subcatId:'1.3',texto:'As exigências emocionais do dia a dia não me deixam com sensação de estar à beira de um esgotamento nervoso.'},
+  {id:20,modId:'M1',subcatId:'1.3',texto:'Sinto que a rotina atual do meu cargo protege e preserva a minha saúde física e mental a longo prazo.'},
+  {id:21,modId:'M1',subcatId:'1.4',texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},
+  {id:22,modId:'M1',subcatId:'1.4',texto:'Os sistemas adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo.'},
+  {id:23,modId:'M1',subcatId:'1.4',texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada ou dores de cabeça.'},
+  {id:24,modId:'M1',subcatId:'1.4',texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse.'},
+  {id:25,modId:'M1',subcatId:'1.4',texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas e processos digitais.'},
+  {id:26,modId:'M1',subcatId:'1.4',texto:'Quando ocorre falha tecnológica, o suporte técnico resolve de forma ágil, evitando o meu desgaste mental.'},
+  {id:27,modId:'M1',subcatId:'1.4',texto:'Os processos e fluxos digitais são diretos e simplificados, sem burocracias desnecessárias que gerem cansaço cognitivo.'},
+  {id:28,modId:'M2',subcatId:'2.1',texto:'Sinto que meu emprego está seguro e não vivo com medo diário de ser demitido repentinamente.'},
+  {id:29,modId:'M2',subcatId:'2.1',texto:'A empresa é clara e transparente sobre os motivos que levam a demissões.'},
+  {id:30,modId:'M2',subcatId:'2.1',texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe.'},
+  {id:31,modId:'M2',subcatId:'2.1',texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira.'},
+  {id:32,modId:'M2',subcatId:'2.1',texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},
+  {id:33,modId:'M2',subcatId:'2.1',texto:'A estabilidade que sinto no meu emprego me dá segurança para fazer planos financeiros de longo prazo.'},
+  {id:34,modId:'M2',subcatId:'2.2',texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara.'},
+  {id:35,modId:'M2',subcatId:'2.2',texto:'As exigências do dia a dia correspondem à função para a qual fui contratado, sem desvios confusos.'},
+  {id:36,modId:'M2',subcatId:'2.2',texto:'As ordens que recebo são coerentes, evitando que eu receba comandos contraditórios.'},
+  {id:37,modId:'M2',subcatId:'2.2',texto:'As metas exigidas de mim são justas e alcançáveis dentro do horário regular.'},
+  {id:38,modId:'M2',subcatId:'2.2',texto:'Os objetivos permanecem estáveis ao longo do mês, sem mudanças bruscas.'},
+  {id:39,modId:'M2',subcatId:'2.2',texto:'Quando a diretoria precisa alterar uma regra, a equipe é avisada com antecedência.'},
+  {id:40,modId:'M2',subcatId:'2.3',texto:'Quando cometo uma falha, a liderança me orienta a corrigir em vez de me culpar ou punir.'},
+  {id:41,modId:'M2',subcatId:'2.3',texto:'Os feedbacks sobre o meu desempenho são feitos de forma reservada e individual.'},
+  {id:42,modId:'M2',subcatId:'2.3',texto:'Sinto-me confortável para admitir que não sei fazer uma tarefa e pedir ajuda sem ser julgado.'},
+  {id:43,modId:'M2',subcatId:'2.3',texto:'Posso apontar problemas nos processos do setor sem medo de sofrer perseguições veladas.'},
+  {id:44,modId:'M2',subcatId:'2.3',texto:'A empresa estimula e abre espaço real para que funcionários deem sugestões de melhoria.'},
+  {id:45,modId:'M2',subcatId:'2.4',texto:'Recebi treinamento suficiente para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},
+  {id:46,modId:'M2',subcatId:'2.4',texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade.'},
+  {id:47,modId:'M2',subcatId:'2.4',texto:'Quando um novo sistema é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},
+  {id:48,modId:'M2',subcatId:'2.4',texto:'Fui instruído sobre quais são os riscos presentes no meu ambiente de trabalho.'},
+  {id:49,modId:'M2',subcatId:'2.4',texto:'Os treinamentos possuem linguagem clara e materiais de apoio adequados.'},
+  {id:50,modId:'M2',subcatId:'2.5',texto:'Executo minhas atividades sem sentir medo ou tensão constante de sofrer um acidente físico.'},
+  {id:51,modId:'M2',subcatId:'2.5',texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},
+  {id:52,modId:'M2',subcatId:'2.5',texto:'Os EPIs disponibilizados estão em excelente estado de conservação.'},
+  {id:53,modId:'M2',subcatId:'2.5',texto:'As máquinas e ferramentas passam por revisões e manutenções preventivas regulares.'},
+  {id:54,modId:'M2',subcatId:'2.5',texto:'A infraestrutura do local onde trabalho é segura.'},
+  {id:55,modId:'M2',subcatId:'2.5',texto:'Recebi treinamento detalhado de segurança antes de ser colocado para operar qualquer equipamento perigoso.'},
+  {id:56,modId:'M2',subcatId:'2.5',texto:'Sinto-me seguro para exercer o Direito de Recusa caso perceba risco grave e iminente para minha vida.'},
+  {id:57,modId:'M3',subcatId:'3.1',texto:'O meu superior direto trata-me com respeito e educação no dia a dia.'},
+  {id:58,modId:'M3',subcatId:'3.1',texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},
+  {id:59,modId:'M3',subcatId:'3.1',texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades antes de tomar decisões.'},
+  {id:60,modId:'M3',subcatId:'3.1',texto:'Considero que o meu superior direto tem competência técnica suficiente para liderar a nossa equipe.'},
+  {id:61,modId:'M3',subcatId:'3.1',texto:'Quando enfrento um problema grave, sinto que posso contar com o apoio prático do meu supervisor.'},
+  {id:62,modId:'M3',subcatId:'3.2',texto:'Os meus colegas ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},
+  {id:63,modId:'M3',subcatId:'3.2',texto:'O convívio diário com a minha equipe é saudável e livre de fofocas ou boatos maliciosos.'},
+  {id:64,modId:'M3',subcatId:'3.2',texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias.'},
+  {id:65,modId:'M3',subcatId:'3.2',texto:'Sinto-me integrado e acolhido pelo meu grupo de trabalho, sem sofrer qualquer tipo de isolamento.'},
+  {id:66,modId:'M3',subcatId:'3.2',texto:'Confio nos colegas do meu setor para realizar as tarefas em conjunto.'},
+  {id:67,modId:'M3',subcatId:'3.3',texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais.'},
+  {id:68,modId:'M3',subcatId:'3.3',texto:'Compreendo e concordo com os objetivos gerais da empresa.'},
+  {id:69,modId:'M3',subcatId:'3.3',texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações.'},
+  {id:70,modId:'M3',subcatId:'3.3',texto:'Há equilíbrio saudável entre respeitar o conhecimento dos mais experientes e dar abertura para os mais jovens.'},
+  {id:71,modId:'M3',subcatId:'3.3',texto:'Sei exatamente se meu perfil e postura estão alinhados com o que a empresa busca.'},
+  {id:72,modId:'M3',subcatId:'3.3',texto:'Recebi retornos claros da gerência sobre minha adaptação à cultura e ao ambiente do time.'},
+  {id:73,modId:'M3',subcatId:'3.4',texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário.'},
+  {id:74,modId:'M3',subcatId:'3.4',texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade das minhas tarefas.'},
+  {id:75,modId:'M3',subcatId:'3.4',texto:'A gerência costuma elogiar de forma clara os bons resultados das entregas.'},
+  {id:76,modId:'M3',subcatId:'3.4',texto:'Quando me dedico além do normal, essa dedicação é notada e valorizada pela empresa.'},
+  {id:77,modId:'M3',subcatId:'3.5',texto:'A liderança não pratica perseguições, piadas humilhantes ou ameaças psicológicas.'},
+  {id:78,modId:'M3',subcatId:'3.5',texto:'O ambiente de trabalho é livre de exclusões intencionais ou boicotes profissionais.'},
+  {id:79,modId:'M3',subcatId:'3.5',texto:'O meu local de trabalho é seguro contra comentários de teor sexual ou insinuações abusivas.'},
+  {id:80,modId:'M3',subcatId:'3.5',texto:'Confio que se eu denunciar um assédio, a empresa investigará com total sigilo e seriedade.'},
+  {id:81,modId:'M3',subcatId:'3.5',texto:'Sinto-me seguro para relatar qualquer desvio de conduta sem medo de punição.'},
+  {id:82,modId:'M4',subcatId:'4.1',texto:'Sinto que as tarefas que realizo possuem valor real e fazem sentido para mim.'},
+  {id:83,modId:'M4',subcatId:'4.1',texto:'Percebo claramente o impacto positivo que o meu trabalho causa na vida dos clientes ou na sociedade.'},
+  {id:84,modId:'M4',subcatId:'4.1',texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},
+  {id:85,modId:'M4',subcatId:'4.1',texto:'Consigo enxergar uma conexão direta entre o crescimento da empresa e a realização dos meus objetivos de vida.'},
+  {id:86,modId:'M4',subcatId:'4.1',texto:'Sinto-me conectado com a missão e o propósito geral da empresa enquanto executo minhas atividades.'},
+  {id:87,modId:'M4',subcatId:'4.2',texto:'As atividades que desempenho aproveitam muito bem as minhas principais habilidades e talentos.'},
+  {id:88,modId:'M4',subcatId:'4.2',texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês nesta empresa.'},
+  {id:89,modId:'M4',subcatId:'4.2',texto:'Sinto que as exigências da minha função combinam com o meu jeito de ser e personalidade.'},
+  {id:90,modId:'M4',subcatId:'4.2',texto:'A realização do meu trabalho me torna uma pessoa melhor e mais madura.'},
+  {id:91,modId:'M4',subcatId:'4.2',texto:'Consigo visualizar um caminho claro de crescimento de carreira para mim dentro desta organização.'},
+  {id:92,modId:'M4',subcatId:'4.3',texto:'Tenho autonomia suficiente para tomar decisões sobre a execução das minhas tarefas sem precisar de autorização para tudo.'},
+  {id:93,modId:'M4',subcatId:'4.3',texto:'A empresa me dá liberdade para ajustar o método quando percebo uma forma mais eficiente.'},
+  {id:94,modId:'M4',subcatId:'4.3',texto:'Sinto-me encorajado a criar soluções próprias diante dos problemas que surgem na minha rotina.'},
+  {id:95,modId:'M4',subcatId:'4.3',texto:'A gerência confia na minha competência, dando-me espaço livre de microgerenciamento constante.'},
+  {id:96,modId:'M4',subcatId:'4.3',texto:'Consigo gerenciar e priorizar a ordem de execução das minhas entregas ao longo do dia com autonomia.'},
+  {id:97,modId:'M4',subcatId:'4.4',texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},
+  {id:98,modId:'M4',subcatId:'4.4',texto:'Os incentivos que a empresa oferece me deixam mais motivado no dia a dia.'},
+  {id:99,modId:'M4',subcatId:'4.4',texto:'Os momentos de integração demonstram preocupação real com o nosso bem-estar.'},
+  {id:100,modId:'M4',subcatId:'4.4',texto:'Quando a equipe supera as expectativas, a empresa retribui com ações motivadoras.'},
+  {id:101,modId:'M4',subcatId:'4.4',texto:'As iniciativas da empresa me estimulam a dar o meu melhor.'}
+];
+
+function freqParaValor(freq, invertida) {
+  var mapa = { sempre:5, maioria:2.5, metade:0, poucas:-2.5, raramente:-5 };
+  var v = mapa[freq] !== undefined ? mapa[freq] : 0;
+  return invertida ? -v : v;
+}
+
+function getZona(v) {
+  if (v >= 1.5) return { nome:'Você está bem', cor:'var(--verde)' };
+  if (v <= -1.5) return { nome:'Momento difícil', cor:'#C53030' };
+  return { nome:'Vale observar', cor:'var(--laranja)' };
+}
+
+function carregarUsuario() {
+  db.collection('nr1map_usuarios_pf').doc(_uid).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      _userData = doc.data();
+      var nomeEl = document.querySelector('.sidebar-perfil .nome');
+      if (nomeEl) nomeEl.textContent = _userData.nome || 'Usuário';
+      var roleEl = document.querySelector('.sidebar-perfil .role');
+      if (roleEl) roleEl.textContent = _userData.profissao || 'Colaborador';
+      carregarHistorico();
+      verificarPesquisaAtiva();
+    }).catch(function(e){ console.log(e); });
+}
+
+function carregarHistorico() {
+  db.collection('nr1map_respostas_pf').doc(_uid).get()
+    .then(function(doc) {
+      var tbody = document.getElementById('tbody-historico-usuario');
+      if (!tbody || !doc.exists) return;
+      var hist = doc.data().historico || [];
+      tbody.innerHTML = '';
+      hist.slice().reverse().forEach(function(h) {
+        var cor = h.ibp >= 1.5 ? 'var(--verde)' : h.ibp <= -1.5 ? '#C53030' : 'var(--laranja)';
+        var zona = h.ibp >= 1.5 ? 'Você está bem' : h.ibp <= -1.5 ? 'Momento difícil' : 'Vale observar';
+        var bdg = h.ibp >= 1.5 ? 'bdg-ok' : h.ibp <= -1.5 ? 'bdg-danger' : 'bdg-warn';
+        var sinal = h.ibp >= 0 ? '+' : '';
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + h.data + '</td>' +
+          '<td><span style="background:var(--verde-xp);color:var(--verde);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' + (h.tipo||'Diagnóstico') + '</span></td>' +
+          '<td style="font-weight:700;color:' + cor + ';">' + sinal + h.ibp.toFixed(1).replace('.',',') + '</td>' +
+          '<td><span class="bdg ' + bdg + '"><span class="dot"></span>' + zona + '</span></td>' +
+          '<td><button class="btn btn-ghost btn-sm" onclick="sv(\'resultados\')">👁 Ver</button></td>';
+        tbody.appendChild(tr);
+      });
+    }).catch(function(e){ console.log(e); });
+}
+
+function verificarPesquisaAtiva() {
+  var empresaId = _userData.empresaId;
+  if (!empresaId) return;
+  db.collection('nr1map_selecoes').doc(empresaId).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      var selecionadas = doc.data().selecionadas || [];
+      var textosCustom = doc.data().textos || {};
+      var propriasExtra = doc.data().proprias || [];
+      if (selecionadas.length === 0) return;
+      var bancoPorId = {};
+      BANCO_PERGUNTAS.forEach(function(p){ bancoPorId[String(p.id)] = Object.assign({}, p, { texto: textosCustom[String(p.id)] || p.texto }); });
+      propriasExtra.forEach(function(p){ bancoPorId[p.id] = p; });
+      var pool = [];
+      selecionadas.forEach(function(pid){ if(bancoPorId[String(pid)]) pool.push(bancoPorId[String(pid)]); });
+      for (var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t; }
+      _perguntas = pool;
+      _blocos = [];
+      for (var k=0;k<_perguntas.length;k+=7) _blocos.push(_perguntas.slice(k,k+7));
+    }).catch(function(e){ console.log(e); });
+}
+
 var pergAtual = 0;
 var respostas = {};
 
-var perguntas = [
-  { texto: 'Como você tem se sentido em relação ao seu volume de trabalho esta semana?', cat: 'Carga de Trabalho' },
-  { texto: 'Você se sentiu reconhecido(a) pelo seu trabalho nos últimos dias?', cat: 'Reconhecimento' },
-  { texto: 'Como está o clima entre você e seus colegas de equipe?', cat: 'Relações no Trabalho' }
-];
-
-var likertOpcoes = [
-  { val: 5, label: 'Muito bem / Concordo totalmente' },
-  { val: 4, label: 'Bem / Concordo' },
-  { val: 3, label: 'Neutro / Indiferente' },
-  { val: 2, label: 'Mal / Discordo' },
-  { val: 1, label: 'Muito mal / Discordo totalmente' }
-];
-
 function renderPergunta() {
-  var p = perguntas[pergAtual];
-  var html = '<div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">' + p.cat + '</div>';
-  html += '<div style="font-size:16px;color:var(--preto);line-height:1.55;margin-bottom:20px;font-weight:400;">' + p.texto + '</div>';
-  html += '<div style="display:flex;flex-direction:column;gap:10px;">';
-  likertOpcoes.forEach(function(op) {
-    var sel = respostas[pergAtual] === op.val;
-    html += '<div onclick="selecionarOpcao(' + op.val + ')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:10px;border:1.5px solid ' + (sel ? 'var(--verde)' : 'var(--linha)') + ';background:' + (sel ? 'var(--verde-xp)' : 'var(--branco)') + ';cursor:pointer;transition:all .15s;">';
-    html += '<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid ' + (sel ? 'var(--verde)' : 'var(--linha)') + ';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:' + (sel ? '#fff' : 'var(--cinza-medio)') + ';background:' + (sel ? 'var(--verde)' : 'transparent') + ';flex-shrink:0;">' + op.val + '</div>';
-    html += '<span style="font-size:13px;color:var(--cinza-escuro);">' + op.label + '</span>';
-    html += '</div>';
+  if (_perguntas.length === 0) {
+    document.getElementById('container-perguntas').innerHTML = '<p style="color:var(--cinza-medio);font-size:13px;padding:20px 0;">Nenhuma pesquisa ativa no momento.</p>';
+    return;
+  }
+  var bloco = _blocos[_blocoAtual] || [];
+  var pergIni = _blocoAtual * 7;
+  var container = document.getElementById('container-perguntas');
+  container.innerHTML = '';
+  document.getElementById('prog-pesquisa').style.width = Math.round((pergIni/_perguntas.length)*100) + '%';
+  document.getElementById('perg-num').textContent = _blocoAtual + 1;
+
+  bloco.forEach(function(p, idx) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--branco);border:1px solid var(--linha);border-radius:12px;padding:16px;margin-bottom:14px;';
+    var num = document.createElement('div');
+    num.style.cssText = 'font-size:10px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;';
+    num.textContent = 'Pergunta ' + (pergIni+idx+1) + ' de ' + _perguntas.length;
+    card.appendChild(num);
+    var txt = document.createElement('div');
+    txt.style.cssText = 'font-size:14px;color:var(--preto);line-height:1.55;margin-bottom:14px;';
+    txt.textContent = p.texto;
+    card.appendChild(txt);
+    var freqWrap = document.createElement('div');
+    freqWrap.className = 'freq-group';
+    var freqSel = _respostasFreq[p.id] || null;
+    FREQ_OPCOES.forEach(function(op) {
+      var btn = document.createElement('button');
+      btn.className = 'freq-btn-u' + (freqSel===op.key?' '+op.cls:'');
+      var dot = document.createElement('div'); dot.className='freq-dot-u';
+      dot.style.background = freqSel===op.key ? op.cor : 'var(--linha)';
+      var lw = document.createElement('div');
+      var lb = document.createElement('div'); lb.className='freq-label-u'; lb.textContent=op.label; lw.appendChild(lb);
+      if(op.sub){ var sb=document.createElement('div'); sb.className='freq-sub-u'; sb.textContent=op.sub; lw.appendChild(sb); }
+      btn.appendChild(dot); btn.appendChild(lw);
+      btn.onclick=(function(pid,freq,cls,cor,inv){return function(){
+        freqWrap.querySelectorAll('.freq-btn-u').forEach(function(b){ b.className='freq-btn-u'; b.querySelector('.freq-dot-u').style.background='var(--linha)'; });
+        this.className='freq-btn-u '+cls; this.querySelector('.freq-dot-u').style.background=cor;
+        _respostasFreq[pid]=freq; _respostas[pid]=freqParaValor(freq,inv);
+        verificarBlocoCompleto();
+      };})(p.id,op.key,op.cls,op.cor,p.invertida||false);
+      freqWrap.appendChild(btn);
+    });
+    card.appendChild(freqWrap);
+    container.appendChild(card);
   });
-  html += '</div>';
-  document.getElementById('container-perguntas').innerHTML = html;
-  document.getElementById('perg-num').textContent = pergAtual + 1;
-  document.getElementById('prog-pesquisa').style.width = ((pergAtual + 1) / perguntas.length * 100) + '%';
-  document.getElementById('btn-anterior').style.display = pergAtual > 0 ? 'flex' : 'none';
-  document.getElementById('btn-proximo').textContent = pergAtual === perguntas.length - 1 ? '✅ Enviar respostas' : 'Próxima →';
+  document.getElementById('btn-anterior').style.display = _blocoAtual>0?'flex':'none';
+  document.getElementById('btn-proximo').textContent = _blocoAtual===_blocos.length-1?'✅ Enviar respostas':'Próximo bloco →';
+  document.getElementById('btn-proximo').disabled = !blocoCompleto();
 }
 
-function selecionarOpcao(val) {
-  respostas[pergAtual] = val;
-  renderPergunta();
+function blocoCompleto() {
+  return (_blocos[_blocoAtual]||[]).every(function(p){ return _respostas[p.id]!==undefined; });
 }
+function verificarBlocoCompleto() {
+  document.getElementById('btn-proximo').disabled = !blocoCompleto();
+}
+function selecionarOpcao() {}
 
 function pergProxima() {
-  if (!respostas[pergAtual]) { alert('Por favor selecione uma opção antes de continuar.'); return; }
-  if (pergAtual < perguntas.length - 1) {
-    pergAtual++;
-    renderPergunta();
-  } else {
-    // Calcular IBP médio das respostas
-    var soma = 0;
-    var total = 0;
-    Object.keys(respostas).forEach(function(k) { soma += respostas[k]; total++; });
-    var media = total > 0 ? (soma / total - 3).toFixed(1) : '0,0';
-    var mediaNum = parseFloat(media);
-    var zona = mediaNum >= 1.5 ? 'Prazer' : mediaNum >= 0 ? 'Neutro' : mediaNum >= -1.5 ? 'Defesa Oculta' : 'Sofrimento';
-    var cor = mediaNum >= 1 ? 'var(--verde)' : mediaNum >= 0 ? 'var(--laranja)' : 'var(--laranja)';
-    var bdgClass = mediaNum >= 1 ? 'bdg bdg-ok' : 'bdg bdg-warn';
-    var sinal = mediaNum >= 0 ? '+' : '';
-
-    // Adiciona no histórico
-    var tbody = document.getElementById('tbody-historico-usuario');
-    if(tbody) {
-      var hoje = new Date().toLocaleDateString('pt-BR');
-      var tipo = perguntas.length > 5 ? 'Diagnóstico Geral' : 'Pesquisa Pulso';
-      var tipoCor = perguntas.length > 5 ? 'var(--verde)' : 'var(--roxo)';
-      var tipoBg = perguntas.length > 5 ? 'var(--verde-xp)' : 'var(--roxo-xp)';
-      var tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + hoje + '</td>' +
-        '<td><span style="background:' + tipoBg + ';color:' + tipoCor + ';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">' + tipo + '</span></td>' +
-        '<td style="font-weight:700;color:' + cor + ';">' + sinal + media.replace('.',',') + '</td>' +
-        '<td><span class="' + bdgClass + '"><span class="dot"></span>' + zona + '</span></td>' +
-        '<td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="sv(\'resultados\')">👁 Ver</button><button class="btn btn-danger btn-sm" onclick="if(confirm(\'Excluir?\'))this.closest(\'tr\').remove()">🗑️</button></td>';
-      tbody.insertBefore(tr, tbody.firstChild);
-    }
-    sv('pesquisa-concluida');
-  }
+  if (!blocoCompleto()) { alert('Por favor responda todas as perguntas do bloco.'); return; }
+  if (_blocoAtual < _blocos.length-1) {
+    _blocoAtual++; renderPergunta();
+    document.querySelector('.main').scrollTop=0;
+  } else { enviarRespostas(); }
 }
 
 function pergAnterior() {
-  if (pergAtual > 0) { pergAtual--; renderPergunta(); }
+  if (_blocoAtual>0) { _blocoAtual--; renderPergunta(); }
+}
+
+function enviarRespostas() {
+  var btn = document.getElementById('btn-proximo');
+  btn.textContent='Enviando...'; btn.disabled=true;
+  var porSubcat={};
+  _perguntas.forEach(function(p){
+    if(_respostas[p.id]===undefined) return;
+    if(!porSubcat[p.subcatId]) porSubcat[p.subcatId]={soma:0,n:0,modId:p.modId};
+    porSubcat[p.subcatId].soma+=_respostas[p.id]; porSubcat[p.subcatId].n++;
+  });
+  var ibpSub={},somaG=0,nG=0;
+  Object.keys(porSubcat).forEach(function(sc){
+    var med=porSubcat[sc].soma/porSubcat[sc].n;
+    ibpSub[sc]={ibp:Math.round(med*100)/100,modId:porSubcat[sc].modId};
+    somaG+=med; nG++;
+  });
+  var ibpGeral=Math.round((somaG/nG)*100)/100;
+  var zona=getZona(ibpGeral);
+  var dataStr=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  var tipo=_perguntas.length>20?'Diagnóstico Geral':'Pesquisa Pulso';
+  db.collection('nr1map_respostas_pf').doc(_uid).set({
+    historico:firebase.firestore.FieldValue.arrayUnion({ibp:ibpGeral,data:dataStr,tipo:tipo}),
+    ultimoIbp:ibpGeral, ultimaZona:zona.nome, atualizadoEm:new Date().toISOString()
+  },{merge:true})
+  .then(function(){
+    btn.textContent='✅ Enviar respostas'; btn.disabled=false;
+    carregarHistorico(); sv('pesquisa-concluida');
+  })
+  .catch(function(e){ console.log(e); btn.textContent='✅ Enviar respostas'; btn.disabled=false; alert('Erro ao enviar. Tente novamente.'); });
 }
 
 function sv(id) {
@@ -577,20 +825,36 @@ function sv(id) {
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   var nav = document.getElementById('nav-' + id);
   if (nav) nav.classList.add('active');
-  if (id === 'pesquisa-form') { pergAtual = 0; respostas = {}; renderPergunta(); }
+  if (id === 'pesquisa-form') { _blocoAtual=0; _respostas={}; _respostasFreq={}; renderPergunta(); }
 }
 
 function abrirSocorro(){ document.getElementById('modal-socorro').classList.add('open'); }
 function abrirSocorroAnonimo(){ document.getElementById('modal-anonimo').classList.add('open'); }
 
 function enviarSocorro() {
-  document.getElementById('modal-socorro').classList.remove('open');
-  alert('✅ Pedido de ajuda enviado com segurança.\n\nA psicóloga responsável receberá sua mensagem e entrará em contato conforme sua preferência.\n\nVocê não está sozinho(a).');
+  var msg = document.getElementById('socorro-msg').value.trim();
+  var contato = document.getElementById('socorro-contato').value;
+  db.collection('nr1map_chamados').add({
+    uid:_uid, tipo:'socorro', mensagem:msg||'(sem descrição)',
+    contato:contato, criadoEm:new Date().toISOString()
+  }).then(function(){
+    document.getElementById('modal-socorro').classList.remove('open');
+    document.getElementById('socorro-msg').value='';
+    alert('Pedido de ajuda enviado com segurança. A psicóloga responsável entrará em contato conforme sua preferência.');
+  }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
 }
 
 function enviarAnonimo() {
-  document.getElementById('modal-anonimo').classList.remove('open');
-  alert('✅ Mensagem anônima enviada com sucesso.\n\nSua identidade está protegida. A gestão receberá sua mensagem sem nenhuma identificação.');
+  var msg = document.getElementById('anonimo-msg').value.trim();
+  if(!msg){ alert('Escreva sua mensagem antes de enviar.'); return; }
+  db.collection('nr1map_sugestoes').add({
+    uid:_uid, empresaId:_userData.empresaId||null,
+    texto:msg, criadoEm:new Date().toISOString()
+  }).then(function(){
+    document.getElementById('modal-anonimo').classList.remove('open');
+    document.getElementById('anonimo-msg').value='';
+    alert('Mensagem enviada. Sua identidade está protegida.');
+  }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
 }
 </script>
 </body>
