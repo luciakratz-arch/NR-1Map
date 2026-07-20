@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Instalar NR-1 Map no seu celular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f4f7f5;color:#1a1a1a;-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+.nav{background:#0D1210;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:-.3px;text-decoration:none;}
+.nav-logo span{color:#12A073;}
+.nav-back{font-size:13px;color:#12A073;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:5px;}
+.nav-back:hover{color:#0A6E4F;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0A6E4F 0%,#0D1210 100%);padding:56px 24px 48px;text-align:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(18,160,115,.2);border:1px solid rgba(18,160,115,.4);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600;color:#12A073;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px;}
+.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(26px,5vw,40px);color:#fff;line-height:1.15;margin-bottom:14px;letter-spacing:-.5px;}
+.hero-title span{color:#12A073;}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.7);line-height:1.7;max-width:520px;margin:0 auto 28px;}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;background:#12A073;color:#fff;font-size:15px;font-weight:600;padding:14px 28px;border-radius:10px;text-decoration:none;transition:background .2s;}
+.hero-btn:hover{background:#0A6E4F;}
+
+/* BENEFÍCIOS */
+.beneficios{padding:40px 24px;max-width:800px;margin:0 auto;}
+.bene-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:20px;}
+.bene-item{background:#fff;border:1px solid #e0e8e4;border-radius:12px;padding:16px;text-align:center;}
+.bene-icon{font-size:28px;margin-bottom:8px;}
+.bene-label{font-size:12px;font-weight:600;color:#2A2E2C;line-height:1.4;}
+.bene-sub{font-size:11px;color:#6B7370;margin-top:3px;}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:#0D1210;margin-bottom:4px;}
+.section-sub{font-size:13px;color:#6B7370;}
+
+/* CARDS DE INSTRUÇÃO */
+.instrucoes{padding:0 24px 48px;max-width:800px;margin:0 auto;}
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;}
+@media(max-width:580px){.cards-row{grid-template-columns:1fr;}}
+.card-inst{background:#fff;border:1px solid #e0e8e4;border-radius:16px;overflow:hidden;}
+.card-inst-header{padding:18px 20px 14px;border-bottom:1px solid #e0e8e4;display:flex;align-items:center;gap:12px;}
+.card-os-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.card-os-icon.android{background:#e8f5e9;}
+.card-os-icon.ios{background:#e3f2fd;}
+.card-os-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#0D1210;}
+.card-os-sub{font-size:11px;color:#6B7370;margin-top:1px;}
+.card-inst-body{padding:18px 20px;}
+.passo{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.passo:last-child{margin-bottom:0;}
+.passo-num{width:24px;height:24px;border-radius:50%;background:#0A6E4F;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.passo-txt{font-size:13px;color:#2A2E2C;line-height:1.55;}
+.passo-txt strong{color:#0D1210;}
+.passo-emoji{font-size:15px;margin-right:3px;}
+
+/* CTA FINAL */
+.cta-final{background:#0D1210;padding:48px 24px;text-align:center;}
+.cta-final h2{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff;margin-bottom:10px;}
+.cta-final p{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.6;}
+.cta-btn-grande{display:inline-flex;align-items:center;gap:8px;background:#12A073;color:#fff;font-size:16px;font-weight:700;padding:16px 36px;border-radius:12px;text-decoration:none;font-family:'Syne',sans-serif;}
+.cta-btn-grande:hover{background:#0A6E4F;}
+
+/* FOOTER */
+footer{background:#0A0D0C;padding:24px;text-align:center;}
+footer a{color:#12A073;text-decoration:none;}
+footer p{font-size:12px;color:#4A5450;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="nav-logo">NR-1<span>Map</span></a>
+  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="nav-back">← Voltar ao site</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">📱 App gratuito · Sem loja de aplicativos</div>
+  <h1 class="hero-title">Instale o <span>NR-1 Map</span><br/>no seu celular</h1>
+  <p class="hero-sub">Acesse sua área, responda pesquisas e acompanhe seu bem-estar no trabalho diretamente pela tela inicial — como um app nativo, sem ocupar espaço de loja.</p>
+  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="hero-btn">🚀 Abrir o App agora</a>
+</section>
+
+<!-- BENEFÍCIOS -->
+<section class="beneficios">
+  <div class="section-title">Por que instalar?</div>
+  <div class="section-sub">Funciona como app, sem precisar de Play Store ou App Store.</div>
+  <div class="bene-grid">
+    <div class="bene-item"><div class="bene-icon">⚡</div><div class="bene-label">Acesso rápido</div><div class="bene-sub">Ícone na tela inicial</div></div>
+    <div class="bene-item"><div class="bene-icon">🔒</div><div class="bene-label">100% seguro</div><div class="bene-sub">Dados criptografados</div></div>
+    <div class="bene-item"><div class="bene-icon">📶</div><div class="bene-label">Funciona offline</div><div class="bene-sub">Acesso mesmo sem net</div></div>
+    <div class="bene-item"><div class="bene-icon">🆓</div><div class="bene-label">Sem download</div><div class="bene-sub">Não ocupa espaço extra</div></div>
+  </div>
+</section>
+
+<!-- INSTRUÇÕES -->
+<section class="instrucoes">
+  <div class="section-title">Como instalar</div>
+  <div class="section-sub">Escolha o seu sistema abaixo e siga os passos — leva menos de 1 minuto.</div>
+
+  <div class="cards-row">
+
+    <!-- ANDROID -->
+    <div class="card-inst">
+      <div class="card-inst-header">
+        <div class="card-os-icon android">🤖</div>
+        <div>
+          <div class="card-os-title">Android</div>
+          <div class="card-os-sub">Usando o Google Chrome</div>
+        </div>
+      </div>
+      <div class="card-inst-body">
+        <div class="passo">
+          <div class="passo-num">1</div>
+          <div class="passo-txt">Abra este link no <strong>Google Chrome</strong> no seu Android.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">2</div>
+          <div class="passo-txt">Toque nos <strong>3 pontos ⋮</strong> no canto superior direito da tela.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">3</div>
+          <div class="passo-txt">Selecione <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong>.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">4</div>
+          <div class="passo-txt">Confirme tocando em <strong>"Instalar"</strong> na caixa que aparece.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">5</div>
+          <div class="passo-txt">✅ Pronto! O ícone do <strong>NR-1 Map</strong> aparecerá na sua tela inicial.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS -->
+    <div class="card-inst">
+      <div class="card-inst-header">
+        <div class="card-os-icon ios">🍎</div>
+        <div>
+          <div class="card-os-title">iPhone / iPad</div>
+          <div class="card-os-sub">Usando o Safari</div>
+        </div>
+      </div>
+      <div class="card-inst-body">
+        <div class="passo">
+          <div class="passo-num">1</div>
+          <div class="passo-txt">Abra este link no <strong>Safari</strong> — não funciona em outros navegadores no iPhone.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">2</div>
+          <div class="passo-txt">Toque no ícone de <strong>compartilhar</strong> <span class="passo-emoji">⬆️</span> na barra inferior da tela.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">3</div>
+          <div class="passo-txt">Role a lista e toque em <strong>"Adicionar à Tela de Início"</strong>.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">4</div>
+          <div class="passo-txt">Confirme o nome e toque em <strong>"Adicionar"</strong> no canto superior direito.</div>
+        </div>
+        <div class="passo">
+          <div class="passo-num">5</div>
+          <div class="passo-txt">✅ Pronto! O ícone do <strong>NR-1 Map</strong> aparecerá na sua tela inicial.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <h2>Tudo pronto para começar?</h2>
+  <p>Acesse o NR-1 Map agora e responda sua pesquisa de bem-estar.<br/>Seus dados são 100% anônimos e seguros.</p>
+  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="cta-btn-grande">🚀 Abrir o App agora</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    <strong style="color:#C8D4D0;">NR-1 Map</strong> — Gestão de Riscos Psicossociais<br/>
+    <a href="https://luciakratz-arch.github.io/NR-1Map/">luciakratz-arch.github.io/NR-1Map</a><br/>
+    <a href="mailto:luciakratz@gmail.com">luciakratz@gmail.com</a> · 
+    <a href="https://wa.me/5562994644950">62 99464-4950</a>
+  </p>
+</footer>
+
+</body>
+</html>

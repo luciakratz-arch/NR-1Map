@@ -1,0 +1,41 @@
+{
+  "name": "NR-1 Map — Gestão de Riscos Psicossociais",
+  "short_name": "NR-1 Map",
+  "description": "Gestão de riscos psicossociais para empresas brasileiras conforme NR-1",
+  "start_url": "/NR-1Map/",
+  "scope": "/NR-1Map/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D1210",
+  "theme_color": "#0A6E4F",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "nr1maps logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "nr1maps logo 512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Painel RH",
+      "short_name": "Painel",
+      "url": "/NR-1Map/painel.html",
+      "icons": [{ "src": "nr1maps logo 512.png", "sizes": "512x512" }]
+    },
+    {
+      "name": "Área do Usuário",
+      "short_name": "Minha Área",
+      "url": "/NR-1Map/usuario.html",
+      "icons": [{ "src": "nr1maps logo 512.png", "sizes": "512x512" }]
+    }
+  ]
+}
