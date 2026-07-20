@@ -924,9 +924,9 @@ async function enviarDep() {
     <div id="calc-sub" style="font-size:12px;color:#8A9590;margin-bottom:20px;"></div>
 
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
-      <input type="range" id="slider-n" min="1" max="100" value="10" oninput="calcValor(this.value)" style="flex:1;min-width:180px;" id="slider-n"/>
+      <input type="range" id="slider-n" min="1" max="500" value="10" oninput="calcValor(this.value)" style="flex:1;min-width:180px;" id="slider-n"/>
       <div style="display:flex;align-items:center;gap:8px;">
-        <input type="number" id="input-n" min="1" max="100" value="10"
+        <input type="number" id="input-n" min="1" max="500" value="10"
           oninput="calcValor(this.value);document.getElementById('slider-n').value=this.value"
           style="width:64px;padding:8px;font-size:16px;font-weight:700;border:1px solid #2A2E2C;border-radius:7px;background:#181D1B;color:#fff;text-align:center;font-family:'Syne',sans-serif;"/>
         <span style="font-size:13px;color:#8A9590;">colaboradores</span>
@@ -953,6 +953,9 @@ async function enviarDep() {
       <div id="tf-row-2" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
       <div id="tf-row-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
       <div id="tf-row-4" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
+      <div id="tf-row-5" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
+      <div id="tf-row-6" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
+      <div id="tf-row-enterprise" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;background:rgba(123,0,196,.08);"></div>
     </div>
 
     <div style="margin-top:20px;">
@@ -972,7 +975,24 @@ async function enviarDep() {
       <span>✓ Respostas 100% anônimas por CBO</span>
     </div>
   </div>
-  <p style="margin-top:14px;font-size:13px;color:var(--cinza-medio);">Acima de 100 colaboradores → <a href="#contato" style="color:var(--verde);">fale com um especialista</a>.</p>
+  <!-- BANNER LEGAL NR-1 -->
+  <div style="max-width:720px;margin-top:20px;background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:20px 24px;border:1px solid #2A1A3E;display:flex;align-items:flex-start;gap:16px;">
+    <div style="font-size:28px;flex-shrink:0;">⚖️</div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">Obrigatório para toda empresa com CLT — sem exceção de porte</div>
+      <div style="font-size:12px;color:#8A9590;line-height:1.7;">A <strong style="color:#C8D4D0;">Portaria MTE nº 1.419/2024</strong> exige gestão de riscos psicossociais para <strong style="color:#C8D4D0;">todos os empregadores CLT</strong>, independentemente do número de funcionários. Micro, pequena, média ou grande — a lei não abre exceções.<br/>
+      <span style="color:var(--verde-claro);font-weight:600;">1 afastamento por burnout custa em média R$ 80.000 em indenização. O NR-1 Map custa a partir de R$ 175/mês.</span></div>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div style="max-width:720px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;background:var(--cinza-claro);border-radius:10px;padding:16px 20px;border:1px solid var(--linha);flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--preto);">Acima de 501 colaboradores?</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-top:3px;">Pacote personalizado com SLA, integrações e proposta sob medida.</div>
+    </div>
+    <a href="#contato" style="display:inline-flex;align-items:center;gap:6px;background:var(--roxo);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;white-space:nowrap;">💬 Falar com especialista →</a>
+  </div>
 </section>
 
 <script>
@@ -991,7 +1011,9 @@ var dados = {
       { label: 'Até 5', unit: 35, ex: '5 × R$35 = R$175' },
       { label: '6 a 20', unit: 25, ex: '10 × R$25 = R$250' },
       { label: '21 a 50', unit: 20, ex: '30 × R$20 = R$600' },
-      { label: '51 a 100 ⭐', unit: 16.5, ex: '60 × R$16,50 = R$990' }
+      { label: '51 a 100', unit: 16.5, ex: '60 × R$16,50 = R$990' },
+      { label: '101 a 200', unit: 13, ex: '150 × R$13 = R$1.950' },
+      { label: '201 a 500 ⭐', unit: 10, ex: '300 × R$10 = R$3.000' }
     ]
   },
   unico: {
@@ -1006,7 +1028,9 @@ var dados = {
       { label: 'Até 5', unit: 97, ex: '5 × R$97 = R$485' },
       { label: '6 a 20', unit: 79, ex: '10 × R$79 = R$790' },
       { label: '21 a 50', unit: 59, ex: '30 × R$59 = R$1.770' },
-      { label: '51 a 100', unit: 49, ex: '60 × R$49 = R$2.940' }
+      { label: '51 a 100', unit: 49, ex: '60 × R$49 = R$2.940' },
+      { label: '101 a 200', unit: 39, ex: '150 × R$39 = R$5.850' },
+      { label: '201 a 500', unit: 29, ex: '300 × R$29 = R$8.700' }
     ]
   }
 };
@@ -1073,9 +1097,11 @@ function calcValor(n) {
   // PISO MÍNIMO ANTIDECRÉSCIMO
   // O valor total nunca pode ser menor que o teto da faixa anterior
   // Tetos: Faixa1=5*unit0, Faixa2=20*unit1, Faixa3=50*unit2
-  if (fi === 1) { var piso = 5 * faixas[0].unit;  if (total < piso) total = piso; }
-  if (fi === 2) { var piso = 20 * faixas[1].unit; if (total < piso) total = piso; }
-  if (fi === 3) { var piso = 50 * faixas[2].unit; if (total < piso) total = piso; }
+  if (fi === 1) { var piso = 5   * faixas[0].unit; if (total < piso) total = piso; }
+  if (fi === 2) { var piso = 20  * faixas[1].unit; if (total < piso) total = piso; }
+  if (fi === 3) { var piso = 50  * faixas[2].unit; if (total < piso) total = piso; }
+  if (fi === 4) { var piso = 100 * faixas[3].unit; if (total < piso) total = piso; }
+  if (fi === 5) { var piso = 200 * faixas[4].unit; if (total < piso) total = piso; }
 
   document.getElementById('calc-faixa').textContent = 'Faixa ' + (fi+1) + ' — ' + faixas[fi].label + ' colaboradores';
   document.getElementById('calc-total').textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
