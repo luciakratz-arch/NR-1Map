@@ -1279,8 +1279,40 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
   </div>
   <div class="content">
-    <div style="background:var(--cinza-claro);border:1px solid var(--linha);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--cinza-medio);line-height:1.6;">
-      Selecione as perguntas que serão enviadas aos seus colaboradores. Mínimo de 3 por subcategoria recomendado.
+
+    <!-- SELETOR DE VERSÃO -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Pré-seleção por versão</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+
+        <div onclick="aplicarVersao('rapida')" style="cursor:pointer;border:1.5px solid var(--linha);border-radius:10px;padding:12px;background:#fff;transition:all .2s;" id="ver-card-rapida"
+          onmouseover="this.style.borderColor='var(--verde)'" onmouseout="if(_versaoDiag!=='rapida')this.style.borderColor='var(--linha)'">
+          <div style="font-size:18px;margin-bottom:4px;">⚡</div>
+          <div style="font-size:12px;font-weight:700;color:var(--preto);">Rápida</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">21 perguntas<br/>~10 min</div>
+        </div>
+
+        <div onclick="aplicarVersao('padrao')" style="cursor:pointer;border:1.5px solid var(--verde);border-radius:10px;padding:12px;background:var(--verde-xp);transition:all .2s;" id="ver-card-padrao">
+          <div style="font-size:18px;margin-bottom:4px;">⭐</div>
+          <div style="font-size:12px;font-weight:700;color:var(--verde);">Padrão</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Mín. 3/subcat<br/>~25 min</div>
+        </div>
+
+        <div onclick="aplicarVersao('completa')" style="cursor:pointer;border:1.5px solid var(--linha);border-radius:10px;padding:12px;background:#fff;transition:all .2s;" id="ver-card-completa"
+          onmouseover="this.style.borderColor='var(--verde)'" onmouseout="if(_versaoDiag!=='completa')this.style.borderColor='var(--linha)'">
+          <div style="font-size:18px;margin-bottom:4px;">📋</div>
+          <div style="font-size:12px;font-weight:700;color:var(--preto);">Completa</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">101 perguntas<br/>~45 min</div>
+        </div>
+
+      </div>
+      <div id="ver-descricao" style="font-size:11px;color:var(--cinza-medio);margin-top:8px;padding:8px 12px;background:var(--cinza-claro);border-radius:6px;">
+        ⭐ <strong>Padrão:</strong> mínimo 3 perguntas por subcategoria pré-selecionadas. Personalize abaixo se quiser.
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;line-height:1.6;">
+      Você pode personalizar a seleção abaixo. <strong>★ PP</strong> = pergunta própria da sua empresa.
     </div>
     <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="abas-rh"></div>
     <div id="container-rh"></div>
@@ -1305,7 +1337,34 @@ textarea.form-control{resize:vertical;min-height:70px;}
             <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
           </div>
         </div>
-        <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisa('diagnostico')">🚀 Disparar Diagnóstico Geral</button>
+        <!-- Seletor de versão -->
+        <div style="margin-bottom:12px;">
+          <div class="form-label" style="margin-bottom:6px;">Versão do diagnóstico</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--linha);cursor:pointer;background:#fff;" id="lbl-ver-rapida">
+              <input type="radio" name="versao-diag" value="rapida" style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('rapida')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--preto);">Rápida — 21 perguntas</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">1 por subcategoria · 3 blocos · ~10 min · ideal para Pulso e primeira avaliação</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--verde);cursor:pointer;background:var(--verde-xp);" id="lbl-ver-padrao">
+              <input type="radio" name="versao-diag" value="padrao" checked style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('padrao')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--verde);">Padrão — perguntas selecionadas ⭐</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">Usa as perguntas que você configurou na aba "Módulos e Perguntas"</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--linha);cursor:pointer;background:#fff;" id="lbl-ver-completa">
+              <input type="radio" name="versao-diag" value="completa" style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('completa')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--preto);">Completa — 101 perguntas</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">Banco completo · 15 blocos · ~45 min · ideal para laudo técnico aprofundado</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisaVersao()">🚀 Disparar Diagnóstico Geral</button>
       </div>
     </div>
   </div>
@@ -1490,18 +1549,34 @@ var MODULOS=[
 ];
 
 var _rhSel = new Set();
+var _rhProprias = [];        // [{id, subcatId, modId, texto}]
+var _rhHistorico = new Set(); // pids que já foram usados em diagnósticos anteriores
+
+function _carregarHistoricoUsado(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  // Busca todos os ciclos para identificar perguntas já usadas
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      snap.forEach(function(ciclo) {
+        var sel = ciclo.data().selecionadas || [];
+        sel.forEach(function(pid) { _rhHistorico.add(String(pid)); });
+      });
+    }).catch(function(){});
+}
 
 function rhToggle(pid, checked){
-  if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
-  // Atualiza contador da subcategoria no header
-  var allChk = document.querySelectorAll('#container-rh input[type=checkbox]');
-  // salva no Firestore se disponivel
-  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if(eid && window.nr1mapDb){
-    window.nr1mapDb.collection('nr1map_selecoes').doc(eid)
-      .set({selecionadas:Array.from(_rhSel),atualizadoEm:new Date().toISOString()},{merge:true})
-      .catch(function(e){console.log(e);});
+  if (!checked && _rhHistorico.has(String(pid))) {
+    var ok = confirm('⚠️ Atenção: esta pergunta já foi usada em diagnósticos anteriores.\n\nDesmarcá-la afeta a comparabilidade histórica dos resultados.\n\nDeseja continuar?');
+    if (!ok) {
+      // Recheck o checkbox
+      var chks = document.querySelectorAll('[data-pid="'+pid+'"]');
+      chks.forEach(function(c){ c.checked = true; });
+      return;
+    }
   }
+  if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
+  _salvarSelecoes();
   var el=document.getElementById('rh-total-sel');
   if(el) el.textContent=_rhSel.size+' selecionada'+(_rhSel.size!==1?'s':'');
 }
@@ -1511,11 +1586,24 @@ function _carregarRHSel(){
   if(!eid||!window.nr1mapDb) return;
   window.nr1mapDb.collection('nr1map_selecoes').doc(eid).get()
     .then(function(doc){
-      if(doc.exists && doc.data().selecionadas){
-        _rhSel = new Set(doc.data().selecionadas.map(String));
-        renderRH();
+      if(doc.exists){
+        var d = doc.data();
+        if(d.selecionadas) _rhSel = new Set(d.selecionadas.map(String));
+        if(d.proprias) _rhProprias = d.proprias;
       }
-    }).catch(function(){});
+      renderRH();
+    }).catch(function(){ renderRH(); });
+  _carregarHistoricoUsado(eid);
+}
+
+function _salvarSelecoes(){
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(!eid||!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_selecoes').doc(eid).set({
+    selecionadas: Array.from(_rhSel),
+    proprias: _rhProprias,
+    atualizadoEm: new Date().toISOString()
+  },{merge:true}).catch(function(e){console.log(e);});
 }
 
 function renderRH(){
@@ -1576,6 +1664,59 @@ function renderRH(){
       row.appendChild(chk); row.appendChild(num); row.appendChild(txt);
       body.appendChild(row);
     });
+  });
+
+  // Perguntas próprias por subcategoria
+  modulo.subcats.forEach(function(s){
+    var body = document.getElementById('sc-body-'+s.id);
+    if (!body) return;
+    // Perguntas próprias desta subcategoria
+    var proprias = _rhProprias.filter(function(p){ return p.subcatId === s.id; });
+    proprias.forEach(function(p){
+      var row = document.createElement('div');
+      row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--linha);background:#FFFBEB;';
+      var chk = document.createElement('input');
+      chk.type='checkbox'; chk.checked=sel.has(p.id);
+      chk.dataset.pid = p.id;
+      chk.style.cssText='margin-top:3px;accent-color:var(--roxo);flex-shrink:0;';
+      chk.onchange=(function(pid){return function(){rhToggle(pid,this.checked);};})(p.id);
+      var tag = document.createElement('span');
+      tag.style.cssText='font-size:10px;font-weight:700;color:var(--roxo);flex-shrink:0;min-width:30px;padding-top:2px;';
+      tag.textContent='★ PP';
+      var txt = document.createElement('span');
+      txt.style.cssText='font-size:12px;line-height:1.5;flex:1;';
+      txt.textContent = p.texto;
+      var btnDel = document.createElement('button');
+      btnDel.textContent='🗑';
+      btnDel.title='Excluir pergunta própria';
+      btnDel.style.cssText='background:none;border:1px solid #fca5a5;border-radius:5px;padding:2px 6px;cursor:pointer;font-size:10px;color:#e53935;flex-shrink:0;';
+      btnDel.onclick=(function(pid){return function(){
+        if(!confirm('Excluir esta pergunta personalizada?')) return;
+        _rhProprias = _rhProprias.filter(function(x){return x.id!==pid;});
+        _rhSel.delete(pid);
+        _salvarSelecoes();
+        renderRH();
+      };})(p.id);
+      row.appendChild(chk); row.appendChild(tag); row.appendChild(txt); row.appendChild(btnDel);
+      body.appendChild(row);
+    });
+    // Botão + Pergunta própria
+    var addDiv = document.createElement('div');
+    addDiv.style.padding='8px 12px';
+    var btnAdd = document.createElement('button');
+    btnAdd.style.cssText='font-size:11px;color:var(--roxo);background:var(--roxo-xp);border:1px dashed var(--roxo);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600;';
+    btnAdd.textContent='+ Pergunta própria';
+    btnAdd.onclick=(function(modId,subcatId){return function(){
+      var texto = prompt('Nova pergunta personalizada para sua empresa:\n(visível apenas para você — não afeta o banco global)');
+      if(!texto||!texto.trim()) return;
+      var id = 'pp_'+Date.now();
+      _rhProprias.push({id:id,modId:modId,subcatId:subcatId,texto:texto.trim()});
+      _rhSel.add(id);
+      _salvarSelecoes();
+      renderRH();
+    };})(modulo.id, s.id);
+    addDiv.appendChild(btnAdd);
+    body.appendChild(addDiv);
   });
 
   var el=document.getElementById('rh-total-sel');
@@ -2233,7 +2374,73 @@ function carregarEmpresa(uid, email) {
 
 
 
-/* ===== DISPARO DE PESQUISA REAL ===== */
+/* ===== VERSÕES DE DIAGNÓSTICO ===== */
+
+// Versão Rápida — 1 pergunta por subcategoria (as mais representativas)
+var PERGUNTAS_RAPIDAS_SET = [1,7,14,21,28,34,40,45,50,57,62,67,73,77,82,87,92,97];
+
+// Versão Padrão — 3 primeiras perguntas de cada subcategoria
+function _getPerguntasPadrao() {
+  var ids = [];
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
+    s.perguntas.slice(0,3).forEach(function(p){ ids.push(String(p.id)); });
+  }); });
+  return ids;
+}
+
+// Versão Completa — todas as 101
+function _getPerguntasCompletas() {
+  var ids = [];
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
+    s.perguntas.forEach(function(p){ ids.push(String(p.id)); });
+  }); });
+  return ids;
+}
+
+var _versaoDiag = 'padrao';
+
+var DESCRICOES_VERSAO = {
+  rapida: '⚡ <strong>Rápida:</strong> 21 perguntas essenciais (1 por subcategoria). Ideal para Pulso e primeira avaliação rápida.',
+  padrao: '⭐ <strong>Padrão:</strong> 3 perguntas por subcategoria pré-selecionadas = 54 perguntas. Personalize abaixo se quiser.',
+  completa: '📋 <strong>Completa:</strong> todas as 101 perguntas do banco. Ideal para laudo técnico aprofundado e GRO.'
+};
+
+function aplicarVersao(v) {
+  _versaoDiag = v;
+
+  // Atualiza visual dos cards
+  ['rapida','padrao','completa'].forEach(function(x){
+    var card = document.getElementById('ver-card-'+x);
+    if(!card) return;
+    if(x===v){
+      card.style.borderColor='var(--verde)';
+      card.style.background='var(--verde-xp)';
+    } else {
+      card.style.borderColor='var(--linha)';
+      card.style.background='#fff';
+    }
+  });
+
+  // Atualiza descrição
+  var desc = document.getElementById('ver-descricao');
+  if(desc) desc.innerHTML = DESCRICOES_VERSAO[v] || '';
+
+  // Pré-seleciona perguntas
+  var ids;
+  if(v === 'rapida') ids = PERGUNTAS_RAPIDAS_SET.map(String);
+  else if(v === 'completa') ids = _getPerguntasCompletas();
+  else ids = _getPerguntasPadrao();
+
+  _rhSel = new Set(ids);
+  _salvarSelecoes();
+  renderRH();
+}
+
+function selecionarVersao(v) { aplicarVersao(v); }
+
+function dispararPesquisaVersao() { dispararPesquisa('diagnostico'); }
+
+
 
 function gerarToken6() {
   return String(Math.floor(100000 + Math.random() * 900000));
