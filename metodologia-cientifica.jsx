@@ -325,6 +325,139 @@ function SecDuasVelocidades() {
   );
 }
 
+// —— SEÇÃO 4: Versões de Diagnóstico ——
+
+function VersaoCard({ emoji, titulo, perguntas, blocos, tempo, ideal, cor, bg, alerta, itens }) {
+  return (
+    <div style={{ border: `1.5px solid ${cor}`, borderRadius: 10, padding: 16, background: bg }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <span style={{ fontSize: 24 }}>{emoji}</span>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: PRETO }}>{titulo}</div>
+          <div style={{ fontSize: 11, color: cor, fontWeight: 600 }}>{perguntas} perguntas · {blocos} blocos · ~{tempo}</div>
+        </div>
+      </div>
+      <div style={{ fontSize: 11, color: CINZA_MED, lineHeight: 1.7, marginBottom: 10 }}>
+        <b style={{ color: PRETO }}>Ideal para:</b> {ideal}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+        {itens.map(function(item, i) {
+          return (
+            <div key={i} style={{ display: "flex", gap: 7, fontSize: 11, color: CINZA_MED, lineHeight: 1.5 }}>
+              <span style={{ color: cor, flexShrink: 0 }}>✓</span>
+              <span>{item}</span>
+            </div>
+          );
+        })}
+      </div>
+      {alerta && (
+        <div style={{ background: "rgba(212,94,42,.08)", border: "1px solid rgba(212,94,42,.2)", borderRadius: 7, padding: "8px 10px", fontSize: 11, color: LARANJA, lineHeight: 1.6 }}>
+          ⚠️ {alerta}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SecVersoesdiagnostico() {
+  return (
+    <div>
+      <SecTitle n={4} title="Três Versões de Diagnóstico" sub="O RH escolhe a profundidade — o sistema garante a validade estatística em todas" />
+
+      <div style={{ background: "#fff", border: `1px solid ${LINHA}`, borderRadius: 10, padding: "15px 17px", marginBottom: 16 }}>
+        <div style={{ fontSize: 12, color: CINZA_MED, lineHeight: 1.75 }}>
+          A seleção de versão é feita na aba <b style={{ color: PRETO }}>"Módulos e Perguntas"</b> do painel RH.
+          Ao escolher uma versão, os checkboxes de perguntas são pré-marcados automaticamente.
+          O RH pode personalizar a seleção depois — adicionando perguntas próprias ou desmarcando individualmente
+          (com alerta de impacto no histórico). <b style={{ color: PRETO }}>A trava ímpar é validada em todas as versões</b> antes do disparo.
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 16 }}>
+        <VersaoCard
+          emoji="⚡"
+          titulo="Versão Rápida"
+          perguntas={21}
+          blocos={3}
+          tempo="10 min"
+          cor={ROXO}
+          bg={ROXO_XP}
+          ideal="Pesquisa Pulso semanal, primeiro contato, empresas com baixa adesão histórica"
+          itens={[
+            "1 pergunta por subcategoria (a mais representativa de cada dimensão)",
+            "3 blocos de 7 — curto o suficiente para responder no intervalo",
+            "Mantém a trava ímpar: 1 pergunta/subcat = sempre ímpar",
+            "Resultado gera IBP por módulo mas não por subcategoria individual",
+          ]}
+          alerta="Diagnóstico menos granular — não recomendado para laudo técnico GRO/PGR. Use para monitoramento de tendência."
+        />
+        <VersaoCard
+          emoji="⭐"
+          titulo="Versão Padrão"
+          perguntas={54}
+          blocos={8}
+          tempo="25 min"
+          cor={VERDE}
+          bg={VERDE_XP}
+          ideal="Diagnóstico regular, ciclo bimestral/semestral, GRO/PGR padrão NR-1"
+          itens={[
+            "3 perguntas por subcategoria — mínimo estatisticamente válido",
+            "8 blocos de 7 — ritmo equilibrado, taxa de abandono baixa",
+            "IBP calculado por subcategoria, módulo e geral",
+            "Compatível com laudo técnico e Plano de Ação 5W2H",
+          ]}
+          alerta={null}
+        />
+        <VersaoCard
+          emoji="📋"
+          titulo="Versão Completa"
+          perguntas={101}
+          blocos={15}
+          tempo="45 min"
+          cor={CINZA_ESC}
+          bg={CINZA_CLR}
+          ideal="Diagnóstico aprofundado, laudo técnico completo, defesa em fiscalização MTE"
+          itens={[
+            "Todas as 101 perguntas do banco — máxima cobertura diagnóstica",
+            "15 blocos de 7 — recomendado dividir em duas sessões",
+            "IBP com máxima granularidade por subcategoria",
+            "Gera Relatório de Evidências completo para processos trabalhistas",
+          ]}
+          alerta="Taxa de abandono mais alta. Recomendado para empresas com cultura de pesquisa estabelecida ou situação de risco elevado."
+        />
+      </div>
+
+      {/* Comparativo */}
+      <div style={{ background: PRETO, borderRadius: 10, padding: "15px 18px" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 12 }}>Comparativo de Validade e Uso</div>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 0 }}>
+          {["Critério", "⚡ Rápida", "⭐ Padrão", "📋 Completa"].map(function(h, i) {
+            return <div key={i} style={{ fontSize: 10, fontWeight: 700, color: VERDE_CLARO, padding: "4px 8px", borderBottom: "1px solid #1E2A28" }}>{h}</div>;
+          })}
+          {[
+            ["IBP por subcategoria", "❌", "✅", "✅"],
+            ["IBP por módulo", "✅", "✅", "✅"],
+            ["Laudo técnico GRO", "❌", "✅", "✅"],
+            ["Relatório de Evidências", "❌", "✅ parcial", "✅ completo"],
+            ["Trava ímpar garantida", "✅", "✅", "✅"],
+            ["Comparabilidade histórica", "⚠️ limitada", "✅", "✅"],
+          ].map(function(row, ri) {
+            return row.map(function(cell, ci) {
+              return (
+                <div key={ri+"-"+ci} style={{
+                  fontSize: 11, color: ci === 0 ? "#C8D4D0" : "#8A9590",
+                  padding: "6px 8px", borderBottom: "1px solid #1E2A28",
+                  background: ri % 2 === 0 ? "rgba(255,255,255,.02)" : "transparent"
+                }}>{cell}</div>
+              );
+            });
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // —— ROOT ——
 
 export default function MetodologiaCientifica() {
@@ -347,6 +480,8 @@ export default function MetodologiaCientifica() {
         <SecPerguntas />
         <Divider />
         <SecDuasVelocidades />
+        <Divider />
+        <SecVersoesdiagnostico />
 
         {/* Rodapé autoridade */}
         <div style={{ marginTop: 28, background: PRETO, borderRadius: 12, padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 }}>
