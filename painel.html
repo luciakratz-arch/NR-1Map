@@ -1309,6 +1309,23 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div id="ver-descricao" style="font-size:11px;color:var(--cinza-medio);margin-top:8px;padding:8px 12px;background:var(--cinza-claro);border-radius:6px;">
         ⭐ <strong>Padrão:</strong> mínimo 3 perguntas por subcategoria pré-selecionadas. Personalize abaixo se quiser.
       </div>
+
+      <!-- Alertas por versão -->
+      <div id="alerta-rapida" style="display:none;margin-top:8px;padding:10px 14px;background:var(--roxo-xp);border:1px solid var(--roxo);border-radius:8px;font-size:11px;color:var(--roxo);line-height:1.6;">
+        ⚡ <strong>Versão Rápida — 21 perguntas (1/subcategoria)</strong><br/>
+        Gera IBP por módulo mas <strong>não por subcategoria individual</strong>. Ideal para Pesquisa Pulso e monitoramento de tendência.<br/>
+        ⚠️ Não recomendado para laudo técnico GRO/PGR — use a versão Padrão ou Completa para documentação oficial.
+      </div>
+      <div id="alerta-padrao" style="display:block;margin-top:8px;padding:10px 14px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;font-size:11px;color:var(--verde);line-height:1.6;">
+        ⭐ <strong>Versão Padrão — 54 perguntas (3/subcategoria)</strong><br/>
+        Mínimo estatisticamente válido. Gera IBP completo por subcategoria, módulo e geral.<br/>
+        ✅ Compatível com laudo técnico, Mapa de Risco e Plano de Ação 5W2H conforme GRO/NR-1.
+      </div>
+      <div id="alerta-completa" style="display:none;margin-top:8px;padding:10px 14px;background:var(--cinza-claro);border:1px solid var(--linha);border-radius:8px;font-size:11px;color:var(--cinza-escuro);line-height:1.6;">
+        📋 <strong>Versão Completa — 101 perguntas</strong><br/>
+        Máxima cobertura diagnóstica. Gera Relatório de Evidências completo para defesa em fiscalização MTE ou processos trabalhistas.<br/>
+        ⚠️ ~45 minutos — taxa de abandono mais alta. Recomendado para empresas com cultura de pesquisa estabelecida.
+      </div>
     </div>
 
     <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;line-height:1.6;">
@@ -2407,6 +2424,12 @@ var DESCRICOES_VERSAO = {
 
 function aplicarVersao(v) {
   _versaoDiag = v;
+
+  // Atualiza alertas
+  ['rapida','padrao','completa'].forEach(function(x){
+    var al = document.getElementById('alerta-'+x);
+    if(al) al.style.display = x===v ? 'block' : 'none';
+  });
 
   // Atualiza visual dos cards
   ['rapida','padrao','completa'].forEach(function(x){
