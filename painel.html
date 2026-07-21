@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Painel do Gestor</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -361,7 +364,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Reconhecimento</span><span style="font-weight:600;color:var(--verde);">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:58%"></div></div></div>
           <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Esgotamento / Sobrecarga</span><span style="font-weight:600;color:var(--laranja);">72</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--laranja)"></div></div></div>
           <div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Insegurança / Medo</span><span style="font-weight:600;color:var(--laranja);">61</span></div><div class="progress-bar"><div class="progress-fill" style="width:61%;background:var(--laranja)"></div></div></div>
-          <button class="btn btn-roxo" style="width:100%;" onclick="sv('pulso')">📡 Disparar Pesquisa Pulso</button>
+          <button class="btn btn-roxo" style="width:100%;" onclick="dispararPesquisa('pulso')">📡 Disparar Pesquisa Pulso</button>
         </div>
       </div>
       <div class="card">
@@ -1302,7 +1305,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
             <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
           </div>
         </div>
-        <button class="btn btn-primary" style="width:100%;" onclick="alert('🚀 Diagnóstico Geral disparado!\n14 colaboradores receberão o link agora.')">🚀 Disparar Diagnóstico Geral — 14 colaboradores</button>
+        <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisa('diagnostico')">🚀 Disparar Diagnóstico Geral</button>
       </div>
     </div>
   </div>
@@ -1359,7 +1362,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
             <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
             <div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
           </div>
-          <button class="btn btn-roxo" style="width:100%;" onclick="alert('📡 Pesquisa Pulso disparada!\n14 colaboradores receberão o link agora.')">📡 Disparar Pesquisa Pulso</button>
+          <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPesquisa('pulso')">📡 Disparar Pesquisa Pulso</button>
         </div>
       </div>
     </div>
@@ -2228,6 +2231,271 @@ function carregarEmpresa(uid, email) {
   });
 }
 
+
+
+/* ===== DISPARO DE PESQUISA REAL ===== */
+
+function gerarToken6() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function dispararPesquisa(tipo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) {
+    alert('Erro: empresa não carregada.'); return;
+  }
+
+  // Busca colaboradores ativos
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId', '==', empresaId)
+    .where('status', '==', 'ativo')
+    .get()
+    .then(function(snap) {
+      if (snap.empty) {
+        alert('Nenhum colaborador ativo cadastrado.'); return;
+      }
+
+      var total = snap.size;
+      var batch = window.nr1mapDb.batch();
+      var links = [];
+
+      snap.forEach(function(doc) {
+        var colab = doc.data();
+        var token = gerarToken6();
+        var ref = window.nr1mapDb.collection('nr1map_tokens').doc();
+
+        batch.set(ref, {
+          codigo: token,
+          empresaId: empresaId,
+          empresaNome: window.nr1mapEmpresa.nome || '',
+          colaboradorId: doc.id,
+          colaboradorNome: colab.nome || '',
+          whatsapp: colab.whatsapp || '',
+          tipo: tipo,
+          usado: false,
+          criadoEm: new Date().toISOString(),
+          expiraEm: new Date(Date.now() + 48 * 3600 * 1000).toISOString()
+        });
+
+        links.push({
+          nome: colab.nome || 'Colaborador',
+          whatsapp: (colab.whatsapp || '').replace(/[^0-9]/g, ''),
+          token: token
+        });
+      });
+
+      batch.commit().then(function() {
+        // Abre WhatsApp para cada colaborador sequencialmente
+        var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+        var tipotxt = tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnóstico Geral';
+
+        // Mostra modal com resumo e links
+        var html = '<div style="max-height:60vh;overflow-y:auto;">';
+        links.forEach(function(l) {
+          var link = base + l.token;
+          var saudacao = 'Ola ' + l.nome + '!';
+          var msgTxt = saudacao + '\n\n' +
+            'A sua empresa esta realizando uma pesquisa de bem-estar no trabalho.\n\n' +
+            'Suas respostas sao 100% anonimas.\n\n' +
+            'Acesse pelo link abaixo e responda em poucos minutos:\n' +
+            link + '\n\n' +
+            'O link expira em 48 horas.';
+          var msg = encodeURIComponent(msgTxt);
+          var waUrl = l.whatsapp
+            ? 'https://wa.me/55' + l.whatsapp + '?text=' + msg
+            : '#';
+
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);">';
+          html += '<span style="font-size:13px;color:var(--preto);">' + l.nome + '</span>';
+          html += '<a href="' + waUrl + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">📱 Enviar</a>';
+          html += '</div>';
+        });
+        html += '</div>';
+
+        // Usa modal existente de confirmação
+        var modal = document.getElementById('modal-disparo-confirmacao');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'modal-disparo-confirmacao';
+          modal.className = 'modal-overlay';
+          // Constrói via DOM para evitar aspas aninhadas
+          var mDiv = document.createElement('div');
+          mDiv.className = 'modal'; mDiv.style.cssText = 'max-width:520px;width:95%;';
+          var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+          var mH3 = document.createElement('h3'); mH3.id = 'modal-disp-titulo'; mH3.textContent = 'Pesquisa disparada!';
+          var mBtn = document.createElement('button'); mBtn.className = 'modal-close'; mBtn.textContent = '×';
+          mBtn.onclick = function(){ modal.classList.remove('open'); };
+          mHdr.appendChild(mH3); mHdr.appendChild(mBtn);
+          var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+          var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+          var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+          mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+          mFtr.appendChild(mFtrBtn);
+          mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+          modal.appendChild(mDiv);
+          document.body.appendChild(modal);
+        }
+
+        document.getElementById('modal-disp-titulo').textContent =
+          '✅ ' + tipotxt + ' — ' + total + ' link' + (total > 1 ? 's' : '') + ' gerado' + (total > 1 ? 's' : '');
+        document.getElementById('modal-disp-body').innerHTML =
+          '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px;">Clique em "Enviar" para abrir o WhatsApp de cada colaborador:</p>' + html;
+        modal.classList.add('open');
+
+      }).catch(function(e) {
+        console.log(e);
+        alert('Erro ao gerar tokens. Tente novamente.');
+      });
+    })
+    .catch(function(e) {
+      console.log(e);
+      alert('Erro ao buscar colaboradores.');
+    });
+}
+
+/* ===== CARREGAMENTO REAL DO FIRESTORE ===== */
+
+function carregarDashboard(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+
+  // Colaboradores
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId','==',empresaId)
+    .get().then(function(snap){
+      var ativos=0, inativos=0;
+      snap.forEach(function(d){ if(d.data().status==='ativo') ativos++; else inativos++; });
+      var el=document.getElementById('mc-colab-ativos');
+      var el2=document.getElementById('mc-colab-inativos');
+      if(el) el.textContent=ativos;
+      if(el2) el2.textContent=inativos+' inativos';
+    }).catch(function(e){ console.log('colab err:',e); });
+
+  // Respostas do ciclo mais recente
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+    .get().then(function(cicloSnap){
+      if(cicloSnap.empty) return;
+      var cicloId = cicloSnap.docs[0].id;
+
+      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').doc(cicloId)
+        .collection('respostas').get()
+        .then(function(snap){
+          if(snap.empty) return;
+          var total = snap.size;
+          // Agrega IBP por módulo
+          var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
+          var somaGeral=0, nGeral=0;
+
+          snap.forEach(function(doc){
+            var d = doc.data();
+            if(d.ibpSubcats){
+              Object.keys(d.ibpSubcats).forEach(function(sc){
+                var modId = d.ibpSubcats[sc].modId;
+                if(porMod[modId]){
+                  porMod[modId].soma += d.ibpSubcats[sc].ibp;
+                  porMod[modId].n++;
+                }
+              });
+            }
+            if(d.ibpGeral !== undefined){ somaGeral+=d.ibpGeral; nGeral++; }
+          });
+
+          // Atualiza velocímetros
+          var mods = {
+            M1: { elIbp:'ibp-fis', elGauge:'gauge-fis' },
+            M2: { elIbp:'ibp-seg', elGauge:'gauge-seg' },
+            M3: { elIbp:'ibp-soc', elGauge:'gauge-soc' },
+            M4: { elIbp:'ibp-mot', elGauge:'gauge-mot' }
+          };
+          Object.keys(mods).forEach(function(m){
+            if(porMod[m].n===0) return;
+            var ibp = Math.round((porMod[m].soma/porMod[m].n)*100)/100;
+            var el = document.getElementById(mods[m].elIbp);
+            if(el){
+              el.textContent = (ibp>=0?'+':'')+ibp.toFixed(1);
+              el.style.color = ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)';
+              // Atualiza zona abaixo
+              var zona = ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta';
+              var zonaEl = el.nextElementSibling;
+              if(zonaEl) zonaEl.textContent = zona;
+            }
+            // Redesenha gauge
+            var canvas = document.getElementById(mods[m].elGauge);
+            if(canvas && typeof desenharGauge==='function') desenharGauge(canvas, ibp);
+          });
+
+          // IBP geral
+          if(nGeral>0){
+            var ibpGeral = Math.round((somaGeral/nGeral)*100)/100;
+            // Taxa de resposta (respostas / colaboradores ativos)
+            var ativosEl = document.getElementById('mc-colab-ativos');
+            var ativos = ativosEl ? parseInt(ativosEl.textContent)||1 : 1;
+            var taxa = Math.round((total/ativos)*100);
+            // Atualiza métricas mockadas com dados reais
+            var mcs = document.querySelectorAll('.mc .val');
+            if(mcs[3]) mcs[3].textContent = Math.min(taxa,100)+'%';
+          }
+
+          // Atualiza histórico recente
+          atualizarHistoricoTimeline(empresaId);
+        });
+    }).catch(function(e){ console.log('respostas err:',e); });
+}
+
+function atualizarHistoricoTimeline(empresaId) {
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(3)
+    .get().then(function(snap){
+      // Timeline já mockada — só atualiza se houver dados reais
+      if(snap.empty) return;
+      // Futura implementação: substituir itens da timeline
+    }).catch(function(){});
+}
+
+function carregarSugestoes(empresaId) {
+  if(!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_sugestoes')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm','desc').limit(20)
+    .get().then(function(snap){
+      var container = document.getElementById('container-sugestoes');
+      if(!container || snap.empty) return;
+      container.innerHTML = '';
+      snap.forEach(function(doc){
+        var d = doc.data();
+        var div = document.createElement('div');
+        div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">'+(d.categoria||'Geral')+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);line-height:1.5;">'+d.texto+'</div>'+
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+        container.appendChild(div);
+      });
+    }).catch(function(e){ console.log('sugestoes err:',e); });
+}
+
+function carregarChamados(empresaId) {
+  if(!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_chamados')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm','desc').limit(10)
+    .get().then(function(snap){
+      var container = document.getElementById('container-chamados');
+      if(!container || snap.empty) return;
+      container.innerHTML = '';
+      snap.forEach(function(doc){
+        var d = doc.data();
+        var tipos = {socorro:'🧠 Apoio psicológico', assedio:'🛡️ Denúncia de assédio', emergencia:'🆘 Emergência'};
+        var div = document.createElement('div');
+        div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">'+(tipos[d.tipo]||d.tipo)+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);">'+d.mensagem+'</div>'+
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+        container.appendChild(div);
+      });
+    }).catch(function(e){ console.log('chamados err:',e); });
+}
+
 function aplicarEmpresa(e) {
   window.nr1mapEmpresa = e;
   var nomeEl=document.querySelector('.sidebar-empresa .nome');
@@ -2237,6 +2505,9 @@ function aplicarEmpresa(e) {
   if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
   if(nmEl) nmEl.textContent=e.responsavel||'—';
   carregarCargos(e.id);
+  carregarDashboard(e.id);
+  carregarSugestoes(e.id);
+  carregarChamados(e.id);
 }
 
 function carregarCargos(empresaId) {
