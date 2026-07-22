@@ -279,7 +279,7 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="nav-item" id="nav-financeiro" onclick="sv('financeiro')"><span class="ic">💰</span>Financeiro</div>
       <div class="nav-item" id="nav-parceiros" onclick="sv('parceiros')"><span class="ic">🤝</span>Parceiros</div>
       <div class="nav-item" id="nav-clientes" onclick="sv('clientes')"><span class="ic">🏢</span>Clientes / Empresas</div>
-      <div class="nav-item" id="nav-leads" onclick="sv('leads')"><span class="ic">🎯</span>Leads<span class="bdg-nav">4</span></div>
+      <div class="nav-item" id="nav-leads" onclick="sv('leads')"><span class="ic">🎯</span>Leads<span class="bdg-nav" id="badge-leads">0</span></div>
       <div class="nav-sec">Conteúdo</div>
       <div class="nav-item" id="nav-laudos" onclick="sv('laudos')"><span class="ic">📄</span>Laudos Gerados</div>
       <div class="nav-item" id="nav-perguntas" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
@@ -298,10 +298,10 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="topbar"><div class="topbar-title">Painel Geral</div><span class="topbar-role">Administradora</span></div>
       <div class="content">
         <div class="metrics">
-          <div class="mc verde"><div class="lbl">Receita do mês</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12% vs. mês anterior</div></div>
-          <div class="mc verde"><div class="lbl">Clientes ativos</div><div class="val">14</div><div class="sub up">↑ 3 novos este mês</div></div>
-          <div class="mc"><div class="lbl">Laudos gerados</div><div class="val">38</div><div class="sub">este mês</div></div>
-          <div class="mc"><div class="lbl">Leads captados</div><div class="val">27</div><div class="sub">formulário landing</div></div>
+          <div class="mc verde"><div class="lbl">Receita do mês</div><div class="val" id="pg-receita">R$ —</div><div class="sub" id="pg-receita-sub">calculando...</div></div>
+          <div class="mc verde"><div class="lbl">Clientes ativos</div><div class="val" id="pg-clientes">—</div><div class="sub" id="pg-clientes-sub">carregando...</div></div>
+          <div class="mc"><div class="lbl">Leads captados</div><div class="val" id="pg-leads">—</div><div class="sub">formulário landing</div></div>
+          <div class="mc"><div class="lbl">Depoimentos pendentes</div><div class="val" id="pg-depoimentos">—</div><div class="sub">aguardando moderação</div></div>
         </div>
 
         <!-- VELOCÍMETROS DA BALANÇA PSICODINÂMICA -->
@@ -344,10 +344,7 @@ tbody tr:hover td{background:#F5F8F7;}
             <div class="card-header"><div class="title">Últimas atividades</div></div>
             <div class="card-body" style="padding:8px 16px;">
               <table><tbody>
-                <tr><td>Clínica Vida S.A.</td><td><span class="bdg bdg-ok"><span class="dot"></span>Laudo gerado</span></td><td style="color:var(--cinza-medio);font-size:11px;">há 2h</td></tr>
-                <tr><td>Escola ABC</td><td><span class="bdg bdg-pend"><span class="dot"></span>Aguardando resp.</span></td><td style="color:var(--cinza-medio);font-size:11px;">há 5h</td></tr>
-                <tr><td>Contábil Souza</td><td><span class="bdg bdg-ok"><span class="dot"></span>Assinatura activa</span></td><td style="color:var(--cinza-medio);font-size:11px;">ontem</td></tr>
-                <tr><td>M.F.S.</td><td><span class="bdg bdg-roxo"><span class="dot"></span>Depoimento pendente</span></td><td style="color:var(--cinza-medio);font-size:11px;">ontem</td></tr>
+                <tr id="pg-ativ-placeholder"><td colspan="3" style="text-align:center;color:var(--cinza-medio);padding:12px;">Carregando atividades...</td></tr>
               </tbody></table>
             </div>
           </div>
@@ -355,10 +352,10 @@ tbody tr:hover td{background:#F5F8F7;}
             <div class="card-header"><div class="title">Planos ativos</div></div>
             <div class="card-body">
               <div style="display:flex;flex-direction:column;gap:10px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Assinatura Mensal</span><span style="font-weight:600;color:var(--verde);">11 empresas</span></div>
-                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div style="width:78%;height:100%;background:var(--verde-claro);border-radius:3px;"></div></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Uso Único</span><span style="font-weight:600;color:var(--roxo);">3 empresas</span></div>
-                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div style="width:22%;height:100%;background:var(--roxo-claro);border-radius:3px;"></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Assinatura Mensal</span><span style="font-weight:600;color:var(--verde);" id="pg-plano-mensal">— empresas</span></div>
+                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div id="bar-mensal" style="width:0%;height:100%;background:var(--verde-claro);border-radius:3px;transition:width .6s;"></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span>Uso Único</span><span style="font-weight:600;color:var(--roxo);" id="pg-plano-unico">— empresas</span></div>
+                <div style="height:6px;background:var(--cinza-claro);border-radius:3px;"><div id="bar-unico" style="width:0%;height:100%;background:var(--roxo-claro);border-radius:3px;transition:width .6s;"></div></div>
               </div>
             </div>
           </div>
@@ -434,32 +431,7 @@ tbody tr:hover td{background:#F5F8F7;}
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Data</th><th>Cliente</th><th>Tipo</th><th>Plano</th><th>Bruto</th><th>Taxa MP</th><th>Comissão</th><th>Líquido</th><th>Créditos</th><th>Usados</th><th>Saldo</th><th>Ações</th></tr></thead>
-                <tbody id="tabela-historico-fin">
-                  <tr>
-                    <td>Jun/2026</td>
-                    <td><strong>Clínica Vida S.A.</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">PJ · Direta</span></td>
-                    <td>Assinatura Mensal</td>
-                    <td>Faixa 2</td>
-                    <td style="color:var(--verde);font-weight:600;">R$ 375,00</td>
-                    <td style="color:var(--laranja);">− R$ 18,71</td>
-                    <td style="color:var(--cinza-medio);">—</td>
-                    <td style="color:var(--verde);font-weight:700;">R$ 356,29</td>
-                    <td>45</td><td>14</td><td style="font-weight:700;">31</td>
-                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
-                  </tr>
-                  <tr>
-                    <td>Mai/2026</td>
-                    <td><strong>Alfa SST Consultoria</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">PJ · Via Parceiro</span></td>
-                    <td>Uso Único</td>
-                    <td>Faixa 3</td>
-                    <td style="color:var(--verde);font-weight:600;">R$ 1.180,00</td>
-                    <td style="color:var(--laranja);">− R$ 58,88</td>
-                    <td style="color:var(--laranja);">− R$ 354,00</td>
-                    <td style="color:var(--verde);font-weight:700;">R$ 767,12</td>
-                    <td>20</td><td>20</td><td style="font-weight:700;color:var(--cinza-medio);">0</td>
-                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
-                  </tr>
-                </tbody>
+                <tbody id="tabela-historico-fin"><tr><td colspan="12" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando histórico...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -487,13 +459,13 @@ tbody tr:hover td{background:#F5F8F7;}
             <div class="card">
               <div class="card-header"><div class="title">📊 Saldo MP em Tempo Real</div></div>
               <div class="card-body">
-                <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--verde);" id="saldo-mp">R$ 3.086,00</div>
+                <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--verde);" id="saldo-mp">R$ —</div>
                 <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:16px;">Saldo disponível no Mercado Pago</div>
                 <div style="font-size:12px;line-height:2;border-top:1px solid var(--linha);padding-top:12px;">
-                  <div style="display:flex;justify-content:space-between;"><span>Total entradas (mês)</span><span style="color:var(--verde);font-weight:600;">+ R$ 3.840,00</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Total entradas (mês)</span><span style="color:var(--verde);font-weight:600;" id="caixa-entradas">+ R$ —</span></div>
                   <div style="display:flex;justify-content:space-between;"><span>Taxas MP</span><span style="color:var(--laranja);">− R$ 192,00</span></div>
                   <div style="display:flex;justify-content:space-between;"><span>Comissões parceiros</span><span style="color:var(--laranja);">− R$ 562,00</span></div>
-                  <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--linha);padding-top:8px;"><span>Saldo líquido</span><span style="color:var(--verde);">R$ 3.086,00</span></div>
+                  <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--linha);padding-top:8px;"><span>Saldo líquido</span><span style="color:var(--verde);" id="caixa-liquido">R$ —</span></div>
                 </div>
               </div>
             </div>
@@ -972,46 +944,8 @@ tbody tr:hover td{background:#F5F8F7;}
           <div class="table-wrap">
             <table>
               <thead><tr><th>Empresa</th><th>Tipo</th><th>IBP Geral</th><th>Colaboradores</th><th>Data Geração</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><strong>Clínica Vida S.A.</strong></td>
-                  <td>Diagnóstico Geral</td>
-                  <td><span style="color:var(--verde);font-weight:700;">+2,4</span></td>
-                  <td>14</td>
-                  <td>Jun/2025</td>
-                  <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
-                  <td style="display:flex;gap:6px;">
-                    <button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver</button>
-                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Construtora Alves ME</strong></td>
-                  <td>Pesquisa Pulso</td>
-                  <td><span style="color:var(--laranja);font-weight:700;">−1,8</span></td>
-                  <td>18</td>
-                  <td>Mai/2025</td>
-                  <td><span class="bdg bdg-ok"><span class="dot"></span>Entregue</span></td>
-                  <td style="display:flex;gap:6px;">
-                    <button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre PDF do laudo.')">📄 Ver</button>
-                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Indústria Mendes S.A.</strong></td>
-                  <td>Diagnóstico Geral</td>
-                  <td><span style="color:var(--cinza-medio);font-weight:700;">0,0</span></td>
-                  <td>85</td>
-                  <td>Mai/2025</td>
-                  <td><span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span></td>
-                  <td style="display:flex;gap:6px;">
-                    <button class="btn btn-roxo btn-sm" onclick="alert('Em produção: finaliza e envia laudo.')">Finalizar</button>
-                    <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'laudo')">✏️ Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
-                  </td>
-                </tr>
+              <tbody id="tabela-laudos">
+                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum laudo gerado ainda.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1053,27 +987,8 @@ tbody tr:hover td{background:#F5F8F7;}
         </div>
 
         <div id="dep-pend" style="display:block">
-          <div class="card" id="dep-card-mestre">
-            <div class="card-body">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
-                <div style="flex:1;">
-                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    <span style="color:var(--roxo);font-size:16px;">★★★★★</span>
-                    <strong style="font-size:13px;">Clínica São Silvestre</strong>
-                  </div>
-                  <p style="font-size:13px;color:var(--cinza-escuro);margin-bottom:14px;">"O mapeamento de riscos da NR-1 nos ajudou a reestruturar nosso RH clínico."</p>
-                  <div class="form-group">
-                    <label class="form-label">Sua resposta pública</label>
-                    <input type="text" class="form-control" value="Ficamos honrados em fazer parte da governança em SST da sua clínica, prezados!" />
-                  </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                  <button class="btn btn-primary btn-sm" onclick="aprovarDepMestre()">✓ Aprovar e Publicar</button>
-                  <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'depoimento')">✏️ Editar</button>
-                  <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button>
-                </div>
-              </div>
-            </div>
+          <div id="container-depoimentos">
+            <div style="text-align:center;padding:30px;color:var(--cinza-medio);">Carregando depoimentos...</div>
           </div>
         </div>
       </div>
@@ -1805,11 +1720,288 @@ function sv(id) {
   if(id === 'parceiros') carregarParceiros();
   if(id === 'clientes') carregarClientes();
   if(id === 'financeiro') carregarFinanceiro();
+  if(id === 'painel') carregarPainelGeral();
+  if(id === 'laudos') carregarLaudos();
+  if(id === 'depoimentos') carregarDepoimentos();
 }
 
 
 
-/* ===== FINANCEIRO REAL ===== */
+
+/* ===== LAUDOS ===== */
+function carregarLaudos() {
+  if (!window.nr1mapDb) return;
+  var tbody = document.getElementById('tabela-laudos');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_laudos')
+    .orderBy('criadoEm','desc').get()
+    .then(function(snap) {
+      tbody.innerHTML = '';
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum laudo gerado ainda.</td></tr>';
+        return;
+      }
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var ibp = d.ibpGeral !== undefined ? d.ibpGeral : null;
+        var cor = ibp !== null ? (ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)') : 'var(--cinza-medio)';
+        var ibpTxt = ibp !== null ? (ibp>=0?'+':'')+ibp.toFixed(1).replace('.',',') : '—';
+        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
+        var status = d.status === 'entregue'
+          ? '<span class="bdg bdg-ok"><span class="dot"></span>Entregue</span>'
+          : d.status === 'analise'
+          ? '<span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span>'
+          : '<span class="bdg bdg-pend"><span class="dot"></span>Pendente</span>';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>'+(d.empresaNome||'—')+'</strong></td>'+
+          '<td>'+(d.tipo||'Diagnóstico Geral')+'</td>'+
+          '<td><span style="color:'+cor+';font-weight:700;">'+ibpTxt+'</span></td>'+
+          '<td>'+(d.numColaboradores||0)+'</td>'+
+          '<td>'+data+'</td>'+
+          '<td>'+status+'</td>'+
+          '<td style="display:flex;gap:6px;"></td>';
+        var tdAcoes = tr.querySelector('td:last-child');
+        var btnVer = document.createElement('button');
+        btnVer.className='btn btn-ghost btn-sm'; btnVer.textContent='📄 Ver';
+        var btnDel = document.createElement('button');
+        btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='🗑️';
+        btnDel.onclick=(function(id){return function(){excluirLaudo(id,this);};})(doc.id);
+        tdAcoes.appendChild(btnVer); tdAcoes.appendChild(btnDel);
+        tbody.appendChild(tr);
+      });
+    }).catch(function(e){ console.log(e); });
+}
+
+function excluirLaudo(docId, btn) {
+  if (!confirm('Excluir este laudo?')) return;
+  window.nr1mapDb.collection('nr1map_laudos').doc(docId).delete()
+    .then(function(){ var tr=btn.closest('tr'); if(tr) tr.remove(); })
+    .catch(function(e){ console.log(e); });
+}
+
+/* ===== DEPOIMENTOS ===== */
+function carregarDepoimentos() {
+  if (!window.nr1mapDb) return;
+  var container = document.getElementById('container-depoimentos');
+  if (!container) return;
+
+  window.nr1mapDb.collection('nr1map_depoimentos')
+    .where('status','==','pendente')
+    .orderBy('criadoEm','desc').get()
+    .then(function(snap) {
+      container.innerHTML = '';
+      if (snap.empty) {
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--cinza-medio);">✅ Nenhum depoimento pendente.</div>';
+        var sid = document.getElementById('sid-dep-count');
+        if(sid) sid.textContent = '0';
+        return;
+      }
+      var sid = document.getElementById('sid-dep-count');
+      if(sid) sid.textContent = snap.size;
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var estrelas = '★'.repeat(d.estrelas||5) + '☆'.repeat(5-(d.estrelas||5));
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.style.marginBottom = '16px';
+
+        var respInput = document.createElement('input');
+        respInput.type='text'; respInput.className='form-control';
+        respInput.placeholder='Escreva sua resposta pública...';
+        respInput.value = d.resposta||'';
+        respInput.id = 'resp-dep-'+doc.id;
+
+        card.innerHTML =
+          '<div class="card-body">'+
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">'+
+            '<div style="flex:1;">'+
+              '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+                '<span style="color:var(--roxo);font-size:16px;">'+estrelas+'</span>'+
+                '<strong style="font-size:13px;">'+(d.empresa||d.nome||'Anônimo')+'</strong>'+
+              '</div>'+
+              '<p style="font-size:13px;color:var(--cinza-escuro);margin-bottom:14px;">"'+(d.texto||d.depoimento||'')+'"</p>'+
+              '<div class="form-group">'+
+                '<label class="form-label">Sua resposta pública</label>'+
+              '</div>'+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;gap:8px;" id="btns-dep-'+doc.id+'"></div>'+
+          '</div></div>';
+
+        // Insere input
+        card.querySelector('.form-group').appendChild(respInput);
+        container.appendChild(card);
+
+        // Botões via DOM
+        var btns = document.getElementById('btns-dep-'+doc.id);
+        var btnAp = document.createElement('button');
+        btnAp.className='btn btn-primary btn-sm'; btnAp.textContent='✓ Aprovar e Publicar';
+        btnAp.onclick = (function(id, inp){ return function(){
+          aprovarDepoimento(id, inp.value);
+        }; })(doc.id, respInput);
+
+        var btnDel = document.createElement('button');
+        btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='🗑️ Excluir';
+        btnDel.onclick = (function(id){ return function(){
+          rejeitarDepoimento(id, this.closest('.card'));
+        }; })(doc.id);
+
+        btns.appendChild(btnAp);
+        btns.appendChild(btnDel);
+      });
+    }).catch(function(e){ console.log(e); });
+}
+
+function aprovarDepoimento(docId, resposta) {
+  if (!confirm('Aprovar e publicar este depoimento?')) return;
+  window.nr1mapDb.collection('nr1map_depoimentos').doc(docId)
+    .update({ status:'aprovado', resposta: resposta, aprovadoEm: new Date().toISOString() })
+    .then(function(){ carregarDepoimentos(); })
+    .catch(function(e){ console.log(e); alert('Erro ao aprovar.'); });
+}
+
+function rejeitarDepoimento(docId, card) {
+  if (!confirm('Excluir este depoimento?')) return;
+  window.nr1mapDb.collection('nr1map_depoimentos').doc(docId).delete()
+    .then(function(){ if(card) card.remove(); carregarDepoimentos(); })
+    .catch(function(e){ console.log(e); });
+}
+
+/* ===== PAINEL GERAL REAL ===== */
+function carregarPainelGeral() {
+  if (!window.nr1mapDb) return;
+
+  var TAXA_MP = 0.0499;
+  var PRECOS_MENSAL = {5:35,20:25,50:20,100:16.5,200:13,500:10};
+  var PRECOS_UNICO  = {5:97,20:79,50:59,100:49,200:39,500:29};
+
+  function calcValor(d) {
+    var n = parseInt(d.numColaboradores)||0;
+    var f = n<=5?5:n<=20?20:n<=50?50:n<=100?100:n<=200?200:500;
+    var p = (d.plano||'').toLowerCase();
+    return n * ((p.includes('mensal')||p.includes('assinatura')) ? PRECOS_MENSAL[f]||16.5 : PRECOS_UNICO[f]||49);
+  }
+
+  function fmt(v){ return 'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+
+  // Empresas ativas
+  window.nr1mapDb.collection('nr1map_empresas').where('status','==','ativo').get()
+    .then(function(snap) {
+      var receita=0, mensal=0, unico=0;
+      snap.forEach(function(doc){
+        var d=doc.data(), v=calcValor(d);
+        receita+=v;
+        if((d.plano||'').toLowerCase().includes('mensal')||(d.plano||'').toLowerCase().includes('assinatura')) mensal++;
+        else unico++;
+      });
+      var liquida = receita - receita*TAXA_MP;
+      var el=function(id){return document.getElementById(id);};
+      if(el('pg-receita'))      el('pg-receita').textContent      = fmt(receita);
+      if(el('pg-receita-sub'))  el('pg-receita-sub').textContent  = snap.size+' empresas ativas';
+      if(el('pg-clientes'))     el('pg-clientes').textContent     = snap.size;
+      if(el('pg-clientes-sub')) el('pg-clientes-sub').textContent = mensal+' assinatura · '+unico+' uso único';
+      if(el('pg-plano-mensal')) el('pg-plano-mensal').textContent = mensal+' empresa'+(mensal!==1?'s':'');
+      if(el('pg-plano-unico'))  el('pg-plano-unico').textContent  = unico+' empresa'+(unico!==1?'s':'');
+      // Caixa
+      if(el('saldo-mp'))        el('saldo-mp').textContent        = fmt(liquida);
+      if(el('caixa-entradas'))  el('caixa-entradas').textContent  = '+ '+fmt(receita);
+      if(el('caixa-liquido'))   el('caixa-liquido').textContent   = fmt(liquida);
+      // Barra planos
+      var total = snap.size || 1;
+      var barMensal = document.getElementById('bar-mensal');
+      var barUnico  = document.getElementById('bar-unico');
+      if(barMensal) barMensal.style.width = Math.round((mensal/total)*100)+'%';
+      if(barUnico)  barUnico.style.width  = Math.round((unico/total)*100)+'%';
+    }).catch(function(e){console.log(e);});
+
+  // Leads
+  window.nr1mapDb.collection('nr1map_leads').get()
+    .then(function(snap){
+      var el=document.getElementById('pg-leads');
+      var badge=document.getElementById('badge-leads');
+      if(el) el.textContent=snap.size;
+      if(badge) badge.textContent=snap.size;
+    }).catch(function(){});
+
+  // Depoimentos pendentes
+  window.nr1mapDb.collection('nr1map_depoimentos').where('status','==','pendente').get()
+    .then(function(snap){
+      var el=document.getElementById('pg-depoimentos');
+      var sid=document.getElementById('sid-dep-count');
+      if(el) el.textContent=snap.size;
+      if(sid) sid.textContent=snap.size;
+    }).catch(function(){});
+
+  // Atividades recentes — empresas mais recentes
+  window.nr1mapDb.collection('nr1map_empresas').orderBy('criadoEm','desc').limit(5).get()
+    .then(function(snap){
+      var tbody=document.getElementById('pg-ativ-placeholder');
+      if(!tbody) return;
+      var parent=tbody.parentNode;
+      parent.innerHTML='';
+      if(snap.empty){
+        parent.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--cinza-medio);padding:12px;">Nenhuma atividade ainda.</td></tr>';
+        return;
+      }
+      snap.forEach(function(doc){
+        var d=doc.data();
+        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : '—';
+        var badge = d.status==='ativo'
+          ? '<span class="bdg bdg-ok"><span class="dot"></span>Ativo</span>'
+          : '<span class="bdg bdg-pend"><span class="dot"></span>Pendente</span>';
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+(d.nome||'—')+'</td><td>'+badge+'</td><td style="color:var(--cinza-medio);font-size:11px;">'+data+'</td>';
+        parent.appendChild(tr);
+      });
+    }).catch(function(){});
+
+  // Histórico de vendas — empresas ativas
+  window.nr1mapDb.collection('nr1map_empresas').where('status','==','ativo').orderBy('criadoEm','desc').limit(20).get()
+    .then(function(snap){
+      var tbody=document.getElementById('tabela-historico-fin');
+      if(!tbody) return;
+      if(snap.empty){
+        tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma venda registrada ainda.</td></tr>';
+        return;
+      }
+      tbody.innerHTML='';
+      snap.forEach(function(doc){
+        var d=doc.data();
+        var n=parseInt(d.numColaboradores)||0;
+        var f=n<=5?5:n<=20?20:n<=50?50:n<=100?100:n<=200?200:500;
+        var fLabel='Faixa '+({5:'1',20:'2',50:'3',100:'4',200:'5',500:'6'}[f]||'—');
+        var p=(d.plano||'').toLowerCase();
+        var isMensal=p.includes('mensal')||p.includes('assinatura');
+        var PRECOS_MENSAL2={5:35,20:25,50:20,100:16.5,200:13,500:10};
+        var PRECOS_UNICO2 ={5:97,20:79,50:59,100:49,200:39,500:29};
+        var bruto=n*(isMensal?PRECOS_MENSAL2[f]||16.5:PRECOS_UNICO2[f]||49);
+        var taxaMP=bruto*TAXA_MP;
+        var comissao=d.criadoPor==='parceiro'?bruto*0.30:0;
+        var liquido=bruto-taxaMP-comissao;
+        function fmt2(v){return 'R$ '+v.toFixed(2).replace('.',',');}
+        var data=d.criadoEm?new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}):'—';
+        var tipo=d.tipo==='pj'||d.cnpj?'PJ':'PF';
+        var origem=d.criadoPor==='parceiro'?'Via Parceiro':'Direta';
+        var tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td>'+data+'</td>'+
+          '<td><strong>'+(d.nome||'—')+'</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">'+tipo+' · '+origem+'</span></td>'+
+          '<td>'+(isMensal?'Assinatura Mensal':'Uso Único')+'</td>'+
+          '<td>'+fLabel+'</td>'+
+          '<td style="color:var(--verde);font-weight:700;">'+fmt2(bruto)+'</td>'+
+          '<td style="color:var(--laranja);">− '+fmt2(taxaMP)+'</td>'+
+          '<td>'+(comissao>0?'<span style="color:var(--laranja);">− '+fmt2(comissao)+'</span>':'—')+'</td>'+
+          '<td style="font-weight:700;">'+fmt2(liquido)+'</td>'+
+          '<td>'+n+'</td><td>0</td><td style="font-weight:700;">'+n+'</td>'+
+          '<td><button class="btn btn-ghost btn-sm">✏️</button></td>';
+        tbody.appendChild(tr);
+      });
+    }).catch(function(){});
+}
+
+
 function carregarFinanceiro() {
   if (!window.nr1mapDb) return;
 
@@ -2529,6 +2721,9 @@ function aprovarDepMestre() {
   window.nr1mapDb   = firebase.firestore(app);
   window.nr1mapAuth = firebase.auth(app);
 })();
+
+// Carrega painel geral ao iniciar
+setTimeout(function(){ if(window.nr1mapDb) carregarPainelGeral(); }, 500);
 
 // ── Carrega leads reais do Firestore ──────────────────────────
 function carregarLeads() {
