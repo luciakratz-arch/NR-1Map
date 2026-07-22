@@ -621,6 +621,14 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('modal-parceiro').classList.remove('open')">Cancelar</button>
           <button class="btn btn-primary" style="flex:1;" onclick="salvarParceiro()">Cadastrar Parceiro</button>
         </div>
+        <div style="margin-top:16px;padding:12px 14px;background:rgba(123,0,196,.08);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
+          <div style="font-size:11px;font-weight:600;color:#7B00C4;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o parceiro</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-control" id="link-parceiro" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#parceiro" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <button class="btn btn-sm" style="background:#7B00C4;color:#fff;white-space:nowrap;" onclick="copiarLinkWhats('parceiro')">🟢 WhatsApp</button>
+          </div>
+          <p style="font-size:11px;color:#7B00C4;margin-top:6px;">📱 Envie este link por WhatsApp para o parceiro preencher o cadastro sozinho.</p>
+        </div>
       </div>
     </div>
 
