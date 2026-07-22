@@ -310,9 +310,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
     <div class="metrics">
       <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val" id="mc-colab-ativos">0</div><div class="sub" id="mc-colab-inativos">0 inativos</div></div>
-      <div class="mc"><div class="lbl">Índice Prazer</div><div class="val">58</div><div class="delta down">▼ 4 pts vs. anterior</div></div>
-      <div class="mc"><div class="lbl">Índice Sofrimento</div><div class="val">72</div><div class="delta down">▲ 8 pts vs. anterior</div></div>
-      <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val">83%</div><div class="delta up">▲ 11% vs. anterior</div></div>
+      <div class="mc"><div class="lbl">Respondentes</div><div class="val" id="mc-respondentes">—</div><div class="sub" id="mc-respondentes-sub">aguardando respostas</div></div>
+      <div class="mc"><div class="lbl">IBP Geral</div><div class="val" id="mc-ibp-geral">—</div><div class="sub" id="mc-ibp-zona">aguardando respostas</div></div>
+      <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val" id="mc-taxa">—</div><div class="sub" id="mc-taxa-sub">—</div></div>
     </div>
 
     <!-- VELOCÍMETROS IBP — Balança Psicodinâmica (Dejours) -->
@@ -369,10 +369,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
       </div>
       <div class="card">
         <div class="card-header"><div class="title">Histórico recente</div><a href="#" style="font-size:11px;color:var(--verde);text-decoration:none;" onclick="sv('historico')">Ver tudo →</a></div>
-        <div class="card-body" style="padding:8px 16px;">
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores responderam</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><div class="tl-data">Jun 2025</div></div></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Reconhecimento</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Tema: Espaço de fala</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div></div>
+        <div class="card-body" style="padding:8px 16px;" id="timeline-historico">
+          <div style="text-align:center;padding:20px;color:var(--cinza-medio);font-size:13px;">Nenhum ciclo registrado ainda.<br/>Dispare sua primeira pesquisa para começar.</div>
         </div>
       </div>
     </div>
@@ -2050,11 +2048,11 @@ function animGauge(id, target) {
     if (i >= steps) clearInterval(iv);
   }, 18);
 }
-function dispararVelocimetros() {
-  animGauge('gauge-fis', -0.3);
-  setTimeout(function(){animGauge('gauge-seg',-2.1);}, 150);
-  setTimeout(function(){animGauge('gauge-soc',1.8);}, 300);
-  setTimeout(function(){animGauge('gauge-mot',0.6);}, 450);
+function dispararVelocimetros(fis, seg, soc, mot) {
+  animGauge('gauge-fis', fis !== undefined ? fis : 0);
+  setTimeout(function(){ animGauge('gauge-seg', seg !== undefined ? seg : 0); }, 150);
+  setTimeout(function(){ animGauge('gauge-soc', soc !== undefined ? soc : 0); }, 300);
+  setTimeout(function(){ animGauge('gauge-mot', mot !== undefined ? mot : 0); }, 450);
 }
 
 /* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
@@ -2340,7 +2338,7 @@ document.addEventListener('DOMContentLoaded', function() {
   atualizarBadgePendentes();
   renderHistorico();
   renderCargos();
-  setTimeout(dispararVelocimetros, 200);
+  setTimeout(function(){ dispararVelocimetros(0,0,0,0); }, 200);
 });
 
 function buscarCBOColab(q) {
@@ -2801,16 +2799,32 @@ function carregarDashboard(empresaId) {
             if(canvas && typeof desenharGauge==='function') desenharGauge(canvas, ibp);
           });
 
-          // IBP geral
-          if(nGeral>0){
-            var ibpGeral = Math.round((somaGeral/nGeral)*100)/100;
-            // Taxa de resposta (respostas / colaboradores ativos)
-            var ativosEl = document.getElementById('mc-colab-ativos');
-            var ativos = ativosEl ? parseInt(ativosEl.textContent)||1 : 1;
-            var taxa = Math.round((total/ativos)*100);
-            // Atualiza métricas mockadas com dados reais
-            var mcs = document.querySelectorAll('.mc .val');
-            if(mcs[3]) mcs[3].textContent = Math.min(taxa,100)+'%';
+          // IBP geral e métricas
+          var ibpGeral = nGeral > 0 ? Math.round((somaGeral/nGeral)*100)/100 : null;
+          var ativosEl = document.getElementById('mc-colab-ativos');
+          var ativos = ativosEl ? parseInt(ativosEl.textContent)||0 : 0;
+          var taxa = ativos > 0 ? Math.min(Math.round((total/ativos)*100), 100) : 0;
+
+          // Respondentes
+          var elResp = document.getElementById('mc-respondentes');
+          var elRespSub = document.getElementById('mc-respondentes-sub');
+          if(elResp) elResp.textContent = total;
+          if(elRespSub) elRespSub.textContent = 'de ' + ativos + ' colaboradores';
+
+          // Taxa de resposta
+          var elTaxa = document.getElementById('mc-taxa');
+          var elTaxaSub = document.getElementById('mc-taxa-sub');
+          if(elTaxa) elTaxa.textContent = taxa + '%';
+          if(elTaxaSub) elTaxaSub.textContent = ativos > 0 ? (ativos - total) + ' pendentes' : '—';
+
+          // IBP Geral
+          if(ibpGeral !== null) {
+            var zona = ibpGeral >= 1.5 ? 'Terreno Fértil' : ibpGeral <= -1.5 ? 'Sofrimento Patogênico' : 'Defesa Oculta';
+            var corIbp = ibpGeral >= 1.5 ? 'var(--verde)' : ibpGeral <= -1.5 ? '#ef4444' : 'var(--laranja)';
+            var elIbpG = document.getElementById('mc-ibp-geral');
+            var elZona = document.getElementById('mc-ibp-zona');
+            if(elIbpG){ elIbpG.textContent = (ibpGeral>=0?'+':'') + ibpGeral.toFixed(1); elIbpG.style.color = corIbp; }
+            if(elZona){ elZona.textContent = zona; elZona.style.color = corIbp; }
           }
 
           // Atualiza histórico recente
@@ -2821,11 +2835,27 @@ function carregarDashboard(empresaId) {
 
 function atualizarHistoricoTimeline(empresaId) {
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-    .collection('ciclos').orderBy('criadoEm','desc').limit(3)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(5)
     .get().then(function(snap){
-      // Timeline já mockada — só atualiza se houver dados reais
       if(snap.empty) return;
-      // Futura implementação: substituir itens da timeline
+      var container = document.getElementById('timeline-historico');
+      if(!container) return;
+      container.innerHTML = '';
+      snap.forEach(function(ciclo) {
+        var d = ciclo.data();
+        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
+        var ibp = d.ibpGeral !== undefined ? d.ibpGeral : null;
+        var cor = ibp !== null ? (ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)') : 'var(--cinza-medio)';
+        var zona = ibp !== null ? (ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta') : '—';
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--linha);';
+        div.innerHTML =
+          '<div style="width:10px;height:10px;border-radius:50%;background:'+cor+';flex-shrink:0;"></div>'+
+          '<div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--preto);">'+data+'</div>'+
+          '<div style="font-size:11px;color:var(--cinza-medio);">'+zona+'</div></div>'+
+          '<div style="font-size:14px;font-weight:700;color:'+cor+';">'+(ibp!==null?(ibp>=0?'+':'')+ibp.toFixed(1):'—')+'</div>';
+        container.appendChild(div);
+      });
     }).catch(function(){});
 }
 
