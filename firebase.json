@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "functions/**",
+      "functions-python/**"
+    ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "nodejs",
+      "runtime": "nodejs18",
+      "ignore": ["node_modules", ".git", "firebase-debug.log"]
+    },
+    {
+      "source": "functions-python",
+      "codebase": "python",
+      "runtime": "python311",
+      "ignore": [".git", "firebase-debug.log", "__pycache__"]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
