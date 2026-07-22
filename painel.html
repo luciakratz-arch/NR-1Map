@@ -1322,7 +1322,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
       <div class="topbar-title">🧩 Módulos e Perguntas — Selecionar</div>
     </div>
-    <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
+      <button id="btn-salvar-sel" class="btn btn-primary btn-sm" onclick="confirmarSalvarSelecoes()" style="display:none;">💾 Salvar seleção</button>
+    </div>
   </div>
   <div class="content">
 
@@ -1643,7 +1646,7 @@ function rhToggle(pid, checked){
     }
   }
   if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
-  _salvarSelecoes();
+  _marcarPendente();
   var el=document.getElementById('rh-total-sel');
   if(el) el.textContent=_rhSel.size+' selecionada'+(_rhSel.size!==1?'s':'');
 }
@@ -1663,6 +1666,15 @@ function _carregarRHSel(){
   _carregarHistoricoUsado(eid);
 }
 
+var _selPendente = false;
+var _selSalva = []; // snapshot da última seleção salva no Firestore
+
+function _marcarPendente() {
+  _selPendente = true;
+  var btn = document.getElementById('btn-salvar-sel');
+  if(btn) btn.style.display = 'inline-flex';
+}
+
 function _salvarSelecoes(){
   var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if(!eid||!window.nr1mapDb) return;
@@ -1670,7 +1682,52 @@ function _salvarSelecoes(){
     selecionadas: Array.from(_rhSel),
     proprias: _rhProprias,
     atualizadoEm: new Date().toISOString()
-  },{merge:true}).catch(function(e){console.log(e);});
+  },{merge:true}).then(function(){
+    _selSalva = Array.from(_rhSel);
+    _selPendente = false;
+    var btn = document.getElementById('btn-salvar-sel');
+    if(btn) btn.style.display = 'none';
+  }).catch(function(e){console.log(e);});
+}
+
+function confirmarSalvarSelecoes() {
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(!eid||!window.nr1mapDb) return;
+
+  // Verifica se empresa já tem respostas gravadas
+  window.nr1mapDb.collection('nr1map_respostas').doc(eid)
+    .collection('ciclos').limit(1).get()
+    .then(function(snap) {
+      if(!snap.empty) {
+        // Tem histórico — mostra aviso
+        _mostrarAvisoHistorico();
+      } else {
+        // Sem histórico — salva direto
+        _salvarSelecoes();
+      }
+    }).catch(function(){ _salvarSelecoes(); });
+}
+
+function _mostrarAvisoHistorico() {
+  var modal = document.getElementById('modal-aviso-selecao');
+  if(modal) { modal.style.display='flex'; return; }
+
+  // Cria modal se não existir
+  var m = document.createElement('div');
+  m.id = 'modal-aviso-selecao';
+  m.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  m.innerHTML = '<div style="background:#1A2420;border:1px solid var(--linha);border-radius:14px;padding:28px;max-width:480px;width:100%;">' +
+    '<div style="font-size:20px;margin-bottom:12px;">⚠️</div>' +
+    '<div style="font-family:var(--font-title);font-size:16px;font-weight:700;color:var(--branco);margin-bottom:10px;">Atenção ao histórico de dados</div>' +
+    '<p style="font-size:13px;color:var(--cinza-medio);line-height:1.7;margin-bottom:8px;">Você alterou a seleção de perguntas. Ciclos futuros usarão a nova configuração.</p>' +
+    '<p style="font-size:13px;color:var(--cinza-medio);line-height:1.7;margin-bottom:8px;">Perguntas <strong style="color:#f87171;">removidas</strong> não serão mais comparadas com respostas anteriores, o que pode afetar a evolução histórica do IBP da sua equipe.</p>' +
+    '<p style="font-size:13px;color:var(--verde);line-height:1.7;margin-bottom:20px;"><strong>Recomendamos adicionar perguntas, não substituir.</strong> Se precisar remover, certifique-se de ter completado pelo menos um ciclo completo com a configuração atual.</p>' +
+    '<div style="display:flex;gap:10px;">' +
+      '<button onclick="document.getElementById('modal-aviso-selecao').style.display='none'" style="flex:1;padding:11px;background:transparent;border:1px solid var(--linha);border-radius:8px;color:var(--cinza-medio);font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>' +
+      '<button onclick="document.getElementById('modal-aviso-selecao').style.display='none';_salvarSelecoes();" style="flex:1;padding:11px;background:var(--verde);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Entendi, salvar assim mesmo</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(m);
 }
 
 function renderRH(){
@@ -2800,7 +2857,7 @@ function aplicarVersao(v) {
   else ids = _getPerguntasPadrao();
 
   _rhSel = new Set(ids);
-  _salvarSelecoes();
+  _marcarPendente();
   renderRH();
 }
 
