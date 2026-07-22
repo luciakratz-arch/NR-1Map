@@ -2341,21 +2341,132 @@ function selCBOColab(el) {
   document.getElementById('nc-cbo-drop-colab').style.display = 'none';
 }
 function salvarNovoColab() {
-  var nome = (document.getElementById('colab-nome')||{}).value || '';
+  var nome    = (document.getElementById('colab-nome')||{}).value || '';
   var contato = (document.getElementById('colab-contato')||{}).value || '';
-  var cargo = (document.getElementById('colab-cargo-select')||{}).value || '';
-  var depto = (document.getElementById('colab-depto')||{}).value || '';
+  var cargo   = (document.getElementById('colab-cargo-select')||{}).value || '';
+  var depto   = (document.getElementById('colab-depto')||{}).value || '';
   var unidade = (document.getElementById('colab-unidade')||{}).value || '';
-  var admissao = (document.getElementById('colab-admissao')||{}).value || '';
+  var admissao= (document.getElementById('colab-admissao')||{}).value || '';
   if (!contato) { alert('Informe WhatsApp ou e-mail do colaborador.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) {
+    alert('Erro: empresa não carregada.'); return;
+  }
+
+  var btn = document.querySelector('#modal-novo-colab .btn-primary') ||
+            document.querySelector('#modal-novo-colab .btn-roxo');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  // Detecta se é whatsapp ou email
+  var whatsapp = '', email = '';
+  if (contato.includes('@')) { email = contato; }
+  else { whatsapp = contato.replace(/[^0-9]/g, ''); }
+
+  window.nr1mapDb.collection('nr1map_colaboradores').add({
+    empresaId: empresaId,
+    nome: nome || '',
+    whatsapp: whatsapp,
+    email: email,
+    cargo: cargo,
+    departamento: depto,
+    unidade: unidade,
+    admissao: admissao,
+    status: 'ativo',
+    criadoEm: new Date().toISOString()
+  }).then(function(docRef) {
+    if (btn) { btn.textContent = 'Cadastrar'; btn.disabled = false; }
+    // Limpa campos
+    ['colab-nome','colab-contato','colab-depto','colab-unidade','colab-admissao'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.value = '';
+    });
+    var sel = document.getElementById('colab-cargo-select');
+    if(sel) sel.selectedIndex = 0;
+    fecharModal('modal-novo-colab');
+    // Adiciona linha na tabela imediatamente
+    adicionarLinhaColab(docRef.id, nome, contato, cargo, depto, unidade, admissao, 'ativo');
+    // Atualiza contador
+    atualizarContadorColab();
+  }).catch(function(e) {
+    if (btn) { btn.textContent = 'Cadastrar'; btn.disabled = false; }
+    console.log(e);
+    alert('Erro ao salvar colaborador. Tente novamente.');
+  });
+}
+
+function adicionarLinhaColab(docId, nome, contato, cargo, depto, unidade, admissao, status) {
   var tbody = document.getElementById('tbody-colab');
+  if (!tbody) return;
   var tr = document.createElement('tr');
-  tr.dataset.nome = nome || '—';
-  tr.dataset.status = 'ativo';
-  tr.innerHTML = '<td>' + (nome||'—') + '</td><td>' + contato + '</td><td>' + cargo + '</td><td>' + depto + '</td><td>' + unidade + '</td><td>' + admissao + '</td><td>—</td><td><span class="bdg-s s-ok"><span class="dot"></span>Ativo</span></td><td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td><td><button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="if(confirm(\'Excluir colaborador?\'))this.closest(\'tr\').remove()">🗑️</button></td>';
+  tr.dataset.nome = nome || '';
+  tr.dataset.status = status || 'ativo';
+  tr.dataset.docid = docId;
+  var badgeStatus = status === 'ativo'
+    ? '<span class="bdg-s s-ok"><span class="dot"></span>Ativo</span>'
+    : '<span class="bdg-s s-warn"><span class="dot"></span>Inativo</span>';
+  tr.innerHTML = '<td>' + (nome||'—') + '</td>' +
+    '<td>' + (contato||'—') + '</td>' +
+    '<td>' + (cargo||'—') + '</td>' +
+    '<td>' + (depto||'—') + '</td>' +
+    '<td>' + (unidade||'—') + '</td>' +
+    '<td>' + (admissao||'—') + '</td>' +
+    '<td>—</td>' +
+    '<td>' + badgeStatus + '</td>' +
+    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+    '<td>' +
+      '<button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="excluirColab(this)">🗑️</button>' +
+    '</td>';
   tbody.appendChild(tr);
-  fecharModal('modal-novo-colab');
-  alert('✅ Colaborador cadastrado!');
+}
+
+function excluirColab(btn) {
+  if (!confirm('Excluir este colaborador?')) return;
+  var tr = btn.closest('tr');
+  var docId = tr && tr.dataset.docid;
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).delete()
+      .catch(function(e){ console.log(e); });
+  }
+  if (tr) tr.remove();
+  atualizarContadorColab();
+}
+
+function atualizarContadorColab() {
+  var rows = document.querySelectorAll('#tbody-colab tr');
+  var ativos = 0;
+  rows.forEach(function(r){ if(r.dataset.status === 'ativo') ativos++; });
+  var el = document.getElementById('mc-colab-ativos');
+  if (el) el.textContent = ativos;
+}
+
+function carregarColabs() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-colab');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId', '==', empresaId)
+    .orderBy('criadoEm', 'desc')
+    .get()
+    .then(function(snap) {
+      tbody.innerHTML = '';
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum colaborador cadastrado ainda.</td></tr>';
+        return;
+      }
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var contato = d.whatsapp || d.email || '—';
+        adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status);
+      });
+      atualizarContadorColab();
+    }).catch(function(e) {
+      console.log(e);
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Erro ao carregar colaboradores.</td></tr>';
+    });
 }
 </script>
 
@@ -2736,6 +2847,7 @@ function aplicarEmpresa(e) {
   if(nmEl) nmEl.textContent=e.responsavel||'—';
   carregarCargos(e.id);
   carregarDashboard(e.id);
+  carregarColabs();
   carregarSugestoes(e.id);
   carregarChamados(e.id);
 }
