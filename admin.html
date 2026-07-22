@@ -277,6 +277,7 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="nav-item active" id="nav-painel" onclick="sv('painel')"><span class="ic">📊</span>Painel Geral</div>
       <div class="nav-sec">Gestão</div>
       <div class="nav-item" id="nav-financeiro" onclick="sv('financeiro')"><span class="ic">💰</span>Financeiro</div>
+      <div class="nav-item" id="nav-parceiros" onclick="sv('parceiros')"><span class="ic">🤝</span>Parceiros</div>
       <div class="nav-item" id="nav-clientes" onclick="sv('clientes')"><span class="ic">🏢</span>Clientes / Empresas</div>
       <div class="nav-item" id="nav-leads" onclick="sv('leads')"><span class="ic">🎯</span>Leads<span class="bdg-nav">4</span></div>
       <div class="nav-sec">Conteúdo</div>
@@ -629,6 +630,105 @@ tbody tr:hover td{background:#F5F8F7;}
     </div>
 
     <!-- CLIENTES -->
+    <!-- ===== PARCEIROS ===== -->
+    <div id="view-parceiros" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">🤝 Parceiros / Representantes</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalParceiro()">+ Novo Parceiro</button>
+      </div>
+      <div class="content">
+
+        <!-- Métricas rápidas -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+          <div class="card" style="padding:14px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:var(--verde);" id="parc-total">0</div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Parceiros ativos</div>
+          </div>
+          <div class="card" style="padding:14px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:var(--roxo);" id="parc-clientes">0</div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Clientes indicados</div>
+          </div>
+          <div class="card" style="padding:14px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:var(--verde);" id="parc-comissao">R$ 0</div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Comissão total/mês</div>
+          </div>
+          <div class="card" style="padding:14px;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:var(--laranja);" id="parc-leads">0</div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Leads pendentes</div>
+          </div>
+        </div>
+
+        <!-- Leads de parceiros pendentes -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <div class="title">📥 Solicitações de Parceria — Pendentes</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>E-mail</th><th>WhatsApp</th><th>Área</th><th>Volume</th><th>Estado</th><th>Data</th><th>Ações</th></tr></thead>
+              <tbody id="tabela-leads-parceiros">
+                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Parceiros ativos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="title">✅ Parceiros Ativos</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Parceiro</th><th>E-mail</th><th>Área</th><th>Clientes</th><th>Comissão/mês</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="tabela-parceiros">
+                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum parceiro ativo ainda.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAL NOVO PARCEIRO -->
+    <div class="modal-overlay" id="modal-parceiro" onclick="if(event.target===this)this.classList.remove('open')">
+      <div class="modal" style="max-width:480px;width:95%;">
+        <div class="modal-header">
+          <h3>Novo Parceiro</h3>
+          <button class="modal-close" onclick="document.getElementById('modal-parceiro').classList.remove('open')">✕</button>
+        </div>
+        <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-control" id="parc-nome" placeholder="Nome do parceiro"/></div>
+        <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="parc-email" type="email" placeholder="parceiro@email.com"/></div>
+        <div class="form-group"><label class="form-label">WhatsApp *</label><input class="form-control" id="parc-whatsapp" placeholder="62 99999-0000"/></div>
+        <div class="form-group"><label class="form-label">Registro profissional</label><input class="form-control" id="parc-registro" placeholder="CRP, CRA, OAB..."/></div>
+        <div class="form-group"><label class="form-label">Área de atuação</label>
+          <select class="form-control" id="parc-area">
+            <option>Psicologia Organizacional</option>
+            <option>Consultoria de RH</option>
+            <option>SST / Medicina do Trabalho</option>
+            <option>Advocacia Trabalhista</option>
+            <option>Contabilidade / Escritório</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Comissão (%)</label>
+          <select class="form-control" id="parc-comissao-pct">
+            <option value="30">30% — Padrão</option>
+            <option value="35">35% — Premium</option>
+            <option value="40">40% — Estratégico</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('modal-parceiro').classList.remove('open')">Cancelar</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="salvarParceiro()">Cadastrar Parceiro</button>
+        </div>
+      </div>
+    </div>
+
     <div id="view-clientes" class="view">
       <div class="topbar">
         <div class="topbar-title-wrapper">
@@ -1752,6 +1852,168 @@ function sv(id) {
   var nav = document.getElementById('nav-' + id);
   if(nav) nav.classList.add('active');
   if(id === 'perguntas') renderAdm();
+  if(id === 'parceiros') carregarParceiros();
+}
+
+/* ===== PARCEIROS ===== */
+function abrirModalParceiro() {
+  document.getElementById('modal-parceiro').classList.add('open');
+}
+
+function salvarParceiro() {
+  var nome     = document.getElementById('parc-nome').value.trim();
+  var email    = document.getElementById('parc-email').value.trim();
+  var whatsapp = document.getElementById('parc-whatsapp').value.trim();
+  var registro = document.getElementById('parc-registro').value.trim();
+  var area     = document.getElementById('parc-area').value;
+  var comissao = document.getElementById('parc-comissao-pct').value;
+  if (!nome || !email || !whatsapp) { alert('Preencha nome, e-mail e WhatsApp.'); return; }
+  if (!window.nr1mapDb) { alert('Erro: Firebase não carregado.'); return; }
+  var btn = document.querySelector('#modal-parceiro .btn-primary');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+  var cfg = {
+    apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain:"entrevista-inicial.firebaseapp.com",
+    projectId:"entrevista-inicial",
+    storageBucket:"entrevista-inicial.firebasestorage.app",
+    messagingSenderId:"437375609844",
+    appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"
+  };
+  var secApp;
+  try { secApp = firebase.app('nr1map-parc-sec'); }
+  catch(e) { secApp = firebase.initializeApp(cfg, 'nr1map-parc-sec'); }
+  var senha = gerarSenha();
+  firebase.auth(secApp).createUserWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      return window.nr1mapDb.collection('nr1map_parceiros').doc(uid).set({
+        uid: uid, nome: nome, email: email,
+        whatsapp: whatsapp.replace(/[^0-9]/g,''),
+        registro: registro, area: area,
+        comissaoPct: parseInt(comissao),
+        status: 'ativo', clientes: 0,
+        criadoEm: new Date().toISOString()
+      }).then(function(){ return { uid: uid, senha: senha }; });
+    })
+    .then(function(result) {
+      btn.textContent = 'Cadastrar Parceiro'; btn.disabled = false;
+      document.getElementById('modal-parceiro').classList.remove('open');
+      ['parc-nome','parc-email','parc-whatsapp','parc-registro'].forEach(function(id){
+        document.getElementById(id).value = '';
+      });
+      carregarParceiros();
+      exibirCredenciais(email, result.senha);
+    })
+    .catch(function(e) {
+      btn.textContent = 'Cadastrar Parceiro'; btn.disabled = false;
+      alert(e.code === 'auth/email-already-in-use' ? 'E-mail já cadastrado.' : 'Erro ao criar acesso.');
+    });
+}
+
+function carregarParceiros() {
+  if (!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_leads_parceiros')
+    .where('status','==','pendente')
+    .get().then(function(snap) {
+      var tbody = document.getElementById('tabela-leads-parceiros');
+      if (!tbody) return;
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma solicitação pendente.</td></tr>';
+        document.getElementById('parc-leads').textContent = '0';
+        return;
+      }
+      tbody.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var tr = document.createElement('tr');
+        var nome = (d.nome||'').replace(/'/g,'');
+        var email2 = (d.email||'').replace(/'/g,'');
+        var wa = (d.whatsapp||'').replace(/'/g,'');
+        var area2 = (d.area||'').replace(/'/g,'');
+        tr.innerHTML =
+          '<td><strong>'+(d.nome||'—')+'</strong></td>'+
+          '<td>'+(d.email||'—')+'</td>'+
+          '<td>'+(d.whatsapp||'—')+'</td>'+
+          '<td>'+(d.area||'—')+'</td>'+
+          '<td>'+(d.volumeClientes||'—')+'</td>'+
+          '<td>'+(d.estado||'—')+'</td>'+
+          '<td>'+(d.criadoEm?new Date(d.criadoEm).toLocaleDateString('pt-BR'):'—')+'</td>'+
+          '<td style="display:flex;gap:6px;">'+
+            '<button class="btn btn-primary btn-sm" onclick="aprovarLead(\''+doc.id+'\',\''+nome+'\',\''+email2+'\',\''+wa+'\',\''+area2+'\')">✅ Aprovar</button>'+
+            '<button class="btn btn-danger btn-sm" onclick="rejeitarLead(\''+doc.id+'\')">❌ Rejeitar</button>'+
+          '</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('parc-leads').textContent = snap.size;
+    }).catch(function(e){ console.log(e); });
+
+  window.nr1mapDb.collection('nr1map_parceiros')
+    .where('status','==','ativo')
+    .get().then(function(snap) {
+      var tbody = document.getElementById('tabela-parceiros');
+      if (!tbody) return;
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum parceiro ativo ainda.</td></tr>';
+        document.getElementById('parc-total').textContent = '0';
+        return;
+      }
+      tbody.innerHTML = '';
+      var total=0, totalClientes=0, totalComissao=0;
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        total++; totalClientes += d.clientes||0; totalComissao += d.comissaoMes||0;
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>'+(d.nome||'—')+'</strong></td>'+
+          '<td>'+(d.email||'—')+'</td>'+
+          '<td>'+(d.area||'—')+'</td>'+
+          '<td>'+(d.clientes||0)+'</td>'+
+          '<td>R$ '+((d.comissaoMes||0).toFixed(2).replace('.',','))+'</td>'+
+          '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>'+
+          '<td style="display:flex;gap:4px;">'+
+            '<a href="https://wa.me/55'+(d.whatsapp||'')+'" target="_blank" class="btn btn-ghost btn-sm">📱</a>'+
+            '<button class="btn btn-danger btn-sm" onclick="inativarParceiro(\''+doc.id+'\')">Inativar</button>'+
+          '</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('parc-total').textContent = total;
+      document.getElementById('parc-clientes').textContent = totalClientes;
+      document.getElementById('parc-comissao').textContent = 'R$ '+totalComissao.toFixed(2).replace('.',',');
+    }).catch(function(e){ console.log(e); });
+}
+
+function aprovarLead(docId, nome, email, whatsapp, area) {
+  if (!confirm('Aprovar '+nome+' como parceiro?')) return;
+  document.getElementById('parc-nome').value = nome;
+  document.getElementById('parc-email').value = email;
+  document.getElementById('parc-whatsapp').value = whatsapp;
+  document.getElementById('parc-area').value = area;
+  document.getElementById('modal-parceiro').classList.add('open');
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_leads_parceiros').doc(docId)
+      .update({status:'aprovado',aprovadoEm:new Date().toISOString()})
+      .catch(function(e){console.log(e);});
+  }
+}
+
+function rejeitarLead(docId) {
+  if (!confirm('Rejeitar esta solicitação?')) return;
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_leads_parceiros').doc(docId)
+      .update({status:'rejeitado',rejeitadoEm:new Date().toISOString()})
+      .then(function(){ carregarParceiros(); })
+      .catch(function(e){console.log(e);});
+  }
+}
+
+function inativarParceiro(docId) {
+  if (!confirm('Inativar este parceiro?')) return;
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_parceiros').doc(docId)
+      .update({status:'inativo'})
+      .then(function(){ carregarParceiros(); })
+      .catch(function(e){console.log(e);});
+  }
 }
 
 function swTab(tab, targetId) {
