@@ -212,21 +212,7 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
           <table>
             <thead><tr><th>Empresa Cliente</th><th>Créditos Cadastrados</th><th>Vidas Ativas</th><th>Status do Plano</th><th>Ações Comerciais</th><th>Suporte Direto</th><th>Editar / Excluir</th></tr></thead>
             <tbody id="tabela-parceiro-clientes">
-              <tr id="p-row-1">
-                <td><strong>Clínica Vida S.A.</strong></td>
-                <td><input type="number" class="form-control" value="45" style="width:75px; padding:4px;" onchange="alert('Solicitação de alteração enviada à Administração Master.')"/></td>
-                <td>14</td>
-                <td><span class="bdg-s s-ok"><span class="dot"></span>Mensal Ativo</span></td>
-                <td style="display:flex;gap:6px;">
-                  <button class="btn btn-ghost btn-sm" onclick="location.href='painel.html'">Ver Painel RH →</button>
-                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Deseja desvincular esta empresa?')) document.getElementById('p-row-1').remove();">Desvincular</button>
-                </td>
-                <td><a href="https://wa.me/5562999999999" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td>
-                <td style="display:flex;gap:6px;">
-                  <button class="btn btn-ghost btn-sm" onclick="editarClienteParceiro(this)">✏️ Editar</button>
-                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Excluir este cliente da carteira?'))this.closest('tr').remove()">🗑️</button>
-                </td>
-              </tr>
+              <tr><td colspan="7" style="text-align:center;color:var(--cinza-medio);padding:20px;">Carregando clientes...</td></tr>
             </tbody>
           </table>
         </div>
