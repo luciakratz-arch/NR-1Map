@@ -463,8 +463,8 @@ tbody tr:hover td{background:#F5F8F7;}
                 <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:16px;">Saldo disponível no Mercado Pago</div>
                 <div style="font-size:12px;line-height:2;border-top:1px solid var(--linha);padding-top:12px;">
                   <div style="display:flex;justify-content:space-between;"><span>Total entradas (mês)</span><span style="color:var(--verde);font-weight:600;" id="caixa-entradas">+ R$ —</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span>Taxas MP</span><span style="color:var(--laranja);">− R$ 192,00</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span>Comissões parceiros</span><span style="color:var(--laranja);">− R$ 562,00</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Taxas MP (4,99%)</span><span style="color:var(--laranja);font-weight:600;" id="caixa-taxa-mp">− R$ —</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Comissões parceiros</span><span style="color:var(--laranja);font-weight:600;" id="caixa-comissoes">− R$ —</span></div>
                   <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--linha);padding-top:8px;"><span>Saldo líquido</span><span style="color:var(--verde);" id="caixa-liquido">R$ —</span></div>
                 </div>
               </div>
@@ -476,25 +476,8 @@ tbody tr:hover td{background:#F5F8F7;}
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Data</th><th>Valor</th><th>Destino</th><th>Saldo MP antes</th><th>Saldo MP depois</th><th>Observação</th><th>Ações</th></tr></thead>
-                <tbody id="tabela-retiradas">
-                  <tr>
-                    <td>05/07/2026</td>
-                    <td style="color:var(--laranja);font-weight:700;">R$ 2.500,00</td>
-                    <td>Conta bancária PJ</td>
-                    <td>R$ 5.586,00</td>
-                    <td>R$ 3.086,00</td>
-                    <td>Pagamento fornecedores Julho</td>
-                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarRetirada(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
-                  </tr>
-                  <tr>
-                    <td>01/06/2026</td>
-                    <td style="color:var(--laranja);font-weight:700;">R$ 3.200,00</td>
-                    <td>Conta bancária PF</td>
-                    <td>R$ 6.843,00</td>
-                    <td>R$ 3.643,00</td>
-                    <td>Retirada mensal Junho</td>
-                    <td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarRetirada(this)">✏️</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️</button></td>
-                  </tr>
+<tbody id="tabela-retiradas">
+                  <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma retirada registrada ainda.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -934,7 +917,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Laudos Gerados</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="alert('Em produção: gera novo laudo técnico NR-1 em PDF.')">+ Gerar Laudo</button>
+        <button class="btn btn-primary btn-sm" onclick="gerarLaudoAdmin()">+ Gerar Laudo</button>
       </div>
       <div class="content">
         <div class="card">
@@ -1566,7 +1549,20 @@ function registrarRetirada() {
 }
 
 function exportarHistorico() {
-  alert('Em produção: exporta a tabela de vendas em formato CSV.');
+  var rows = [['Data','Cliente','Tipo','Plano','Bruto','Taxa MP','Comissão','Líquido','Colaboradores']];
+  var tbody = document.getElementById('tabela-historico-fin');
+  if(tbody){
+    tbody.querySelectorAll('tr').forEach(function(tr){
+      var cells = Array.from(tr.querySelectorAll('td')).map(function(td){ return td.innerText.trim(); });
+      if(cells.length > 1) rows.push(cells);
+    });
+  }
+  var csv = rows.map(function(r){ return r.join(';'); }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'vendas-nr1map.csv'; a.click();
+  URL.revokeObjectURL(url);
 }
 
 function salvarConfig() {
@@ -1727,6 +1723,30 @@ function sv(id) {
 
 
 
+
+
+function gerarLaudoAdmin() {
+  var empresaId = prompt('ID da empresa (uid do Firestore):');
+  if (!empresaId || !empresaId.trim()) return;
+  var btn = event.target;
+  btn.textContent = '⏳ Gerando...'; btn.disabled = true;
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId.trim())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.textContent = '+ Gerar Laudo'; btn.disabled = false;
+      if(d.url){
+        window.open(d.url, '_blank');
+        carregarLaudos();
+        alert('Laudo gerado com sucesso!');
+      } else {
+        alert('Erro: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      btn.textContent = '+ Gerar Laudo'; btn.disabled = false;
+      alert('Erro: ' + e.message);
+    });
+}
 
 /* ===== LAUDOS ===== */
 function carregarLaudos() {
@@ -2064,6 +2084,9 @@ function carregarFinanceiro() {
       if(el('fin-v-unico'))       el('fin-v-unico').textContent       = fmt(receitaUnico);
       if(el('fin-v-parceiro'))    el('fin-v-parceiro').innerHTML      = fmt(receitaParceiro) + ' <span style="font-size:10px;color:var(--laranja);">(-30%)</span>';
       if(el('fin-total-empresas'))el('fin-total-empresas').textContent = totalEmpresas;
+      // Atualiza também o fluxo de caixa
+      if(el('caixa-taxa-mp'))   el('caixa-taxa-mp').textContent   = '− ' + fmt(taxaMP);
+      if(el('caixa-comissoes')) el('caixa-comissoes').textContent = '− ' + fmt(comissoes);
 
       // Badge pendentes — empresas com status pendente
       window.nr1mapDb.collection('nr1map_empresas').where('status','==','pendente').get()
