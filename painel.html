@@ -598,11 +598,59 @@ textarea.form-control{resize:vertical;min-height:70px;}
             <div style="font-size:12px;color:var(--cinza-medio);line-height:1.5;">A logo do Parceiro é herdada automaticamente do cadastro dele — você só precisa subir a logo da sua empresa. As duas aparecem lado a lado em todos os relatórios.</div>
           </div>
         </div>
-        <div class="form-group"><div class="form-label">Nome da empresa (exibido nos relatórios)</div><input class="form-control" value="Clínica Vida S.A."/></div>
+        <div class="form-group"><div class="form-label">Nome da empresa (exibido nos relatórios)</div><input class="form-control" id="cb-nome-empresa" value=""/></div>
         <button class="btn btn-roxo" style="width:100%;" onclick="salvarLogoEmpresa()">Salvar logo da empresa</button>
         <p style="font-size:11px;color:var(--cinza-medio);margin-top:8px;">Formatos aceitos: PNG, JPG ou SVG, fundo transparente recomendado. Tamanho ideal: até 300×120px.</p>
       </div>
     </div>
+
+    <!-- RESPONSÁVEL TÉCNICO -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">👤 Responsável Técnico pela Empresa</div>
+        <div class="subtitle">Pessoa que assina o laudo psicossocial pela empresa</div>
+      </div>
+      <div class="card-body">
+
+        <!-- Aviso legal -->
+        <div style="background:#FFF1B8;border:1px solid #F59E0B;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:6px;">⚖️ O que a lei exige — Portaria MTE 1.419/2024</div>
+          <div style="font-size:11px;color:#78350F;line-height:1.7;">
+            O laudo psicossocial deve ser assinado por <strong>profissional legalmente habilitado</strong> — psicólogo, médico do trabalho, engenheiro de segurança ou técnico de SST, conforme a complexidade do diagnóstico.<br/>
+            A <strong>Resolução CFP nº 02/2022</strong> determina que a avaliação psicossocial conduzida por psicólogo resulta em laudo psicológico, de responsabilidade técnica do profissional que a conduziu.<br/><br/>
+            <strong>Se sua empresa não possui profissional habilitado</strong>, o laudo pode ser assinado pela <strong>Dra. Lucia Kratz (CRP 09/20590)</strong> — responsável técnica pela metodologia IBP e pela plataforma NR-1 Map.
+          </div>
+        </div>
+
+        <!-- Campos do responsável -->
+        <div class="form-group"><div class="form-label">Nome completo *</div><input class="form-control" id="rt-nome" placeholder="Ex: João da Silva"/></div>
+        <div class="form-group"><div class="form-label">Cargo / Função *</div><input class="form-control" id="rt-cargo" placeholder="Ex: Gestor de RH, Médico do Trabalho, Psicólogo"/></div>
+        <div class="form-group"><div class="form-label">Registro profissional</div><input class="form-control" id="rt-registro" placeholder="Ex: CRP 09/99999, CRM 12345, CREA 67890"/></div>
+        <div class="form-group"><div class="form-label">Formação / Área de atuação</div><input class="form-control" id="rt-formacao" placeholder="Ex: Psicologia Organizacional, Medicina do Trabalho"/></div>
+        <div class="form-group">
+          <div class="form-label">Mini currículo <span style="font-size:10px;color:var(--cinza-medio);">(2-3 linhas — usado para validar habilitação)</span></div>
+          <textarea class="form-control" id="rt-curriculo" rows="3" placeholder="Ex: Psicóloga com 10 anos de experiência em saúde ocupacional, especialista em gestão de riscos psicossociais. Atuou em empresas do setor industrial e de serviços."></textarea>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" onclick="salvarResponsavelTecnico()">💾 Salvar Responsável Técnico</button>
+
+        <!-- Solicitação de assinatura da Dra. Lucia -->
+        <div style="background:var(--roxo-xp);border:1px solid var(--roxo);border-radius:10px;padding:16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--roxo);margin-bottom:6px;">✍️ Prefere que a Dra. Lucia Kratz assine o laudo?</div>
+          <div style="font-size:11px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:12px;">
+            Caso sua empresa não possua responsável técnico habilitado, ou prefira ter a assinatura da psicóloga responsável pela metodologia, você pode solicitar a assinatura da <strong>Dra. Lucia Kratz (CRP 09/20590)</strong>.<br/><br/>
+            <strong>Custo adicional por laudo assinado:</strong><br/>
+            · Até 20 colaboradores — <strong>R$ 97,00</strong><br/>
+            · 21 a 100 colaboradores — <strong>R$ 197,00</strong><br/>
+            · Acima de 100 colaboradores — <strong>R$ 297,00</strong><br/><br/>
+            <span style="color:var(--roxo);font-size:10px;">Válido para Uso Único e Assinatura Mensal. O laudo é revisado e assinado via gov.br em até 48h úteis.</span>
+          </div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="solicitarAssinaturaLucia()">📋 Solicitar Assinatura da Dra. Lucia Kratz</button>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1875,6 +1923,7 @@ function sv(id){
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
+  if(id==='cobranding') _carregarResponsavelTecnico();
 }
 function swTab(tab,targetId){
   parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -1981,6 +2030,88 @@ function gerarPdfPlano(){
       if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
       alert('Erro de conexão: ' + e.message);
     });
+}
+
+
+/* ===== RESPONSÁVEL TÉCNICO ===== */
+function salvarResponsavelTecnico() {
+  var nome      = document.getElementById('rt-nome').value.trim();
+  var cargo     = document.getElementById('rt-cargo').value.trim();
+  var registro  = document.getElementById('rt-registro').value.trim();
+  var formacao  = document.getElementById('rt-formacao').value.trim();
+  var curriculo = document.getElementById('rt-curriculo').value.trim();
+
+  if (!nome || !cargo) { alert('Preencha nome e cargo do responsável técnico.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa não carregada.'); return; }
+
+  var btn = document.querySelector('[onclick="salvarResponsavelTecnico()"]');
+  if(btn){ btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update({
+    responsavelTecnico: {
+      nome: nome,
+      cargo: cargo,
+      registro: registro,
+      formacao: formacao,
+      curriculo: curriculo,
+      status: 'pendente_validacao',
+      atualizadoEm: new Date().toISOString()
+    }
+  }).then(function(){
+    if(btn){ btn.textContent = '💾 Salvar Responsável Técnico'; btn.disabled = false; }
+    alert('✅ Responsável técnico salvo!\n\nSeus dados serão analisados pela Dra. Lucia Kratz para validação da habilitação.');
+  }).catch(function(e){
+    if(btn){ btn.textContent = '💾 Salvar Responsável Técnico'; btn.disabled = false; }
+    console.log(e); alert('Erro ao salvar. Tente novamente.');
+  });
+}
+
+function solicitarAssinaturaLucia() {
+  var empresaId   = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var empresaNome = window.nr1mapEmpresa && window.nr1mapEmpresa.nome;
+  var numColab    = window.nr1mapEmpresa && (window.nr1mapEmpresa.numColaboradores || 0);
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa não carregada.'); return; }
+
+  // Calcula custo
+  var custo = numColab <= 20 ? 97 : numColab <= 100 ? 197 : 297;
+  var custoLabel = 'R$ ' + custo.toFixed(2).replace('.', ',');
+
+  if (!confirm('Solicitar assinatura da Dra. Lucia Kratz no laudo técnico?\n\nCusto: ' + custoLabel + ' por laudo assinado.\n\nUm chamado será aberto e você receberá instruções de pagamento.')) return;
+
+  window.nr1mapDb.collection('nr1map_chamados').add({
+    tipo: 'assinatura_laudo',
+    empresaId: empresaId,
+    empresaNome: empresaNome || '',
+    numColaboradores: numColab,
+    custo: custo,
+    status: 'pendente_pagamento',
+    criadoEm: new Date().toISOString()
+  }).then(function(){
+    alert('✅ Solicitação enviada!\n\nA Dra. Lucia Kratz entrará em contato em até 1 dia útil com as instruções de pagamento e assinatura.');
+  }).catch(function(e){ console.log(e); alert('Erro ao enviar solicitação.'); });
+}
+
+function _carregarResponsavelTecnico() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc){
+      if (!doc.exists) return;
+      var d = doc.data();
+      // Nome empresa
+      var cbNome = document.getElementById('cb-nome-empresa');
+      if(cbNome) cbNome.value = d.nome || '';
+      // Responsável técnico
+      var rt = d.responsavelTecnico;
+      if(!rt) return;
+      if(document.getElementById('rt-nome')) document.getElementById('rt-nome').value = rt.nome||'';
+      if(document.getElementById('rt-cargo')) document.getElementById('rt-cargo').value = rt.cargo||'';
+      if(document.getElementById('rt-registro')) document.getElementById('rt-registro').value = rt.registro||'';
+      if(document.getElementById('rt-formacao')) document.getElementById('rt-formacao').value = rt.formacao||'';
+      if(document.getElementById('rt-curriculo')) document.getElementById('rt-curriculo').value = rt.curriculo||'';
+    }).catch(function(){});
 }
 
 /* ===== CO-BRANDING — logo da empresa ===== */
