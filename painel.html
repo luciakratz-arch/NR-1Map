@@ -323,28 +323,28 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Fisiológicos</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 1 · Corpo e Mente</div>
           <canvas id="gauge-fis" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−0.3</div>
+          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores de Segurança</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 2 · Previsibilidade</div>
           <canvas id="gauge-seg" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−2.1</div>
+          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Sofrimento Patogênico</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Sociais</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 3 · Relacionamentos</div>
           <canvas id="gauge-soc" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:#10b981;">+1.8</div>
+          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Terreno Fértil</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Motivacionais</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 4 · Propósito</div>
           <canvas id="gauge-mot" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:#f59e0b;">+0.6</div>
+          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
         </div>
       </div>
@@ -458,10 +458,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card">
         <div class="card-header"><div class="title">Linha do tempo</div></div>
         <div class="card-body" style="padding:8px 16px;">
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <!-- Histórico carregado dinamicamente pelo Firestore -->
         </div>
       </div>
       <div class="card">
@@ -2220,10 +2217,11 @@ function animGauge(id, target) {
   }, 18);
 }
 function dispararVelocimetros(fis, seg, soc, mot) {
-  animGauge('gauge-fis', fis !== undefined ? fis : 0);
-  setTimeout(function(){ animGauge('gauge-seg', seg !== undefined ? seg : 0); }, 150);
-  setTimeout(function(){ animGauge('gauge-soc', soc !== undefined ? soc : 0); }, 300);
-  setTimeout(function(){ animGauge('gauge-mot', mot !== undefined ? mot : 0); }, 450);
+  // Só anima se tiver dados reais — evita mostrar 0 como se fosse IBP real
+  if (fis !== undefined) animGauge('gauge-fis', fis);
+  if (seg !== undefined) setTimeout(function(){ animGauge('gauge-seg', seg); }, 150);
+  if (soc !== undefined) setTimeout(function(){ animGauge('gauge-soc', soc); }, 300);
+  if (mot !== undefined) setTimeout(function(){ animGauge('gauge-mot', mot); }, 450);
 }
 
 /* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
@@ -2509,7 +2507,7 @@ document.addEventListener('DOMContentLoaded', function() {
   atualizarBadgePendentes();
   renderHistorico();
   renderCargos();
-  setTimeout(function(){ dispararVelocimetros(0,0,0,0); }, 200);
+  // Velocímetros aguardam dados reais do Firestore — não inicializar com zeros
 });
 
 function buscarCBOColab(q) {
