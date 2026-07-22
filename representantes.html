@@ -338,16 +338,16 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
       <div id="form-conteudo">
         <div class="form-divider">Dados pessoais e profissionais</div>
         <div class="form-grid">
-          <div class="field"><label>Nome completo *</label><input type="text" placeholder="Seu nome"/></div>
-          <div class="field"><label>E-mail profissional *</label><input type="email" placeholder="voce@consultoria.com.br"/></div>
-          <div class="field"><label>WhatsApp *</label><input type="tel" placeholder="(11) 9 9999-0000"/></div>
-          <div class="field"><label>Registro profissional (CRP/CRA/OAB)</label><input type="text" placeholder="Ex: CRP 09/99999"/></div>
+          <div class="field"><label>Nome completo *</label><input type="text" id="rep-nome" placeholder="Seu nome"/></div>
+          <div class="field"><label>E-mail profissional *</label><input type="email" id="rep-email" placeholder="voce@consultoria.com.br"/></div>
+          <div class="field"><label>WhatsApp *</label><input type="tel" id="rep-whatsapp" placeholder="(11) 9 9999-0000"/></div>
+          <div class="field"><label>Registro profissional (CRP/CRA/OAB)</label><input type="text" id="rep-registro" placeholder="Ex: CRP 09/99999"/></div>
         </div>
 
         <div class="form-divider">Perfil comercial</div>
         <div class="form-grid">
           <div class="field"><label>Área de atuação *</label>
-            <select>
+            <select id="rep-area">
               <option value="">Selecione...</option>
               <option>Psicologia Organizacional</option>
               <option>Consultoria de RH</option>
@@ -358,7 +358,7 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
             </select>
           </div>
           <div class="field"><label>Volume estimado de empresas clientes</label>
-            <select>
+            <select id="rep-volume">
               <option>Até 5 empresas</option>
               <option>6 a 15 empresas</option>
               <option>16 a 30 empresas</option>
@@ -369,17 +369,17 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
 
         <div class="form-grid">
           <div class="field"><label>Modalidade de interesse</label>
-            <select>
+            <select id="rep-modalidade">
               <option>Assinatura Mensal (recorrente)</option>
               <option>Uso Único (diagnóstico pontual)</option>
               <option>Ambas as modalidades</option>
             </select>
           </div>
-          <div class="field"><label>Estado / Região de atuação</label><input type="text" placeholder="Ex: São Paulo / Sudeste"/></div>
+          <div class="field"><label>Estado / Região de atuação</label><input type="text" id="rep-estado" placeholder="Ex: São Paulo / Sudeste"/></div>
         </div>
 
         <div class="field"><label>Como conheceu o NR-1 Map?</label>
-          <select>
+          <select id="rep-origem">
             <option>Indicação de colega</option>
             <option>Redes sociais</option>
             <option>Google / Pesquisa</option>
@@ -390,7 +390,7 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
         </div>
 
         <div class="field"><label>Conte um pouco sobre sua carteira de clientes e por que quer ser representante</label>
-          <textarea placeholder="Descreva brevemente sua experiência e o potencial da sua rede para o produto..."></textarea>
+          <textarea id="rep-descricao" placeholder="Descreva brevemente sua experiência e o potencial da sua rede para o produto..."></textarea>
         </div>
 
         <div style="background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:12px 14px;font-size:12px;color:#C084FC;margin-bottom:20px;line-height:1.5;">
@@ -478,11 +478,59 @@ function toggleFaq(el) {
 
 // FORMULÁRIO
 function enviarAplicacao() {
-  document.getElementById('form-conteudo').style.display = 'none';
-  document.getElementById('form-sucesso').style.display = 'block';
+  var nome     = (document.getElementById('rep-nome')||{}).value || '';
+  var email    = (document.getElementById('rep-email')||{}).value || '';
+  var whatsapp = (document.getElementById('rep-whatsapp')||{}).value || '';
+  var registro = (document.getElementById('rep-registro')||{}).value || '';
+  var area     = (document.getElementById('rep-area')||{}).value || '';
+  var volume   = (document.getElementById('rep-volume')||{}).value || '';
+  var modalidade=(document.getElementById('rep-modalidade')||{}).value || '';
+  var estado   = (document.getElementById('rep-estado')||{}).value || '';
+  var origem   = (document.getElementById('rep-origem')||{}).value || '';
+  var descricao= (document.getElementById('rep-descricao')||{}).value || '';
 
-  // Em produção: enviar para Firestore coleção leads_parceiros
-  console.log('Aplicação enviada para leads_parceiros no Firestore');
+  if (!nome || !email || !whatsapp) {
+    alert('Preencha nome, e-mail e WhatsApp antes de enviar.');
+    return;
+  }
+
+  var btn = document.querySelector('.btn-primary[onclick="enviarAplicacao()"]');
+  if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+
+  var fbApp;
+  var cfg = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+  };
+  try { fbApp = firebase.app('nr1map-rep'); }
+  catch(e) { fbApp = firebase.initializeApp(cfg, 'nr1map-rep'); }
+  var db = firebase.firestore(fbApp);
+
+  db.collection('nr1map_leads_parceiros').add({
+    nome: nome,
+    email: email,
+    whatsapp: whatsapp.replace(/[^0-9]/g,''),
+    registro: registro,
+    area: area,
+    volumeClientes: volume,
+    modalidade: modalidade,
+    estado: estado,
+    comoConheceu: origem,
+    descricao: descricao,
+    status: 'pendente',
+    criadoEm: new Date().toISOString()
+  }).then(function() {
+    document.getElementById('form-conteudo').style.display = 'none';
+    document.getElementById('form-sucesso').style.display = 'block';
+  }).catch(function(e) {
+    if (btn) { btn.textContent = 'Quero ser Representante →'; btn.disabled = false; }
+    console.log(e);
+    alert('Erro ao enviar. Tente novamente.');
+  });
 }
 </script>
 </body>
