@@ -135,7 +135,7 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
   <nav class="nav">
     <div class="nav-sec">Minha Carteira</div>
     <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard Executivo</div>
-    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Meus Clientes<span class="bdg">2</span></div>
+    <div class="nav-item" onclick="sv('clientes')"><span class="ic">🏢</span>Meus Clientes<span class="bdg" id="bdg-par-clientes" style="display:none;">0</span></div>
     <div class="nav-item" onclick="sv('financeiro')"><span class="ic">💰</span>Minhas Comissões</div>
     <div class="nav-sec">Suporte Técnico</div>
     <div class="nav-item" onclick="sv('valores')"><span class="ic">💲</span>Tabela de Valores</div>
@@ -1074,6 +1074,9 @@ function carregarDadosParceiro(uid) {
       _setEl('par-receita-total', fmt(receitaTotal));
       _setEl('par-comissao-total', fmt(comissaoTotal));
       _setEl('par-empresas-ativas', snap.size + ' empresa' + (snap.size !== 1 ? 's' : ''));
+      // Badge menu lateral
+      var bdgCli = document.getElementById('bdg-par-clientes');
+      if (bdgCli) { if(snap.size > 0){ bdgCli.textContent = snap.size; bdgCli.style.display = ''; } else { bdgCli.style.display = 'none'; } }
       _setEl('par-saldo-receber', fmt(saldoPendente));
       _setEl('par-saldo-financeiro', fmt(saldoPendente));
 
