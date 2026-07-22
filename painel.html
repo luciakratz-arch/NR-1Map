@@ -1380,6 +1380,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
           </div>
         </div>
         <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisaVersao()">🚀 Disparar Diagnóstico Geral</button>
+        <div style="margin-top:12px;padding:12px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">📄 Após receber as respostas</div>
+          <button class="btn btn-primary" style="width:100%;" onclick="gerarLaudoCompleto()">📄 Gerar Laudo Técnico PDF</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1958,7 +1962,25 @@ function adicionarAcao(){
   atualizarBadgePendentes();
 }
 function gerarPdfPlano(){
-  alert('⬇ Gerando PDF do Plano de Ação 5W2H com o estado atual (editado)...\n\nEm produção, isso envia os dados desta tela para o gerador Python (gerar_plano_5w2h.py) e devolve o PDF assinado.');
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = document.querySelector('[onclick="gerarPdfPlano()"]');
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=plano_5w2h')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
+      if(d.url){
+        window.open(d.url, '_blank');
+        alert('✅ PDF do Plano de Ação gerado com sucesso!');
+      } else {
+        alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
+      alert('Erro de conexão: ' + e.message);
+    });
 }
 
 /* ===== CO-BRANDING — logo da empresa ===== */
@@ -2013,7 +2035,25 @@ function renderHistorico(){
   }).join('');
 }
 function gerarPdfAcompanhamento(){
-  alert('⬇ Gerando PDF de Acompanhamento (instrumento 4 do GRO)...\n\nEm produção, isso envia esta linha do tempo + a remedição de IBP de cada ação para o gerador Python (gerar_acompanhamento.py) e devolve o PDF assinado, para anexação ao PGR.');
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = document.querySelector('[onclick="gerarPdfAcompanhamento()"]');
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=acompanhamento')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Gerar PDF de Acompanhamento'; btn.disabled = false; }
+      if(d.url){
+        window.open(d.url, '_blank');
+        alert('✅ PDF de Acompanhamento gerado com sucesso!');
+      } else {
+        alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Gerar PDF de Acompanhamento'; btn.disabled = false; }
+      alert('Erro de conexão: ' + e.message);
+    });
 }
 /* ===== VELOCÍMETROS IBP ===== */
 function drawGauge(id, ibp) {
@@ -2534,6 +2574,36 @@ function carregarEmpresa(uid, email) {
 }
 
 
+
+
+/* ===== GERAR LAUDO PDF ===== */
+function gerarLaudoCompleto() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  if (!confirm('Gerar o Laudo Técnico Psicossocial completo?\n\nIsso pode levar até 30 segundos.')) return;
+
+  var btn = event.target;
+  btn.textContent = '⏳ Gerando laudo...';
+  btn.disabled = true;
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.textContent = '📄 Gerar Laudo Técnico PDF';
+      btn.disabled = false;
+      if(d.url){
+        window.open(d.url, '_blank');
+        alert('✅ Laudo Técnico gerado e salvo com sucesso!\n\nO laudo foi registrado em "Laudos Gerados" no Admin.');
+      } else {
+        alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      btn.textContent = '📄 Gerar Laudo Técnico PDF';
+      btn.disabled = false;
+      alert('Erro de conexão: ' + e.message);
+    });
+}
 
 /* ===== VERSÕES DE DIAGNÓSTICO ===== */
 
