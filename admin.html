@@ -417,77 +417,14 @@ tbody tr:hover td{background:#F5F8F7;}
         <!-- APROVAÇÕES PENDENTES -->
         <div id="fin-pendentes" style="display:none">
           <div style="background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--roxo);">
-            ⚡ Essas vendas foram processadas pelo Mercado Pago. Verifique e aprove para liberar o acesso ao cliente.
+            ⚡ Empresas com pagamento pendente de aprovação. Após aprovar, o RH recebe acesso ao painel.
           </div>
-
-          <!-- VENDA DIRETA PJ PENDENTE -->
-          <div class="card" id="pend-1">
-            <div class="card-header">
-              <div>
-                <div class="title">🏢 Venda Direta — Pessoa Jurídica</div>
-                <div class="subtitle">Mercado Pago · Pago em 12/07/2026 às 08:14</div>
-              </div>
-              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
-            </div>
-            <div class="card-body">
-              <div class="grid-2" style="margin-bottom:12px;">
-                <div style="font-size:12px;line-height:1.8;"><strong>Empresa:</strong> Farmácia Central Ltda<br/><strong>CNPJ:</strong> 12.345.678/0001-90<br/><strong>Responsável:</strong> Ana Beatriz Costa<br/><strong>E-mail:</strong> ana@farmaciacentral.com.br<br/><strong>WhatsApp:</strong> (62) 9 9111-2222</div>
-                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Assinatura Mensal — Faixa 2 (6-20 colab.)<br/><strong>Colaboradores:</strong> 12<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 300,00</span><br/><strong>Forma pag.:</strong> Pix<br/><strong>Taxa MP:</strong> <span style="color:var(--verde);">R$ 0,00 (0%)</span><br/><strong>Líquido:</strong> <span style="color:var(--verde);font-weight:700;">R$ 300,00</span><br/><strong>Parceiro:</strong> Nenhum (venda direta)</div>
-              </div>
-              <div style="display:flex;gap:8px;">
-                <button class="btn btn-primary" onclick="aprovarVenda('pend-1','Farmácia Central Ltda')">✅ Aprovar e Liberar Acesso</button>
-                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
-                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- VENDA DIRETA PF PENDENTE -->
-          <div class="card" id="pend-2">
-            <div class="card-header">
-              <div>
-                <div class="title">👤 Venda Direta — Pessoa Física</div>
-                <div class="subtitle">Mercado Pago · Pago em 12/07/2026 às 09:32</div>
-              </div>
-              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
-            </div>
-            <div class="card-body">
-              <div class="grid-2" style="margin-bottom:12px;">
-                <div style="font-size:12px;line-height:1.8;"><strong>Nome:</strong> João Carlos Mendes<br/><strong>CPF:</strong> 123.456.789-00<br/><strong>E-mail:</strong> joao@email.com.br<br/><strong>WhatsApp:</strong> (62) 9 9333-4444<br/><strong>Profissão:</strong> Consultor SST</div>
-                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Uso Único — Faixa 1 (até 5 colab.)<br/><strong>Colaboradores:</strong> 4<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 388,00</span><br/><strong>Taxa MP (4,99%):</strong> <span style="color:var(--laranja);">− R$ 19,36</span><br/><strong>Líquido:</strong> <span style="color:var(--verde);font-weight:700;">R$ 368,64</span><br/><strong>Parceiro:</strong> Nenhum (venda direta)</div>
-              </div>
-              <div style="display:flex;gap:8px;">
-                <button class="btn btn-primary" onclick="aprovarVenda('pend-2','João Carlos Mendes')">✅ Aprovar e Liberar Acesso</button>
-                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
-                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- VENDA VIA PARCEIRO PJ PENDENTE -->
-          <div class="card" id="pend-3">
-            <div class="card-header">
-              <div>
-                <div class="title">🤝 Venda via Parceiro — Pessoa Jurídica</div>
-                <div class="subtitle">Mercado Pago · Pago em 11/07/2026 às 15:47</div>
-              </div>
-              <span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>
-            </div>
-            <div class="card-body">
-              <div class="grid-2" style="margin-bottom:12px;">
-                <div style="font-size:12px;line-height:1.8;"><strong>Empresa:</strong> Logística Rápida S.A.<br/><strong>CNPJ:</strong> 98.765.432/0001-10<br/><strong>Responsável:</strong> Pedro Oliveira<br/><strong>E-mail:</strong> pedro@logisticarapida.com.br<br/><strong>WhatsApp:</strong> (62) 9 9555-6666</div>
-                <div style="font-size:12px;line-height:1.8;"><strong>Plano:</strong> Assinatura Mensal — Faixa 3 (21-50 colab.)<br/><strong>Colaboradores:</strong> 35<br/><strong>Valor pago:</strong> <span style="color:var(--verde);font-weight:700;">R$ 700,00</span><br/><strong>Taxa MP (4,99%):</strong> <span style="color:var(--laranja);">− R$ 34,93</span><br/><strong>Comissão parceiro (30%):</strong> <span style="color:var(--laranja);">− R$ 210,00</span><br/><strong>Líquido Lucia:</strong> <span style="color:var(--verde);font-weight:700;">R$ 455,07</span><br/><strong>Parceiro:</strong> Alfa SST Consultoria</div>
-              </div>
-              <div style="display:flex;gap:8px;">
-                <button class="btn btn-primary" onclick="aprovarVenda('pend-3','Logística Rápida S.A.')">✅ Aprovar e Liberar Acesso</button>
-                <button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar dados</button>
-                <button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Rejeitar</button>
-              </div>
-            </div>
+          <div id="container-pendentes">
+            <div style="text-align:center;padding:30px;color:var(--cinza-medio);">Carregando pendências...</div>
           </div>
         </div>
 
-        <!-- HISTÓRICO DE VENDAS -->
+                <!-- HISTÓRICO DE VENDAS -->
         <div id="fin-historico" style="display:none">
           <div class="card">
             <div class="card-header">
@@ -1948,15 +1885,128 @@ function carregarFinanceiro() {
 }
 
 function carregarPendentes(snap) {
-  // Placeholder — pendentes vêm do Mercado Pago webhook
-  // Por ora mostra empresas com status pendente no Firestore
-  if(snap.empty) {
-    var cont = document.getElementById('fin-pendentes');
-    if(cont) {
-      var aviso = cont.querySelector('.card');
-      // Não remove cards existentes — são exemplos de layout
-    }
+  var container = document.getElementById('container-pendentes');
+  if (!container) return;
+
+  if (snap.empty) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--cinza-medio);">✅ Nenhuma pendência no momento.</div>';
+    return;
   }
+
+  container.innerHTML = '';
+  snap.forEach(function(doc) {
+    var d = doc.data();
+    var isPJ = d.tipo === 'pj' || d.cnpj;
+    var icone = d.criadoPor === 'parceiro' ? '🤝' : isPJ ? '🏢' : '👤';
+    var titulo = d.criadoPor === 'parceiro' ? 'Via Parceiro' : isPJ ? 'Venda Direta — PJ' : 'Venda Direta — PF';
+    var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR') : '—';
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '16px';
+    card.id = 'pend-' + doc.id;
+
+    var infoEsq = isPJ
+      ? '<strong>Empresa:</strong> '+(d.nome||'—')+'<br/>' +
+        (d.cnpj?'<strong>CNPJ:</strong> '+d.cnpj+'<br/>':'') +
+        '<strong>Responsável:</strong> '+(d.responsavel||'—')+'<br/>' +
+        '<strong>E-mail:</strong> '+(d.email||'—')+'<br/>' +
+        '<strong>WhatsApp:</strong> '+(d.whatsapp||'—')
+      : '<strong>Nome:</strong> '+(d.nome||'—')+'<br/>' +
+        (d.cpf?'<strong>CPF:</strong> '+d.cpf+'<br/>':'') +
+        '<strong>E-mail:</strong> '+(d.email||'—')+'<br/>' +
+        '<strong>WhatsApp:</strong> '+(d.whatsapp||'—');
+
+    var n = parseInt(d.numColaboradores)||0;
+    var planoLabel = d.planoLabel || d.plano || '—';
+    var TAXA_MP = 0.0499;
+    var COMISSAO = d.criadoPor === 'parceiro' ? 0.30 : 0;
+
+    // Calcula valor estimado
+    var PRECOS = d.plano && d.plano.includes('mensal')
+      ? {5:35,20:25,50:20,100:16.5,200:13,500:10}
+      : {5:97,20:79,50:59,100:49,200:39,500:29};
+    var faixa = n<=5?5:n<=20?20:n<=50?50:n<=100?100:n<=200?200:500;
+    var bruto = n * (PRECOS[faixa]||49);
+    var taxaMP = bruto * TAXA_MP;
+    var comissao = bruto * COMISSAO;
+    var liquido = bruto - taxaMP - comissao;
+
+    function fmt(v){ return 'R$ '+v.toFixed(2).replace('.',','); }
+
+    var infoDir =
+      '<strong>Plano:</strong> '+planoLabel+'<br/>' +
+      '<strong>Colaboradores:</strong> '+n+'<br/>' +
+      '<strong>Valor estimado:</strong> <span style="color:var(--verde);font-weight:700;">'+fmt(bruto)+'</span><br/>' +
+      '<strong>Taxa MP (4,99%):</strong> <span style="color:var(--laranja);">− '+fmt(taxaMP)+'</span><br/>' +
+      (comissao > 0 ? '<strong>Comissão parceiro (30%):</strong> <span style="color:var(--laranja);">− '+fmt(comissao)+'</span><br/>' : '') +
+      '<strong>Líquido:</strong> <span style="color:var(--verde);font-weight:700;">'+fmt(liquido)+'</span><br/>' +
+      '<strong>Origem:</strong> '+(d.criadoPor==='parceiro'?'Parceiro':'Direto');
+
+    card.innerHTML =
+      '<div class="card-header">' +
+        '<div><div class="title">'+icone+' '+titulo+'</div>' +
+        '<div class="subtitle">Cadastrado em '+data+'</div></div>' +
+        '<span class="bdg bdg-roxo"><span class="dot"></span>Aguardando aprovação</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="grid-2" style="margin-bottom:12px;">' +
+          '<div style="font-size:12px;line-height:1.8;">'+infoEsq+'</div>' +
+          '<div style="font-size:12px;line-height:1.8;">'+infoDir+'</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;" id="btns-pend-'+doc.id+'"></div>' +
+      '</div>';
+
+    container.appendChild(card);
+
+    // Botões via DOM
+    var btns = document.getElementById('btns-pend-'+doc.id);
+    var btnAprovar = document.createElement('button');
+    btnAprovar.className = 'btn btn-primary';
+    btnAprovar.textContent = '✅ Aprovar e Liberar Acesso';
+    btnAprovar.onclick = (function(docId, nome){ return function(){
+      aprovarEmpresaPendente(docId, nome);
+    }; })(doc.id, d.nome||'—');
+
+    var btnRejeitar = document.createElement('button');
+    btnRejeitar.className = 'btn btn-danger btn-sm';
+    btnRejeitar.textContent = '🗑️ Rejeitar';
+    btnRejeitar.onclick = (function(docId){ return function(){
+      rejeitarEmpresaPendente(docId, this);
+    }; })(doc.id);
+
+    btns.appendChild(btnAprovar);
+    btns.appendChild(btnRejeitar);
+  });
+}
+
+function aprovarEmpresaPendente(docId, nome) {
+  if (!confirm('Aprovar "'+nome+'" e liberar acesso ao painel?')) return;
+  if (!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(docId)
+    .update({ status: 'ativo', aprovadoEm: new Date().toISOString() })
+    .then(function() {
+      var card = document.getElementById('pend-'+docId);
+      if (card) card.remove();
+      // Atualiza badge
+      var badge = document.getElementById('badge-pend');
+      if (badge) badge.textContent = Math.max(0, parseInt(badge.textContent||0) - 1);
+      carregarFinanceiro();
+      alert('✅ Acesso liberado para "'+nome+'"!');
+    }).catch(function(e){ console.log(e); alert('Erro ao aprovar.'); });
+}
+
+function rejeitarEmpresaPendente(docId, btn) {
+  if (!confirm('Rejeitar e excluir esta empresa?')) return;
+  if (!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(docId)
+    .delete()
+    .then(function() {
+      var card = btn.closest('.card');
+      if (card) card.remove();
+      var badge = document.getElementById('badge-pend');
+      if (badge) badge.textContent = Math.max(0, parseInt(badge.textContent||0) - 1);
+    }).catch(function(e){ console.log(e); alert('Erro ao rejeitar.'); });
 }
 
 /* ===== CLIENTES REAIS ===== */
