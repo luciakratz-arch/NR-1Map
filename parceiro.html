@@ -155,10 +155,10 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
     <div class="topbar"><div class="topbar-title">Painel de Monitoramento de Carteira Isolada</div></div>
     <div class="content">
       <div class="metrics">
-        <div class="mc"><div class="lbl">Minha Receita Gerada</div><div class="val">R$ 1.680</div><div class="sub">Total pago por seus clientes</div></div>
-        <div class="mc"><div class="lbl">Minha Comissão (30%)</div><div class="val" style="color:var(--roxo);">R$ 504,00</div><div class="sub">Previsão líquida de repasse</div></div>
-        <div class="mc"><div class="lbl" style="color:var(--laranja);">Alerta de Créditos</div><div class="val">1 Empresa</div><div class="sub">Exige renovação imediata</div></div>
-        <div class="mc"><div class="lbl">Adesão Média</div><div class="val">83%</div><div class="sub">Taxa de resposta ativa</div></div>
+        <div class="mc"><div class="lbl">Minha Receita Gerada</div><div class="val" id="par-receita-total">—</div><div class="sub">Total pago por seus clientes</div></div>
+        <div class="mc"><div class="lbl">Minha Comissão (30%)</div><div class="val" id="par-comissao-total" style="color:var(--roxo);">—</div><div class="sub">Previsão líquida de repasse</div></div>
+        <div class="mc"><div class="lbl" style="color:var(--laranja);">Empresas Ativas</div><div class="val" id="par-empresas-ativas">—</div><div class="sub">Clientes na sua carteira</div></div>
+        <div class="mc"><div class="lbl">Saldo a Receber</div><div class="val" id="par-saldo-receber">—</div><div class="sub">Aguardando repasse</div></div>
       </div>
 
       <!-- VELOCÍMETROS EXCLUSIVOS DOS CLIENTES DO PARCEIRO -->
@@ -167,23 +167,23 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
         <div class="card-body" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; text-align:center;">
           <div style="background:var(--cinza-claro); padding:10px; border-radius:8px;">
             <div style="font-size:11px; font-weight:600;">Fatores Fisiológicos</div>
-            <div style="font-size:20px; font-weight:700; color:#ef4444; margin:4px 0;">−0.3</div>
-            <span class="bdg-s s-erro"><span class="dot"></span>Defesa Limite</span>
+            <div id="par-ibp-m1" style="font-size:20px; font-weight:700; color:var(--cinza-medio); margin:4px 0;">—</div>
+            <span id="par-zona-m1" class="bdg-s s-neutro"><span class="dot"></span>Aguardando dados</span>
           </div>
           <div style="background:var(--cinza-claro); padding:10px; border-radius:8px;">
             <div style="font-size:11px; font-weight:600;">Fatores de Segurança</div>
-            <div style="font-size:20px; font-weight:700; color:#ef4444; margin:4px 0;">−2.1</div>
-            <span class="bdg-s s-erro"><span class="dot"></span>Sofrimento Patogênico</span>
+            <div id="par-ibp-m2" style="font-size:20px; font-weight:700; color:var(--cinza-medio); margin:4px 0;">—</div>
+            <span id="par-zona-m2" class="bdg-s s-neutro"><span class="dot"></span>Aguardando dados</span>
           </div>
           <div style="background:var(--cinza-claro); padding:10px; border-radius:8px;">
             <div style="font-size:11px; font-weight:600;">Fatores Sociais</div>
-            <div style="font-size:20px; font-weight:700; color:var(--verde); margin:4px 0;">+1.8</div>
-            <span class="bdg-s s-ok"><span class="dot"></span>Terreno Fértil</span>
+            <div id="par-ibp-m3" style="font-size:20px; font-weight:700; color:var(--cinza-medio); margin:4px 0;">—</div>
+            <span id="par-zona-m3" class="bdg-s s-neutro"><span class="dot"></span>Aguardando dados</span>
           </div>
           <div style="background:var(--cinza-claro); padding:10px; border-radius:8px;">
             <div style="font-size:11px; font-weight:600;">Fatores Organizacionais</div>
-            <div style="font-size:20px; font-weight:700; color:#f59e0b; margin:4px 0;">+0.6</div>
-            <span class="bdg-s s-alert"><span class="dot"></span>Defesa Oculta</span>
+            <div id="par-ibp-m4" style="font-size:20px; font-weight:700; color:var(--cinza-medio); margin:4px 0;">—</div>
+            <span id="par-zona-m4" class="bdg-s s-neutro"><span class="dot"></span>Aguardando dados</span>
           </div>
         </div>
       </div>
@@ -194,9 +194,8 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
         <div class="table-wrap">
           <table>
             <thead><tr><th>Empresa Cliente</th><th>Última Atividade</th><th>Status de Uso</th><th>Notificar Cliente</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Clínica Vida S.A.</strong></td><td>Há 2 horas</td><td><span class="bdg-s s-ok"><span class="dot"></span>Uso Frequente</span></td><td><button class="btn btn-ghost btn-sm" disabled>Conforme</button></td></tr>
-              <tr><td>Indústria MetalTop</td><td>Há 15 dias</td><td><span class="bdg-s s-erro"><span class="dot"></span>Sistema Parado</span></td><td><a href="https://wa.me/5562999999999?text=Olá!%20Notamos%20que%20as%20pesquisas%20da%20NR-1%20estão%20paradas.%20Vamos%20disparar%20um%20novo%20pulso?" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a></td></tr>
+            <tbody id="par-tbody-churn">
+              <tr><td colspan="4" style="text-align:center;color:var(--cinza-medio);padding:20px;">Carregando clientes...</td></tr>
             </tbody>
           </table>
         </div>
@@ -400,37 +399,22 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
     <div class="content">
       <div class="card" style="background:var(--roxo-xp); border:1px solid rgba(123,0,196,0.2);">
         <div class="card-body">
-          <div style="font-size:11px; color:var(--roxo); font-weight:600; text-transform:uppercase;">Saldo Acumulado Prontinho para Saque</div>
-          <div style="font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--preto); margin:6px 0;">R$ 2.847,00</div>
+          <div style="font-size:11px; color:var(--roxo); font-weight:600; text-transform:uppercase;">Saldo Acumulado Disponível para Saque</div>
+          <div id="par-saldo-financeiro" style="font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--preto); margin:6px 0;">—</div>
           <div style="display:flex; gap:10px; margin-top:12px; align-items:flex-end;">
-            <div style="flex:1;"><label class="form-label" style="color:var(--preto);">Minha Chave Pix para Recebimento</label><input type="text" class="form-control" value="pix@alfasst.com.br"/></div>
-            <button class="btn btn-roxo" onclick="alert('Solicitação enviada! A Administradora Lucia Kratz realizará o depósito em até 48h úteis.')">Solicitar Resgate via Pix →</button>
+            <div style="flex:1;"><label class="form-label" style="color:var(--preto);">Minha Chave Pix para Recebimento</label><input type="text" class="form-control" id="par-pix-key" placeholder="Informe sua chave Pix"/></div>
+            <button class="btn btn-roxo" onclick="solicitarSaque()">Solicitar Resgate via Pix →</button>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header"><div class="title">Histórico de Faturamento e Comissões Geradas por Minha Base</div></div>
+        <div class="card-header"><div class="title">Histórico de Faturamento e Comissões</div></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Mês de Referência</th><th>Faturamento Bruto Clientes</th><th>Minha Taxa Fixa</th><th>Minha Comissão Líquida</th><th>Descontos Aplicados</th><th>Status do Repasse</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>Julho 2026</strong></td>
-                <td><input type="text" class="form-control" value="R$ 300,00" style="width:100px; padding:4px;" readonly/></td>
-                <td>30%</td>
-                <td style="color:var(--verde); font-weight:600;">R$ 90,00</td>
-                <td><input type="text" class="form-control" value="0%" style="width:60px; padding:4px;" readonly/></td>
-                <td><span class="bdg-s s-alert"><span class="dot"></span>Processando</span></td>
-              </tr>
-              <tr>
-                <td>Junho 2026</td>
-                <td>R$ 1.380,00</td>
-                <td>30%</td>
-                <td style="color:var(--verde); font-weight:600;">R$ 414,00</td>
-                <td>0%</td>
-                <td><span class="bdg-s s-ok"><span class="dot"></span>Liquidado</span></td>
-              </tr>
+            <thead><tr><th>Mês de Referência</th><th>Faturamento Bruto</th><th>Comissão (30%)</th><th>Status</th></tr></thead>
+            <tbody id="par-tbody-financeiro">
+              <tr><td colspan="4" style="text-align:center;color:var(--cinza-medio);padding:20px;">Carregando histórico...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1048,8 +1032,173 @@ function calcular(){
 
   // Detecta UID do parceiro logado via sessionStorage (set pelo admin ao redirecionar)
   var uid = sessionStorage.getItem('nr1map_parceiro_uid');
-  if (uid) window._parceiroUid = uid;
+  if (uid) {
+    window._parceiroUid = uid;
+    carregarDadosParceiro(uid);
+  }
 })();
+
+function carregarDadosParceiro(uid) {
+  if (!window.nr1mapDb || !uid) return;
+
+  // Carrega dados do parceiro
+  window.nr1mapDb.collection('nr1map_parceiros').doc(uid).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      var d = doc.data();
+      // Pix key salva
+      var pixEl = document.getElementById('par-pix-key');
+      if (pixEl && d.pixKey) pixEl.value = d.pixKey;
+    }).catch(function(e){ console.log('parceiro doc:', e); });
+
+  // Carrega empresas vinculadas ao parceiro
+  window.nr1mapDb.collection('nr1map_empresas')
+    .where('parceiroId', '==', uid)
+    .get()
+    .then(function(snap) {
+      var empresas = [];
+      var receitaTotal = 0;
+      var saldoPendente = 0;
+
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        empresas.push({ id: doc.id, data: d });
+        receitaTotal += d.receitaTotal || 0;
+        saldoPendente += d.comissaoPendente || 0;
+      });
+
+      var comissaoTotal = receitaTotal * 0.30;
+
+      // Atualiza cards do dashboard
+      var fmt = function(v){ return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); };
+      _setEl('par-receita-total', fmt(receitaTotal));
+      _setEl('par-comissao-total', fmt(comissaoTotal));
+      _setEl('par-empresas-ativas', snap.size + ' empresa' + (snap.size !== 1 ? 's' : ''));
+      _setEl('par-saldo-receber', fmt(saldoPendente));
+      _setEl('par-saldo-financeiro', fmt(saldoPendente));
+
+      // Tabela de alerta de churn
+      var tbody = document.getElementById('par-tbody-churn');
+      if (tbody) {
+        if (empresas.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--cinza-medio);padding:20px;">Nenhum cliente cadastrado ainda.</td></tr>';
+        } else {
+          tbody.innerHTML = '';
+          empresas.forEach(function(e) {
+            var d = e.data;
+            var ultima = d.ultimaAtividade ? new Date(d.ultimaAtividade) : null;
+            var diasSem = ultima ? Math.floor((Date.now() - ultima.getTime()) / 86400000) : 999;
+            var statusCls = diasSem <= 7 ? 's-ok' : diasSem <= 30 ? 's-alert' : 's-erro';
+            var statusTxt = diasSem <= 7 ? 'Uso Frequente' : diasSem <= 30 ? 'Pouco Ativo' : 'Sistema Parado';
+            var tel = d.whatsapp || d.telefone || '';
+            var acao = diasSem > 7 && tel
+              ? '<a href="https://wa.me/55' + tel.replace(/\D/g,'') + '?text=' + encodeURIComponent('Olá! Que tal disparar um novo ciclo de pesquisa NR-1 para sua equipe?') + '" target="_blank" class="btn btn-primary btn-sm" style="background:#25D366;">🟢 WhatsApp</a>'
+              : '<button class="btn btn-ghost btn-sm" disabled>Conforme</button>';
+            var ultimaStr = ultima ? (diasSem === 0 ? 'Hoje' : 'Há ' + diasSem + ' dia' + (diasSem !== 1 ? 's' : '')) : 'Sem atividade';
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><strong>' + (d.nome || d.razaoSocial || 'Empresa') + '</strong></td>' +
+              '<td>' + ultimaStr + '</td>' +
+              '<td><span class="bdg-s ' + statusCls + '"><span class="dot"></span>' + statusTxt + '</span></td>' +
+              '<td>' + acao + '</td>';
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      // IBP agregado da carteira
+      _carregarIBPCarteira(empresas.map(function(e){ return e.id; }));
+    }).catch(function(e){ console.log('empresas parceiro:', e); });
+
+  // Carrega histórico de comissões
+  window.nr1mapDb.collection('nr1map_comissoes')
+    .where('parceiroId', '==', uid)
+    .orderBy('mesRef', 'desc')
+    .limit(12)
+    .get()
+    .then(function(snap) {
+      var tbody = document.getElementById('par-tbody-financeiro');
+      if (!tbody) return;
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--cinza-medio);padding:20px;">Nenhum histórico de comissão ainda.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var statusCls = d.status === 'liquidado' ? 's-ok' : d.status === 'processando' ? 's-alert' : 's-neutro';
+        var statusTxt = d.status === 'liquidado' ? 'Liquidado' : d.status === 'processando' ? 'Processando' : 'Pendente';
+        var fmt = function(v){ return 'R$ ' + (v||0).toFixed(2).replace('.',','); };
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + (d.mesRef || '—') + '</strong></td>' +
+          '<td>' + fmt(d.faturamentoBruto) + '</td>' +
+          '<td style="color:var(--verde);font-weight:600;">' + fmt(d.comissao) + '</td>' +
+          '<td><span class="bdg-s ' + statusCls + '"><span class="dot"></span>' + statusTxt + '</span></td>';
+        tbody.appendChild(tr);
+      });
+    }).catch(function(e){ console.log('comissoes:', e); });
+}
+
+function _setEl(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function _carregarIBPCarteira(empresaIds) {
+  if (!empresaIds || empresaIds.length === 0) return;
+  var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
+  var promises = empresaIds.map(function(eid) {
+    return window.nr1mapDb.collection('nr1map_respostas').doc(eid)
+      .collection('ciclos').orderBy('criadoEm','desc').limit(1).get()
+      .then(function(cicloSnap) {
+        if (cicloSnap.empty) return;
+        var cicloId = cicloSnap.docs[0].id;
+        return window.nr1mapDb.collection('nr1map_respostas').doc(eid)
+          .collection('ciclos').doc(cicloId).collection('respostas').get()
+          .then(function(snap) {
+            snap.forEach(function(doc) {
+              var d = doc.data();
+              if (d.ibpSubcats) {
+                Object.keys(d.ibpSubcats).forEach(function(sc) {
+                  var modId = d.ibpSubcats[sc].modId;
+                  if (porMod[modId]) { porMod[modId].soma += d.ibpSubcats[sc].ibp; porMod[modId].n++; }
+                });
+              }
+            });
+          });
+      });
+  });
+  Promise.all(promises).then(function() {
+    var mods = { M1:'m1', M2:'m2', M3:'m3', M4:'m4' };
+    Object.keys(mods).forEach(function(m) {
+      if (porMod[m].n === 0) return;
+      var ibp = Math.round((porMod[m].soma / porMod[m].n) * 100) / 100;
+      var sinal = ibp >= 0 ? '+' : '';
+      var cor = ibp >= 1.5 ? 'var(--verde)' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+      var zona = ibp >= 1.5 ? 'Terreno Fértil' : ibp <= -1.5 ? 'Sofrimento Patogênico' : 'Defesa Oculta';
+      var zonaCls = ibp >= 1.5 ? 's-ok' : ibp <= -1.5 ? 's-erro' : 's-alert';
+      var ibpEl = document.getElementById('par-ibp-' + mods[m]);
+      var zonaEl = document.getElementById('par-zona-' + mods[m]);
+      if (ibpEl) { ibpEl.textContent = sinal + ibp.toFixed(1); ibpEl.style.color = cor; }
+      if (zonaEl) { zonaEl.className = 'bdg-s ' + zonaCls; zonaEl.innerHTML = '<span class="dot"></span>' + zona; }
+    });
+  }).catch(function(e){ console.log('IBP carteira:', e); });
+}
+
+function solicitarSaque() {
+  var uid = window._parceiroUid;
+  var pix = document.getElementById('par-pix-key');
+  if (!uid || !pix || !pix.value.trim()) { alert('Informe sua chave Pix antes de solicitar.'); return; }
+  // Salva chave Pix e registra solicitação
+  window.nr1mapDb.collection('nr1map_parceiros').doc(uid).set({ pixKey: pix.value.trim() }, {merge:true});
+  window.nr1mapDb.collection('nr1map_saques').add({
+    parceiroId: uid,
+    pixKey: pix.value.trim(),
+    solicitadoEm: new Date().toISOString(),
+    status: 'pendente'
+  }).then(function(){
+    alert('Solicitação enviada! A Dra. Lucia Kratz realizará o depósito em até 48h úteis.');
+  }).catch(function(){ alert('Erro ao enviar solicitação. Tente novamente.'); });
+}
 </script>
 </body>
 </html>
