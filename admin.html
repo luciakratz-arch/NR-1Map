@@ -529,7 +529,10 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">🤝 Parceiros / Representantes</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalParceiro()">+ Novo Parceiro</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="copiarLinkWhats('parceiro')" class="btn btn-ghost btn-sm" style="border:1px solid #7B00C4;color:#7B00C4;">🟢 Link auto-cadastro</button>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalParceiro()">+ Novo Parceiro</button>
+        </div>
       </div>
       <div class="content">
 
@@ -666,34 +669,18 @@ tbody tr:hover td{background:#F5F8F7;}
           <h3>Tipo de Cliente</h3>
           <button class="modal-close" onclick="fecharModalTipo()">✕</button>
         </div>
-        <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;">Selecione o tipo de cadastro:</p>
-
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza-medio);margin-bottom:8px;">Clientes / Empresas</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-          <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:14px 18px;" onclick="fecharModalTipo();abrirModalPJ()">
+        <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;">Selecione o tipo de cliente:</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+          <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPJ()">
             🏢 <span><strong style="display:block;font-size:14px;">Empresa (Pessoa Jurídica)</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CNPJ · múltiplos colaboradores · RH responsável</span></span>
           </button>
-          <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:14px 18px;" onclick="fecharModalTipo();abrirModalPF()">
+          <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPF()">
             👤 <span><strong style="display:block;font-size:14px;">Profissional / Pessoa Física</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CPF · contratante individual · MEI ou autônomo</span></span>
           </button>
         </div>
-
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza-medio);margin-bottom:8px;">Parceiros / Representantes</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-          <button class="btn" style="justify-content:flex-start;gap:12px;padding:14px 18px;background:#7B00C4;color:#fff;" onclick="fecharModalTipo();abrirModalParceiro()">
-            🤝 <span><strong style="display:block;font-size:14px;">Novo Parceiro / Representante</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CRP, CRA, OAB, consultor · comissão 30%</span></span>
-          </button>
-        </div>
-
-        <div style="padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);margin-bottom:8px;">
-          🔗 <strong>Link auto-cadastro RH:</strong>
-          <span id="link-autocad-rh" style="font-size:11px;color:var(--cinza-medio);word-break:break-all;">https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario</span>
-          <button onclick="copiarLinkWhats('rh')" style="margin-left:8px;background:var(--verde);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🟢 WhatsApp</button>
-        </div>
-        <div style="padding:12px 14px;background:rgba(123,0,196,.08);border-radius:8px;font-size:12px;color:var(--roxo);">
-          🔗 <strong>Link auto-cadastro Parceiro:</strong>
-          <span id="link-autocad-par" style="font-size:11px;color:var(--cinza-medio);word-break:break-all;">https://luciakratz-arch.github.io/NR-1Map/representantes.html#parceiro</span>
-          <button onclick="copiarLinkWhats('parceiro')" style="margin-left:8px;background:#7B00C4;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🟢 WhatsApp</button>
+        <div style="padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);">
+          🔗 <strong>Link de auto-cadastro:</strong> Envie para o cliente preencher sozinho →
+          <button onclick="copiarLinkWhats('rh')" style="margin-left:6px;background:var(--verde);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🟢 Copiar + WhatsApp</button>
         </div>
       </div>
     </div>
