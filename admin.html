@@ -741,12 +741,25 @@ tbody tr:hover td{background:#F5F8F7;}
         <div class="card">
           <div class="card-header">
             <div><div class="title">Empresas cadastradas</div></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="filtro-origem-empresa" class="form-control" style="font-size:12px;padding:5px 10px;width:auto;" onchange="carregarClientes()">
+                <option value="">Todas as origens</option>
+                <option value="admin">Cadastradas pelo Admin</option>
+                <option value="parceiro">Cadastradas por Parceiro</option>
+              </select>
+              <select id="filtro-status-empresa" class="form-control" style="font-size:12px;padding:5px 10px;width:auto;" onchange="carregarClientes()">
+                <option value="">Todos os status</option>
+                <option value="ativo">Ativas</option>
+                <option value="pendente">Pendentes</option>
+                <option value="inativo">Inativas</option>
+              </select>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Plano</th><th>Colaboradores</th><th>Status</th><th>Ações</th></tr></thead>
+              <thead><tr><th>Empresa</th><th>Responsável</th><th>E-mail</th><th>Plano</th><th>Colaboradores</th><th>Origem</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="tabela-empresas">
-                <tr><td><strong>Clínica Vida S.A.</strong></td><td>Carlos M.</td><td>carlos@clinica.com</td><td>Assinatura Mensal</td><td>14</td><td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td><td style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="alert('Em produção: abre painel desta empresa.')">Ver Painel</button><button class="btn btn-ghost btn-sm" onclick="editarItem(this,'empresa')">✏️ Editar</button><button class="btn btn-danger btn-sm" onclick="excluirItem(this)">🗑️ Excluir</button></td></tr>
+                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>
               </tbody>
             </table>
           </div>
@@ -1853,6 +1866,93 @@ function sv(id) {
   if(nav) nav.classList.add('active');
   if(id === 'perguntas') renderAdm();
   if(id === 'parceiros') carregarParceiros();
+  if(id === 'clientes') carregarClientes();
+}
+
+
+/* ===== CLIENTES REAIS ===== */
+function carregarClientes() {
+  if (!window.nr1mapDb) return;
+  var tbody = document.getElementById('tabela-empresas');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  var filtroOrigem = document.getElementById('filtro-origem-empresa');
+  var filtroStatus = document.getElementById('filtro-status-empresa');
+  var origem = filtroOrigem ? filtroOrigem.value : '';
+  var status = filtroStatus ? filtroStatus.value : '';
+
+  var query = window.nr1mapDb.collection('nr1map_empresas');
+  if (origem) query = query.where('criadoPor', '==', origem);
+  if (status) query = query.where('status', '==', status);
+
+  query.orderBy('criadoEm', 'desc').get()
+    .then(function(snap) {
+      tbody.innerHTML = '';
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma empresa cadastrada ainda.</td></tr>';
+        return;
+      }
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var statusBdg = d.status === 'ativo'
+          ? '<span class="bdg bdg-ok"><span class="dot"></span>Ativo</span>'
+          : d.status === 'pendente'
+          ? '<span class="bdg bdg-warn"><span class="dot"></span>Pendente</span>'
+          : '<span class="bdg"><span class="dot"></span>Inativo</span>';
+        var origemBdg = d.criadoPor === 'parceiro'
+          ? '<span style="font-size:10px;background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-weight:600;">🤝 Parceiro</span>'
+          : '<span style="font-size:10px;background:var(--verde-xp);color:var(--verde);padding:2px 8px;border-radius:10px;font-weight:600;">👤 Admin</span>';
+        var plano = d.plano || d.planoLabel || '—';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>' + (d.nome || d.razaoSocial || '—') + '</strong>' +
+            (d.cnpj ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">' + d.cnpj + '</span>' : '') +
+          '</td>' +
+          '<td>' + (d.responsavel || '—') +
+            (d.whatsapp ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">📱 ' + d.whatsapp + '</span>' : '') +
+          '</td>' +
+          '<td>' + (d.email || '—') + '</td>' +
+          '<td>' + plano.split('—')[0].trim() + '</td>' +
+          '<td>' + (d.numColaboradores || 0) + '</td>' +
+          '<td>' + origemBdg + '</td>' +
+          '<td>' + statusBdg + '</td>' +
+          '<td class="acoes-empresa" data-docid="' + doc.id + '" data-email="' + (d.email||'') + '"></td>';
+        tbody.appendChild(tr);
+        // Botões via DOM para evitar aspas aninhadas
+        var tdAcoes = tr.querySelector('.acoes-empresa');
+        tdAcoes.style.cssText = 'display:flex;gap:4px;';
+        var btnVer = document.createElement('button');
+        btnVer.className = 'btn btn-ghost btn-sm';
+        btnVer.textContent = 'Ver Painel';
+        btnVer.onclick = (function(id, email){ return function(){ verPainelEmpresa(id, email); }; })(doc.id, d.email||'');
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-danger btn-sm';
+        btnDel.textContent = '🗑️';
+        btnDel.onclick = (function(id){ return function(){ excluirEmpresa(id, this); }; })(doc.id);
+        tdAcoes.appendChild(btnVer);
+        tdAcoes.appendChild(btnDel);
+      });
+    }).catch(function(e) {
+      console.log(e);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Erro ao carregar. Verifique o índice do Firestore.</td></tr>';
+    });
+}
+
+function verPainelEmpresa(empresaId, email) {
+  sessionStorage.setItem('nr1map_rh_uid', empresaId);
+  sessionStorage.setItem('nr1map_rh_email', email);
+  window.open('painel.html', '_blank');
+}
+
+function excluirEmpresa(docId, btn) {
+  if (!confirm('Excluir esta empresa? Esta ação é irreversível.')) return;
+  if (!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(docId).delete()
+    .then(function() {
+      var tr = btn.closest('tr');
+      if (tr) tr.remove();
+    }).catch(function(e){ console.log(e); alert('Erro ao excluir.'); });
 }
 
 /* ===== PARCEIROS ===== */
