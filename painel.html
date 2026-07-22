@@ -1760,6 +1760,7 @@ function editarColab(btn) {
   document.getElementById('ec-admissao').value = '';
   document.getElementById('ec-status').value = row.dataset.status || 'ativo';
   window._editColabRow = row;
+  window._editColabDocId = row.dataset.docid || null;
   document.getElementById('modal-edit-colab').classList.add('open');
 }
 
@@ -1767,15 +1768,49 @@ function salvarEditColab() {
   var row = window._editColabRow;
   if(!row) return;
   var cells = Array.from(row.querySelectorAll('td'));
-  var nome = document.getElementById('ec-nome').value.trim() || '—';
+  var nome    = document.getElementById('ec-nome').value.trim() || '—';
+  var contato = document.getElementById('ec-contato').value.trim();
+  var cargo   = document.getElementById('ec-cargo').value.trim();
+  var depto   = document.getElementById('ec-depto').value.trim();
+  var unidade = document.getElementById('ec-unidade').value.trim();
+  var status  = document.getElementById('ec-status').value || 'ativo';
+
+  // Atualiza tabela imediatamente
   cells[0].innerText = nome;
-  cells[1].innerText = document.getElementById('ec-contato').value.trim();
-  cells[2].innerText = document.getElementById('ec-cargo').value.trim();
-  cells[3].innerText = document.getElementById('ec-depto').value.trim();
-  cells[4].innerText = document.getElementById('ec-unidade').value.trim();
-  row.dataset.nome = nome;
+  cells[1].innerText = contato;
+  cells[2].innerText = cargo;
+  cells[3].innerText = depto;
+  cells[4].innerText = unidade;
+  row.dataset.nome   = nome;
+  row.dataset.status = status;
+  // Atualiza badge de status
+  var badgeStatus = cells[7];
+  if(badgeStatus) badgeStatus.innerHTML = status === 'ativo'
+    ? '<span class="bdg-s s-ok"><span class="dot"></span>Ativo</span>'
+    : '<span class="bdg-s s-warn"><span class="dot"></span>Inativo</span>';
+
   document.getElementById('modal-edit-colab').classList.remove('open');
-  alert('✅ Colaborador atualizado!');
+
+  // Salva no Firestore se tiver docId
+  var docId = window._editColabDocId;
+  if (docId && window.nr1mapDb) {
+    var whatsapp = '', email = '';
+    if (contato.includes('@')) { email = contato; } else { whatsapp = contato.replace(/[^0-9]/g,''); }
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).update({
+      nome: nome,
+      whatsapp: whatsapp,
+      email: email,
+      cargo: cargo,
+      departamento: depto,
+      unidade: unidade,
+      status: status,
+      atualizadoEm: new Date().toISOString()
+    }).then(function(){
+      atualizarContadorColab();
+    }).catch(function(e){ console.log('Erro ao atualizar colaborador:', e); });
+  } else {
+    atualizarContadorColab();
+  }
 }
 
 function editarCargo(id) {
