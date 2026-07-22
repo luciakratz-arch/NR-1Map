@@ -388,27 +388,27 @@ tbody tr:hover td{background:#F5F8F7;}
         <!-- RESUMO -->
         <div id="fin-resumo" style="display:block">
           <div class="metrics" style="grid-template-columns:repeat(4,1fr);">
-            <div class="mc verde"><div class="lbl">Receita Bruta (mês)</div><div class="val">R$ 3.840</div><div class="sub up">↑ 12% vs. mês anterior</div></div>
-            <div class="mc"><div class="lbl">Taxa MP (~4,99%)</div><div class="val" style="color:var(--laranja);">− R$ 192</div><div class="sub">descontado automaticamente</div></div>
-            <div class="mc"><div class="lbl">Comissões Parceiros</div><div class="val" style="color:var(--laranja);">− R$ 562</div><div class="sub">30% sobre vendas via parceiro</div></div>
-            <div class="mc verde"><div class="lbl">Receita Líquida</div><div class="val">R$ 3.086</div><div class="sub">disponível para retirada</div></div>
+            <div class="mc verde"><div class="lbl">Receita Bruta (mês)</div><div class="val" id="fin-receita-bruta">R$ —</div><div class="sub" id="fin-receita-sub">calculando...</div></div>
+            <div class="mc"><div class="lbl">Taxa MP (~4,99%)</div><div class="val" style="color:var(--laranja);" id="fin-taxa-mp">− R$ —</div><div class="sub">descontado automaticamente</div></div>
+            <div class="mc"><div class="lbl">Comissões Parceiros</div><div class="val" style="color:var(--laranja);" id="fin-comissoes">− R$ —</div><div class="sub" id="fin-comissoes-sub">30% sobre vendas via parceiro</div></div>
+            <div class="mc verde"><div class="lbl">Receita Líquida</div><div class="val" id="fin-liquida">R$ —</div><div class="sub">disponível para retirada</div></div>
           </div>
           <div class="grid-2">
             <div class="card">
               <div class="card-header"><div class="title">Saldo no Mercado Pago</div></div>
               <div class="card-body">
-                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--verde);">R$ 3.086,00</div>
-                <div style="font-size:12px;color:var(--cinza-medio);margin-top:4px;">Disponível para retirada</div>
+                <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--verde);" id="fin-saldo-mp">R$ —</div>
+                <div style="font-size:12px;color:var(--cinza-medio);margin-top:4px;">Receita líquida estimada do mês</div>
                 <button class="btn btn-primary" style="margin-top:14px;width:100%;" onclick="swTab(document.querySelector('.tab:nth-child(4)'),'fin-caixa')">💸 Registrar Retirada</button>
               </div>
             </div>
             <div class="card">
               <div class="card-header"><div class="title">Vendas por Tipo (mês)</div></div>
               <div class="card-body">
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Diretas (PJ)</span><span style="font-weight:700;color:var(--verde);">R$ 2.175,00</span></div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Diretas (PF)</span><span style="font-weight:700;color:var(--verde);">R$ 780,00</span></div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Via Parceiro (PJ)</span><span style="font-weight:700;color:var(--roxo);">R$ 675,00 <span style="font-size:10px;color:var(--laranja);">(-30%)</span></span></div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px;"><span>Via Parceiro (PF)</span><span style="font-weight:700;color:var(--roxo);">R$ 210,00 <span style="font-size:10px;color:var(--laranja);">(-30%)</span></span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Assinatura Mensal</span><span style="font-weight:700;color:var(--verde);" id="fin-v-assinatura">R$ —</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Uso Único</span><span style="font-weight:700;color:var(--verde);" id="fin-v-unico">R$ —</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);font-size:12px;"><span>Via Parceiro</span><span style="font-weight:700;color:var(--roxo);" id="fin-v-parceiro">R$ — <span style="font-size:10px;color:var(--laranja);">(-30%)</span></span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px;"><span>Total de empresas ativas</span><span style="font-weight:700;color:var(--verde);" id="fin-total-empresas">0</span></div>
               </div>
             </div>
           </div>
@@ -1867,8 +1867,97 @@ function sv(id) {
   if(id === 'perguntas') renderAdm();
   if(id === 'parceiros') carregarParceiros();
   if(id === 'clientes') carregarClientes();
+  if(id === 'financeiro') carregarFinanceiro();
 }
 
+
+
+/* ===== FINANCEIRO REAL ===== */
+function carregarFinanceiro() {
+  if (!window.nr1mapDb) return;
+
+  var TAXA_MP = 0.0499;
+  var COMISSAO_PARC = 0.30;
+
+  // Tabela de preços por plano
+  var PRECOS_MENSAL = { '5': 35, '20': 25, '50': 20, '100': 16.5, '200': 13, '500': 10 };
+  var PRECOS_UNICO  = { '5': 97, '20': 79, '50': 59, '100': 49,  '200': 39, '500': 29 };
+
+  function calcValorEmpresa(d) {
+    var n = parseInt(d.numColaboradores) || 0;
+    var faixa = n<=5?'5':n<=20?'20':n<=50?'50':n<=100?'100':n<=200?'200':'500';
+    var plano = (d.plano || '').toLowerCase();
+    if (plano.includes('mensal') || plano.includes('assinatura')) {
+      return n * (PRECOS_MENSAL[faixa] || 16.5);
+    } else {
+      return n * (PRECOS_UNICO[faixa] || 49);
+    }
+  }
+
+  window.nr1mapDb.collection('nr1map_empresas')
+    .where('status','==','ativo')
+    .get().then(function(snap) {
+      var receitaBruta = 0;
+      var receitaAssinatura = 0;
+      var receitaUnico = 0;
+      var receitaParceiro = 0;
+      var totalEmpresas = snap.size;
+
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var valor = calcValorEmpresa(d);
+        receitaBruta += valor;
+        var plano = (d.plano || '').toLowerCase();
+        if (plano.includes('mensal') || plano.includes('assinatura')) {
+          receitaAssinatura += valor;
+        } else {
+          receitaUnico += valor;
+        }
+        if (d.criadoPor === 'parceiro') receitaParceiro += valor;
+      });
+
+      var taxaMP     = receitaBruta * TAXA_MP;
+      var comissoes  = receitaParceiro * COMISSAO_PARC;
+      var liquida    = receitaBruta - taxaMP - comissoes;
+
+      function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+
+      // Atualiza métricas
+      var el = function(id){ return document.getElementById(id); };
+      if(el('fin-receita-bruta')) el('fin-receita-bruta').textContent = fmt(receitaBruta);
+      if(el('fin-receita-sub'))   el('fin-receita-sub').textContent   = totalEmpresas + ' empresas ativas';
+      if(el('fin-taxa-mp'))       el('fin-taxa-mp').textContent       = '− ' + fmt(taxaMP);
+      if(el('fin-comissoes'))     el('fin-comissoes').textContent     = '− ' + fmt(comissoes);
+      if(el('fin-comissoes-sub')) el('fin-comissoes-sub').textContent = receitaParceiro > 0 ? '30% de ' + fmt(receitaParceiro) + ' via parceiro' : 'Sem vendas via parceiro';
+      if(el('fin-liquida'))       el('fin-liquida').textContent       = fmt(liquida);
+      if(el('fin-saldo-mp'))      el('fin-saldo-mp').textContent      = fmt(liquida);
+      if(el('fin-v-assinatura'))  el('fin-v-assinatura').textContent  = fmt(receitaAssinatura);
+      if(el('fin-v-unico'))       el('fin-v-unico').textContent       = fmt(receitaUnico);
+      if(el('fin-v-parceiro'))    el('fin-v-parceiro').innerHTML      = fmt(receitaParceiro) + ' <span style="font-size:10px;color:var(--laranja);">(-30%)</span>';
+      if(el('fin-total-empresas'))el('fin-total-empresas').textContent = totalEmpresas;
+
+      // Badge pendentes — empresas com status pendente
+      window.nr1mapDb.collection('nr1map_empresas').where('status','==','pendente').get()
+        .then(function(pendSnap) {
+          var badge = document.getElementById('badge-pend');
+          if(badge) badge.textContent = pendSnap.size;
+          carregarPendentes(pendSnap);
+        }).catch(function(){});
+
+    }).catch(function(e){ console.log('fin err:', e); });
+}
+
+function carregarPendentes(snap) {
+  // Placeholder — pendentes vêm do Mercado Pago webhook
+  // Por ora mostra empresas com status pendente no Firestore
+  if(snap.empty) {
+    var cont = document.getElementById('fin-pendentes');
+    if(cont) {
+      var aviso = cont.querySelector('.card');
+      // Não remove cards existentes — são exemplos de layout
+    }
+  }
+}
 
 /* ===== CLIENTES REAIS ===== */
 function carregarClientes() {
