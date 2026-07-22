@@ -666,18 +666,34 @@ tbody tr:hover td{background:#F5F8F7;}
           <h3>Tipo de Cliente</h3>
           <button class="modal-close" onclick="fecharModalTipo()">✕</button>
         </div>
-        <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:20px;">Selecione o tipo de cadastro:</p>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPJ()">
+        <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;">Selecione o tipo de cadastro:</p>
+
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza-medio);margin-bottom:8px;">Clientes / Empresas</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;padding:14px 18px;" onclick="fecharModalTipo();abrirModalPJ()">
             🏢 <span><strong style="display:block;font-size:14px;">Empresa (Pessoa Jurídica)</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CNPJ · múltiplos colaboradores · RH responsável</span></span>
           </button>
-          <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:16px 18px;" onclick="fecharModalTipo();abrirModalPF()">
+          <button class="btn btn-roxo" style="justify-content:flex-start;gap:12px;padding:14px 18px;" onclick="fecharModalTipo();abrirModalPF()">
             👤 <span><strong style="display:block;font-size:14px;">Profissional / Pessoa Física</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CPF · contratante individual · MEI ou autônomo</span></span>
           </button>
         </div>
-        <div style="margin-top:20px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);">
-          🔗 <strong>Link de auto-cadastro:</strong> Envie para o cliente preencher sozinho →
-          <a href="representantes.html" target="_blank" style="color:var(--verde);font-weight:600;"> representantes.html#formulario</a>
+
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza-medio);margin-bottom:8px;">Parceiros / Representantes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          <button class="btn" style="justify-content:flex-start;gap:12px;padding:14px 18px;background:#7B00C4;color:#fff;" onclick="fecharModalTipo();abrirModalParceiro()">
+            🤝 <span><strong style="display:block;font-size:14px;">Novo Parceiro / Representante</strong><span style="font-size:11px;font-weight:400;opacity:.8;">CRP, CRA, OAB, consultor · comissão 30%</span></span>
+          </button>
+        </div>
+
+        <div style="padding:12px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);margin-bottom:8px;">
+          🔗 <strong>Link auto-cadastro RH:</strong>
+          <span id="link-autocad-rh" style="font-size:11px;color:var(--cinza-medio);word-break:break-all;">https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario</span>
+          <button onclick="copiarLinkWhats('rh')" style="margin-left:8px;background:var(--verde);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🟢 WhatsApp</button>
+        </div>
+        <div style="padding:12px 14px;background:rgba(123,0,196,.08);border-radius:8px;font-size:12px;color:var(--roxo);">
+          🔗 <strong>Link auto-cadastro Parceiro:</strong>
+          <span id="link-autocad-par" style="font-size:11px;color:var(--cinza-medio);word-break:break-all;">https://luciakratz-arch.github.io/NR-1Map/representantes.html#parceiro</span>
+          <button onclick="copiarLinkWhats('parceiro')" style="margin-left:8px;background:#7B00C4;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🟢 WhatsApp</button>
         </div>
       </div>
     </div>
@@ -748,6 +764,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <div class="form-group">
             <label class="form-label">Plano *</label>
             <select class="form-control" id="pj-plano">
+                <option value="isento">⭐ Isento / Teste (sem cobrança)</option>
               <option value="">Selecione...</option>
               <optgroup label="Uso Único">
                 <option value="uso-unico-5">Até 5 colab. — R$ 97/colab</option>
@@ -891,7 +908,7 @@ tbody tr:hover td{background:#F5F8F7;}
           <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
           <div class="topbar-title">Leads Captados</div>
         </div>
-        <span id="leads-badge-topbar" style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">4 leads aguardando contato</span>
+        <span id="leads-badge-topbar" style="font-size:11px;background:var(--roxo-xp);color:var(--roxo);padding:3px 10px;border-radius:20px;">0 leads aguardando contato</span>
       </div>
       <div class="content">
         <div class="card">
@@ -1219,6 +1236,18 @@ function salvarPJ() {
   var secondaryAuth = firebase.auth(secondaryApp);
 
   secondaryAuth.createUserWithEmailAndPassword(email, senha)
+    .catch(function(e) {
+      // E-mail já cadastrado no Auth — busca o uid existente para reutilizar
+      if (e.code === 'auth/email-already-in-use') {
+        return secondaryAuth.signInWithEmailAndPassword(email, senha)
+          .catch(function() {
+            // Senha diferente — cria documento sem Auth (isento/teste)
+            var fakeUid = 'isento_' + Date.now();
+            return { user: { uid: fakeUid }, reusoSemAuth: true };
+          });
+      }
+      throw e;
+    })
     .then(function(cred) {
       var uid = cred.user.uid;
       // Salva no Firestore sob o uid do usuário RH criado
@@ -2310,6 +2339,27 @@ function excluirEmpresa(docId, btn) {
 }
 
 /* ===== PARCEIROS ===== */
+function copiarLinkWhats(tipo) {
+  var baseUrl = 'https://luciakratz-arch.github.io/NR-1Map/';
+  var txt, url;
+  if (tipo === 'rh') {
+    url = baseUrl + 'representantes.html#formulario';
+    txt = '🏢 *NR-1 Map — Cadastro de Empresa*\n\nOlá! Segue o link para sua empresa se cadastrar na plataforma NR-1 Map e iniciar a gestão de riscos psicossociais conforme a NR-1:\n\n🔗 ' + url + '\n\nQualquer dúvida, estou à disposição!';
+  } else {
+    url = baseUrl + 'representantes.html#parceiro';
+    txt = '🤝 *NR-1 Map — Seja um Parceiro/Representante*\n\nOlá! Convido você a se tornar Parceiro(a) do NR-1 Map — a plataforma especializada em gestão de riscos psicossociais conforme a NR-1/Portaria MTE 1.419/2024.\n\nComo parceiro(a), você terá 30% de comissão recorrente e poderá assinar os laudos com seu próprio registro profissional.\n\n🔗 Preencha seu cadastro aqui:\n' + url + '\n\nQualquer dúvida, fale comigo!';
+  }
+  navigator.clipboard.writeText(txt).then(function(){
+    alert('✅ Texto copiado!\n\nCole no WhatsApp e envie.');
+  }).catch(function(){
+    // fallback
+    var ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('✅ Texto copiado! Cole no WhatsApp.');
+  });
+}
+
 function abrirModalParceiro() {
   document.getElementById('modal-parceiro').classList.add('open');
 }
@@ -2357,6 +2407,20 @@ function salvarParceiro() {
       });
       carregarParceiros();
       exibirCredenciais(email, result.senha);
+      // Abre WhatsApp com pré-texto de boas-vindas ao parceiro
+      var wpp = whatsapp.replace(/\D/g,'');
+      if (wpp) {
+        var txt = encodeURIComponent(
+          '🤝 *Bem-vindo(a) ao NR-1 Map!*\n\n' +
+          'Olá, ' + nome + '! Seu cadastro como Parceiro/Representante foi aprovado.\n\n' +
+          '📧 *E-mail:* ' + email + '\n' +
+          '🔑 *Senha:* ' + result.senha + '\n\n' +
+          '🔗 *Acesse seu painel aqui:*\n' +
+          'https://luciakratz-arch.github.io/NR-1Map/parceiro.html\n\n' +
+          'Qualquer dúvida, estou à disposição! 🚀'
+        );
+        setTimeout(function(){ window.open('https://wa.me/55' + wpp + '?text=' + txt, '_blank'); }, 800);
+      }
     })
     .catch(function(e) {
       btn.textContent = 'Cadastrar Parceiro'; btn.disabled = false;
