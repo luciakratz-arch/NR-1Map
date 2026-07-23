@@ -245,7 +245,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="sidebar-logo">NR-1<span>Map</span></div>
   <div class="sidebar-empresa">
     <div class="lbl">Empresa</div>
-    <div class="nome">Clínica Vida S.A.</div>
+    <div class="nome">—</div>
     <div class="plano">Assinatura · Faixa 2</div>
   </div>
   <nav class="nav">
@@ -1958,26 +1958,26 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el=document.getElementById('view-'+id);
-  if(el)el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
-  if(nav)nav.classList.add('active');
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  var el=document.getElementById('view-'+id);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var nav=document.querySelector('.nav-item[onclick*=\'\'' + id + '\'\'\']');
+  if(nav) nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='cobranding') _carregarResponsavelTecnico();
   if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   tab.classList.add('active');
-  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
-  const t=document.getElementById(targetId);
-  if(t)t.classList.add('active');
+  parent.querySelectorAll('[id^="t-"]').forEach(function(v){ v.classList.remove('active'); });
+  var t=document.getElementById(targetId);
+  if(t) t.classList.add('active');
 }
 function toggleModulo(header){
-  const body=header.nextElementSibling;
+  var body=header.nextElementSibling;
   body.classList.toggle('open');
 }
 function selOpt(el){
@@ -1986,9 +1986,9 @@ function selOpt(el){
 }
 function handleUpload(input){
   if(input.files&&input.files[0]){
-    const z=document.querySelector('.upload-zone');
-    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
-    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
+    var z=document.querySelector('.upload-zone');
+    z.innerHTML='<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>'+input.files[0].name+'</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>';
+    setTimeout(function(){document.getElementById('uploadPreview').style.display='block';},600);
   }
 }
 function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
@@ -2019,9 +2019,9 @@ function atualizarSinalizador(inputOuTr){
   const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
   const input=tr.querySelector('input[type="date"]');
   if(!input||!input.value)return;
-  const {cor,texto}=corSinalizador(input.value);
-  const cel=tr.querySelector('.sinalizador-cell');
-  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
+  var _cs=corSinalizador(input.value); var cor=_cs.cor; var texto=_cs.texto;
+  var cel=tr.querySelector('.sinalizador-cell');
+  cel.innerHTML='<span class="bdg-s" style="background:'+cor+'22;color:'+cor+';"><span class="dot" style="background:'+cor+';"></span>'+texto+'</span>';
 }
 function atualizarTodosSinalizadores(){
   document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
@@ -2040,16 +2040,16 @@ function adicionarAcao(){
   const tbody=document.getElementById('tbody-plano');
   const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
   const dataPadrao=hoje.toISOString().slice(0,10);
-  const tr=document.createElement('tr');
+  var tr=document.createElement('tr');
   tr.dataset.prazo=dataPadrao;
-  tr.innerHTML=`
-    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
-    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
-    <td><div contenteditable="true">Responsável</div></td>
-    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
-    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
-    <td class="sinalizador-cell"></td>
-    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
+  tr.innerHTML=
+    '<td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>'+
+    '<td><div contenteditable="true">Descreva a ação (What / How)...</div></td>'+
+    '<td><div contenteditable="true">Responsável</div></td>'+
+    '<td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>'+
+    '<td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="'+dataPadrao+'" onchange="atualizarSinalizador(this)"/></td>'+
+    '<td class="sinalizador-cell"></td>'+
+    '<td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest(\'tr\').remove();atualizarBadgePendentes();">✕</button></td>';
   tbody.appendChild(tr);
   atualizarSinalizador(tr);
   atualizarBadgePendentes();
@@ -2186,9 +2186,9 @@ function registrarEvento(selectEl){
   const tr=selectEl.closest('tr');
   const setor=nomeSetorDaLinha(tr);
   const status=selectEl.value;
-  const agora=new Date();
-  const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
+  var agora=new Date();
+  var dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:setor+' — Status alterado para '+status});
   renderHistorico();
 }
 function renderHistorico(){
@@ -2200,13 +2200,13 @@ function renderHistorico(){
     if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
     else if(ev.evento.includes('Em andamento'))c='#D4A017';
     else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
-    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
-      <div style="flex:1;">
-        <div style="font-size:12px;">${ev.evento}</div>
-        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
-      </div>
-    </div>`;
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">'+
+      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-top:4px;flex-shrink:0;"></span>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:12px;">'+ev.evento+'</div>'+
+        '<div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">'+ev.data+' · '+ev.resp+'</div>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 function gerarPdfAcompanhamento(){
