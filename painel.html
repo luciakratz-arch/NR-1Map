@@ -1962,8 +1962,8 @@ function sv(id){
   var el=document.getElementById('view-'+id);
   if(el)el.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var nav=document.querySelector(".nav-item[onclick*=\"'" + id + "'\"]");
-  if(nav)nav.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ if(n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'"+id+"'") !== -1) n.classList.add('active'); });
+
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='cobranding') _carregarResponsavelTecnico();
@@ -2545,11 +2545,29 @@ function _renderOrgV(el,lista) {
   var CW=148,CH=52,GX=24,GY=70;
   var nvMap=_buildNvMap(lista); var maxNv=0;
   for (var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
-  var posMap={},totalW=0;
+  // Passo 1: calcular totalW primeiro
+  var totalW=0;
   for (var nv=1;nv<=maxNv;nv++){var it=nvMap[nv]||[];var rW=it.length*(CW+GX)-GX;if(rW>totalW)totalW=rW;}
-  for (var nv2=1;nv2<=maxNv;nv2++){var it2=nvMap[nv2]||[];var rW2=it2.length*(CW+GX)-GX;var sx=Math.floor((totalW-rW2)/2);for(var m=0;m<it2.length;m++)posMap[it2[m].id]={x:sx+m*(CW+GX),y:(nv2-1)*(CH+GY)};}
+  // Passo 2: posicionar com totalW já definido
+  var posMap={};
+  for (var nv2=1;nv2<=maxNv;nv2++){
+    var it2=nvMap[nv2]||[];
+    var rW2=it2.length*(CW+GX)-GX;
+    var sx=Math.floor((totalW-rW2)/2);
+    for(var m=0;m<it2.length;m++) posMap[it2[m].id]={x:sx+m*(CW+GX),y:(nv2-1)*(CH+GY)};
+  }
   var svgW=Math.max(totalW+40,500),svgH=maxNv*(CH+GY)+40,linhas='',cards='';
-  lista.forEach(function(cr){if(cr.repId&&posMap[cr.id]&&posMap[cr.repId]){var px=posMap[cr.repId].x+CW/2,py=posMap[cr.repId].y+CH,cx2=posMap[cr.id].x+CW/2,cy2=posMap[cr.id].y,my=(py+cy2)/2;linhas+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';}});
+  // Linhas: conectar cada nó ao seu pai real
+  lista.forEach(function(cr){
+    if(cr.repId&&posMap[cr.id]&&posMap[cr.repId]){
+      var px=posMap[cr.repId].x+CW/2;
+      var py=posMap[cr.repId].y+CH;
+      var cx2=posMap[cr.id].x+CW/2;
+      var cy2=posMap[cr.id].y;
+      var my=py+GY/2;
+      linhas+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  });
   lista.forEach(function(dr){if(!posMap[dr.id])return;cards+=_orgCard(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
   el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
 }
