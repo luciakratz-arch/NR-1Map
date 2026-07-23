@@ -1961,12 +1961,14 @@ function carregarPainelGeral() {
     }).catch(function(e){console.log(e);});
 
   // Leads
-  window.nr1mapDb.collection('nr1map_leads').get()
+  window.nr1mapDb.collection('nr1map_leads')
+    .where('status','==','pendente').get()
     .then(function(snap){
       var el=document.getElementById('pg-leads');
       var badge=document.getElementById('badge-leads');
-      if(el) el.textContent=snap.size;
-      if(badge) badge.textContent=snap.size;
+      var total=snap.size;
+      if(el) el.textContent=total;
+      if(badge){ badge.textContent=total; badge.style.display=total>0?'':'none'; }
     }).catch(function(){});
 
   // Depoimentos pendentes
