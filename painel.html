@@ -2651,8 +2651,8 @@ function _renderOrgRadial(el, lista) {
       posMap[item.cargo.id] = {x:Math.round(r*Math.cos(angle)), y:Math.round(r*Math.sin(angle))};
     });
   });
-  var allX = Object.values(posMap).map(function(p){return p.x;});
-  var allY = Object.values(posMap).map(function(p){return p.y;});
+  var allX = Object.keys(posMap).map(function(k){return posMap[k].x;});
+  var allY = Object.keys(posMap).map(function(k){return posMap[k].y;});
   var minX=Math.min.apply(null,allX)-CW/2-20, minY=Math.min.apply(null,allY)-CH/2-20;
   var maxX=Math.max.apply(null,allX)+CW/2+20, maxY=Math.max.apply(null,allY)+CH/2+20;
   var offX=-minX, offY=-minY;
@@ -3457,9 +3457,23 @@ function carregarCargos(empresaId) {
     if(user){
       carregarEmpresa(user.uid, user.email);
     } else {
+      // Verifica se veio do admin via "Ver Painel" (passa empresaId direto, sem senha)
+      var uid = sessionStorage.getItem('nr1map_rh_uid');
       var email = sessionStorage.getItem('nr1map_rh_email');
       var pwd = sessionStorage.getItem('nr1map_rh_pwd');
-      if(email && pwd){
+      if(uid && !pwd) {
+        // Acesso admin direto — carrega empresa pelo ID sem precisar de auth
+        window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
+          .then(function(doc){
+            if(doc.exists){
+              var e = doc.data(); e.id = doc.id;
+              aplicarEmpresa(e);
+            } else {
+              // Tenta por email
+              if(email) carregarEmpresa(uid, email);
+            }
+          }).catch(function(){ if(email) carregarEmpresa(uid, email); });
+      } else if(email && pwd){
         window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
           .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
           .catch(function(e){ console.log('Re-auth falhou:', e); });
