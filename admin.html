@@ -2670,14 +2670,39 @@ function carregarParceiros() {
           '<td>'+(d.clientes||0)+'</td>'+
           '<td>R$ '+((d.comissaoMes||0).toFixed(2).replace('.',','))+'</td>'+
           '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>'+
-          '<td style="display:flex;gap:4px;">'+
-            '<a href="https://wa.me/55'+(d.whatsapp||'')+'" target="_blank" class="btn btn-ghost btn-sm" title="WhatsApp">📱</a>'+
-            '<button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditParceiro(\''+doc.id+'\','+JSON.stringify({nome:d.nome,email:d.email,whatsapp:d.whatsapp,area:d.area,registro:d.registro,comissaoPct:d.comissaoPct})+')">✏️</button>'+
-            '<button class="btn btn-ghost btn-sm" title="Reset senha" onclick="resetSenhaParceiro(\''+d.email+'\')">🔑</button>'+
-            '<button class="btn btn-'+(d.status==='inativo'?'primary':'danger')+' btn-sm" onclick="toggleStatusParceiro(\''+doc.id+'\','+(d.status==='inativo'?'false':'true')+')">'+(d.status==='inativo'?'Ativar':'Inativar')+'</button>'+
-            '<button class="btn btn-danger btn-sm" title="Excluir" onclick="excluirParceiro(\''+doc.id+'\')">🗑️</button>'+
-          '</td>';
+          '<td class="acoes-parceiro" data-docid="'+doc.id+'"></td>';
         tbody.appendChild(tr);
+
+        // Botões via DOM para evitar conflito de aspas
+        var tdP = tr.querySelector('.acoes-parceiro');
+        tdP.style.cssText = 'display:flex;gap:4px;flex-wrap:wrap;';
+
+        var bWa = document.createElement('a');
+        bWa.href = 'https://wa.me/55'+(d.whatsapp||''); bWa.target='_blank';
+        bWa.className='btn btn-ghost btn-sm'; bWa.title='WhatsApp'; bWa.textContent='📱';
+        tdP.appendChild(bWa);
+
+        var bEd = document.createElement('button');
+        bEd.className='btn btn-ghost btn-sm'; bEd.title='Editar'; bEd.textContent='✏️';
+        bEd.onclick = (function(id, data){ return function(){ abrirEditParceiro(id, data); }; })(doc.id, d);
+        tdP.appendChild(bEd);
+
+        var bPw = document.createElement('button');
+        bPw.className='btn btn-ghost btn-sm'; bPw.title='Reset senha'; bPw.textContent='🔑';
+        bPw.onclick = (function(email){ return function(){ resetSenhaParceiro(email); }; })(d.email||'');
+        tdP.appendChild(bPw);
+
+        var bSt = document.createElement('button');
+        var pIsAtivo = (d.status||'ativo') === 'ativo';
+        bSt.className='btn btn-sm '+(pIsAtivo?'btn-danger':'btn-primary');
+        bSt.textContent = pIsAtivo ? 'Inativar' : 'Ativar';
+        bSt.onclick = (function(id, ativo){ return function(){ toggleStatusParceiro(id, ativo); }; })(doc.id, pIsAtivo);
+        tdP.appendChild(bSt);
+
+        var bDl = document.createElement('button');
+        bDl.className='btn btn-danger btn-sm'; bDl.title='Excluir'; bDl.textContent='🗑️';
+        bDl.onclick = (function(id){ return function(){ excluirParceiro(id); }; })(doc.id);
+        tdP.appendChild(bDl);
       });
       document.getElementById('parc-total').textContent = total;
       document.getElementById('parc-clientes').textContent = totalClientes;
