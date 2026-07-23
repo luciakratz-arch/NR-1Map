@@ -600,8 +600,12 @@ function enviarAplicacao() {
     document.getElementById('form-sucesso').style.display = 'block';
   }).catch(function(e) {
     if (btn) { btn.textContent = 'Quero ser Representante →'; btn.disabled = false; }
-    console.log(e);
-    alert('Erro ao enviar. Tente novamente.');
+    console.log('Erro Firestore:', e.code, e.message);
+    if (e.code === 'permission-denied') {
+      alert('Erro de permissão. Entre em contato:\n📧 luciakratz@gmail.com\n📱 62 9 9154-6757');
+    } else {
+      alert('Erro ao enviar: ' + e.message + '\n\nTente novamente ou entre em contato:\n📧 luciakratz@gmail.com');
+    }
   });
 }
 </script>
