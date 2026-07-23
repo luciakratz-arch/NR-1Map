@@ -1962,7 +1962,7 @@ function sv(id){
   var el=document.getElementById('view-'+id);
   if(el)el.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var nav=document.querySelector('.nav-item[onclick*=\'\'' + id + '\'\']');
+  var nav=document.querySelector(".nav-item[onclick*=\"'" + id + "'\"]");
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
