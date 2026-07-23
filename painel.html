@@ -1586,7 +1586,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control"><option>Pesquisa Pulso</option><option>Diagnóstico Geral</option></select></div>
     <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option></select></div></div>
     <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div></div>
-    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="fecharModal('modal-agendar');alert('📅 Pesquisa agendada!')">Agendar</button></div>
+    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
   </div>
 </div>
 
@@ -1967,6 +1967,7 @@ function sv(id){
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='cobranding') _carregarResponsavelTecnico();
+  if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
   parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -2675,6 +2676,97 @@ function _renderOrgRadial(el, lista) {
   el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
 }
 
+
+function carregarAgenda() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var lista = document.getElementById('agenda-lista');
+  var titulo = document.getElementById('agenda-titulo');
+  if (lista) lista.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
+  window.nr1mapDb.collection('nr1map_agenda')
+    .where('empresaId','==',empresaId)
+    .get()
+    .then(function(snap) {
+      if (!lista) return;
+      if (snap.empty) {
+        lista.innerHTML = '<div style="text-align:center;padding:32px;color:var(--cinza-medio);">Nenhuma pesquisa agendada ainda.<br/><span style="font-size:12px;">Use "+ Agendar pesquisa" para começar.</span></div>';
+        if (titulo) titulo.textContent = 'Agenda';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var docs = [];
+      snap.forEach(function(doc){ docs.push({id:doc.id, d:doc.data()}); });
+      docs.sort(function(a,b){ return (a.d.data||'') < (b.d.data||'') ? -1 : 1; });
+      lista.innerHTML = '';
+      var datas = [];
+      docs.forEach(function(item) {
+        var d = item.d;
+        var dt = d.data ? new Date(d.data+'T12:00:00') : null;
+        if (dt) datas.push(dt);
+        var dia = dt ? String(dt.getDate()).padStart(2,'0') : '—';
+        var mes = dt ? meses[dt.getMonth()] : '—';
+        var tipoCls = d.tipo === 'geral' ? 'tipo-geral' : 'tipo-pulso';
+        var tipoLabel = d.tipo === 'geral' ? 'Geral' : 'Pulso';
+        var info = [d.canal||'WhatsApp'];
+        if (d.unidade && d.unidade !== 'Todas') info.push(d.unidade);
+        else info.push('todas as unidades');
+        if (d.prazo) info.push(d.prazo + ' dias');
+        var div = document.createElement('div');
+        div.className = 'agenda-item';
+        div.innerHTML =
+          '<div class="agenda-data"><div class="dia">'+dia+'</div><div class="mes">'+mes+'</div></div>'+
+          '<div class="agenda-info">'+
+            '<h4>'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+(d.tema?' — '+d.tema:'')+'</h4>'+
+            '<p>'+info.join(' · ')+'</p>'+
+          '</div>'+
+          '<span class="agenda-tipo '+tipoCls+'">'+tipoLabel+'</span>'+
+          '<button onclick="excluirAgendamento(''+item.id+'')" style="margin-left:8px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;" title="Excluir">🗑️</button>';
+        lista.appendChild(div);
+      });
+      if (datas.length > 0 && titulo) {
+        var min = datas.reduce(function(a,b){return a<b?a:b;});
+        var max = datas.reduce(function(a,b){return a>b?a:b;});
+        var fmt = function(dt){ return meses[dt.getMonth()]+'/'+dt.getFullYear(); };
+        titulo.textContent = 'Agenda — ' + fmt(min) + (fmt(min)!==fmt(max) ? ' a ' + fmt(max) : '');
+      }
+    }).catch(function(e){
+      if (lista) lista.innerHTML = '<div style="text-align:center;padding:24px;color:#ef4444;">Erro ao carregar. Verifique índice do Firestore (empresaId + data).</div>';
+      console.log('agenda:', e);
+    });
+}
+
+function salvarAgendamento() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var data = document.getElementById('ag-data').value;
+  if (!data) { alert('Selecione a data de disparo.'); return; }
+  var payload = {
+    empresaId: empresaId,
+    tipo: document.getElementById('ag-tipo').value,
+    tema: document.getElementById('ag-tema').value.trim(),
+    data: data,
+    prazo: document.getElementById('ag-prazo').value,
+    unidade: document.getElementById('ag-unidade').value,
+    canal: document.getElementById('ag-canal').value,
+    status: 'agendado',
+    criadoEm: new Date().toISOString()
+  };
+  window.nr1mapDb.collection('nr1map_agenda').add(payload)
+    .then(function() {
+      fecharModal('modal-agendar');
+      document.getElementById('ag-data').value = '';
+      document.getElementById('ag-tema').value = '';
+      carregarAgenda();
+      alert('✅ Pesquisa agendada com sucesso!');
+    }).catch(function(e){ alert('Erro ao agendar: ' + e.message); });
+}
+
+function excluirAgendamento(docId) {
+  if (!confirm('Excluir este agendamento?')) return;
+  window.nr1mapDb.collection('nr1map_agenda').doc(docId).delete()
+    .then(function(){ carregarAgenda(); })
+    .catch(function(e){ alert('Erro: ' + e.message); });
+}
 
 function exportarOrgPDF() {
   alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
