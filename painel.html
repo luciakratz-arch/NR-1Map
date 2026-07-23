@@ -1521,9 +1521,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <div class="modal-overlay" id="modal-agendar">
   <div class="modal">
     <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
-    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control"><option>Pesquisa Pulso</option><option>Diagnóstico Geral</option></select></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option></select></div></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div></div>
+    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control" id="ag-tipo"><option value="pulso">Pesquisa Pulso</option><option value="geral">Diagnóstico Geral</option></select></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="ag-data"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control" id="ag-prazo"><option value="7">7 dias</option><option value="14">14 dias</option></select></div></div>
+    <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="ag-unidade"><option value="Todas">Todas</option><option value="Goiânia">Goiânia</option><option value="Brasília">Brasília</option><option value="Belo Horizonte">Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control" id="ag-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
   </div>
 </div>
@@ -2435,6 +2435,10 @@ function salvarCargo() {
 function renderOrg() {
   var el = document.getElementById('org-chart');
   if (!el) return;
+  if (!cargos || cargos.length === 0) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
+    return;
+  }
   var CW=140, CH=52, GX=20, GY=60;
   var nvMap = {};
   for (var i=0; i<cargos.length; i++) {
