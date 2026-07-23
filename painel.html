@@ -1580,6 +1580,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="grid-2" style="margin-bottom:12px;">
       <div class="form-group"><label class="form-label">Nível Hierárquico</label><select class="form-control" id="edit-cargo-nivel"></select></div>
       <div class="form-group"><label class="form-label">Reporta a</label><select class="form-control" id="edit-cargo-reporta"></select></div>
+      <div class="form-group"><label class="form-label">Tipo de vínculo no organograma</label>
+        <select class="form-control" id="edit-cargo-staff">
+          <option value="">Subordinado direto (linha vertical)</option>
+          <option value="interno">Staff interno — funcionário assessor (linha horizontal sólida)</option>
+          <option value="externo">Staff externo — empresa/consultoria terceirizada (linha tracejada)</option>
+        </select>
+      </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
       <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">Cancelar</button>
@@ -1929,6 +1936,8 @@ function editarCargo(id) {
     selRep.appendChild(opt);
   });
   window._editCargoId = id;
+  var selStaff = document.getElementById('edit-cargo-staff');
+  if (selStaff) selStaff.value = cargo.staffTipo || '';
   document.getElementById('modal-edit-cargo').classList.add('open');
 }
 
@@ -1940,13 +1949,16 @@ function salvarEditCargo() {
       cargos[i].cbo = document.getElementById('edit-cargo-cbo').value.trim();
       cargos[i].nvId = document.getElementById('edit-cargo-nivel').value || null;
       cargos[i].repId = document.getElementById('edit-cargo-reporta').value || null;
+      var staffEl = document.getElementById('edit-cargo-staff');
+      cargos[i].staffTipo = staffEl ? staffEl.value : '';
+      cargos[i].isStaff = cargos[i].staffTipo !== '';
       break;
     }
   }
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').doc(id).update({
       nome: cargos[i].nome, cbo: cargos[i].cbo,
-      nvId: cargos[i].nvId, repId: cargos[i].repId
+      nvId: cargos[i].nvId, repId: cargos[i].repId, staffTipo: cargos[i].staffTipo||'', isStaff: cargos[i].isStaff||false
     }).catch(function(e){ console.log(e); });
   }
   renderCargos();
