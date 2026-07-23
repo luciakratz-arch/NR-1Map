@@ -1030,7 +1030,9 @@ tbody tr:hover td{background:#F5F8F7;}
     </div>
     <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Plano</label>
       <select class="form-control" id="edit-emp-plano">
-        <option>Assinatura Mensal</option><option>Uso Único</option>
+        <option value="Isento / Teste">⭐ Isento / Teste (sem cobrança)</option>
+        <option value="Assinatura Mensal">Assinatura Mensal</option>
+        <option value="Uso Único">Uso Único</option>
       </select>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -2371,11 +2373,35 @@ function carregarClientes() {
         btnVer.className = 'btn btn-ghost btn-sm';
         btnVer.textContent = 'Ver Painel';
         btnVer.onclick = (function(id, email){ return function(){ verPainelEmpresa(id, email); }; })(doc.id, d.email||'');
+
+        var btnEdit = document.createElement('button');
+        btnEdit.className = 'btn btn-ghost btn-sm';
+        btnEdit.textContent = '✏️';
+        btnEdit.title = 'Editar empresa';
+        btnEdit.onclick = (function(id, data){ return function(){ abrirEditEmpresa(id, data); }; })(doc.id, d);
+
+        var btnPwd = document.createElement('button');
+        btnPwd.className = 'btn btn-ghost btn-sm';
+        btnPwd.textContent = '🔑';
+        btnPwd.title = 'Enviar reset de senha';
+        btnPwd.onclick = (function(email){ return function(){ resetSenhaEmpresa(email); }; })(d.email||'');
+
+        var btnStatus = document.createElement('button');
+        var isAtivo = (d.status||'ativo') === 'ativo';
+        btnStatus.className = 'btn btn-sm ' + (isAtivo ? 'btn-danger' : 'btn-primary');
+        btnStatus.textContent = isAtivo ? 'Inativar' : 'Ativar';
+        btnStatus.onclick = (function(id, ativo){ return function(){ toggleStatusEmpresa(id, ativo, this); }; })(doc.id, isAtivo);
+
         var btnDel = document.createElement('button');
         btnDel.className = 'btn btn-danger btn-sm';
         btnDel.textContent = '🗑️';
+        btnDel.title = 'Excluir empresa';
         btnDel.onclick = (function(id){ return function(){ excluirEmpresa(id, this); }; })(doc.id);
+
         tdAcoes.appendChild(btnVer);
+        tdAcoes.appendChild(btnEdit);
+        tdAcoes.appendChild(btnPwd);
+        tdAcoes.appendChild(btnStatus);
         tdAcoes.appendChild(btnDel);
       });
     }).catch(function(e) {
@@ -2551,8 +2577,11 @@ function carregarParceiros() {
           '<td>R$ '+((d.comissaoMes||0).toFixed(2).replace('.',','))+'</td>'+
           '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>'+
           '<td style="display:flex;gap:4px;">'+
-            '<a href="https://wa.me/55'+(d.whatsapp||'')+'" target="_blank" class="btn btn-ghost btn-sm">📱</a>'+
-            '<button class="btn btn-danger btn-sm" onclick="inativarParceiro(\''+doc.id+'\')">Inativar</button>'+
+            '<a href="https://wa.me/55'+(d.whatsapp||'')+'" target="_blank" class="btn btn-ghost btn-sm" title="WhatsApp">📱</a>'+
+            '<button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditParceiro(\''+doc.id+'\','+JSON.stringify({nome:d.nome,email:d.email,whatsapp:d.whatsapp,area:d.area,registro:d.registro,comissaoPct:d.comissaoPct})+')">✏️</button>'+
+            '<button class="btn btn-ghost btn-sm" title="Reset senha" onclick="resetSenhaParceiro(\''+d.email+'\')">🔑</button>'+
+            '<button class="btn btn-'+(d.status==='inativo'?'primary':'danger')+' btn-sm" onclick="toggleStatusParceiro(\''+doc.id+'\','+(d.status==='inativo'?'false':'true')+')">'+(d.status==='inativo'?'Ativar':'Inativar')+'</button>'+
+            '<button class="btn btn-danger btn-sm" title="Excluir" onclick="excluirParceiro(\''+doc.id+'\')">🗑️</button>'+
           '</td>';
         tbody.appendChild(tr);
       });
@@ -2931,5 +2960,136 @@ function carregarLeads() {
     });
 }
 </script>
+<!-- MODAL EDITAR PARCEIRO -->
+<div class="modal-overlay" id="modal-edit-parceiro" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:480px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Parceiro</h3><button class="modal-close" onclick="document.getElementById('modal-edit-parceiro').classList.remove('open')">✕</button></div>
+    <input type="hidden" id="edit-parc-id"/>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome *</label><input class="form-control" id="edit-parc-nome"/></div>
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="edit-parc-whatsapp"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="edit-parc-email" type="email"/></div>
+      <div class="form-group"><label class="form-label">Registro profissional</label><input class="form-control" id="edit-parc-registro" placeholder="CRP, CRA, OAB..."/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="form-group"><label class="form-label">Área de atuação</label>
+        <select class="form-control" id="edit-parc-area">
+          <option>Psicologia Organizacional</option>
+          <option>Consultoria de RH</option>
+          <option>SST / Medicina do Trabalho</option>
+          <option>Advocacia Trabalhista</option>
+          <option>Contabilidade / Escritório</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Comissão (%)</label>
+        <select class="form-control" id="edit-parc-comissao">
+          <option value="30">30% — Padrão</option>
+          <option value="35">35% — Premium</option>
+          <option value="40">40% — Estratégico</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-parceiro').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditParceiro()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== FUNÇÕES CRUD EMPRESAS =====
+function abrirEditEmpresa(docId, d) {
+  document.getElementById('edit-emp-nome').value = d.nome || d.razaoSocial || '';
+  document.getElementById('edit-emp-resp').value = d.responsavel || '';
+  document.getElementById('edit-emp-email').value = d.email || '';
+  document.getElementById('edit-emp-colab').value = d.numColaboradores || '';
+  var sel = document.getElementById('edit-emp-plano');
+  var plano = (d.plano||'').toLowerCase();
+  sel.value = plano.includes('mensal')||plano.includes('assinatura') ? 'Assinatura Mensal' : plano.includes('isento') ? 'Isento / Teste' : 'Uso Único';
+  document.getElementById('modal-edit-empresa')._docId = docId;
+  document.getElementById('modal-edit-empresa').classList.add('open');
+}
+
+function toggleStatusEmpresa(docId, isAtivo, btn) {
+  var novoStatus = isAtivo ? 'inativo' : 'ativo';
+  if (!confirm((isAtivo ? 'Inativar' : 'Ativar') + ' esta empresa?')) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(docId)
+    .update({ status: novoStatus })
+    .then(function() {
+      carregarClientes();
+    }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function resetSenhaEmpresa(email) {
+  if (!email) { alert('E-mail não encontrado.'); return; }
+  if (!confirm('Enviar e-mail de reset de senha para ' + email + '?')) return;
+  firebase.auth(firebase.app('nr1map'))
+    .sendPasswordResetEmail(email)
+    .then(function(){ alert('✅ E-mail de reset enviado para ' + email); })
+    .catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+// ===== FUNÇÕES CRUD PARCEIROS =====
+function abrirEditParceiro(docId, d) {
+  document.getElementById('edit-parc-id').value = docId;
+  document.getElementById('edit-parc-nome').value = d.nome || '';
+  document.getElementById('edit-parc-email').value = d.email || '';
+  document.getElementById('edit-parc-whatsapp').value = d.whatsapp || '';
+  document.getElementById('edit-parc-registro').value = d.registro || '';
+  document.getElementById('edit-parc-area').value = d.area || 'Psicologia Organizacional';
+  document.getElementById('edit-parc-comissao').value = d.comissaoPct || 30;
+  document.getElementById('modal-edit-parceiro').classList.add('open');
+}
+
+function salvarEditParceiro() {
+  var docId = document.getElementById('edit-parc-id').value;
+  if (!docId) return;
+  var data = {
+    nome: document.getElementById('edit-parc-nome').value.trim(),
+    email: document.getElementById('edit-parc-email').value.trim(),
+    whatsapp: document.getElementById('edit-parc-whatsapp').value.trim(),
+    registro: document.getElementById('edit-parc-registro').value.trim(),
+    area: document.getElementById('edit-parc-area').value,
+    comissaoPct: parseInt(document.getElementById('edit-parc-comissao').value),
+    atualizadoEm: new Date().toISOString()
+  };
+  window.nr1mapDb.collection('nr1map_parceiros').doc(docId).update(data)
+    .then(function() {
+      document.getElementById('modal-edit-parceiro').classList.remove('open');
+      carregarParceiros();
+      alert('✅ Parceiro atualizado com sucesso!');
+    }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function toggleStatusParceiro(docId, isAtivo) {
+  var novoStatus = isAtivo ? 'inativo' : 'ativo';
+  if (!confirm((isAtivo ? 'Inativar' : 'Ativar') + ' este parceiro?')) return;
+  window.nr1mapDb.collection('nr1map_parceiros').doc(docId)
+    .update({ status: novoStatus })
+    .then(function(){ carregarParceiros(); })
+    .catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function resetSenhaParceiro(email) {
+  if (!email) { alert('E-mail não encontrado.'); return; }
+  if (!confirm('Enviar e-mail de reset de senha para ' + email + '?')) return;
+  firebase.auth(firebase.app('nr1map'))
+    .sendPasswordResetEmail(email)
+    .then(function(){ alert('✅ E-mail de reset enviado para ' + email); })
+    .catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function excluirParceiro(docId) {
+  if (!confirm('Excluir este parceiro permanentemente? Esta ação é irreversível.')) return;
+  window.nr1mapDb.collection('nr1map_parceiros').doc(docId)
+    .delete()
+    .then(function(){ carregarParceiros(); alert('✅ Parceiro excluído.'); })
+    .catch(function(e){ alert('Erro: ' + e.message); });
+}
+</script>
+
 </body>
 </html>
