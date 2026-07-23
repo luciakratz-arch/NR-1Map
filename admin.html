@@ -1425,10 +1425,12 @@ function sair() {
 
 // NAVEGAÇÃO INTERNA COM RETORNO SEGURO
 function atualizarBadgeLeads() {
-  var total = document.querySelectorAll('#tabela-leads tr').length;
   var novos = document.querySelectorAll('#tabela-leads .bdg-roxo').length;
   var navBadge = document.querySelector('#nav-leads .bdg-nav');
-  if(navBadge) { navBadge.textContent = total; if(total===0) navBadge.style.display='none'; }
+  if(navBadge) { 
+    if(novos > 0) { navBadge.textContent = novos; navBadge.style.display = ''; }
+    else { navBadge.style.display = 'none'; }
+  }
   var topBadge = document.getElementById('leads-badge-topbar');
   if(topBadge) topBadge.textContent = novos + ' lead' + (novos!==1?'s':'') + ' aguardando contato';
 }
@@ -1961,15 +1963,16 @@ function carregarPainelGeral() {
     }).catch(function(e){console.log(e);});
 
   // Leads
-  window.nr1mapDb.collection('nr1map_leads')
-    .where('status','==','pendente').get()
+  window.nr1mapDb.collection('nr1map_leads').get()
     .then(function(snap){
-      var el=document.getElementById('pg-leads');
-      var badge=document.getElementById('badge-leads');
-      var total=snap.size;
-      if(el) el.textContent=total;
-      if(badge){ badge.textContent=total; badge.style.display=total>0?'':'none'; }
-    }).catch(function(){});
+      var novos = 0;
+      snap.forEach(function(doc){ var s=doc.data().status||'novo'; if(s!=='contatado') novos++; });
+      var navBadge = document.querySelector('#nav-leads .bdg-nav');
+      if(navBadge){ if(novos>0){navBadge.textContent=novos;navBadge.style.display='';}else{navBadge.style.display='none';} }
+    }).catch(function(){
+      var navBadge = document.querySelector('#nav-leads .bdg-nav');
+      if(navBadge) navBadge.style.display='none';
+    });
 
   // Depoimentos pendentes
   window.nr1mapDb.collection('nr1map_depoimentos').where('status','==','pendente').get()
@@ -2818,7 +2821,6 @@ function carregarLeads() {
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
 
   window.nr1mapDb.collection('nr1map_leads')
-    .orderBy('data', 'desc')
     .get()
     .then(function(snap) {
       if (snap.empty) {
