@@ -1369,20 +1369,7 @@ function salvarPJ() {
       if(origemEl) origemEl.selectedIndex = 0;
       btn.textContent = 'Cadastrar Empresa'; btn.disabled = false;
       fecharModalPJ();
-      // Adiciona linha na tabela (visual imediato)
-      var tbody = document.getElementById('tabela-empresas');
-      if(tbody) {
-        var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">CNPJ: ' + cnpj + '</span></td>' +
-          '<td>' + responsavel + '<br/><span style="font-size:10px;color:var(--cinza-medio);">📱 ' + whatsapp + '</span></td>' +
-          '<td>' + email + '</td>' +
-          '<td>' + planoText.split('—')[0].trim() + '</td>' +
-          '<td>' + colab + '</td>' +
-          '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>' +
-          '<td><button class="btn btn-ghost btn-sm">Ver Painel</button></td>';
-        tbody.appendChild(tr);
-      }
-      // Exibe credenciais
+      carregarClientes(); // Recarrega tabela completa com todos os botões
       exibirCredenciais(email, senha);
     })
     .catch(function(e) {
@@ -1463,19 +1450,7 @@ function salvarPF() {
       if(origemEl) origemEl.selectedIndex = 0;
       btn.textContent = 'Cadastrar Cliente PF'; btn.disabled = false;
       fecharModalPF();
-      // Linha visual imediata na tabela
-      var tbody = document.getElementById('tabela-empresas');
-      if(tbody) {
-        var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">CPF: ' + cpf + '</span></td>' +
-          '<td>' + nome + '<br/><span style="font-size:10px;color:var(--cinza-medio);">📱 ' + whatsapp + '</span></td>' +
-          '<td>' + email + '</td>' +
-          '<td>' + planoText.split('—')[0].trim() + '</td>' +
-          '<td>' + colab + '</td>' +
-          '<td><span class="bdg bdg-ok"><span class="dot"></span>Ativo</span></td>' +
-          '<td><button class="btn btn-ghost btn-sm">Ver Painel</button></td>';
-        tbody.appendChild(tr);
-      }
+      carregarClientes(); // Recarrega tabela completa com todos os botões
       exibirCredenciais(email, senha);
     })
     .catch(function(e) {
@@ -2220,9 +2195,10 @@ function carregarFinanceiro() {
   var PRECOS_UNICO  = { '5': 97, '20': 79, '50': 59, '100': 49,  '200': 39, '500': 29 };
 
   function calcValorEmpresa(d) {
+    var plano = (d.plano || '').toLowerCase();
+    if (plano.includes('isento') || plano.includes('teste') || plano === '') return 0;
     var n = parseInt(d.numColaboradores) || 0;
     var faixa = n<=5?'5':n<=20?'20':n<=50?'50':n<=100?'100':n<=200?'200':'500';
-    var plano = (d.plano || '').toLowerCase();
     if (plano.includes('mensal') || plano.includes('assinatura')) {
       return n * (PRECOS_MENSAL[faixa] || 16.5);
     } else {
