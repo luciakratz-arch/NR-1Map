@@ -307,34 +307,34 @@ tbody tr:hover td{background:#F5F8F7;}
         <!-- VELOCÍMETROS DA BALANÇA PSICODINÂMICA -->
         <div class="card" style="margin-bottom:20px;">
           <div class="card-header"><div class="title">Balança Psicodinâmica Consolidada (Escala Dejours Global)</div></div>
-          <div class="card-body gauge-container">
+          <div class="card-body gauge-container" id="admin-gauges-container">
             <div class="gauge-box">
               <div class="gauge">
-                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 45 15" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="30" y2="20" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path id="ag-arc-m1" d="" fill="none" stroke="#CBD5D0" stroke-width="8"/><line id="ag-needle-m1" x1="50" y1="50" x2="50" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
               </div>
-              <div style="font-size:11px; font-weight:600; margin-top:4px;">Fisiológicos (-0.8)</div>
-              <span class="bdg bdg-erro"><span class="dot"></span>Limite</span>
+              <div id="ag-label-m1" style="font-size:11px;font-weight:600;margin-top:4px;color:var(--cinza-medio);">Fisiológicos (—)</div>
+              <span id="ag-zona-m1" class="bdg" style="color:var(--cinza-medio);">Sem dados</span>
             </div>
             <div class="gauge-box">
               <div class="gauge">
-                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 30 30" fill="none" stroke="#ef4444" stroke-width="8"/><line x1="50" y1="50" x2="20" y2="35" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path id="ag-arc-m2" d="" fill="none" stroke="#CBD5D0" stroke-width="8"/><line id="ag-needle-m2" x1="50" y1="50" x2="50" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
               </div>
-              <div style="font-size:11px; font-weight:600; margin-top:4px;">Segurança (-2.4)</div>
-              <span class="bdg bdg-erro"><span class="dot"></span>Patogênico</span>
+              <div id="ag-label-m2" style="font-size:11px;font-weight:600;margin-top:4px;color:var(--cinza-medio);">Segurança (—)</div>
+              <span id="ag-zona-m2" class="bdg" style="color:var(--cinza-medio);">Sem dados</span>
             </div>
             <div class="gauge-box">
               <div class="gauge">
-                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 80 40" fill="none" stroke="#10b981" stroke-width="8"/><line x1="50" y1="50" x2="75" y2="25" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path id="ag-arc-m3" d="" fill="none" stroke="#CBD5D0" stroke-width="8"/><line id="ag-needle-m3" x1="50" y1="50" x2="50" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
               </div>
-              <div style="font-size:11px; font-weight:600; margin-top:4px;">Sociais (+2.1)</div>
-              <span class="bdg bdg-ok"><span class="dot"></span>Fértil</span>
+              <div id="ag-label-m3" style="font-size:11px;font-weight:600;margin-top:4px;color:var(--cinza-medio);">Sociais (—)</div>
+              <span id="ag-zona-m3" class="bdg" style="color:var(--cinza-medio);">Sem dados</span>
             </div>
             <div class="gauge-box">
               <div class="gauge">
-                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path d="M 10 50 A 40 40 0 0 1 60 20" fill="none" stroke="#f59e0b" stroke-width="8"/><line x1="50" y1="50" x2="55" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
+                <svg width="100" height="60"><path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#EEF1F0" stroke-width="8"/><path id="ag-arc-m4" d="" fill="none" stroke="#CBD5D0" stroke-width="8"/><line id="ag-needle-m4" x1="50" y1="50" x2="50" y2="15" stroke="#2A2E2C" stroke-width="3" stroke-linecap="round" /><circle cx="50" cy="50" r="4" fill="#2A2E2C"/></svg>
               </div>
-              <div style="font-size:11px; font-weight:600; margin-top:4px;">Organizacionais (+0.4)</div>
-              <span class="bdg bdg-pend"><span class="dot"></span>Alerta</span>
+              <div id="ag-label-m4" style="font-size:11px;font-weight:600;margin-top:4px;color:var(--cinza-medio);">Organizacionais (—)</div>
+              <span id="ag-zona-m4" class="bdg" style="color:var(--cinza-medio);">Sem dados</span>
             </div>
           </div>
         </div>
@@ -1924,9 +1924,10 @@ function carregarPainelGeral() {
   var PRECOS_UNICO  = {5:97,20:79,50:59,100:49,200:39,500:29};
 
   function calcValor(d) {
+    var p = (d.plano||'').toLowerCase();
+    if (p.includes('isento') || p.includes('teste') || p === '') return 0;
     var n = parseInt(d.numColaboradores)||0;
     var f = n<=5?5:n<=20?20:n<=50?50:n<=100?100:n<=200?200:500;
-    var p = (d.plano||'').toLowerCase();
     return n * ((p.includes('mensal')||p.includes('assinatura')) ? PRECOS_MENSAL[f]||16.5 : PRECOS_UNICO[f]||49);
   }
 
@@ -2050,6 +2051,67 @@ function carregarPainelGeral() {
     }).catch(function(){});
 }
 
+function carregarGaugesAdmin() {
+  if (!window.nr1mapDb) return;
+  var nomes = { m1:'Fisiológicos', m2:'Segurança', m3:'Sociais', m4:'Organizacionais' };
+  var porMod = { m1:{soma:0,n:0}, m2:{soma:0,n:0}, m3:{soma:0,n:0}, m4:{soma:0,n:0} };
+
+  window.nr1mapDb.collection('nr1map_empresas').where('status','==','ativo').get()
+    .then(function(empSnap) {
+      if (empSnap.empty) return Promise.resolve();
+      var promises = [];
+      empSnap.forEach(function(empDoc) {
+        var eid = empDoc.id;
+        var p = window.nr1mapDb.collection('nr1map_respostas').doc(eid)
+          .collection('ciclos').limit(1).get()
+          .then(function(cicloSnap) {
+            if (cicloSnap.empty) return;
+            return window.nr1mapDb.collection('nr1map_respostas').doc(eid)
+              .collection('ciclos').doc(cicloSnap.docs[0].id)
+              .collection('respostas').get()
+              .then(function(respSnap) {
+                respSnap.forEach(function(r) {
+                  var d = r.data();
+                  if (d.ibpSubcats) {
+                    Object.keys(d.ibpSubcats).forEach(function(sc) {
+                      var modId = (d.ibpSubcats[sc].modId||'').toLowerCase();
+                      if (porMod[modId]) { porMod[modId].soma += d.ibpSubcats[sc].ibp||0; porMod[modId].n++; }
+                    });
+                  }
+                });
+              });
+          }).catch(function(){});
+        promises.push(p);
+      });
+      return Promise.all(promises);
+    })
+    .then(function() {
+      ['m1','m2','m3','m4'].forEach(function(m) {
+        if (porMod[m].n === 0) return;
+        var ibp = Math.round((porMod[m].soma / porMod[m].n) * 10) / 10;
+        var sinal = ibp >= 0 ? '+' : '';
+        var cor = ibp >= 1.5 ? '#10b981' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+        var zona = ibp >= 1.5 ? 'Fértil' : ibp <= -1.5 ? 'Patogênico' : 'Alerta';
+        var zonaCls = ibp >= 1.5 ? 'bdg-ok' : ibp <= -1.5 ? 'bdg-erro' : 'bdg-pend';
+        var lbl = document.getElementById('ag-label-' + m);
+        var zon = document.getElementById('ag-zona-' + m);
+        if (lbl) lbl.textContent = nomes[m] + ' (' + sinal + ibp + ')';
+        if (zon) { zon.className = 'bdg ' + zonaCls; zon.innerHTML = '<span class="dot"></span>' + zona; }
+        var ang = ((ibp + 5) / 10) * 180;
+        var rad = (ang - 90) * Math.PI / 180;
+        var nx = 50 + 35 * Math.cos(rad); var ny = 50 + 35 * Math.sin(rad);
+        var needle = document.getElementById('ag-needle-' + m);
+        if (needle) { needle.setAttribute('x2', nx.toFixed(1)); needle.setAttribute('y2', ny.toFixed(1)); }
+        var endRad = (ang * Math.PI / 180) - Math.PI;
+        var ex = 50 + 40 * Math.cos(endRad); var ey = 50 + 40 * Math.sin(endRad);
+        var arc = document.getElementById('ag-arc-' + m);
+        if (arc) { arc.setAttribute('d','M 10 50 A 40 40 0 0 1 '+ex.toFixed(1)+' '+ey.toFixed(1)); arc.setAttribute('stroke', cor); }
+      });
+    }).catch(function(e){ console.log('gaugesAdmin:', e); });
+}
+
+// Chamar gauges ao carregar painel
+setTimeout(function(){ if(window.nr1mapDb) carregarGaugesAdmin(); }, 700);
 
 function carregarFinanceiro() {
   if (!window.nr1mapDb) return;
