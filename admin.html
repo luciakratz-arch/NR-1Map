@@ -280,6 +280,7 @@ tbody tr:hover td{background:#F5F8F7;}
       <div class="nav-item" id="nav-parceiros" onclick="sv('parceiros')"><span class="ic">🤝</span>Parceiros</div>
       <div class="nav-item" id="nav-clientes" onclick="sv('clientes')"><span class="ic">🏢</span>Clientes / Empresas</div>
       <div class="nav-item" id="nav-leads" onclick="sv('leads')"><span class="ic">🎯</span>Leads<span class="bdg-nav" id="badge-leads">0</span></div>
+      <div class="nav-item" id="nav-usuarios" onclick="sv('usuarios')"><span class="ic">👥</span>Usuários</div>
       <div class="nav-sec">Conteúdo</div>
       <div class="nav-item" id="nav-laudos" onclick="sv('laudos')"><span class="ic">📄</span>Laudos Gerados</div>
       <div class="nav-item" id="nav-perguntas" onclick="sv('perguntas')"><span class="ic">🧩</span>Banco 110 Perguntas</div>
@@ -897,6 +898,98 @@ tbody tr:hover td{background:#F5F8F7;}
 </div>
 
     <!-- LEADS -->
+    <!-- ===== VIEW USUÁRIOS ===== -->
+    <div id="view-usuarios" class="view">
+      <div class="topbar">
+        <div class="topbar-title-wrapper">
+          <button class="btn btn-ghost btn-sm" onclick="sv('painel')">← Voltar</button>
+          <div class="topbar-title">👥 Usuários da Plataforma</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select class="form-control" id="usr-filtro-tipo" onchange="filtrarUsuarios()" style="font-size:12px;padding:6px 10px;width:auto;">
+            <option value="">Todos os tipos</option>
+            <option value="admin">👑 Admin</option>
+            <option value="empresa">🏢 RH / Empresa</option>
+            <option value="parceiro">🤝 Parceiro</option>
+            <option value="colaborador">👤 Colaborador</option>
+          </select>
+          <select class="form-control" id="usr-filtro-status" onchange="filtrarUsuarios()" style="font-size:12px;padding:6px 10px;width:auto;">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <div class="title">Todos os usuários</div>
+            <span id="usr-total" style="font-size:12px;color:var(--cinza-medio);">Carregando...</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Tipo</th>
+                  <th>Vinculado a</th>
+                  <th>Status</th>
+                  <th>Cadastro</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-usuarios">
+                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando usuários...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR USUÁRIO -->
+    <div class="modal-overlay" id="modal-edit-usuario" onclick="if(event.target===this)this.classList.remove('open')">
+      <div class="modal" style="max-width:480px;width:95%;">
+        <div class="modal-header">
+          <h3>✏️ Editar Usuário</h3>
+          <button class="modal-close" onclick="document.getElementById('modal-edit-usuario').classList.remove('open')">✕</button>
+        </div>
+        <input type="hidden" id="edit-usr-id"/>
+        <input type="hidden" id="edit-usr-collection"/>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group"><label class="form-label">Nome *</label><input class="form-control" id="edit-usr-nome"/></div>
+          <div class="form-group"><label class="form-label">E-mail *</label><input class="form-control" id="edit-usr-email" type="email"/></div>
+        </div>
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="edit-usr-whatsapp"/></div>
+          <div class="form-group"><label class="form-label">Status</label>
+            <select class="form-control" id="edit-usr-status">
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px;font-size:12px;color:#b45309;margin-bottom:16px;">
+          <div style="font-weight:700;margin-bottom:8px;">⚠️ Para alterar e-mail de login (Firebase Auth)</div>
+          <p style="margin-bottom:10px;line-height:1.6;">A alteração de e-mail no campo acima atualiza apenas o Firestore. Para alterar o e-mail de acesso (login), é necessário uma Cloud Function:</p>
+          <div style="background:#1a1a1a;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;color:#10b981;margin-bottom:10px;word-break:break-all;">
+            exports.alterarEmailUsuario = functions.https.onCall(async (data, context) => {<br/>
+            &nbsp;&nbsp;await admin.auth().updateUser(data.uid, { email: data.novoEmail });<br/>
+            });
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://console.firebase.google.com/project/entrevista-inicial/authentication/users" target="_blank" class="btn btn-sm" style="background:#F6820D;color:#fff;font-size:11px;text-decoration:none;">🔗 Abrir Firebase Auth Console</a>
+            <button class="btn btn-sm" style="background:#4285F4;color:#fff;font-size:11px;" onclick="enviarLinkAtualizacao()">📧 Enviar link de atualização ao usuário</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-usuario').classList.remove('open')">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarEditUsuario()">Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+
     <div id="view-leads" class="view">
       <div class="topbar">
         <div class="topbar-title-wrapper">
@@ -1745,6 +1838,7 @@ function sv(id) {
   if(id === 'clientes') carregarClientes();
   if(id === 'financeiro') carregarFinanceiro();
   if(id === 'painel') carregarPainelGeral();
+  if(id === 'usuarios') carregarUsuarios();
   if(id === 'laudos') carregarLaudos();
   if(id === 'depoimentos') carregarDepoimentos();
 }
@@ -3088,6 +3182,173 @@ function excluirParceiro(docId) {
     .delete()
     .then(function(){ carregarParceiros(); alert('✅ Parceiro excluído.'); })
     .catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+// ===== ABA USUÁRIOS =====
+var _todosUsuarios = [];
+
+function carregarUsuarios() {
+  if (!window.nr1mapDb) return;
+  _todosUsuarios = [];
+  var tbody = document.getElementById('tabela-usuarios');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  var collections = [
+    { col: 'nr1map_admins',       tipo: 'admin',       label: '👑 Admin' },
+    { col: 'nr1map_empresas',     tipo: 'empresa',     label: '🏢 RH/Empresa' },
+    { col: 'nr1map_parceiros',    tipo: 'parceiro',    label: '🤝 Parceiro' },
+    { col: 'nr1map_usuarios_pf',  tipo: 'colaborador', label: '👤 Colaborador' }
+  ];
+
+  var promises = collections.map(function(cfg) {
+    return window.nr1mapDb.collection(cfg.col).get()
+      .then(function(snap) {
+        snap.forEach(function(doc) {
+          var d = doc.data();
+          _todosUsuarios.push({
+            id: doc.id,
+            collection: cfg.col,
+            tipo: cfg.tipo,
+            tipoLabel: cfg.label,
+            nome: d.nome || d.responsavel || d.razaoSocial || '—',
+            email: d.email || '—',
+            whatsapp: d.whatsapp || '',
+            status: d.status || 'ativo',
+            vinculo: cfg.tipo === 'colaborador' ? (d.empresaId||'') : (cfg.tipo === 'empresa' ? (d.cnpj||'') : ''),
+            criadoEm: d.criadoEm || ''
+          });
+        });
+      }).catch(function(){});
+  });
+
+  Promise.all(promises).then(function() {
+    _todosUsuarios.sort(function(a,b){ return a.tipo.localeCompare(b.tipo); });
+    renderUsuarios(_todosUsuarios);
+  });
+}
+
+function renderUsuarios(lista) {
+  var tbody = document.getElementById('tabela-usuarios');
+  if (!tbody) return;
+  var total = document.getElementById('usr-total');
+  if (total) total.textContent = lista.length + ' usuário' + (lista.length !== 1 ? 's' : '');
+
+  if (lista.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum usuário encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  lista.forEach(function(u) {
+    var statusCls = u.status === 'ativo' ? 'bdg-ok' : 'bdg-erro';
+    var statusTxt = u.status === 'ativo' ? 'Ativo' : 'Inativo';
+    var data = u.criadoEm ? new Date(u.criadoEm).toLocaleDateString('pt-BR') : '—';
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-tipo', u.tipo);
+    tr.setAttribute('data-status', u.status);
+    tr.innerHTML =
+      '<td><strong>' + u.nome + '</strong></td>' +
+      '<td style="font-size:12px;">' + u.email + '</td>' +
+      '<td>' + u.tipoLabel + '</td>' +
+      '<td style="font-size:11px;color:var(--cinza-medio);">' + (u.vinculo||'—') + '</td>' +
+      '<td><span class="bdg ' + statusCls + '"><span class="dot"></span>' + statusTxt + '</span></td>' +
+      '<td style="font-size:11px;color:var(--cinza-medio);">' + data + '</td>' +
+      '<td style="display:flex;gap:4px;flex-wrap:wrap;"></td>';
+    tbody.appendChild(tr);
+
+    var tdAcoes = tr.querySelector('td:last-child');
+
+    // Editar
+    var btnEdit = document.createElement('button');
+    btnEdit.className = 'btn btn-ghost btn-sm'; btnEdit.textContent = '✏️'; btnEdit.title = 'Editar';
+    btnEdit.onclick = (function(usr){ return function(){ abrirEditUsuario(usr); }; })(u);
+    tdAcoes.appendChild(btnEdit);
+
+    // Reset senha
+    if (u.email !== '—') {
+      var btnPwd = document.createElement('button');
+      btnPwd.className = 'btn btn-ghost btn-sm'; btnPwd.textContent = '🔑'; btnPwd.title = 'Reset senha';
+      btnPwd.onclick = (function(email){ return function(){
+        if (!confirm('Enviar reset de senha para ' + email + '?')) return;
+        firebase.auth(firebase.app('nr1map')).sendPasswordResetEmail(email)
+          .then(function(){ alert('✅ E-mail enviado para ' + email); })
+          .catch(function(e){ alert('Erro: ' + e.message); });
+      }; })(u.email);
+      tdAcoes.appendChild(btnPwd);
+    }
+
+    // Ativar/Inativar
+    var btnStatus = document.createElement('button');
+    var isAtivo = u.status === 'ativo';
+    btnStatus.className = 'btn btn-sm ' + (isAtivo ? 'btn-danger' : 'btn-primary');
+    btnStatus.textContent = isAtivo ? 'Inativar' : 'Ativar';
+    btnStatus.onclick = (function(usr, ativo){ return function(){
+      if (!confirm((ativo ? 'Inativar' : 'Ativar') + ' ' + usr.nome + '?')) return;
+      window.nr1mapDb.collection(usr.collection).doc(usr.id)
+        .update({ status: ativo ? 'inativo' : 'ativo' })
+        .then(function(){ carregarUsuarios(); })
+        .catch(function(e){ alert('Erro: ' + e.message); });
+    }; })(u, isAtivo);
+    tdAcoes.appendChild(btnStatus);
+
+    // Excluir
+    var btnDel = document.createElement('button');
+    btnDel.className = 'btn btn-danger btn-sm'; btnDel.textContent = '🗑️'; btnDel.title = 'Excluir';
+    btnDel.onclick = (function(usr){ return function(){
+      if (!confirm('Excluir ' + usr.nome + ' permanentemente?')) return;
+      window.nr1mapDb.collection(usr.collection).doc(usr.id)
+        .delete()
+        .then(function(){ carregarUsuarios(); })
+        .catch(function(e){ alert('Erro: ' + e.message); });
+    }; })(u);
+    tdAcoes.appendChild(btnDel);
+  });
+}
+
+function filtrarUsuarios() {
+  var tipo = document.getElementById('usr-filtro-tipo').value;
+  var status = document.getElementById('usr-filtro-status').value;
+  var filtrado = _todosUsuarios.filter(function(u) {
+    return (!tipo || u.tipo === tipo) && (!status || u.status === status);
+  });
+  renderUsuarios(filtrado);
+}
+
+function abrirEditUsuario(u) {
+  document.getElementById('edit-usr-id').value = u.id;
+  document.getElementById('edit-usr-collection').value = u.collection;
+  document.getElementById('edit-usr-nome').value = u.nome !== '—' ? u.nome : '';
+  document.getElementById('edit-usr-email').value = u.email !== '—' ? u.email : '';
+  document.getElementById('edit-usr-whatsapp').value = u.whatsapp || '';
+  document.getElementById('edit-usr-status').value = u.status || 'ativo';
+  document.getElementById('modal-edit-usuario').classList.add('open');
+}
+
+function enviarLinkAtualizacao() {
+  var email = document.getElementById('edit-usr-email').value.trim();
+  if (!email) { alert('Informe o e-mail do usuário primeiro.'); return; }
+  if (!confirm('Enviar link de atualização de e-mail/senha para ' + email + '?')) return;
+  firebase.auth(firebase.app('nr1map')).sendPasswordResetEmail(email)
+    .then(function(){ alert('✅ Link enviado para ' + email + '.\n\nO usuário poderá redefinir o acesso pelo link recebido.'); })
+    .catch(function(e){ alert('Erro ao enviar: ' + e.message); });
+}
+
+function salvarEditUsuario() {
+  var docId = document.getElementById('edit-usr-id').value;
+  var col = document.getElementById('edit-usr-collection').value;
+  if (!docId || !col) return;
+  var updates = {
+    nome: document.getElementById('edit-usr-nome').value.trim(),
+    email: document.getElementById('edit-usr-email').value.trim(),
+    whatsapp: document.getElementById('edit-usr-whatsapp').value.trim(),
+    status: document.getElementById('edit-usr-status').value,
+    atualizadoEm: new Date().toISOString()
+  };
+  window.nr1mapDb.collection(col).doc(docId).update(updates)
+    .then(function() {
+      document.getElementById('modal-edit-usuario').classList.remove('open');
+      carregarUsuarios();
+      alert('✅ Usuário atualizado!');
+    }).catch(function(e){ alert('Erro: ' + e.message); });
 }
 </script>
 
