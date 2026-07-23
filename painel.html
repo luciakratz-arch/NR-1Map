@@ -323,28 +323,28 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Fisiológicos</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 1 · Corpo e Mente</div>
           <canvas id="gauge-fis" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
+          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−0.3</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores de Segurança</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 2 · Previsibilidade</div>
           <canvas id="gauge-seg" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
+          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−2.1</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Sofrimento Patogênico</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Sociais</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 3 · Relacionamentos</div>
           <canvas id="gauge-soc" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
+          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:#10b981;">+1.8</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Terreno Fértil</div>
         </div>
         <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
           <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Motivacionais</div>
           <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 4 · Propósito</div>
           <canvas id="gauge-mot" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
-          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:var(--cinza-medio);">—</div>
+          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:#f59e0b;">+0.6</div>
           <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
         </div>
       </div>
@@ -458,7 +458,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card">
         <div class="card-header"><div class="title">Linha do tempo</div></div>
         <div class="card-body" style="padding:8px 16px;">
-          <!-- Histórico carregado dinamicamente pelo Firestore -->
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
+          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
         </div>
       </div>
       <div class="card">
@@ -523,7 +526,24 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
     </div>
     <div id="pc-org" style="display:none;">
-      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.08em;">Layout:</span>
+            <button id="org-btn-vertical" class="btn btn-sm btn-primary" onclick="setOrgLayout('vertical')">⬇ Vertical</button>
+            <button id="org-btn-horizontal" class="btn btn-sm btn-ghost" onclick="setOrgLayout('horizontal')">➡ Horizontal</button>
+            <button id="org-btn-radial" class="btn btn-sm btn-ghost" onclick="setOrgLayout('radial')">⭕ Radial</button>
+            <div style="flex:1;"></div>
+            <label style="font-size:12px;color:var(--cinza-medio);display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="org-show-staff" onchange="renderOrg()"/>
+              Mostrar Staff / Assessorias
+            </label>
+          </div>
+          <div style="overflow:auto;border:1px solid var(--linha);border-radius:8px;background:#FAFBFA;min-height:300px;">
+            <div id="org-chart" style="display:inline-block;padding:20px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="pc-niveis" style="display:none;">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
@@ -561,6 +581,32 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
     <div class="form-group"><div class="form-label">Reporta a</div>
       <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
+    </div>
+    <div style="margin:10px 0 14px;padding:12px;background:rgba(123,0,196,.06);border-radius:8px;border:1px solid rgba(123,0,196,.15);">
+      <div style="font-size:11px;font-weight:600;color:#7B00C4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Posição no organograma</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="nc-staff-tipo" value="" checked style="margin-top:2px;"/>
+          <span>
+            <strong>Subordinado direto</strong>
+            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Aparece abaixo do superior — linha vertical (padrão)</span>
+          </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="nc-staff-tipo" value="interno" style="margin-top:2px;"/>
+          <span>
+            <strong>Staff interno</strong>
+            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Funcionário assessor — aparece ao lado, linha horizontal sólida. Ex: Assistente da Presidência</span>
+          </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="nc-staff-tipo" value="externo" style="margin-top:2px;"/>
+          <span>
+            <strong>Staff externo</strong>
+            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Empresa ou consultoria terceirizada — linha horizontal tracejada. Ex: Assessoria Jurídica, Contabilidade</span>
+          </span>
+        </label>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
@@ -2217,11 +2263,10 @@ function animGauge(id, target) {
   }, 18);
 }
 function dispararVelocimetros(fis, seg, soc, mot) {
-  // Só anima se tiver dados reais — evita mostrar 0 como se fosse IBP real
-  if (fis !== undefined) animGauge('gauge-fis', fis);
-  if (seg !== undefined) setTimeout(function(){ animGauge('gauge-seg', seg); }, 150);
-  if (soc !== undefined) setTimeout(function(){ animGauge('gauge-soc', soc); }, 300);
-  if (mot !== undefined) setTimeout(function(){ animGauge('gauge-mot', mot); }, 450);
+  animGauge('gauge-fis', fis !== undefined ? fis : 0);
+  setTimeout(function(){ animGauge('gauge-seg', seg !== undefined ? seg : 0); }, 150);
+  setTimeout(function(){ animGauge('gauge-soc', soc !== undefined ? soc : 0); }, 300);
+  setTimeout(function(){ animGauge('gauge-mot', mot !== undefined ? mot : 0); }, 450);
 }
 
 /* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
@@ -2425,7 +2470,10 @@ function salvarCargo() {
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
   if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
   var empresaId = window.nr1mapEmpresa.id;
-  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  var staffEl = document.querySelector('input[name="nc-staff-tipo"]:checked');
+  var staffTipo = staffEl ? staffEl.value : '';
+  var isStaff = staffTipo !== '';
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, isStaff:isStaff, staffTipo:staffTipo, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
       .then(function(doc) {
@@ -2448,18 +2496,62 @@ function salvarCargo() {
   }
 }
 
+var _orgLayout = 'vertical';
+
+function setOrgLayout(layout) {
+  _orgLayout = layout;
+  ['vertical','horizontal','radial'].forEach(function(b) {
+    var btn = document.getElementById('org-btn-' + b);
+    if (btn) btn.className = b === layout ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
+  });
+  renderOrg();
+}
+
+function _orgCard(x, y, cargo, CW, CH, isStaff) {
+  var nv2 = getNivel(cargo.nvId);
+  var cor = nv2 ? nv2.cor : '#6B7280';
+  var nm = cargo.nome.length > 18 ? cargo.nome.slice(0,17)+'\u2026' : cargo.nome;
+  var fill = isStaff ? '#F9F5FF' : 'white';
+  var g = '<g>';
+  g += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="'+fill+'" stroke="'+cor+'" stroke-width="1.5"'+(isStaff?' stroke-dasharray="4,3"':'')+'/>';
+  g += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="4" fill="'+cor+'"/>';
+  g += '<text x="'+(x+CW/2)+'" y="'+(y+20)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+  g += '<text x="'+(x+CW/2)+'" y="'+(y+32)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+cargo.cbo+'</text>';
+  if (isStaff) { var sLbl = cargo.staffTipo === 'externo' ? 'Staff Externo' : 'Staff Interno'; g += '<text x="'+(x+CW/2)+'" y="'+(y+45)+'" text-anchor="middle" font-size="8" fill="'+cor+'" font-family="Inter,sans-serif">'+sLbl+'</text>'; }
+  else g += '<text x="'+(x+CW/2)+'" y="'+(y+45)+'" text-anchor="middle" font-size="8" fill="'+cor+'" font-family="Inter,sans-serif">'+(cargo.n||0)+' colab.</text>';
+  g += '</g>';
+  return g;
+}
+
+function _buildNvMap(lista) {
+  var nvMap = {};
+  for (var i=0; i<lista.length; i++) {
+    var pos = 0;
+    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === lista[i].nvId) { pos = j+1; break; } }
+    if (!pos) pos = niveisHier.length+1;
+    if (!nvMap[pos]) nvMap[pos] = [];
+    nvMap[pos].push(lista[i]);
+  }
+  return nvMap;
+}
+
 function renderOrg() {
   var el = document.getElementById('org-chart');
   if (!el) return;
-  var CW=140, CH=52, GX=20, GY=60;
-  var nvMap = {};
-  for (var i=0; i<cargos.length; i++) {
-    var pos = 0;
-    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
-    if (!pos) pos = niveisHier.length+1;
-    if (!nvMap[pos]) nvMap[pos] = [];
-    nvMap[pos].push(cargos[i]);
+  if (!cargos || cargos.length === 0) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos para visualizar o organograma.</div>';
+    return;
   }
+  var showStaff = document.getElementById('org-show-staff') && document.getElementById('org-show-staff').checked;
+  var lista = showStaff ? cargos : cargos.filter(function(c){ return !c.isStaff; });
+  if (_orgLayout === 'horizontal') _renderOrgHorizontal(el, lista);
+  else if (_orgLayout === 'radial') _renderOrgRadial(el, lista);
+  else _renderOrgVertical(el, lista);
+}
+
+function _renderOrgVertical(el, lista) {
+  var CW=148, CH=52, GX=24, GY=70;
+  var nvMap = _buildNvMap(lista);
   var maxNv = 0;
   for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
   var posMap = {}, totalW = 0;
@@ -2467,36 +2559,122 @@ function renderOrg() {
     var itens = nvMap[nv] || [];
     var rowW = itens.length*(CW+GX)-GX;
     if (rowW > totalW) totalW = rowW;
-    var sx = (totalW-rowW)/2;
-    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
   }
-  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
+  for (var nv2=1; nv2<=maxNv; nv2++) {
+    var itens2 = nvMap[nv2] || [];
+    var rowW2 = itens2.length*(CW+GX)-GX;
+    var sx = Math.floor((totalW-rowW2)/2);
+    for (var m=0; m<itens2.length; m++) posMap[itens2[m].id] = {x:sx+m*(CW+GX), y:(nv2-1)*(CH+GY)};
+  }
+  var svgW = Math.max(totalW+40,500), svgH = maxNv*(CH+GY)+40;
   var linhas = '', cards = '';
-  for (var ci=0; ci<cargos.length; ci++) {
-    var cr = cargos[ci];
+  lista.forEach(function(cr) {
     if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
       var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
       var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
-      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+      if (cr.isStaff) {
+        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
+        linhas += '<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx2+'" y2="'+(cy2+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
+      }
+      else linhas += '<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
     }
-  }
-  for (var di=0; di<cargos.length; di++) {
-    var dr = cargos[di];
-    if (!posMap[dr.id]) continue;
-    var x=posMap[dr.id].x, y=posMap[dr.id].y;
-    var nv2 = getNivel(dr.nvId);
-    var cor = nv2 ? nv2.cor : '#6B7280';
-    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
-    cards += '<g>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
-    cards += '</g>';
-  }
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
+  });
+  lista.forEach(function(dr) {
+    if (!posMap[dr.id]) return;
+    cards += _orgCard(posMap[dr.id].x, posMap[dr.id].y, dr, CW, CH, dr.isStaff);
+  });
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
 }
+
+function _renderOrgHorizontal(el, lista) {
+  var CW=148, CH=52, GX=80, GY=20;
+  var nvMap = _buildNvMap(lista);
+  var maxNv = 0;
+  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
+  var posMap = {}, totalH = 0;
+  for (var nv=1; nv<=maxNv; nv++) {
+    var itens = nvMap[nv] || [];
+    var colH = itens.length*(CH+GY)-GY;
+    if (colH > totalH) totalH = colH;
+  }
+  for (var nv2=1; nv2<=maxNv; nv2++) {
+    var itens2 = nvMap[nv2] || [];
+    var colH2 = itens2.length*(CH+GY)-GY;
+    var sy = Math.floor((totalH-colH2)/2);
+    for (var m=0; m<itens2.length; m++) posMap[itens2[m].id] = {x:(nv2-1)*(CW+GX), y:sy+m*(CH+GY)};
+  }
+  var svgW = maxNv*(CW+GX)+40, svgH = Math.max(totalH+40,300);
+  var linhas = '', cards = '';
+  lista.forEach(function(cr) {
+    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
+      var px=posMap[cr.repId].x+CW, py=posMap[cr.repId].y+CH/2;
+      var cx2=posMap[cr.id].x, cy2=posMap[cr.id].y+CH/2, mx=(px+cx2)/2;
+      if (cr.isStaff) {
+        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
+        linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
+      } else linhas += '<path d="M'+px+','+py+' L'+mx+','+py+' L'+mx+','+cy2+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  });
+  lista.forEach(function(dr) {
+    if (!posMap[dr.id]) return;
+    cards += _orgCard(posMap[dr.id].x, posMap[dr.id].y, dr, CW, CH, dr.isStaff);
+  });
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
+}
+
+function _renderOrgRadial(el, lista) {
+  var CW=130, CH=48;
+  var roots = lista.filter(function(c){ return !c.repId; });
+  var center = roots[0] || lista[0];
+  if (!center) return;
+  var R_BASE=160, R_STEP=140;
+  var posMap = {}; posMap[center.id] = {x:0, y:0};
+  var queue = [{id:center.id, depth:1}];
+  var visited = {}; visited[center.id] = true;
+  var byDepth = {};
+  while (queue.length) {
+    var curr = queue.shift();
+    var children = lista.filter(function(c){ return c.repId === curr.id && !visited[c.id]; });
+    children.forEach(function(ch) {
+      visited[ch.id] = true;
+      if (!byDepth[curr.depth]) byDepth[curr.depth] = [];
+      byDepth[curr.depth].push({cargo:ch, parentId:curr.id});
+      queue.push({id:ch.id, depth:curr.depth+1});
+    });
+  }
+  Object.keys(byDepth).forEach(function(depth) {
+    var items = byDepth[depth];
+    var r = R_BASE + (parseInt(depth)-1)*R_STEP;
+    items.forEach(function(item, idx) {
+      var angle = (2*Math.PI/items.length)*idx - Math.PI/2;
+      posMap[item.cargo.id] = {x:Math.round(r*Math.cos(angle)), y:Math.round(r*Math.sin(angle))};
+    });
+  });
+  var allX = Object.values(posMap).map(function(p){return p.x;});
+  var allY = Object.values(posMap).map(function(p){return p.y;});
+  var minX=Math.min.apply(null,allX)-CW/2-20, minY=Math.min.apply(null,allY)-CH/2-20;
+  var maxX=Math.max.apply(null,allX)+CW/2+20, maxY=Math.max.apply(null,allY)+CH/2+20;
+  var offX=-minX, offY=-minY;
+  var svgW=maxX-minX, svgH=maxY-minY;
+  var linhas='', cards='';
+  lista.forEach(function(cr) {
+    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
+      var px=posMap[cr.repId].x+offX+CW/2, py=posMap[cr.repId].y+offY+CH/2;
+      var cx2=posMap[cr.id].x+offX+CW/2, cy2=posMap[cr.id].y+offY+CH/2;
+      if (cr.isStaff) {
+        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
+        linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
+      } else linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#D1D5DB" stroke-width="1.5"/>';
+    }
+  });
+  lista.forEach(function(dr) {
+    if (!posMap[dr.id]) return;
+    var x=posMap[dr.id].x+offX-CW/2, y=posMap[dr.id].y+offY-CH/2;
+    cards += _orgCard(x, y, dr, CW, CH, dr.isStaff);
+  });
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
+}
+
 
 function exportarOrgPDF() {
   alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
@@ -2507,7 +2685,7 @@ document.addEventListener('DOMContentLoaded', function() {
   atualizarBadgePendentes();
   renderHistorico();
   renderCargos();
-  // Velocímetros aguardam dados reais do Firestore — não inicializar com zeros
+  setTimeout(function(){ dispararVelocimetros(0,0,0,0); }, 200);
 });
 
 function buscarCBOColab(q) {
@@ -2703,28 +2881,40 @@ function carregarColabs() {
 <!-- FIREBASE SDK -->
 <script>
 function carregarEmpresa(uid, email) {
+  // Tenta 1: busca por campo uid
   window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
   .then(function(snap){
-    if(!snap.empty){
-      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
-      aplicarEmpresa(e);
-    } else {
-      // Usa uid como empresaId diretamente
-      aplicarEmpresa({
-        id: uid,
-        uid: uid,
-        email: email,
-        nome: 'Minha Empresa',
-        responsavel: email,
-        tipo: 'mensal',
-        faixa: 'Faixa 2'
-      });
+    if (!snap.empty) {
+      var e = snap.docs[0].data(); e.id = snap.docs[0].id;
+      return aplicarEmpresa(e);
     }
+    // Tenta 2: busca por doc.id === uid
+    return window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
+      .then(function(doc) {
+        if (doc.exists) {
+          var e = doc.data(); e.id = doc.id;
+          return aplicarEmpresa(e);
+        }
+        // Tenta 3: busca por email
+        return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
+          .then(function(snapEmail) {
+            if (!snapEmail.empty) {
+              var e = snapEmail.docs[0].data(); e.id = snapEmail.docs[0].id;
+              return aplicarEmpresa(e);
+            }
+            // Fallback real — empresa não encontrada
+            aplicarEmpresa({
+              id: uid, uid: uid, email: email,
+              nome: email || 'Empresa', responsavel: email,
+              tipo: 'mensal', faixa: 'Faixa 2'
+            });
+          });
+      });
   }).catch(function(err){
-    // Fallback sem Firestore
+    console.log('carregarEmpresa erro:', err);
     aplicarEmpresa({
       id: uid, uid: uid, email: email,
-      nome: 'Minha Empresa', responsavel: email,
+      nome: email || 'Empresa', responsavel: email,
       tipo: 'mensal', faixa: 'Faixa 2'
     });
   });
