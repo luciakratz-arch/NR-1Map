@@ -2576,8 +2576,20 @@ function salvarParceiro() {
   catch(e) { secApp = firebase.initializeApp(cfg, 'nr1map-parc-sec'); }
   var senha = gerarSenha();
   firebase.auth(secApp).createUserWithEmailAndPassword(email, senha)
+    .catch(function(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        // E-mail já existe no Auth — faz login para pegar o uid
+        return firebase.auth(secApp).signInWithEmailAndPassword(email, senha)
+          .catch(function() {
+            // Senha diferente — gera uid baseado no email como fallback
+            return { user: { uid: 'parc_' + email.replace(/[^a-z0-9]/gi,'_') }, senhaExistente: true };
+          });
+      }
+      throw e;
+    })
     .then(function(cred) {
       var uid = cred.user.uid;
+      var senhaFinal = cred.senhaExistente ? '(use a senha anterior)' : senha;
       return window.nr1mapDb.collection('nr1map_parceiros').doc(uid).set({
         uid: uid, nome: nome, email: email,
         whatsapp: whatsapp.replace(/[^0-9]/g,''),
@@ -2585,7 +2597,7 @@ function salvarParceiro() {
         comissaoPct: parseInt(comissao),
         status: 'ativo', clientes: 0,
         criadoEm: new Date().toISOString()
-      }).then(function(){ return { uid: uid, senha: senha }; });
+      }, {merge: true}).then(function(){ return { uid: uid, senha: senhaFinal }; });
     })
     .then(function(result) {
       btn.textContent = 'Cadastrar Parceiro'; btn.disabled = false;
