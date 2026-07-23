@@ -224,6 +224,9 @@ tbody tr:hover td{background:#F5F8F7;}
       <input class="login-input" type="email" placeholder="lucia@nr1map.com.br" id="adm-email"/>
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="adm-senha"/>
+      <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+        <a href="#" onclick="esqueciSenha(document.getElementById('adm-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
+      </div>
       <button class="login-btn roxo" onclick="entrarAdmin()">Entrar como Admin</button>
       <p class="login-hint">Acesso exclusivo da administradora · use qualquer senha para demo</p>
     </div>
@@ -234,6 +237,9 @@ tbody tr:hover td{background:#F5F8F7;}
       <input class="login-input" type="email" placeholder="parceiro@consultoria.com.br" id="par-email"/>
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="par-senha"/>
+      <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+        <a href="#" onclick="esqueciSenha(document.getElementById('par-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
+      </div>
       <button class="login-btn" style="background:var(--verde-claro);" onclick="entrarParceiro()">Entrar como Parceiro</button>
       <p class="login-hint">Representante / Consultoria credenciada · use qualquer senha para demo</p>
     </div>
@@ -244,6 +250,9 @@ tbody tr:hover td{background:#F5F8F7;}
       <input class="login-input" type="email" placeholder="rh@suaempresa.com.br" id="rh-email"/>
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="rh-senha"/>
+      <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+        <a href="#" onclick="esqueciSenha(document.getElementById('rh-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
+      </div>
       <button class="login-btn" onclick="entrarRH()">Entrar como Gestor RH</button>
       <p class="login-hint">Conta criada após assinatura do plano · use qualquer senha para demo</p>
     </div>
@@ -254,6 +263,9 @@ tbody tr:hover td{background:#F5F8F7;}
       <input class="login-input" type="email" placeholder="seu@email.com" id="user-email"/>
       <label class="login-field-label">Senha</label>
       <input class="login-input" type="password" placeholder="••••••••" id="user-senha"/>
+      <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+        <a href="#" onclick="esqueciSenha(document.getElementById('user-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
+      </div>
       <button class="login-btn" onclick="entrarUser()">Entrar na minha área</button>
       <p class="login-hint">Cadastro feito pelo link recebido da empresa · use qualquer senha para demo</p>
       <div style="margin-top:16px;padding:12px 14px;background:rgba(10,110,79,.12);border:1px solid rgba(18,160,115,.2);border-radius:9px;font-size:11px;color:#12A073;line-height:1.6;text-align:center;">
@@ -2497,6 +2509,24 @@ function excluirEmpresa(docId, btn) {
 }
 
 /* ===== PARCEIROS ===== */
+function esqueciSenha(email) {
+  if (!email || !email.includes('@')) {
+    alert('Preencha o e-mail acima antes de solicitar a redefinição de senha.');
+    return;
+  }
+  firebase.auth(firebase.app('nr1map')).sendPasswordResetEmail(email)
+    .then(function() {
+      alert('✅ E-mail enviado para: ' + email + '\n\n📬 Verifique sua caixa de entrada e a pasta de spam.\n⏱ Pode demorar alguns minutos para chegar.\n\nSe não chegar, entre em contato:\n📧 luciakratz@gmail.com');
+    })
+    .catch(function(e) {
+      if (e.code === 'auth/user-not-found') {
+        alert('❌ Nenhuma conta encontrada com este e-mail.');
+      } else {
+        alert('Erro: ' + e.message);
+      }
+    });
+}
+
 function copiarLinkWhats(tipo) {
   var baseUrl = 'https://luciakratz-arch.github.io/NR-1Map/';
   var txt, url;
