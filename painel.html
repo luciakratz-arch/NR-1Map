@@ -3226,12 +3226,24 @@ function carregarCargos(empresaId) {
       var uid = sessionStorage.getItem('nr1map_rh_uid');
       var email = sessionStorage.getItem('nr1map_rh_email');
       var pwd = sessionStorage.getItem('nr1map_rh_pwd');
-      if(uid && !pwd){
+      if(uid){
+        // Tenta pelo doc.id primeiro
         window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
           .then(function(doc){
-            if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); }
-            else if(email) carregarEmpresa(uid, email);
-          }).catch(function(){ if(email) carregarEmpresa(uid, email); });
+            if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); return; }
+            // Tenta por campo uid
+            return window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+              .then(function(snap){
+                if(!snap.empty){ var e=snap.docs[0].data(); e.id=snap.docs[0].id; aplicarEmpresa(e); return; }
+                // Tenta por email
+                if(email) return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
+                  .then(function(snap2){
+                    if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; aplicarEmpresa(e); }
+                    else if(pwd) window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
+                      .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); });
+                  });
+              });
+          }).catch(function(err){ console.log('auth painel err:', err); });
       } else if(email && pwd){
         window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
           .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
