@@ -3328,6 +3328,9 @@ function carregarCargos(empresaId) {
         cargos.push(d);
       });
       renderCargos();
+      // Atualizar organograma se estiver aberto
+      var orgEl = document.getElementById('pc-org');
+      if (orgEl && orgEl.style.display !== 'none') renderOrg();
     }).catch(function(e){ 
       console.log('Erro carregarCargos:', e);
       if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
