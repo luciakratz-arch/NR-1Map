@@ -526,24 +526,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
     </div>
     <div id="pc-org" style="display:none;">
-      <div class="card">
-        <div class="card-body" style="padding:16px;">
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
-            <span style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.08em;">Layout:</span>
-            <button id="org-btn-vertical" class="btn btn-sm btn-primary" onclick="setOrgLayout('vertical')">⬇ Vertical</button>
-            <button id="org-btn-horizontal" class="btn btn-sm btn-ghost" onclick="setOrgLayout('horizontal')">➡ Horizontal</button>
-            <button id="org-btn-radial" class="btn btn-sm btn-ghost" onclick="setOrgLayout('radial')">⭕ Radial</button>
-            <div style="flex:1;"></div>
-            <label style="font-size:12px;color:var(--cinza-medio);display:flex;align-items:center;gap:6px;cursor:pointer;">
-              <input type="checkbox" id="org-show-staff" onchange="renderOrg()"/>
-              Mostrar Staff / Assessorias
-            </label>
-          </div>
-          <div style="overflow:auto;border:1px solid var(--linha);border-radius:8px;background:#FAFBFA;min-height:300px;">
-            <div id="org-chart" style="display:inline-block;padding:20px;"></div>
-          </div>
-        </div>
-      </div>
+      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
     </div>
     <div id="pc-niveis" style="display:none;">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
@@ -581,32 +564,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
     <div class="form-group"><div class="form-label">Reporta a</div>
       <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
-    </div>
-    <div style="margin:10px 0 14px;padding:12px;background:rgba(123,0,196,.06);border-radius:8px;border:1px solid rgba(123,0,196,.15);">
-      <div style="font-size:11px;font-weight:600;color:#7B00C4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Posição no organograma</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
-          <input type="radio" name="nc-staff-tipo" value="" checked style="margin-top:2px;"/>
-          <span>
-            <strong>Subordinado direto</strong>
-            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Aparece abaixo do superior — linha vertical (padrão)</span>
-          </span>
-        </label>
-        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
-          <input type="radio" name="nc-staff-tipo" value="interno" style="margin-top:2px;"/>
-          <span>
-            <strong>Staff interno</strong>
-            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Funcionário assessor — aparece ao lado, linha horizontal sólida. Ex: Assistente da Presidência</span>
-          </span>
-        </label>
-        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;">
-          <input type="radio" name="nc-staff-tipo" value="externo" style="margin-top:2px;"/>
-          <span>
-            <strong>Staff externo</strong>
-            <span style="display:block;font-size:11px;color:var(--cinza-medio);">Empresa ou consultoria terceirizada — linha horizontal tracejada. Ex: Assessoria Jurídica, Contabilidade</span>
-          </span>
-        </label>
-      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
@@ -1039,28 +996,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="content">
     <div class="grid-2">
       <div class="card">
-        <div class="card-header"><div class="title">Agenda — Jul/Ago 2025</div></div>
-        <div class="card-body" style="padding:8px 16px;">
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">07</div><div class="mes">Jul</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Esgotamento</h4><p>Sugerida pela IA · WhatsApp · 14 colaboradores</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">14</div><div class="mes">Jul</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Reconhecimento</h4><p>Manual · E-mail · 14 colaboradores</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">01</div><div class="mes">Ago</div></div>
-            <div class="agenda-info"><h4>Diagnóstico Geral — Ciclo 2</h4><p>Programado · WhatsApp + E-mail · todas as unidades</p></div>
-            <span class="agenda-tipo tipo-geral">Geral</span>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-data"><div class="dia">18</div><div class="mes">Ago</div></div>
-            <div class="agenda-info"><h4>Pesquisa Pulso — Relações interpessoais</h4><p>Manual · WhatsApp · unidade Brasília</p></div>
-            <span class="agenda-tipo tipo-pulso">Pulso</span>
-          </div>
+        <div class="card-header"><div class="title" id="agenda-titulo">Agenda</div></div>
+        <div class="card-body" style="padding:8px 16px;" id="agenda-lista">
+          <div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa agendada ainda.</div>
         </div>
       </div>
       <div class="card">
@@ -1958,26 +1896,26 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  var el=document.getElementById('view-'+id);
-  if(el) el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var nav=document.querySelector('.nav-item[onclick*=\'\'' + id + '\'\'\']');
-  if(nav) nav.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('view-'+id);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='cobranding') _carregarResponsavelTecnico();
   if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
-  parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   tab.classList.add('active');
-  parent.querySelectorAll('[id^="t-"]').forEach(function(v){ v.classList.remove('active'); });
-  var t=document.getElementById(targetId);
-  if(t) t.classList.add('active');
+  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
+  const t=document.getElementById(targetId);
+  if(t)t.classList.add('active');
 }
 function toggleModulo(header){
-  var body=header.nextElementSibling;
+  const body=header.nextElementSibling;
   body.classList.toggle('open');
 }
 function selOpt(el){
@@ -1986,9 +1924,9 @@ function selOpt(el){
 }
 function handleUpload(input){
   if(input.files&&input.files[0]){
-    var z=document.querySelector('.upload-zone');
-    z.innerHTML='<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>'+input.files[0].name+'</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>';
-    setTimeout(function(){document.getElementById('uploadPreview').style.display='block';},600);
+    const z=document.querySelector('.upload-zone');
+    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
+    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
   }
 }
 function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
@@ -2019,9 +1957,9 @@ function atualizarSinalizador(inputOuTr){
   const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
   const input=tr.querySelector('input[type="date"]');
   if(!input||!input.value)return;
-  var _cs=corSinalizador(input.value); var cor=_cs.cor; var texto=_cs.texto;
-  var cel=tr.querySelector('.sinalizador-cell');
-  cel.innerHTML='<span class="bdg-s" style="background:'+cor+'22;color:'+cor+';"><span class="dot" style="background:'+cor+';"></span>'+texto+'</span>';
+  const {cor,texto}=corSinalizador(input.value);
+  const cel=tr.querySelector('.sinalizador-cell');
+  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
 }
 function atualizarTodosSinalizadores(){
   document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
@@ -2040,16 +1978,16 @@ function adicionarAcao(){
   const tbody=document.getElementById('tbody-plano');
   const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
   const dataPadrao=hoje.toISOString().slice(0,10);
-  var tr=document.createElement('tr');
+  const tr=document.createElement('tr');
   tr.dataset.prazo=dataPadrao;
-  tr.innerHTML=
-    '<td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>'+
-    '<td><div contenteditable="true">Descreva a ação (What / How)...</div></td>'+
-    '<td><div contenteditable="true">Responsável</div></td>'+
-    '<td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>'+
-    '<td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="'+dataPadrao+'" onchange="atualizarSinalizador(this)"/></td>'+
-    '<td class="sinalizador-cell"></td>'+
-    '<td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest(\'tr\').remove();atualizarBadgePendentes();">✕</button></td>';
+  tr.innerHTML=`
+    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
+    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
+    <td><div contenteditable="true">Responsável</div></td>
+    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
+    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
+    <td class="sinalizador-cell"></td>
+    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
   tbody.appendChild(tr);
   atualizarSinalizador(tr);
   atualizarBadgePendentes();
@@ -2186,9 +2124,9 @@ function registrarEvento(selectEl){
   const tr=selectEl.closest('tr');
   const setor=nomeSetorDaLinha(tr);
   const status=selectEl.value;
-  var agora=new Date();
-  var dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:setor+' — Status alterado para '+status});
+  const agora=new Date();
+  const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
   renderHistorico();
 }
 function renderHistorico(){
@@ -2200,13 +2138,13 @@ function renderHistorico(){
     if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
     else if(ev.evento.includes('Em andamento'))c='#D4A017';
     else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
-    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">'+
-      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-top:4px;flex-shrink:0;"></span>'+
-      '<div style="flex:1;">'+
-        '<div style="font-size:12px;">'+ev.evento+'</div>'+
-        '<div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">'+ev.data+' · '+ev.resp+'</div>'+
-      '</div>'+
-    '</div>';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
+      <div style="flex:1;">
+        <div style="font-size:12px;">${ev.evento}</div>
+        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
+      </div>
+    </div>`;
   }).join('');
 }
 function gerarPdfAcompanhamento(){
@@ -2471,10 +2409,7 @@ function salvarCargo() {
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
   if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
   var empresaId = window.nr1mapEmpresa.id;
-  var staffEl = document.querySelector('input[name="nc-staff-tipo"]:checked');
-  var staffTipo = staffEl ? staffEl.value : '';
-  var isStaff = staffTipo !== '';
-  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, isStaff:isStaff, staffTipo:staffTipo, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
       .then(function(doc) {
@@ -2497,62 +2432,18 @@ function salvarCargo() {
   }
 }
 
-var _orgLayout = 'vertical';
-
-function setOrgLayout(layout) {
-  _orgLayout = layout;
-  ['vertical','horizontal','radial'].forEach(function(b) {
-    var btn = document.getElementById('org-btn-' + b);
-    if (btn) btn.className = b === layout ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
-  });
-  renderOrg();
-}
-
-function _orgCard(x, y, cargo, CW, CH, isStaff) {
-  var nv2 = getNivel(cargo.nvId);
-  var cor = nv2 ? nv2.cor : '#6B7280';
-  var nm = cargo.nome.length > 18 ? cargo.nome.slice(0,17)+'\u2026' : cargo.nome;
-  var fill = isStaff ? '#F9F5FF' : 'white';
-  var g = '<g>';
-  g += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="'+fill+'" stroke="'+cor+'" stroke-width="1.5"'+(isStaff?' stroke-dasharray="4,3"':'')+'/>';
-  g += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="4" fill="'+cor+'"/>';
-  g += '<text x="'+(x+CW/2)+'" y="'+(y+20)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-  g += '<text x="'+(x+CW/2)+'" y="'+(y+32)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+cargo.cbo+'</text>';
-  if (isStaff) { var sLbl = cargo.staffTipo === 'externo' ? 'Staff Externo' : 'Staff Interno'; g += '<text x="'+(x+CW/2)+'" y="'+(y+45)+'" text-anchor="middle" font-size="8" fill="'+cor+'" font-family="Inter,sans-serif">'+sLbl+'</text>'; }
-  else g += '<text x="'+(x+CW/2)+'" y="'+(y+45)+'" text-anchor="middle" font-size="8" fill="'+cor+'" font-family="Inter,sans-serif">'+(cargo.n||0)+' colab.</text>';
-  g += '</g>';
-  return g;
-}
-
-function _buildNvMap(lista) {
-  var nvMap = {};
-  for (var i=0; i<lista.length; i++) {
-    var pos = 0;
-    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === lista[i].nvId) { pos = j+1; break; } }
-    if (!pos) pos = niveisHier.length+1;
-    if (!nvMap[pos]) nvMap[pos] = [];
-    nvMap[pos].push(lista[i]);
-  }
-  return nvMap;
-}
-
 function renderOrg() {
   var el = document.getElementById('org-chart');
   if (!el) return;
-  if (!cargos || cargos.length === 0) {
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos para visualizar o organograma.</div>';
-    return;
+  var CW=140, CH=52, GX=20, GY=60;
+  var nvMap = {};
+  for (var i=0; i<cargos.length; i++) {
+    var pos = 0;
+    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
+    if (!pos) pos = niveisHier.length+1;
+    if (!nvMap[pos]) nvMap[pos] = [];
+    nvMap[pos].push(cargos[i]);
   }
-  var showStaff = document.getElementById('org-show-staff') && document.getElementById('org-show-staff').checked;
-  var lista = showStaff ? cargos : cargos.filter(function(c){ return !c.isStaff; });
-  if (_orgLayout === 'horizontal') _renderOrgHorizontal(el, lista);
-  else if (_orgLayout === 'radial') _renderOrgRadial(el, lista);
-  else _renderOrgVertical(el, lista);
-}
-
-function _renderOrgVertical(el, lista) {
-  var CW=148, CH=52, GX=24, GY=70;
-  var nvMap = _buildNvMap(lista);
   var maxNv = 0;
   for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
   var posMap = {}, totalW = 0;
@@ -2560,122 +2451,36 @@ function _renderOrgVertical(el, lista) {
     var itens = nvMap[nv] || [];
     var rowW = itens.length*(CW+GX)-GX;
     if (rowW > totalW) totalW = rowW;
+    var sx = (totalW-rowW)/2;
+    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
   }
-  for (var nv2=1; nv2<=maxNv; nv2++) {
-    var itens2 = nvMap[nv2] || [];
-    var rowW2 = itens2.length*(CW+GX)-GX;
-    var sx = Math.floor((totalW-rowW2)/2);
-    for (var m=0; m<itens2.length; m++) posMap[itens2[m].id] = {x:sx+m*(CW+GX), y:(nv2-1)*(CH+GY)};
-  }
-  var svgW = Math.max(totalW+40,500), svgH = maxNv*(CH+GY)+40;
+  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
   var linhas = '', cards = '';
-  lista.forEach(function(cr) {
+  for (var ci=0; ci<cargos.length; ci++) {
+    var cr = cargos[ci];
     if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
       var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
       var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
-      if (cr.isStaff) {
-        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
-        linhas += '<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx2+'" y2="'+(cy2+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
-      }
-      else linhas += '<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
     }
-  });
-  lista.forEach(function(dr) {
-    if (!posMap[dr.id]) return;
-    cards += _orgCard(posMap[dr.id].x, posMap[dr.id].y, dr, CW, CH, dr.isStaff);
-  });
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
-}
-
-function _renderOrgHorizontal(el, lista) {
-  var CW=148, CH=52, GX=80, GY=20;
-  var nvMap = _buildNvMap(lista);
-  var maxNv = 0;
-  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
-  var posMap = {}, totalH = 0;
-  for (var nv=1; nv<=maxNv; nv++) {
-    var itens = nvMap[nv] || [];
-    var colH = itens.length*(CH+GY)-GY;
-    if (colH > totalH) totalH = colH;
   }
-  for (var nv2=1; nv2<=maxNv; nv2++) {
-    var itens2 = nvMap[nv2] || [];
-    var colH2 = itens2.length*(CH+GY)-GY;
-    var sy = Math.floor((totalH-colH2)/2);
-    for (var m=0; m<itens2.length; m++) posMap[itens2[m].id] = {x:(nv2-1)*(CW+GX), y:sy+m*(CH+GY)};
+  for (var di=0; di<cargos.length; di++) {
+    var dr = cargos[di];
+    if (!posMap[dr.id]) continue;
+    var x=posMap[dr.id].x, y=posMap[dr.id].y;
+    var nv2 = getNivel(dr.nvId);
+    var cor = nv2 ? nv2.cor : '#6B7280';
+    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
+    cards += '<g>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
+    cards += '</g>';
   }
-  var svgW = maxNv*(CW+GX)+40, svgH = Math.max(totalH+40,300);
-  var linhas = '', cards = '';
-  lista.forEach(function(cr) {
-    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
-      var px=posMap[cr.repId].x+CW, py=posMap[cr.repId].y+CH/2;
-      var cx2=posMap[cr.id].x, cy2=posMap[cr.id].y+CH/2, mx=(px+cx2)/2;
-      if (cr.isStaff) {
-        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
-        linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
-      } else linhas += '<path d="M'+px+','+py+' L'+mx+','+py+' L'+mx+','+cy2+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
-    }
-  });
-  lista.forEach(function(dr) {
-    if (!posMap[dr.id]) return;
-    cards += _orgCard(posMap[dr.id].x, posMap[dr.id].y, dr, CW, CH, dr.isStaff);
-  });
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
 }
-
-function _renderOrgRadial(el, lista) {
-  var CW=130, CH=48;
-  var roots = lista.filter(function(c){ return !c.repId; });
-  var center = roots[0] || lista[0];
-  if (!center) return;
-  var R_BASE=160, R_STEP=140;
-  var posMap = {}; posMap[center.id] = {x:0, y:0};
-  var queue = [{id:center.id, depth:1}];
-  var visited = {}; visited[center.id] = true;
-  var byDepth = {};
-  while (queue.length) {
-    var curr = queue.shift();
-    var children = lista.filter(function(c){ return c.repId === curr.id && !visited[c.id]; });
-    children.forEach(function(ch) {
-      visited[ch.id] = true;
-      if (!byDepth[curr.depth]) byDepth[curr.depth] = [];
-      byDepth[curr.depth].push({cargo:ch, parentId:curr.id});
-      queue.push({id:ch.id, depth:curr.depth+1});
-    });
-  }
-  Object.keys(byDepth).forEach(function(depth) {
-    var items = byDepth[depth];
-    var r = R_BASE + (parseInt(depth)-1)*R_STEP;
-    items.forEach(function(item, idx) {
-      var angle = (2*Math.PI/items.length)*idx - Math.PI/2;
-      posMap[item.cargo.id] = {x:Math.round(r*Math.cos(angle)), y:Math.round(r*Math.sin(angle))};
-    });
-  });
-  var allX = Object.keys(posMap).map(function(k){return posMap[k].x;});
-  var allY = Object.keys(posMap).map(function(k){return posMap[k].y;});
-  var minX=Math.min.apply(null,allX)-CW/2-20, minY=Math.min.apply(null,allY)-CH/2-20;
-  var maxX=Math.max.apply(null,allX)+CW/2+20, maxY=Math.max.apply(null,allY)+CH/2+20;
-  var offX=-minX, offY=-minY;
-  var svgW=maxX-minX, svgH=maxY-minY;
-  var linhas='', cards='';
-  lista.forEach(function(cr) {
-    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
-      var px=posMap[cr.repId].x+offX+CW/2, py=posMap[cr.repId].y+offY+CH/2;
-      var cx2=posMap[cr.id].x+offX+CW/2, cy2=posMap[cr.id].y+offY+CH/2;
-      if (cr.isStaff) {
-        var dashArr = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
-        linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#A78BFA" stroke-width="1.5"'+dashArr+'/>';
-      } else linhas += '<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#D1D5DB" stroke-width="1.5"/>';
-    }
-  });
-  lista.forEach(function(dr) {
-    if (!posMap[dr.id]) return;
-    var x=posMap[dr.id].x+offX-CW/2, y=posMap[dr.id].y+offY-CH/2;
-    cards += _orgCard(x, y, dr, CW, CH, dr.isStaff);
-  });
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
-}
-
 
 function carregarAgenda() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
@@ -2698,11 +2503,9 @@ function carregarAgenda() {
       snap.forEach(function(doc){ docs.push({id:doc.id, d:doc.data()}); });
       docs.sort(function(a,b){ return (a.d.data||'') < (b.d.data||'') ? -1 : 1; });
       lista.innerHTML = '';
-      var datas = [];
       docs.forEach(function(item) {
         var d = item.d;
         var dt = d.data ? new Date(d.data+'T12:00:00') : null;
-        if (dt) datas.push(dt);
         var dia = dt ? String(dt.getDate()).padStart(2,'0') : '—';
         var mes = dt ? meses[dt.getMonth()] : '—';
         var tipoCls = d.tipo === 'geral' ? 'tipo-geral' : 'tipo-pulso';
@@ -2710,62 +2513,44 @@ function carregarAgenda() {
         var info = [d.canal||'WhatsApp'];
         if (d.unidade && d.unidade !== 'Todas') info.push(d.unidade);
         else info.push('todas as unidades');
-        if (d.prazo) info.push(d.prazo + ' dias');
         var div = document.createElement('div');
         div.className = 'agenda-item';
         div.innerHTML =
           '<div class="agenda-data"><div class="dia">'+dia+'</div><div class="mes">'+mes+'</div></div>'+
-          '<div class="agenda-info">'+
-            '<h4>'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+(d.tema?' — '+d.tema:'')+'</h4>'+
-            '<p>'+info.join(' · ')+'</p>'+
-          '</div>'+
+          '<div class="agenda-info"><h4>'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+(d.tema?' — '+d.tema:'')+'</h4>'+
+          '<p>'+info.join(' · ')+'</p></div>'+
           '<span class="agenda-tipo '+tipoCls+'">'+tipoLabel+'</span>'+
-          '<button onclick="excluirAgendamento(''+item.id+'')" style="margin-left:8px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;" title="Excluir">🗑️</button>';
+          '<button class="btn-del-ag" style="margin-left:8px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">🗑️</button>';
+        div.querySelector('.btn-del-ag').addEventListener('click', (function(id){ return function(){ excluirAgendamento(id); }; })(item.id));
         lista.appendChild(div);
       });
-      if (datas.length > 0 && titulo) {
-        var min = datas.reduce(function(a,b){return a<b?a:b;});
-        var max = datas.reduce(function(a,b){return a>b?a:b;});
-        var fmt = function(dt){ return meses[dt.getMonth()]+'/'+dt.getFullYear(); };
-        titulo.textContent = 'Agenda — ' + fmt(min) + (fmt(min)!==fmt(max) ? ' a ' + fmt(max) : '');
-      }
-    }).catch(function(e){
-      if (lista) lista.innerHTML = '<div style="text-align:center;padding:24px;color:#ef4444;">Erro ao carregar. Verifique índice do Firestore (empresaId + data).</div>';
-      console.log('agenda:', e);
-    });
+      if (titulo) titulo.textContent = 'Agenda';
+    }).catch(function(e){ console.log('agenda:', e); });
 }
 
 function salvarAgendamento() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId || !window.nr1mapDb) return;
-  var data = document.getElementById('ag-data').value;
+  var data = document.getElementById('ag-data') ? document.getElementById('ag-data').value : '';
   if (!data) { alert('Selecione a data de disparo.'); return; }
-  var payload = {
+  window.nr1mapDb.collection('nr1map_agenda').add({
     empresaId: empresaId,
-    tipo: document.getElementById('ag-tipo').value,
-    tema: document.getElementById('ag-tema').value.trim(),
+    tipo: document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso',
+    tema: document.getElementById('ag-tema') ? document.getElementById('ag-tema').value.trim() : '',
     data: data,
-    prazo: document.getElementById('ag-prazo').value,
-    unidade: document.getElementById('ag-unidade').value,
-    canal: document.getElementById('ag-canal').value,
+    canal: document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp',
     status: 'agendado',
     criadoEm: new Date().toISOString()
-  };
-  window.nr1mapDb.collection('nr1map_agenda').add(payload)
-    .then(function() {
-      fecharModal('modal-agendar');
-      document.getElementById('ag-data').value = '';
-      document.getElementById('ag-tema').value = '';
-      carregarAgenda();
-      alert('✅ Pesquisa agendada com sucesso!');
-    }).catch(function(e){ alert('Erro ao agendar: ' + e.message); });
+  }).then(function() {
+    fecharModal('modal-agendar');
+    carregarAgenda();
+  }).catch(function(e){ alert('Erro: ' + e.message); });
 }
 
 function excluirAgendamento(docId) {
   if (!confirm('Excluir este agendamento?')) return;
   window.nr1mapDb.collection('nr1map_agenda').doc(docId).delete()
-    .then(function(){ carregarAgenda(); })
-    .catch(function(e){ alert('Erro: ' + e.message); });
+    .then(function(){ carregarAgenda(); });
 }
 
 function exportarOrgPDF() {
@@ -2973,42 +2758,23 @@ function carregarColabs() {
 <!-- FIREBASE SDK -->
 <script>
 function carregarEmpresa(uid, email) {
-  // Tenta 1: busca por campo uid
   window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
   .then(function(snap){
-    if (!snap.empty) {
-      var e = snap.docs[0].data(); e.id = snap.docs[0].id;
+    if(!snap.empty){
+      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
       return aplicarEmpresa(e);
     }
-    // Tenta 2: busca por doc.id === uid
     return window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
-      .then(function(doc) {
-        if (doc.exists) {
-          var e = doc.data(); e.id = doc.id;
-          return aplicarEmpresa(e);
-        }
-        // Tenta 3: busca por email
+      .then(function(doc){
+        if(doc.exists){ var e=doc.data(); e.id=doc.id; return aplicarEmpresa(e); }
         return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
-          .then(function(snapEmail) {
-            if (!snapEmail.empty) {
-              var e = snapEmail.docs[0].data(); e.id = snapEmail.docs[0].id;
-              return aplicarEmpresa(e);
-            }
-            // Fallback real — empresa não encontrada
-            aplicarEmpresa({
-              id: uid, uid: uid, email: email,
-              nome: email || 'Empresa', responsavel: email,
-              tipo: 'mensal', faixa: 'Faixa 2'
-            });
+          .then(function(snap2){
+            if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; return aplicarEmpresa(e); }
+            aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
           });
       });
   }).catch(function(err){
-    console.log('carregarEmpresa erro:', err);
-    aplicarEmpresa({
-      id: uid, uid: uid, email: email,
-      nome: email || 'Empresa', responsavel: email,
-      tipo: 'mensal', faixa: 'Faixa 2'
-    });
+    aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
   });
 }
 
@@ -3457,21 +3223,14 @@ function carregarCargos(empresaId) {
     if(user){
       carregarEmpresa(user.uid, user.email);
     } else {
-      // Verifica se veio do admin via "Ver Painel" (passa empresaId direto, sem senha)
       var uid = sessionStorage.getItem('nr1map_rh_uid');
       var email = sessionStorage.getItem('nr1map_rh_email');
       var pwd = sessionStorage.getItem('nr1map_rh_pwd');
-      if(uid && !pwd) {
-        // Acesso admin direto — carrega empresa pelo ID sem precisar de auth
+      if(uid && !pwd){
         window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
           .then(function(doc){
-            if(doc.exists){
-              var e = doc.data(); e.id = doc.id;
-              aplicarEmpresa(e);
-            } else {
-              // Tenta por email
-              if(email) carregarEmpresa(uid, email);
-            }
+            if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); }
+            else if(email) carregarEmpresa(uid, email);
           }).catch(function(){ if(email) carregarEmpresa(uid, email); });
       } else if(email && pwd){
         window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
