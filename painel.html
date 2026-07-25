@@ -462,23 +462,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
       </div>
       <div class="card">
         <div class="card-header"><div class="title">Evolução dos indicadores</div></div>
-        <div class="card-body">
-          <div style="margin-bottom:16px;"><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Sofrimento geral</div>
-            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.5;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">64</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:38px;opacity:.65;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">67</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:36px;opacity:.75;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;">63</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--laranja);border-radius:3px 3px 0 0;height:56px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;color:var(--laranja);">72</div></div>
-            </div>
-          </div>
-          <div><div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">Prazer geral</div>
-            <div style="display:flex;gap:6px;align-items:flex-end;height:56px;">
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:35px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jan</div><div style="font-size:10px;font-weight:600;">62</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:37px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Abr</div><div style="font-size:10px;font-weight:600;">66</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:40px;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Mai</div><div style="font-size:10px;font-weight:600;color:var(--verde);">70</div></div>
-              <div style="flex:1;text-align:center;"><div style="background:var(--verde-claro);border-radius:3px 3px 0 0;height:33px;opacity:.7;"></div><div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">Jun</div><div style="font-size:10px;font-weight:600;">58</div></div>
-            </div>
-          </div>
+        <div class="card-body" id="evolucao-indicadores-body">
+          <div style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</div>
         </div>
       </div>
     </div>
@@ -695,44 +680,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
             </tr>
           </thead>
           <tbody id="tbody-plano">
-            <tr data-prazo="2026-07-02">
-              <td><div contenteditable="true" style="font-weight:600;">Operações / Linha A<br/><span style="font-size:10px;color:var(--cinza-medio);">Operador de Linha (CBO 7170) · Intolerável</span></div></td>
-              <td><div contenteditable="true">Abrir Espaço de Fala Coletivo urgente. Suspender exigências não essenciais por 30 dias e revisar metas/cargas de trabalho.</div></td>
-              <td><div contenteditable="true">Gestor de RH</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-02" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
-            </tr>
-            <tr data-prazo="2026-07-07">
-              <td><div contenteditable="true" style="font-weight:600;">RH / Gestão de Pessoas<br/><span style="font-size:10px;color:var(--cinza-medio);">Assistente de RH (CBO 3514) · Substancial</span></div></td>
-              <td><div contenteditable="true">Implementar supervisão de pares e espaço de fala quinzenal. Avaliar distribuição de carga de trabalho.</div></td>
-              <td><div contenteditable="true">Gestor de RH</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-07-07" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
-            </tr>
-            <tr data-prazo="2026-06-25">
-              <td><div contenteditable="true" style="font-weight:600;">Comercial / Vendas<br/><span style="font-size:10px;color:var(--cinza-medio);">Representante Comercial (CBO 3541) · Substancial</span></div></td>
-              <td><div contenteditable="true">Investigar ativismo e horas extras ocultas na equipe. Aplicar Pesquisa Pulso direcionada sobre sobrecarga.</div></td>
-              <td><div contenteditable="true">Liderança direta</div></td>
-              <td>
-                <select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()">
-                  <option>Pendente</option><option>Em andamento</option><option selected>Concluída</option>
-                </select>
-              </td>
-              <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="2026-06-25" onchange="atualizarSinalizador(this)"/></td>
-              <td class="sinalizador-cell"></td>
-              <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>
+
             </tr>
           </tbody>
         </table>
@@ -1607,6 +1555,138 @@ var _rhSel = new Set();
 var _rhProprias = [];        // [{id, subcatId, modId, texto}]
 var _rhHistorico = new Set(); // pids que já foram usados em diagnósticos anteriores
 
+function carregarPlanoAcao(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-plano');
+  if (!tbody) return;
+  window.nr1mapDb.collection('nr1map_plano_acao')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm','asc')
+    .get()
+    .then(function(snap) {
+      tbody.innerHTML = '';
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma ação cadastrada. Use "+ Nova ação" para começar.</td></tr>';
+        atualizarBadgePendentes();
+        return;
+      }
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var tr = document.createElement('tr');
+        tr.dataset.prazo = d.prazo || '';
+        tr.dataset.docId = doc.id;
+        var statusOpts = ['Pendente','Em andamento','Concluída'].map(function(s){
+          return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>';
+        }).join('');
+        tr.innerHTML =
+          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','setor')" style="font-weight:600;">'+
+            (d.setor||'Setor')+'<br/>'+
+            '<span style="font-size:10px;color:var(--cinza-medio);">'+(d.cbo||'')+'</span>'+
+          '</div></td>'+
+          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','acao')">'+( d.acao||'')+'</div></td>'+
+          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','responsavel')">'+( d.responsavel||'')+'</div></td>'+
+          '<td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="salvarStatusAcao(this,''+doc.id+'');registrarEvento(this);atualizarBadgePendentes()">'+statusOpts+'</select></td>'+
+          '<td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="'+(d.prazo||'')+'" onchange="salvarCampoAcao(this,''+doc.id+'','prazo');atualizarSinalizador(this)"/></td>'+
+          '<td class="sinalizador-cell"></td>'+
+          '<td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="excluirAcao(''+doc.id+'',this)">✕</button></td>';
+        tbody.appendChild(tr);
+      });
+      document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
+      atualizarBadgePendentes();
+    }).catch(function(e){ console.log('plano err:',e); });
+}
+
+function salvarCampoAcao(el, docId, campo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!docId || !window.nr1mapDb) return;
+  var upd = {}; upd[campo] = el.innerText.trim();
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId).update(upd).catch(function(e){console.log(e);});
+}
+
+function salvarStatusAcao(sel, docId) {
+  if (!docId || !window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId)
+    .update({status: sel.value, atualizadoEm: new Date().toISOString()})
+    .catch(function(e){console.log(e);});
+}
+
+function excluirAcao(docId, btn) {
+  if (!confirm('Excluir esta ação?')) return;
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId).delete()
+    .then(function(){ btn.closest('tr').remove(); atualizarBadgePendentes(); })
+    .catch(function(e){alert('Erro: '+e.message);});
+}
+
+function carregarEvolucaoIndicadores(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('evolucao-indicadores-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','asc').limit(6).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum dado disponível ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        ciclos.push({
+          mes: dt ? meses[dt.getMonth()] : '—',
+          sofrimento: d.sofrimentoGeral || null,
+          prazer: d.prazerGeral || null,
+          ibp: d.ibpGeral || null
+        });
+      });
+
+      // Se não tem sofrimento/prazer, usa IBP para mostrar algo
+      var temDados = ciclos.some(function(c){ return c.sofrimento !== null || c.ibp !== null; });
+      if (!temDados) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Aguardando diagnósticos concluídos para gerar evolução.</div>';
+        return;
+      }
+
+      function renderBars(dados, cor, label) {
+        var maxVal = Math.max.apply(null, dados.map(function(d){ return d||0; }));
+        if (maxVal === 0) maxVal = 100;
+        var html = '<div style="margin-bottom:16px;">';
+        html += '<div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">'+label+'</div>';
+        html += '<div style="display:flex;gap:6px;align-items:flex-end;height:56px;">';
+        ciclos.forEach(function(c, i) {
+          var val = dados[i] || 0;
+          var h = maxVal > 0 ? Math.round((val/maxVal)*52) : 0;
+          var isMax = val === maxVal;
+          html += '<div style="flex:1;text-align:center;">';
+          html += '<div style="background:'+cor+';border-radius:3px 3px 0 0;height:'+h+'px;'+(isMax?'':'opacity:.7;')+'"></div>';
+          html += '<div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">'+c.mes+'</div>';
+          html += '<div style="font-size:10px;font-weight:600;'+(isMax?'color:'+cor+';':'')+'">'+(val||'—')+'</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+        return html;
+      }
+
+      var sofrimentos = ciclos.map(function(c){ return c.sofrimento; });
+      var prazeres = ciclos.map(function(c){ return c.prazer; });
+      var ibps = ciclos.map(function(c){ return c.ibp !== null ? Math.round((c.ibp+5)*10) : null; });
+
+      var html = '';
+      if (sofrimentos.some(function(v){return v!==null;})) {
+        html += renderBars(sofrimentos, 'var(--laranja)', 'Sofrimento geral');
+        html += renderBars(prazeres, 'var(--verde-claro)', 'Prazer geral');
+      } else {
+        html += renderBars(ibps, 'var(--verde-claro)', 'IBP geral (escala 0-100)');
+      }
+      el.innerHTML = html;
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum dado disponível ainda.</div>';
+      console.log('evolucao err:', e);
+    });
+}
+
 function carregarHistoricoReal(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var el = document.getElementById('historico-timeline-body');
@@ -1988,6 +2068,7 @@ function sv(id){
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
+  if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
   if(id==='cobranding') _carregarResponsavelTecnico();
   if(id==='planejamento') carregarAgenda();
 }
@@ -2059,22 +2140,20 @@ function atualizarBadgePendentes(){
   if(bdg)bdg.textContent=pendentes;
 }
 function adicionarAcao(){
-  const tbody=document.getElementById('tbody-plano');
-  const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
-  const dataPadrao=hoje.toISOString().slice(0,10);
-  const tr=document.createElement('tr');
-  tr.dataset.prazo=dataPadrao;
-  tr.innerHTML=`
-    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
-    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
-    <td><div contenteditable="true">Responsável</div></td>
-    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
-    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
-    <td class="sinalizador-cell"></td>
-    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
-  tbody.appendChild(tr);
-  atualizarSinalizador(tr);
-  atualizarBadgePendentes();
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var hoje=new Date(); hoje.setDate(hoje.getDate()+7);
+  var dataPadrao=hoje.toISOString().slice(0,10);
+  window.nr1mapDb.collection('nr1map_plano_acao').add({
+    empresaId: empresaId,
+    setor: 'Novo setor / CBO',
+    acao: 'Descreva a ação (What / How)...',
+    responsavel: 'Responsável',
+    status: 'Pendente',
+    prazo: dataPadrao,
+    criadoEm: new Date().toISOString()
+  }).then(function(){ carregarPlanoAcao(empresaId); })
+  .catch(function(e){ alert('Erro: '+e.message); });
 }
 function gerarPdfPlano(){
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
@@ -2195,11 +2274,7 @@ function salvarLogoEmpresa(){
 }
 
 /* ===== ACOMPANHAMENTO — linha do tempo de evidências ===== */
-let historicoEventos=[
-  {data:'18/06/2026 09:14', resp:'Gestor de RH', evento:'Operações / Linha A — Ação criada (Pendente)'},
-  {data:'20/06/2026 14:02', resp:'Gestor de RH', evento:'Operações / Linha A — Status alterado para Em andamento'},
-  {data:'25/06/2026 10:05', resp:'Liderança direta', evento:'Comercial / Vendas — Status alterado para Concluída'},
-];
+var historicoEventos=[];
 function nomeSetorDaLinha(tr){
   const primeiraCelula=tr.querySelector('td div[contenteditable]');
   return primeiraCelula?primeiraCelula.textContent.split('\n')[0].trim():'Ação';
@@ -3362,6 +3437,8 @@ function aplicarEmpresa(e) {
   carregarColabs();
   carregarHistoricoReal(e.id);
   carregarHistoricoPulso(e.id);
+  carregarEvolucaoIndicadores(e.id);
+  carregarPlanoAcao(e.id);
   atualizarBadgePulso();
   carregarSugestoes(e.id);
   carregarChamados(e.id);
