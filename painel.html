@@ -526,7 +526,19 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
     </div>
     <div id="pc-org" style="display:none;">
-      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <span style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;margin-right:4px;align-self:center;">Layout:</span>
+            <button id="org-btn-v" class="btn btn-primary btn-sm" onclick="setOrgLayout('v')">⬇ Vertical</button>
+            <button id="org-btn-h" class="btn btn-ghost btn-sm" onclick="setOrgLayout('h')">➡ Horizontal</button>
+            <button id="org-btn-r" class="btn btn-ghost btn-sm" onclick="setOrgLayout('r')">⭕ Radial</button>
+          </div>
+          <div style="overflow:auto;border:1px solid #E5E7EB;border-radius:8px;background:#FAFBFA;min-height:300px;">
+            <div id="org-chart" style="display:inline-block;padding:20px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="pc-niveis" style="display:none;">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
@@ -2432,6 +2444,13 @@ function salvarCargo() {
   }
 }
 
+var _orgL = 'v';
+function setOrgLayout(l) {
+  _orgL = l;
+  ['v','h','r'].forEach(function(b){ var btn=document.getElementById('org-btn-'+b); if(btn) btn.className=b===l?'btn btn-primary btn-sm':'btn btn-ghost btn-sm'; });
+  renderOrg();
+}
+
 function renderOrg() {
   var el = document.getElementById('org-chart');
   if (!el) return;
@@ -2439,59 +2458,129 @@ function renderOrg() {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
     return;
   }
-  var CW=140, CH=52, GX=20, GY=60;
+  if (_orgL === 'h') { _orgH(el); return; }
+  if (_orgL === 'r') { _orgR(el); return; }
+  _orgV(el);
+}
+
+function _nvMap() {
   var nvMap = {};
-  for (var i=0; i<cargos.length; i++) {
-    var pos = 0;
-    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
-    if (!pos) pos = niveisHier.length+1;
-    if (!nvMap[pos]) nvMap[pos] = [];
+  for (var i=0;i<cargos.length;i++) {
+    var pos=0;
+    for (var j=0;j<niveisHier.length;j++){if(niveisHier[j].id===cargos[i].nvId){pos=j+1;break;}}
+    if(!pos) pos=niveisHier.length+1;
+    if(!nvMap[pos]) nvMap[pos]=[];
     nvMap[pos].push(cargos[i]);
   }
-  var maxNv = 0;
-  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
-  // Passo 1: calcular totalW completo
-  var totalW = 0;
-  for (var nv=1; nv<=maxNv; nv++) {
-    var itens = nvMap[nv] || [];
-    var rowW = itens.length*(CW+GX)-GX;
-    if (rowW > totalW) totalW = rowW;
-  }
-  // Passo 2: posicionar com totalW já definido
-  var posMap = {};
-  for (var nv=1; nv<=maxNv; nv++) {
-    var itens = nvMap[nv] || [];
-    var rowW = itens.length*(CW+GX)-GX;
-    var sx = Math.floor((totalW-rowW)/2);
-    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
-  }
-  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
-  var linhas = '', cards = '';
-  for (var ci=0; ci<cargos.length; ci++) {
-    var cr = cargos[ci];
-    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
-      var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
-      var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
-      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
-    }
-  }
-  for (var di=0; di<cargos.length; di++) {
-    var dr = cargos[di];
-    if (!posMap[dr.id]) continue;
-    var x=posMap[dr.id].x, y=posMap[dr.id].y;
-    var nv2 = getNivel(dr.nvId);
-    var cor = nv2 ? nv2.cor : '#6B7280';
-    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
-    cards += '<g>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
-    cards += '</g>';
-  }
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
+  return nvMap;
 }
+
+function _card(x,y,c,CW,CH) {
+  var nv=getNivel(c.nvId); var cor=nv?nv.cor:'#6B7280';
+  var nm=c.nome.length>18?c.nome.slice(0,17)+'…':c.nome;
+  var g='<g>';
+  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"'+(c.staffTipo==='externo'?' stroke-dasharray="4,3"':'')+'/>';
+  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="3" fill="'+cor+'"/>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+20)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+32)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+c.cbo+'</text>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+46)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+(c.n||0)+' colab.</text>';
+  g+='</g>'; return g;
+}
+
+function _orgV(el) {
+  var CW=148,CH=52,GX=24,GY=70;
+  var nvMap=_nvMap(); var maxNv=0;
+  for(var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
+  var totalW=0;
+  for(var nv=1;nv<=maxNv;nv++){var rw=((nvMap[nv]||[]).length*(CW+GX)-GX);if(rw>totalW)totalW=rw;}
+  var posMap={};
+  for(var nv=1;nv<=maxNv;nv++){
+    var it=nvMap[nv]||[]; var rw=it.length*(CW+GX)-GX;
+    var sx=Math.floor((totalW-rw)/2);
+    for(var m=0;m<it.length;m++) posMap[it[m].id]={x:sx+m*(CW+GX),y:(nv-1)*(CH+GY)};
+  }
+  var svgW=Math.max(totalW+40,500),svgH=maxNv*(CH+GY)+40,lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW/2,py=posMap[cr.repId].y+CH;
+    var cx=posMap[cr.id].x+CW/2,cy=posMap[cr.id].y;
+    if(cr.isStaff||cr.staffTipo){
+      var dash=cr.staffTipo==='externo'?' stroke-dasharray="5,4"':'';
+      lin+='<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx+'" y2="'+(posMap[cr.id].y+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dash+'/>';
+    } else {
+      var my=py+Math.floor(GY/2);
+      lin+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx+','+my+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  });
+  cargos.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
+function _orgH(el) {
+  var CW=148,CH=52,GX=80,GY=16;
+  var nvMap=_nvMap(); var maxNv=0;
+  for(var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
+  var totalH=0;
+  for(var nv=1;nv<=maxNv;nv++){var ch=((nvMap[nv]||[]).length*(CH+GY)-GY);if(ch>totalH)totalH=ch;}
+  var posMap={};
+  for(var nv=1;nv<=maxNv;nv++){
+    var it=nvMap[nv]||[]; var ch=it.length*(CH+GY)-GY;
+    var sy=Math.floor((totalH-ch)/2);
+    for(var m=0;m<it.length;m++) posMap[it[m].id]={x:(nv-1)*(CW+GX),y:sy+m*(CH+GY)};
+  }
+  var svgW=maxNv*(CW+GX)+40,svgH=Math.max(totalH+40,300),lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW,py=posMap[cr.repId].y+CH/2;
+    var cx=posMap[cr.id].x,cy=posMap[cr.id].y+CH/2;
+    var mx=(px+cx)/2;
+    lin+='<path d="M'+px+','+py+' L'+mx+','+py+' L'+mx+','+cy+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+  });
+  cargos.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
+function _orgR(el) {
+  var CW=130,CH=48;
+  var roots=cargos.filter(function(c){return !c.repId;});
+  var center=roots[0]||cargos[0]; if(!center) return;
+  var posMap={}; posMap[center.id]={x:0,y:0};
+  var queue=[{id:center.id,depth:1}],visited={},byDepth={};
+  visited[center.id]=true;
+  while(queue.length){
+    var curr=queue.shift();
+    cargos.filter(function(c){return c.repId===curr.id&&!visited[c.id];}).forEach(function(ch){
+      visited[ch.id]=true;
+      if(!byDepth[curr.depth]) byDepth[curr.depth]=[];
+      byDepth[curr.depth].push(ch);
+      queue.push({id:ch.id,depth:curr.depth+1});
+    });
+  }
+  Object.keys(byDepth).forEach(function(d){
+    var items=byDepth[d]; var r=160+(parseInt(d)-1)*140;
+    items.forEach(function(item,i){
+      var angle=(2*Math.PI/items.length)*i-Math.PI/2;
+      posMap[item.id]={x:Math.round(r*Math.cos(angle)),y:Math.round(r*Math.sin(angle))};
+    });
+  });
+  var allX=Object.keys(posMap).map(function(k){return posMap[k].x;});
+  var allY=Object.keys(posMap).map(function(k){return posMap[k].y;});
+  var minX=Math.min.apply(null,allX)-CW/2-20,minY=Math.min.apply(null,allY)-CH/2-20;
+  var maxX=Math.max.apply(null,allX)+CW/2+20,maxY=Math.max.apply(null,allY)+CH/2+20;
+  var ox=-minX,oy=-minY,lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+ox+CW/2,py=posMap[cr.repId].y+oy+CH/2;
+    var cx=posMap[cr.id].x+ox+CW/2,cy=posMap[cr.id].y+oy+CH/2;
+    lin+='<line x1="'+px+'" y1="'+py+'" x2="'+cx+'" y2="'+cy+'" stroke="#D1D5DB" stroke-width="1.5"/>';
+  });
+  cargos.forEach(function(dr){
+    if(!posMap[dr.id]) return;
+    cards+=_card(posMap[dr.id].x+ox-CW/2,posMap[dr.id].y+oy-CH/2,dr,CW,CH);
+  });
+  el.innerHTML='<svg width="'+(maxX-minX)+'" height="'+(maxY-minY)+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
 
 function carregarAgenda() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
