@@ -265,9 +265,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-sec">Referência</div>
     <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
     <div class="nav-sec">Resultados</div>
-    <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
     <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
-    <div class="nav-item" onclick="sv('relatorios')"><span class="ic">📄</span>Relatórios</div>
+    <div class="nav-item" onclick="sv('laudo-tecnico')"><span class="ic">📋</span>Laudo Técnico</div>
+    <div class="nav-item" onclick="sv('mapa-risco')"><span class="ic">🗺</span>Mapa de Risco</div>
+    <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
+    <div class="nav-item" onclick="sv('relatorio-anual')"><span class="ic">📊</span>Relatório Anual</div>
   </nav>
   <div class="sidebar-bottom">
     <div class="s-user">
@@ -471,20 +473,112 @@ textarea.form-control{resize:vertical;min-height:70px;}
 </div>
 
 <!-- ===== RELATÓRIOS ===== -->
-<div id="view-relatorios" class="view">
-  <div class="topbar"><div class="topbar-title">Relatórios</div><div class="topbar-actions">
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>2025</option><option>2024</option></select>
-  </div></div>
-  <div class="content">
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><div><div class="title">Laudo Técnico Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Fundamentação Dejours + Herzberg + Maslow. Análise por CBO e nível de risco.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📄 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Mapa de Risco Psicossocial</div><div class="subtitle">Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">5 riscos por cargo CBO com criticidade e urgência de intervenção.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">🗺 Ver mapa</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Plano de Ação 5W2H</div><div class="subtitle">Jun 2025 · Editável</div></div><span class="bdg-s s-pend"><span class="dot"></span>Em andamento</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 ações com responsável, prazo e custo. Edite e marque como concluídas.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="sv('plano-acao')">✏ Editar</button><button class="btn btn-ghost btn-sm" onclick="gerarPdfPlano()">⬇ PDF</button></div></div></div>
-      <div class="card"><div class="card-header"><div><div class="title">Relatório Comparativo Anual</div><div class="subtitle">Jan → Jun 2025</div></div><span class="bdg-s s-ok"><span class="dot"></span>Disponível</span></div><div class="card-body"><p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Evolução temporal, eficácia das ações e ranking por cargo e unidade.</p><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm">📊 Visualizar</button><button class="btn btn-ghost btn-sm">⬇ PDF</button></div></div></div>
+<!-- ===== LAUDO TÉCNICO ===== -->
+<div id="view-laudo-tecnico" class="view">
+  <div class="topbar">
+    <div class="topbar-title">📋 Laudo Técnico Psicossocial</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('laudo_tecnico')">⬇ Exportar PDF</button>
+    </div>
+  </div>
+  <div class="content" id="laudo-tecnico-content">
+    <div id="laudo-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">📋</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
+      <p style="font-size:13px;">Dispare um Diagnóstico Geral para gerar o laudo automaticamente.</p>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+    </div>
+    <div id="laudo-dados" style="display:none;">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">IBP por Módulo — Balança Psicodinâmica (Dejours)</div></div>
+        <div class="card-body"><div id="laudo-modulos"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">IBP por Subcategoria</div></div>
+        <div class="card-body"><div id="laudo-subcats"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">Conclusão e Assinaturas</div></div>
+        <div class="card-body">
+          <div id="laudo-conclusao" style="font-size:13px;line-height:1.7;margin-bottom:24px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+            <div style="border-top:1px solid var(--linha);padding-top:12px;text-align:center;">
+              <div style="font-size:13px;font-weight:600;">Dra. Lucia Kratz</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Psicóloga — CRP 09/20590</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Responsável técnica pela metodologia IBP</div>
+            </div>
+            <div style="border-top:1px solid var(--linha);padding-top:12px;text-align:center;" id="laudo-assinatura-empresa">
+              <div style="font-size:13px;font-weight:600;" id="laudo-responsavel-nome">—</div>
+              <div style="font-size:11px;color:var(--cinza-medio);" id="laudo-responsavel-cargo">Responsável pela Empresa</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Assinatura via gov.br</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- ===== MAPA DE RISCO ===== -->
+<div id="view-mapa-risco" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🗺 Mapa de Risco Psicossocial</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('mapa_risco')">⬇ Exportar PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="mapa-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">🗺</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+    </div>
+    <div id="mapa-dados" style="display:none;">
+      <div class="card">
+        <div class="card-header"><div class="title">Matriz de Risco — GRO/NR-1 (Severidade × Probabilidade)</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cargo / CBO</th><th>Fator de Risco</th><th>Severidade</th><th>Probabilidade</th><th>Nível GRO</th><th>IBP</th><th>Zona Dejours</th></tr></thead>
+            <tbody id="mapa-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIO ANUAL ===== -->
+<div id="view-relatorio-anual" class="view">
+  <div class="topbar">
+    <div class="topbar-title">📊 Relatório Comparativo Anual</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('relatorio_anual')">⬇ Exportar PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="anual-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">📊</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum dado histórico disponível ainda</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+    </div>
+    <div id="anual-dados" style="display:none;">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">Evolução do IBP Geral por Ciclo</div></div>
+        <div class="card-body" id="anual-grafico" style="min-height:200px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Tabela Comparativa</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Período</th><th>Tipo</th><th>IBP Geral</th><th>Zona Dejours</th><th>Respondentes</th><th>Variação</th></tr></thead>
+            <tbody id="anual-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <!-- ===== CARGOS / ORGANOGRAMA ===== -->
@@ -2105,6 +2199,10 @@ function sv(id){
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
   if(id==='cobranding') _carregarResponsavelTecnico();
+  if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
+  if(id==='mapa-risco' && window.nr1mapEmpresa) carregarMapaRisco(window.nr1mapEmpresa.id);
+  if(id==='relatorio-anual' && window.nr1mapEmpresa) carregarRelatorioAnual(window.nr1mapEmpresa.id);
+  if(id==='relatorios' && window.nr1mapEmpresa) carregarRelatorios(window.nr1mapEmpresa.id);
   if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
@@ -3538,6 +3636,135 @@ function carregarCargos(empresaId) {
     }
   });
 })();
+
+function carregarLaudoTecnico(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('laudo-sem-dados');
+  var comDados = document.getElementById('laudo-dados');
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(1).get()
+    .then(function(snap) {
+      if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
+      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
+      var d = snap.docs[0].data();
+      var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
+      var corFn = function(ibp){ return ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b'; };
+      var nomesMod = {M1:'Fatores Fisiológicos',M2:'Fatores de Segurança',M3:'Fatores Sociais',M4:'Fatores Motivacionais'};
+      var mods = document.getElementById('laudo-modulos');
+      if (mods) {
+        if (d.ibpModulos && Object.keys(d.ibpModulos).length) {
+          var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;text-align:left;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Módulo</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona Dejours</th></tr></thead><tbody>';
+          Object.keys(d.ibpModulos).forEach(function(m){
+            var ibp=d.ibpModulos[m]; var s=ibp>=0?'+':'';
+            html+='<tr><td style="padding:8px;font-size:13px;border-bottom:1px solid #E5E7EB;">'+(nomesMod[m]||m)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
+          });
+          html+='</tbody></table>';
+          mods.innerHTML = html;
+        } else {
+          mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por módulo gerados após o próximo diagnóstico.</p>';
+        }
+      }
+      var concl = document.getElementById('laudo-conclusao');
+      var ibpG = d.ibpGeral||0; var s=ibpG>=0?'+':'';
+      if(concl) concl.innerHTML = '<p>Com base no Diagnóstico Psicossocial realizado conforme a <strong>Portaria MTE nº 1.419/2024</strong>, o IBP geral da organização foi de <strong style="color:'+corFn(ibpG)+'">'+s+ibpG.toFixed(1)+'</strong>, zona de <strong>'+zonaFn(ibpG)+'</strong>.</p>';
+      var nomeEl = document.getElementById('laudo-responsavel-nome');
+      if(nomeEl && window.nr1mapEmpresa) nomeEl.textContent = window.nr1mapEmpresa.responsavel||window.nr1mapEmpresa.nome||'—';
+    }).catch(function(e){ console.log('laudo err:',e); });
+}
+
+function carregarMapaRisco(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('mapa-sem-dados');
+  var comDados = document.getElementById('mapa-dados');
+  var tbody = document.getElementById('mapa-tbody');
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(1).get()
+    .then(function(snap) {
+      if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
+      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
+      var d = snap.docs[0].data();
+      var subcats = d.ibpSubcats||{};
+      var groFn = function(ibp){ return ibp<=-3?'Intolerável':ibp<=-1.5?'Substancial':ibp<=0?'Moderado':ibp<=1.5?'Tolerável':'Trivial'; };
+      var groCor = function(ibp){ return ibp<=-3?'#991b1b':ibp<=-1.5?'#c2410c':ibp<=0?'#b45309':ibp<=1.5?'#15803d':'#166534'; };
+      var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
+      if(!tbody) return;
+      if(!Object.keys(subcats).length){
+        tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados por subcategoria serão gerados no próximo diagnóstico.</td></tr>'; return;
+      }
+      tbody.innerHTML='';
+      Object.keys(subcats).forEach(function(sc){
+        var s=subcats[sc]; var ibp=typeof s==='object'?s.ibp:s; var sinal=ibp>=0?'+':'';
+        var sev=ibp<=-3?'Alta':ibp<=-1.5?'Média':'Baixa'; var prob=ibp<=-1.5?'Alta':'Moderada';
+        var groN=groFn(ibp); var groC=groCor(ibp);
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.nome||sc)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.modNome||'—')+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+sev+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+prob+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;"><span style="background:'+groC+'22;color:'+groC+';padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;">'+groN+'</span></td><td style="padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;">'+sinal+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td>';
+        tbody.appendChild(tr);
+      });
+    }).catch(function(e){ console.log('mapa err:',e); });
+}
+
+function carregarRelatorioAnual(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('anual-sem-dados');
+  var comDados = document.getElementById('anual-dados');
+  var tbody = document.getElementById('anual-tbody');
+  var grafico = document.getElementById('anual-grafico');
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','asc').limit(12).get()
+    .then(function(snap) {
+      if (snap.empty||snap.size<2) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
+      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
+      var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var ciclos=[]; snap.forEach(function(doc){ ciclos.push(doc.data()); });
+      if(grafico){
+        var maxW=600,barH=28,gap=8,svgH=ciclos.length*(barH+gap)+20,midX=maxW/2;
+        var svg='<svg width="100%" viewBox="0 0 '+maxW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg"><line x1="'+midX+'" y1="0" x2="'+midX+'" y2="'+svgH+'" stroke="#E5E7EB" stroke-width="1"/>';
+        ciclos.forEach(function(d,i){
+          var ibp=d.ibpGeral||0; var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var label=dt?meses[dt.getMonth()]+'/'+dt.getFullYear().toString().slice(2):'—';
+          var bW=Math.abs(ibp)/5*(midX-60); var cor=ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b';
+          var y=i*(barH+gap)+10; var bX=ibp>=0?midX:midX-bW;
+          svg+='<text x="55" y="'+(y+barH/2+4)+'" text-anchor="end" font-size="10" fill="#6B7280">'+label+'</text>';
+          svg+='<rect x="'+bX+'" y="'+y+'" width="'+bW+'" height="'+barH+'" rx="3" fill="'+cor+'"/>';
+          var tx=ibp>=0?midX+bW+4:midX-bW-4; var an=ibp>=0?'start':'end'; var s=ibp>=0?'+':'';
+          svg+='<text x="'+tx+'" y="'+(y+barH/2+4)+'" text-anchor="'+an+'" font-size="10" font-weight="600" fill="'+cor+'">'+s+ibp.toFixed(1)+'</text>';
+        });
+        svg+='</svg>'; grafico.innerHTML=svg;
+      }
+      if(tbody){
+        tbody.innerHTML='';
+        ciclos.forEach(function(d,i){
+          var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var ds=dt?meses[dt.getMonth()]+' '+dt.getFullYear():'—';
+          var ibp=d.ibpGeral||0; var s=ibp>=0?'+':'';
+          var zona=ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta';
+          var var_=i>0?(ibp-(ciclos[i-1].ibpGeral||0)).toFixed(1):'—';
+          var vc=var_==='—'?'':parseFloat(var_)>0?'color:#16a34a':parseFloat(var_)<0?'color:#ef4444':'';
+          var tr=document.createElement('tr');
+          tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+ds+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+'</td><td style="padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+zona+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+(d.totalRespostas||'—')+'</td><td style="padding:8px;font-weight:600;border-bottom:1px solid #E5E7EB;'+vc+'">'+(var_==='—'?'—':(parseFloat(var_)>0?'+':'')+var_)+'</td>';
+          tbody.appendChild(tr);
+        });
+      }
+    }).catch(function(e){ console.log('anual err:',e); });
+}
+
+function gerarRelatorio(tipo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empresaId+'&tipo='+tipo)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Exportar PDF'; btn.disabled = false; }
+      if(d.url){ window.open(d.url,'_blank'); }
+      else { alert('Erro ao gerar: '+(d.error||'tente novamente')); }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Exportar PDF'; btn.disabled = false; }
+      alert('Erro: '+e.message);
+    });
+}
 </script>
 </body>
 </html>
