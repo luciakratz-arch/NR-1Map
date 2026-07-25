@@ -523,19 +523,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
     </div>
     <div id="pc-org" style="display:none;">
-      <div class="card">
-        <div class="card-body" style="padding:16px;">
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
-            <span style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.08em;">Layout:</span>
-            <button id="org-btn-vertical" class="btn btn-primary btn-sm" onclick="setOrgLayout('vertical')">⬇ Vertical</button>
-            <button id="org-btn-horizontal" class="btn btn-ghost btn-sm" onclick="setOrgLayout('horizontal')">➡ Horizontal</button>
-            <button id="org-btn-radial" class="btn btn-ghost btn-sm" onclick="setOrgLayout('radial')">⭕ Radial</button>
-          </div>
-          <div style="overflow:auto;border:1px solid var(--linha);border-radius:8px;background:#FAFBFA;min-height:300px;">
-            <div id="org-chart" style="display:inline-block;padding:20px;"></div>
-          </div>
-        </div>
-      </div>
+      <div class="card"><div class="card-body" style="overflow-x:auto;padding:16px;"><div id="org-chart" style="min-width:500px;"></div></div></div>
     </div>
     <div id="pc-niveis" style="display:none;">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
@@ -1312,10 +1300,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
       <div class="topbar-title">🧩 Módulos e Perguntas — Selecionar</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
-      <button id="btn-salvar-sel" class="btn btn-primary btn-sm" onclick="confirmarSalvarSelecoes()" style="display:none;">💾 Salvar seleção</button>
-    </div>
+    <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
   </div>
   <div class="content">
 
@@ -1580,13 +1565,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="grid-2" style="margin-bottom:12px;">
       <div class="form-group"><label class="form-label">Nível Hierárquico</label><select class="form-control" id="edit-cargo-nivel"></select></div>
       <div class="form-group"><label class="form-label">Reporta a</label><select class="form-control" id="edit-cargo-reporta"></select></div>
-      <div class="form-group"><label class="form-label">Tipo de vínculo no organograma</label>
-        <select class="form-control" id="edit-cargo-staff">
-          <option value="">Subordinado direto (linha vertical)</option>
-          <option value="interno">Staff interno — funcionário assessor (linha horizontal sólida)</option>
-          <option value="externo">Staff externo — empresa/consultoria terceirizada (linha tracejada)</option>
-        </select>
-      </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
       <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">Cancelar</button>
@@ -1643,7 +1621,7 @@ function rhToggle(pid, checked){
     }
   }
   if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
-  _marcarPendente();
+  _salvarSelecoes();
   var el=document.getElementById('rh-total-sel');
   if(el) el.textContent=_rhSel.size+' selecionada'+(_rhSel.size!==1?'s':'');
 }
@@ -1661,53 +1639,6 @@ function _carregarRHSel(){
       renderRH();
     }).catch(function(){ renderRH(); });
   _carregarHistoricoUsado(eid);
-}
-
-var _selPendente = false;
-
-function _marcarPendente() {
-  _selPendente = true;
-  var btn = document.getElementById('btn-salvar-sel');
-  if (btn) btn.style.display = 'inline-flex';
-}
-
-function confirmarSalvarSelecoes() {
-  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!eid || !window.nr1mapDb) return;
-  window.nr1mapDb.collection('nr1map_respostas').doc(eid).collection('ciclos').limit(1).get()
-    .then(function(snap) {
-      if (!snap.empty) _mostrarAvisoHistorico();
-      else _salvarSelecoes();
-    }).catch(function(){ _salvarSelecoes(); });
-}
-
-function _mostrarAvisoHistorico() {
-  var m = document.getElementById('modal-aviso-selecao');
-  if (m) { m.style.display='flex'; return; }
-  m = document.createElement('div');
-  m.id = 'modal-aviso-selecao';
-  m.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-  var inner = document.createElement('div');
-  inner.style.cssText = 'background:#1A2420;border:1px solid #2A3430;border-radius:14px;padding:28px;max-width:480px;width:100%;';
-  inner.innerHTML = '<div style="font-size:20px;margin-bottom:12px;">⚠️</div>'+
-    '<div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:10px;">Atenção ao histórico de dados</div>'+
-    '<p style="font-size:13px;color:#8A9590;line-height:1.7;margin-bottom:8px;">Você alterou a seleção de perguntas. Ciclos futuros usarão a nova configuração.</p>'+
-    '<p style="font-size:13px;color:#8A9590;line-height:1.7;margin-bottom:20px;">Recomendamos adicionar perguntas, não substituir.</p>';
-  var btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;gap:10px;';
-  var bCancelar = document.createElement('button');
-  bCancelar.textContent = 'Cancelar';
-  bCancelar.style.cssText = 'flex:1;padding:11px;background:transparent;border:1px solid #2A3430;border-radius:8px;color:#8A9590;font-size:13px;cursor:pointer;';
-  bCancelar.onclick = function(){ m.style.display='none'; };
-  var bSalvar = document.createElement('button');
-  bSalvar.textContent = 'Entendi, salvar assim mesmo';
-  bSalvar.style.cssText = 'flex:1;padding:11px;background:#12A073;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;';
-  bSalvar.onclick = function(){ m.style.display='none'; _salvarSelecoes(); };
-  btns.appendChild(bCancelar);
-  btns.appendChild(bSalvar);
-  inner.appendChild(btns);
-  m.appendChild(inner);
-  document.body.appendChild(m);
 }
 
 function _salvarSelecoes(){
@@ -1936,8 +1867,6 @@ function editarCargo(id) {
     selRep.appendChild(opt);
   });
   window._editCargoId = id;
-  var selStaff = document.getElementById('edit-cargo-staff');
-  if (selStaff) selStaff.value = cargo.staffTipo || '';
   document.getElementById('modal-edit-cargo').classList.add('open');
 }
 
@@ -1949,16 +1878,13 @@ function salvarEditCargo() {
       cargos[i].cbo = document.getElementById('edit-cargo-cbo').value.trim();
       cargos[i].nvId = document.getElementById('edit-cargo-nivel').value || null;
       cargos[i].repId = document.getElementById('edit-cargo-reporta').value || null;
-      var staffEl = document.getElementById('edit-cargo-staff');
-      cargos[i].staffTipo = staffEl ? staffEl.value : '';
-      cargos[i].isStaff = cargos[i].staffTipo !== '';
       break;
     }
   }
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').doc(id).update({
       nome: cargos[i].nome, cbo: cargos[i].cbo,
-      nvId: cargos[i].nvId, repId: cargos[i].repId, staffTipo: cargos[i].staffTipo||'', isStaff: cargos[i].isStaff||false
+      nvId: cargos[i].nvId, repId: cargos[i].repId
     }).catch(function(e){ console.log(e); });
   }
   renderCargos();
@@ -1967,26 +1893,26 @@ function salvarEditCargo() {
 }
 
 function sv(id){
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  var el=document.getElementById('view-'+id);
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('view-'+id);
   if(el)el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  document.querySelectorAll('.nav-item').forEach(function(n){ if(n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'"+id+"'") !== -1) n.classList.add('active'); });
-
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='cobranding') _carregarResponsavelTecnico();
   if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
-  parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   tab.classList.add('active');
-  parent.querySelectorAll('[id^="t-"]').forEach(function(v){ v.classList.remove('active'); });
-  var t=document.getElementById(targetId);
+  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
+  const t=document.getElementById(targetId);
   if(t)t.classList.add('active');
 }
 function toggleModulo(header){
-  var body=header.nextElementSibling;
+  const body=header.nextElementSibling;
   body.classList.toggle('open');
 }
 function selOpt(el){
@@ -1995,9 +1921,9 @@ function selOpt(el){
 }
 function handleUpload(input){
   if(input.files&&input.files[0]){
-    var z=document.querySelector('.upload-zone');
-    z.innerHTML='<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>'+input.files[0].name+'</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>';
-    setTimeout(function(){document.getElementById('uploadPreview').style.display='block';},600);
+    const z=document.querySelector('.upload-zone');
+    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
+    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
   }
 }
 function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
@@ -2028,9 +1954,9 @@ function atualizarSinalizador(inputOuTr){
   const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
   const input=tr.querySelector('input[type="date"]');
   if(!input||!input.value)return;
-  var _cs=corSinalizador(input.value); var cor=_cs.cor; var texto=_cs.texto;
-  var cel=tr.querySelector('.sinalizador-cell');
-  cel.innerHTML='<span class="bdg-s" style="background:'+cor+'22;color:'+cor+';"><span class="dot" style="background:'+cor+';"></span>'+texto+'</span>';
+  const {cor,texto}=corSinalizador(input.value);
+  const cel=tr.querySelector('.sinalizador-cell');
+  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
 }
 function atualizarTodosSinalizadores(){
   document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
@@ -2049,16 +1975,16 @@ function adicionarAcao(){
   const tbody=document.getElementById('tbody-plano');
   const hoje=new Date(); hoje.setDate(hoje.getDate()+7);
   const dataPadrao=hoje.toISOString().slice(0,10);
-  var tr=document.createElement('tr');
+  const tr=document.createElement('tr');
   tr.dataset.prazo=dataPadrao;
-  tr.innerHTML=
-    '<td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>'+
-    '<td><div contenteditable="true">Descreva a ação (What / How)...</div></td>'+
-    '<td><div contenteditable="true">Responsável</div></td>'+
-    '<td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>'+
-    '<td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="'+dataPadrao+'" onchange="atualizarSinalizador(this)"/></td>'+
-    '<td class="sinalizador-cell"></td>'+
-    '<td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest(\'tr\').remove();atualizarBadgePendentes();">✕</button></td>';
+  tr.innerHTML=`
+    <td><div contenteditable="true" style="font-weight:600;">Novo setor / CBO</div></td>
+    <td><div contenteditable="true">Descreva a ação (What / How)...</div></td>
+    <td><div contenteditable="true">Responsável</div></td>
+    <td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="registrarEvento(this);atualizarBadgePendentes()"><option>Pendente</option><option>Em andamento</option><option>Concluída</option></select></td>
+    <td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="${dataPadrao}" onchange="atualizarSinalizador(this)"/></td>
+    <td class="sinalizador-cell"></td>
+    <td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="this.closest('tr').remove();atualizarBadgePendentes();">✕</button></td>`;
   tbody.appendChild(tr);
   atualizarSinalizador(tr);
   atualizarBadgePendentes();
@@ -2197,7 +2123,7 @@ function registrarEvento(selectEl){
   const status=selectEl.value;
   const agora=new Date();
   const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:setor+' — Status alterado para '+status});
+  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
   renderHistorico();
 }
 function renderHistorico(){
@@ -2209,13 +2135,13 @@ function renderHistorico(){
     if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
     else if(ev.evento.includes('Em andamento'))c='#D4A017';
     else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
-    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">'+
-      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-top:4px;flex-shrink:0;"></span>'+
-      '<div style="flex:1;">'+
-        '<div style="font-size:12px;">'+ev.evento+'</div>'+
-        '<div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">'+ev.data+' · '+ev.resp+'</div>'+
-      '</div>'+
-    '</div>';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
+      <div style="flex:1;">
+        <div style="font-size:12px;">${ev.evento}</div>
+        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
+      </div>
+    </div>`;
   }).join('');
 }
 function gerarPdfAcompanhamento(){
@@ -2503,113 +2429,89 @@ function salvarCargo() {
   }
 }
 
-var _orgLayout = 'vertical';
-
-function setOrgLayout(layout) {
-  _orgLayout = layout;
-  ['vertical','horizontal','radial'].forEach(function(b) {
-    var btn = document.getElementById('org-btn-'+b);
-    if (btn) btn.className = b===layout ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-  });
-  renderOrg();
-}
-
-function _orgCard(x,y,cargo,CW,CH) {
-  var nv2=getNivel(cargo.nvId); var cor=nv2?nv2.cor:'#6B7280';
-  var nm=cargo.nome.length>18?cargo.nome.slice(0,17)+'…':cargo.nome;
-  var g='<g>';
-  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
-  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="4" fill="'+cor+'"/>';
-  g+='<text x="'+(x+CW/2)+'" y="'+(y+20)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-  g+='<text x="'+(x+CW/2)+'" y="'+(y+32)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+cargo.cbo+'</text>';
-  g+='<text x="'+(x+CW/2)+'" y="'+(y+45)+'" text-anchor="middle" font-size="8" fill="'+cor+'" font-family="Inter,sans-serif">'+(cargo.n||0)+' colab.</text>';
-  g+='</g>'; return g;
-}
-
-function _buildNvMap(lista) {
-  var nvMap={};
-  for (var i=0;i<lista.length;i++) {
-    var pos=0;
-    for (var j=0;j<niveisHier.length;j++){if(niveisHier[j].id===lista[i].nvId){pos=j+1;break;}}
-    if(!pos) pos=niveisHier.length+1;
-    if(!nvMap[pos]) nvMap[pos]=[];
-    nvMap[pos].push(lista[i]);
-  }
-  return nvMap;
-}
-
 function renderOrg() {
-  var el=document.getElementById('org-chart');
+  var el = document.getElementById('org-chart');
   if (!el) return;
-  if (!cargos||cargos.length===0) {
-    el.innerHTML='<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
+  if (!cargos || cargos.length === 0) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
     return;
   }
-  if (_orgLayout==='horizontal') _renderOrgH(el,cargos);
-  else if (_orgLayout==='radial') _renderOrgR(el,cargos);
-  else _renderOrgV(el,cargos);
-}
+  var CW=148, CH=56, GX=28, GY=72;
 
-function _renderOrgV(el,lista) {
-  var CW=148,CH=52,GX=24,GY=70;
-  var nvMap=_buildNvMap(lista); var maxNv=0;
-  for (var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
-  // Passo 1: calcular totalW primeiro
-  var totalW=0;
-  for (var nv=1;nv<=maxNv;nv++){var it=nvMap[nv]||[];var rW=it.length*(CW+GX)-GX;if(rW>totalW)totalW=rW;}
-  // Passo 2: posicionar com totalW já definido
-  var posMap={};
-  for (var nv2=1;nv2<=maxNv;nv2++){
-    var it2=nvMap[nv2]||[];
-    var rW2=it2.length*(CW+GX)-GX;
-    var sx=Math.floor((totalW-rW2)/2);
-    for(var m=0;m<it2.length;m++) posMap[it2[m].id]={x:sx+m*(CW+GX),y:(nv2-1)*(CH+GY)};
+  // 1. Mapear por nível hierárquico
+  var nvMap = {};
+  for (var i=0; i<cargos.length; i++) {
+    var pos = 0;
+    for (var j=0; j<niveisHier.length; j++) { if (niveisHier[j].id === cargos[i].nvId) { pos = j+1; break; } }
+    if (!pos) pos = niveisHier.length+1;
+    if (!nvMap[pos]) nvMap[pos] = [];
+    nvMap[pos].push(cargos[i]);
   }
-  var svgW=Math.max(totalW+40,500),svgH=maxNv*(CH+GY)+40,linhas='',cards='';
-  // Linhas: conectar cada nó ao seu pai real
-  lista.forEach(function(cr){
-    if(cr.repId&&posMap[cr.id]&&posMap[cr.repId]){
-      var px=posMap[cr.repId].x+CW/2;
-      var py=posMap[cr.repId].y+CH;
-      var cx2=posMap[cr.id].x+CW/2;
-      var cy2=posMap[cr.id].y;
-      var my=py+GY/2;
-      linhas+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+  var maxNv = 0;
+  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
+
+  // 2. Calcular totalW PRIMEIRO
+  var totalW = 0;
+  for (var nv=1; nv<=maxNv; nv++) {
+    var it = nvMap[nv] || [];
+    var rW = it.length*(CW+GX) - GX;
+    if (rW > totalW) totalW = rW;
+  }
+
+  // 3. Posicionar com totalW já definido
+  var posMap = {};
+  for (var nv2=1; nv2<=maxNv; nv2++) {
+    var it2 = nvMap[nv2] || [];
+    var rW2 = it2.length*(CW+GX) - GX;
+    var sx = Math.floor((totalW - rW2) / 2);
+    for (var m=0; m<it2.length; m++) {
+      posMap[it2[m].id] = { x: sx + m*(CW+GX), y: (nv2-1)*(CH+GY) };
     }
-  });
-  lista.forEach(function(dr){if(!posMap[dr.id])return;cards+=_orgCard(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
-  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
-}
+  }
 
-function _renderOrgH(el,lista) {
-  var CW=148,CH=52,GX=80,GY=20;
-  var nvMap=_buildNvMap(lista); var maxNv=0;
-  for (var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
-  var posMap={},totalH=0;
-  for (var nv=1;nv<=maxNv;nv++){var it=nvMap[nv]||[];var cH=it.length*(CH+GY)-GY;if(cH>totalH)totalH=cH;}
-  for (var nv2=1;nv2<=maxNv;nv2++){var it2=nvMap[nv2]||[];var cH2=it2.length*(CH+GY)-GY;var sy=Math.floor((totalH-cH2)/2);for(var m=0;m<it2.length;m++)posMap[it2[m].id]={x:(nv2-1)*(CW+GX),y:sy+m*(CH+GY)};}
-  var svgW=maxNv*(CW+GX)+40,svgH=Math.max(totalH+40,300),linhas='',cards='';
-  lista.forEach(function(cr){if(cr.repId&&posMap[cr.id]&&posMap[cr.repId]){var px=posMap[cr.repId].x+CW,py=posMap[cr.repId].y+CH/2,cx2=posMap[cr.id].x,cy2=posMap[cr.id].y+CH/2,mx=(px+cx2)/2;linhas+='<path d="M'+px+','+py+' L'+mx+','+py+' L'+mx+','+cy2+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';}});
-  lista.forEach(function(dr){if(!posMap[dr.id])return;cards+=_orgCard(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
-  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
-}
+  var svgW = Math.max(totalW+40, 500), svgH = maxNv*(CH+GY)+40;
+  var linhas = '', cards = '';
 
-function _renderOrgR(el,lista) {
-  var CW=130,CH=48;
-  var roots=lista.filter(function(c){return !c.repId;}); var center=roots[0]||lista[0];
-  if(!center)return;
-  var R_BASE=160,R_STEP=140,posMap={};
-  posMap[center.id]={x:0,y:0};
-  var queue=[{id:center.id,depth:1}],visited={},byDepth={};
-  visited[center.id]=true;
-  while(queue.length){var curr=queue.shift();var ch=lista.filter(function(c){return c.repId===curr.id&&!visited[c.id];});ch.forEach(function(ch2){visited[ch2.id]=true;if(!byDepth[curr.depth])byDepth[curr.depth]=[];byDepth[curr.depth].push({cargo:ch2});queue.push({id:ch2.id,depth:curr.depth+1});});}
-  Object.keys(byDepth).forEach(function(depth){var items=byDepth[depth];var r=R_BASE+(parseInt(depth)-1)*R_STEP;items.forEach(function(item,idx){var angle=(2*Math.PI/items.length)*idx-Math.PI/2;posMap[item.cargo.id]={x:Math.round(r*Math.cos(angle)),y:Math.round(r*Math.sin(angle))};});});
-  var allX=Object.keys(posMap).map(function(k){return posMap[k].x;}),allY=Object.keys(posMap).map(function(k){return posMap[k].y;});
-  var minX=Math.min.apply(null,allX)-CW/2-20,minY=Math.min.apply(null,allY)-CH/2-20,maxX=Math.max.apply(null,allX)+CW/2+20,maxY=Math.max.apply(null,allY)+CH/2+20;
-  var offX=-minX,offY=-minY,svgW=maxX-minX,svgH=maxY-minY,linhas='',cards='';
-  lista.forEach(function(cr){if(cr.repId&&posMap[cr.id]&&posMap[cr.repId]){var px=posMap[cr.repId].x+offX+CW/2,py=posMap[cr.repId].y+offY+CH/2,cx2=posMap[cr.id].x+offX+CW/2,cy2=posMap[cr.id].y+offY+CH/2;linhas+='<line x1="'+px+'" y1="'+py+'" x2="'+cx2+'" y2="'+cy2+'" stroke="#D1D5DB" stroke-width="1.5"/>';}});
-  lista.forEach(function(dr){if(!posMap[dr.id])return;cards+=_orgCard(posMap[dr.id].x+offX-CW/2,posMap[dr.id].y+offY-CH/2,dr,CW,CH);});
-  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
+  // 4. Desenhar linhas — sempre do centro inferior do PAI real
+  for (var ci=0; ci<cargos.length; ci++) {
+    var cr = cargos[ci];
+    if (!cr.repId || !posMap[cr.id] || !posMap[cr.repId]) continue;
+    var isStaff = cr.isStaff || cr.staffTipo;
+    var px = posMap[cr.repId].x + CW/2;
+    var py = posMap[cr.repId].y + CH;
+    var cx2 = posMap[cr.id].x + CW/2;
+    var cy2 = posMap[cr.id].y;
+    if (isStaff) {
+      // Staff: linha horizontal ao lado
+      var dash = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
+      linhas += '<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx2+'" y2="'+(posMap[cr.id].y+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dash+'/>';
+    } else {
+      // Subordinado: linha ortogonal em L
+      var my = py + GY/2;
+      linhas += '<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  }
+
+  // 5. Desenhar cards
+  for (var di=0; di<cargos.length; di++) {
+    var dr = cargos[di];
+    if (!posMap[dr.id]) continue;
+    var x = posMap[dr.id].x, y = posMap[dr.id].y;
+    var nv3 = getNivel(dr.nvId);
+    var cor = nv3 ? nv3.cor : '#6B7280';
+    var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
+    var fillCard = (dr.isStaff || dr.staffTipo) ? '#F9F5FF' : 'white';
+    var dashRect = (dr.staffTipo === 'externo') ? ' stroke-dasharray="4,3"' : '';
+    cards += '<g>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="'+fillCard+'" stroke="'+cor+'" stroke-width="1.5"'+dashRect+'/>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="4" fill="'+cor+'"/>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+33)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
+    cards += '</g>';
+  }
+
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
 }
 
 function carregarAgenda() {
@@ -3004,7 +2906,7 @@ function aplicarVersao(v) {
   else ids = _getPerguntasPadrao();
 
   _rhSel = new Set(ids);
-  _marcarPendente();
+  _salvarSelecoes();
   renderRH();
 }
 
@@ -3337,9 +3239,6 @@ function carregarCargos(empresaId) {
         cargos.push(d);
       });
       renderCargos();
-      // Atualizar organograma se estiver aberto
-      var orgEl = document.getElementById('pc-org');
-      if (orgEl && orgEl.style.display !== 'none') renderOrg();
     }).catch(function(e){ 
       console.log('Erro carregarCargos:', e);
       if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
