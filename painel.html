@@ -233,6 +233,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
 </style>
 <script src="cbo-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app">
@@ -2436,9 +2439,7 @@ function renderOrg() {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
     return;
   }
-  var CW=148, CH=56, GX=28, GY=72;
-
-  // 1. Mapear por nível hierárquico
+  var CW=140, CH=52, GX=20, GY=60;
   var nvMap = {};
   for (var i=0; i<cargos.length; i++) {
     var pos = 0;
@@ -2449,69 +2450,47 @@ function renderOrg() {
   }
   var maxNv = 0;
   for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
-
-  // 2. Calcular totalW PRIMEIRO
+  // Passo 1: calcular totalW completo
   var totalW = 0;
   for (var nv=1; nv<=maxNv; nv++) {
-    var it = nvMap[nv] || [];
-    var rW = it.length*(CW+GX) - GX;
-    if (rW > totalW) totalW = rW;
+    var itens = nvMap[nv] || [];
+    var rowW = itens.length*(CW+GX)-GX;
+    if (rowW > totalW) totalW = rowW;
   }
-
-  // 3. Posicionar com totalW já definido
+  // Passo 2: posicionar com totalW já definido
   var posMap = {};
-  for (var nv2=1; nv2<=maxNv; nv2++) {
-    var it2 = nvMap[nv2] || [];
-    var rW2 = it2.length*(CW+GX) - GX;
-    var sx = Math.floor((totalW - rW2) / 2);
-    for (var m=0; m<it2.length; m++) {
-      posMap[it2[m].id] = { x: sx + m*(CW+GX), y: (nv2-1)*(CH+GY) };
-    }
+  for (var nv=1; nv<=maxNv; nv++) {
+    var itens = nvMap[nv] || [];
+    var rowW = itens.length*(CW+GX)-GX;
+    var sx = Math.floor((totalW-rowW)/2);
+    for (var m=0; m<itens.length; m++) { posMap[itens[m].id] = {x:sx+m*(CW+GX), y:(nv-1)*(CH+GY)}; }
   }
-
-  var svgW = Math.max(totalW+40, 500), svgH = maxNv*(CH+GY)+40;
+  var svgW = Math.max(totalW,500), svgH = maxNv*(CH+GY)+10;
   var linhas = '', cards = '';
-
-  // 4. Desenhar linhas — sempre do centro inferior do PAI real
   for (var ci=0; ci<cargos.length; ci++) {
     var cr = cargos[ci];
-    if (!cr.repId || !posMap[cr.id] || !posMap[cr.repId]) continue;
-    var isStaff = cr.isStaff || cr.staffTipo;
-    var px = posMap[cr.repId].x + CW/2;
-    var py = posMap[cr.repId].y + CH;
-    var cx2 = posMap[cr.id].x + CW/2;
-    var cy2 = posMap[cr.id].y;
-    if (isStaff) {
-      // Staff: linha horizontal ao lado
-      var dash = cr.staffTipo === 'externo' ? ' stroke-dasharray="5,4"' : '';
-      linhas += '<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx2+'" y2="'+(posMap[cr.id].y+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dash+'/>';
-    } else {
-      // Subordinado: linha ortogonal em L
-      var my = py + GY/2;
-      linhas += '<path d="M'+px+','+py+' L'+px+','+my+' L'+cx2+','+my+' L'+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    if (cr.repId && posMap[cr.id] && posMap[cr.repId]) {
+      var px=posMap[cr.repId].x+CW/2, py=posMap[cr.repId].y+CH;
+      var cx2=posMap[cr.id].x+CW/2, cy2=posMap[cr.id].y, my=(py+cy2)/2;
+      linhas += '<path d="M'+px+','+py+' C'+px+','+my+' '+cx2+','+my+' '+cx2+','+cy2+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
     }
   }
-
-  // 5. Desenhar cards
   for (var di=0; di<cargos.length; di++) {
     var dr = cargos[di];
     if (!posMap[dr.id]) continue;
-    var x = posMap[dr.id].x, y = posMap[dr.id].y;
-    var nv3 = getNivel(dr.nvId);
-    var cor = nv3 ? nv3.cor : '#6B7280';
+    var x=posMap[dr.id].x, y=posMap[dr.id].y;
+    var nv2 = getNivel(dr.nvId);
+    var cor = nv2 ? nv2.cor : '#6B7280';
     var nm = dr.nome.length > 18 ? dr.nome.slice(0,17)+'…' : dr.nome;
-    var fillCard = (dr.isStaff || dr.staffTipo) ? '#F9F5FF' : 'white';
-    var dashRect = (dr.staffTipo === 'externo') ? ' stroke-dasharray="4,3"' : '';
     cards += '<g>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="'+fillCard+'" stroke="'+cor+'" stroke-width="1.5"'+dashRect+'/>';
-    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="4" fill="'+cor+'"/>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
-    cards += '<text x="'+(x+CW/2)+'" y="'+(y+33)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"/>';
+    cards += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="6" rx="4" fill="'+cor+'"/>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+    cards += '<text x="'+(x+CW/2)+'" y="'+(y+36)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+dr.cbo+'</text>';
     cards += '<text x="'+(x+CW/2)+'" y="'+(y+48)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+dr.n+' colab.</text>';
     cards += '</g>';
   }
-
-  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+linhas+cards+'</svg>';
+  el.innerHTML = '<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg">'+linhas+cards+'</svg>';
 }
 
 function carregarAgenda() {
