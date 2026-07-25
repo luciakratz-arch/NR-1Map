@@ -458,10 +458,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card">
         <div class="card-header"><div class="title">Linha do tempo</div></div>
         <div class="card-body" style="padding:8px 16px;">
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">12 colaboradores · todas as unidades</div><span class="score-tag score-alto">Sofrimento 72</span><span class="score-tag score-medio">Prazer 58</span><span class="score-tag score-alto">Risco ALTO</span><div class="tl-data">Jun 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="sv('relatorios')">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Reconhecimento · 10 respostas</div><span class="score-tag score-medio">↑ +4 pts</span><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pesquisa Pulso</div><div class="tl-desc">Espaço de fala · 9 respostas</div><span class="score-tag score-baixo">Estável</span><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
-          <div class="timeline-item"><div class="tl-dot tl-geral"></div><div class="tl-body"><div class="tl-tipo g">Diagnóstico Geral</div><div class="tl-desc">10 colaboradores · todas as unidades</div><span class="score-tag score-medio">Sofrimento 64</span><span class="score-tag score-medio">Prazer 62</span><span class="score-tag score-medio">Risco MÉDIO</span><div class="tl-data">Jan 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Laudo →</button></div>
         </div>
       </div>
       <div class="card">
@@ -773,7 +769,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title">📑 Norma NR-1 — Base Legal do NR-1 Map</div>
     <div class="topbar-actions">
-      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-1.pdf"
         target="_blank" class="btn btn-roxo btn-sm">📥 Baixar PDF Original (Gov.br)</a>
     </div>
   </div>
@@ -917,7 +913,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div style="font-size:18px;margin-bottom:10px;">📥</div>
       <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;">Texto Oficial da NR-1 na Íntegra</div>
       <div style="font-size:12px;color:#8A9590;margin-bottom:20px;">Portaria MTE nº 1.419/2024 — Ministério do Trabalho e Emprego — Fonte: Gov.br</div>
-      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-01-atualizada-2024-1.pdf"
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/normas-regulamentadoras/nr-1.pdf"
         target="_blank"
         style="display:inline-flex;align-items:center;gap:10px;background:var(--roxo);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:background .2s;"
         onmouseover="this.style.background='var(--roxo-claro)'" onmouseout="this.style.background='var(--roxo)'">
@@ -1437,8 +1433,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="ia-box" style="margin-bottom:16px;"><div class="ia-lbl">🤖 Sugestão da IA</div><div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div><div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div><div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">Aceitar sugestão →</button></div></div>
     <div class="card"><div class="card-header"><div class="title">Histórico de Pulsos</div></div>
       <div class="card-body" style="padding:8px 16px;">
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Reconhecimento</div><div class="tl-desc">10 de 14 responderam · 83% adesão · ↑ +4 pts</div><div class="tl-data">Mai 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
-        <div class="timeline-item"><div class="tl-dot tl-pulso"></div><div class="tl-body"><div class="tl-tipo p">Pulso — Espaço de fala</div><div class="tl-desc">9 de 14 responderam · 75% adesão · Estável</div><div class="tl-data">Abr 2025</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button></div>
+        <div id="pulso-historico-body"><div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando histórico de pulsos...</div></div>
       </div>
     </div>
   </div>
@@ -1611,6 +1606,83 @@ var MODULOS=[
 var _rhSel = new Set();
 var _rhProprias = [];        // [{id, subcatId, modId, texto}]
 var _rhHistorico = new Set(); // pids que já foram usados em diagnósticos anteriores
+
+function carregarHistoricoReal(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('historico-timeline-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(10).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum ciclo registrado ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      el.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
+        var tipo = d.tipo === 'geral' ? 'Diagnóstico Geral' : 'Pesquisa Pulso';
+        var tipoCls = d.tipo === 'geral' ? 'tl-geral' : 'tl-pulso';
+        var tipoBadge = d.tipo === 'geral' ? 'g' : 'p';
+        var div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML =
+          '<div class="tl-dot '+tipoCls+'"></div>'+
+          '<div class="tl-body">'+
+            '<div class="tl-tipo '+tipoBadge+'">'+tipo+'</div>'+
+            '<div class="tl-desc">'+(d.totalRespostas||0)+' respostas · '+(d.unidade||'todas as unidades')+'</div>'+
+            (d.ibpGeral !== undefined ? '<span class="score-tag">IBP: '+(d.ibpGeral>0?'+':'')+parseFloat(d.ibpGeral).toFixed(1)+'</span>' : '')+
+            '<div class="tl-data">'+dataStr+'</div>'+
+          '</div>'+
+          '<button class="btn btn-ghost btn-sm btn-laudo" style="margin-left:auto;">Laudo →</button>';
+        var btnLaudo = div.querySelector('.btn-laudo');
+        if (btnLaudo) btnLaudo.addEventListener('click', function(){ sv('relatorios'); });
+        el.appendChild(div);
+      });
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum ciclo registrado ainda.</div>';
+      console.log('historico err:', e);
+    });
+}
+
+function carregarHistoricoPulso(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('pulso-historico-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').where('tipo','==','pulso').orderBy('criadoEm','desc').limit(10).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma pesquisa pulso realizada ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      el.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
+        var div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML =
+          '<div class="tl-dot tl-pulso"></div>'+
+          '<div class="tl-body">'+
+            '<div class="tl-tipo p">Pesquisa Pulso'+(d.tema?' — '+d.tema:'')+'</div>'+
+            '<div class="tl-desc">'+(d.totalRespostas||0)+' responderam · '+(d.adesao||'—')+'% adesão</div>'+
+            '<div class="tl-data">'+dataStr+'</div>'+
+          '</div>'+
+          '<button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button>';
+        el.appendChild(div);
+      });
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma pesquisa pulso realizada ainda.</div>';
+    });
+}
 
 function _carregarHistoricoUsado(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
@@ -3288,6 +3360,8 @@ function aplicarEmpresa(e) {
   carregarCargos(e.id);
   carregarDashboard(e.id);
   carregarColabs();
+  carregarHistoricoReal(e.id);
+  carregarHistoricoPulso(e.id);
   atualizarBadgePulso();
   carregarSugestoes(e.id);
   carregarChamados(e.id);
