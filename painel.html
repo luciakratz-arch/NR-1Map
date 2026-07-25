@@ -1578,17 +1578,52 @@ function carregarPlanoAcao(empresaId) {
         var statusOpts = ['Pendente','Em andamento','Concluída'].map(function(s){
           return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>';
         }).join('');
-        tr.innerHTML =
-          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','setor')" style="font-weight:600;">'+
-            (d.setor||'Setor')+'<br/>'+
-            '<span style="font-size:10px;color:var(--cinza-medio);">'+(d.cbo||'')+'</span>'+
-          '</div></td>'+
-          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','acao')">'+( d.acao||'')+'</div></td>'+
-          '<td><div contenteditable="true" onblur="salvarCampoAcao(this,''+doc.id+'','responsavel')">'+( d.responsavel||'')+'</div></td>'+
-          '<td><select class="form-control" style="font-size:11px;padding:5px 6px;" onchange="salvarStatusAcao(this,''+doc.id+'');registrarEvento(this);atualizarBadgePendentes()">'+statusOpts+'</select></td>'+
-          '<td><input type="date" class="form-control" style="font-size:11px;padding:5px 6px;" value="'+(d.prazo||'')+'" onchange="salvarCampoAcao(this,''+doc.id+'','prazo');atualizarSinalizador(this)"/></td>'+
-          '<td class="sinalizador-cell"></td>'+
-          '<td><button class="btn btn-ghost btn-sm" style="padding:4px 7px;" onclick="excluirAcao(''+doc.id+'',this)">✕</button></td>';
+        // Construir linha via DOM — sem aspas aninhadas
+        var tdSetor = document.createElement('td');
+        var divSetor = document.createElement('div');
+        divSetor.contentEditable = 'true'; divSetor.style.fontWeight = '600';
+        divSetor.innerHTML = (d.setor||'Setor') + (d.cbo ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">'+d.cbo+'</span>' : '');
+        divSetor.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'setor'); }; })(doc.id));
+        tdSetor.appendChild(divSetor); tr.appendChild(tdSetor);
+
+        var tdAcao = document.createElement('td');
+        var divAcao = document.createElement('div');
+        divAcao.contentEditable = 'true'; divAcao.textContent = d.acao||'';
+        divAcao.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'acao'); }; })(doc.id));
+        tdAcao.appendChild(divAcao); tr.appendChild(tdAcao);
+
+        var tdResp = document.createElement('td');
+        var divResp = document.createElement('div');
+        divResp.contentEditable = 'true'; divResp.textContent = d.responsavel||'';
+        divResp.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'responsavel'); }; })(doc.id));
+        tdResp.appendChild(divResp); tr.appendChild(tdResp);
+
+        var tdStat = document.createElement('td');
+        var sel = document.createElement('select');
+        sel.className = 'form-control'; sel.style.cssText = 'font-size:11px;padding:5px 6px;';
+        ['Pendente','Em andamento','Concluída'].forEach(function(s){
+          var opt = document.createElement('option');
+          opt.textContent = s; if(d.status===s) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', (function(id){ return function(){ salvarStatusAcao(this,id); registrarEvento(this); atualizarBadgePendentes(); }; })(doc.id));
+        tdStat.appendChild(sel); tr.appendChild(tdStat);
+
+        var tdPrazo = document.createElement('td');
+        var inp = document.createElement('input');
+        inp.type = 'date'; inp.className = 'form-control'; inp.style.cssText = 'font-size:11px;padding:5px 6px;';
+        inp.value = d.prazo||'';
+        inp.addEventListener('change', (function(id){ return function(){ salvarCampoAcao(this,id,'prazo'); atualizarSinalizador(this); }; })(doc.id));
+        tdPrazo.appendChild(inp); tr.appendChild(tdPrazo);
+
+        var tdSin = document.createElement('td'); tdSin.className = 'sinalizador-cell'; tr.appendChild(tdSin);
+
+        var tdDel = document.createElement('td');
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-ghost btn-sm'; btnDel.style.cssText = 'padding:4px 7px;'; btnDel.textContent = '✕';
+        btnDel.addEventListener('click', (function(id){ return function(){ excluirAcao(id, this); }; })(doc.id));
+        tdDel.appendChild(btnDel); tr.appendChild(tdDel);
+
         tbody.appendChild(tr);
       });
       document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
