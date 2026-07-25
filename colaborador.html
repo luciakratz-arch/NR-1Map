@@ -561,6 +561,9 @@ var _empresaId = null;     // uid da empresa
 var _empresaNome = '';
 var _tipoPesquisa = '';    // 'pulso' | 'robusta'
 var _pesquisaId = null;    // doc id da pesquisa ativa
+var _cargo = '';           // cargo do colaborador (vem do token)
+var _cbo = '';             // CBO do colaborador
+var _setor = '';           // setor/departamento
 var _perguntas = [];       // pool embaralhado
 var _blocos = [];          // [[p,p,p,p,p,p,p], ...]
 var _blocoAtual = 0;
@@ -614,6 +617,9 @@ function validarToken(codigo) {
       _tipoPesquisa = data.tipo || 'pulso';
       _pesquisaId = doc.id;
       _empresaNome = data.empresaNome || '';
+      _cargo = data.cargo || '';
+      _cbo = data.cbo || '';
+      _setor = data.setor || '';
       // Não marca como usado ainda — só após envio das respostas
       carregarApp();
     })
@@ -974,6 +980,9 @@ function enviarRespostas() {
     empresaId: _empresaId,
     pesquisaId: _pesquisaId,
     tipo: _tipoPesquisa,
+    cargo: _cargo,
+    cbo: _cbo,
+    setor: _setor,
     respostas: _respostas,
     ibpSubcats: ibpSubcats,
     ibpGeral: ibpGeral,
