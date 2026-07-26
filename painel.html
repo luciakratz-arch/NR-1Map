@@ -1542,26 +1542,31 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="modal">
     <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Nome (opcional)</div><input class="form-control" id="colab-nome" placeholder="Nome do colaborador"/></div>
-      <div class="form-group"><div class="form-label">WhatsApp ou E-mail *</div><input class="form-control" id="colab-contato" placeholder="11 9 9999-0000"/></div>
-    </div>
-    <div class="form-group"><div class="form-label">Cargo *</div>
-      <select class="form-control" id="colab-cargo-select">
-        <option value="">Selecione o cargo...</option>
-      </select>
-      <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Cadastre os cargos primeiro em Cargos / Organograma</div>
+      <div class="form-group"><div class="form-label">Nome *</div><input class="form-control" id="colab-nome" placeholder="Nome completo"/></div>
+      <div class="form-group"><div class="form-label">E-mail *</div><input class="form-control" type="email" id="colab-email" placeholder="colaborador@empresa.com"/></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="colab-depto" placeholder="Ex: UTI"/></div>
+      <div class="form-group"><div class="form-label">WhatsApp</div><input class="form-control" id="colab-whatsapp" placeholder="62 9 9999-0000"/></div>
+      <div class="form-group"><div class="form-label">Cargo *</div>
+        <select class="form-control" id="colab-cargo-select">
+          <option value="">Selecione o cargo...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="colab-depto" placeholder="Ex: RH"/></div>
       <div class="form-group"><div class="form-label">Unidade / Filial</div><input class="form-control" id="colab-unidade" placeholder="Ex: Goiânia"/></div>
     </div>
     <div class="form-row">
       <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="colab-admissao"/></div>
       <div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control" id="colab-demissao"/></div>
     </div>
+    <div style="background:var(--cinza-claro);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:8px;">
+      🔐 Um e-mail com link de acesso será enviado automaticamente. Se informar WhatsApp, um link também será gerado para envio via WhatsApp.
+    </div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="salvarNovoColab()">Salvar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="salvarNovoColab()">Cadastrar e enviar acesso</button>
     </div>
   </div>
 </div>
@@ -2239,6 +2244,10 @@ function filtrarStatus(s){
   });
 }
 function ordenar(campo){alert('Ordenando por '+campo+'...');}
+function _gerarSenhaTemp() {
+  var c='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#';
+  var s=''; for(var i=0;i<10;i++) s+=c[Math.floor(Math.random()*c.length)]; return s;
+}
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
 
@@ -2978,56 +2987,98 @@ function selCBOColab(el) {
   document.getElementById('nc-cbo-drop-colab').style.display = 'none';
 }
 function salvarNovoColab() {
-  var nome    = (document.getElementById('colab-nome')||{}).value || '';
-  var contato = (document.getElementById('colab-contato')||{}).value || '';
-  var cargo   = (document.getElementById('colab-cargo-select')||{}).value || '';
-  var depto   = (document.getElementById('colab-depto')||{}).value || '';
-  var unidade = (document.getElementById('colab-unidade')||{}).value || '';
-  var admissao= (document.getElementById('colab-admissao')||{}).value || '';
-  if (!contato) { alert('Informe WhatsApp ou e-mail do colaborador.'); return; }
+  var nome     = (document.getElementById('colab-nome')||{}).value.trim() || '';
+  var email    = (document.getElementById('colab-email')||{}).value.trim() || '';
+  var whatsapp = ((document.getElementById('colab-whatsapp')||{}).value || '').replace(/[^0-9]/g,'');
+  var cargoVal = (document.getElementById('colab-cargo-select')||{}).value || '';
+  var depto    = (document.getElementById('colab-depto')||{}).value.trim() || '';
+  var unidade  = (document.getElementById('colab-unidade')||{}).value.trim() || '';
+  var admissao = (document.getElementById('colab-admissao')||{}).value || '';
+
+  if (!nome)     { alert('Informe o nome do colaborador.'); return; }
+  if (!email)    { alert('Informe o e-mail do colaborador.'); return; }
+  if (!cargoVal) { alert('Selecione o cargo do colaborador.'); return; }
 
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!empresaId || !window.nr1mapDb) {
-    alert('Erro: empresa não carregada.'); return;
-  }
+  if (!empresaId || !window.nr1mapDb) { alert('Erro: empresa não carregada.'); return; }
 
-  var btn = document.querySelector('#modal-novo-colab .btn-primary') ||
-            document.querySelector('#modal-novo-colab .btn-roxo');
-  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  // Separa "Cargo · CBO" → cargo e cbo
+  var partes    = cargoVal.split(' · ');
+  var cargoNome = partes[0] || cargoVal;
+  var cbo       = partes[1] || '';
 
-  // Detecta se é whatsapp ou email
-  var whatsapp = '', email = '';
-  if (contato.includes('@')) { email = contato; }
-  else { whatsapp = contato.replace(/[^0-9]/g, ''); }
+  var btn = document.querySelector('#modal-novo-colab .btn-primary');
+  if (btn) { btn.textContent = 'Cadastrando...'; btn.disabled = true; }
 
-  window.nr1mapDb.collection('nr1map_colaboradores').add({
-    empresaId: empresaId,
-    nome: nome || '',
-    whatsapp: whatsapp,
-    email: email,
-    cargo: cargo,
-    departamento: depto,
-    unidade: unidade,
-    admissao: admissao,
-    status: 'ativo',
-    criadoEm: new Date().toISOString()
-  }).then(function(docRef) {
-    if (btn) { btn.textContent = 'Cadastrar'; btn.disabled = false; }
-    // Limpa campos
-    ['colab-nome','colab-contato','colab-depto','colab-unidade','colab-admissao'].forEach(function(id){
-      var el = document.getElementById(id); if(el) el.value = '';
-    });
-    var sel = document.getElementById('colab-cargo-select');
-    if(sel) sel.selectedIndex = 0;
-    fecharModal('modal-novo-colab');
-    // Adiciona linha na tabela imediatamente
-    adicionarLinhaColab(docRef.id, nome, contato, cargo, depto, unidade, admissao, 'ativo');
-    // Atualiza contador
-    atualizarContadorColab();
-  }).catch(function(e) {
-    if (btn) { btn.textContent = 'Cadastrar'; btn.disabled = false; }
-    console.log(e);
-    alert('Erro ao salvar colaborador. Tente novamente.');
+  // Cria usuário no Firebase Auth
+  window.nr1mapAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      return window.nr1mapDb.collection('nr1map_colaboradores').doc(uid).set({
+        empresaId: empresaId,
+        nome: nome,
+        email: email,
+        whatsapp: whatsapp,
+        cargo: cargoNome,
+        cbo: cbo,
+        setor: depto,
+        departamento: depto,
+        unidade: unidade,
+        admissao: admissao,
+        status: 'ativo',
+        criadoEm: new Date().toISOString()
+      }).then(function() {
+        return window.nr1mapDb.collection('nr1map_usuarios_pf').doc(uid).set({
+          empresaId: empresaId,
+          nome: nome,
+          email: email,
+          cargo: cargoNome,
+          cbo: cbo,
+          tipo: 'colaborador',
+          status: 'ativo',
+          criadoEm: new Date().toISOString()
+        });
+      }).then(function() {
+        return window.nr1mapAuth.sendPasswordResetEmail(email);
+      }).then(function() {
+        return uid;
+      });
+    })
+    .then(function(uid) {
+      if (btn) { btn.textContent = 'Cadastrar e enviar acesso'; btn.disabled = false; }
+      ['colab-nome','colab-email','colab-whatsapp','colab-depto','colab-unidade','colab-admissao'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.value = '';
+      });
+      var sel = document.getElementById('colab-cargo-select');
+      if(sel) sel.selectedIndex = 0;
+      fecharModal('modal-novo-colab');
+      adicionarLinhaColab(uid, nome, email, cargoNome + ' · ' + cbo, depto, unidade, admissao, 'ativo');
+      atualizarContadorColab();
+      // WhatsApp opcional
+      var msg = '✅ Colaborador cadastrado! E-mail de acesso enviado para: ' + email;
+      if (whatsapp) {
+        var txt = 'Olá ' + nome + '! 👋\n\nVocê foi cadastrado(a) no *NR-1 Map* de *' +
+          (window.nr1mapEmpresa.nome || 'sua empresa') + '*.\n\n' +
+          '📧 Acesse com o e-mail: *' + email + '*\n' +
+          '🔑 Verifique seu e-mail para criar sua senha.\n\n' +
+          'Acesse: https://luciakratz-arch.github.io/NR-1Map/usuario.html';
+        if (confirm(msg + '\n\nEnviar instruções via WhatsApp?')) {
+          window.open('https://wa.me/55' + whatsapp + '?text=' + encodeURIComponent(txt), '_blank');
+        }
+      } else {
+        alert(msg);
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = 'Cadastrar e enviar acesso'; btn.disabled = false; }
+      console.error(e);
+      if (e.code === 'auth/email-already-in-use') {
+        alert('Este e-mail já está cadastrado.');
+      } else if (e.code === 'auth/invalid-email') {
+        alert('E-mail inválido.');
+      } else {
+        alert('Erro ao cadastrar: ' + (e.message || e));
+      }
   });
 }
 
