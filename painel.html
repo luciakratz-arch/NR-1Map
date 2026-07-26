@@ -3052,8 +3052,7 @@ function salvarNovoColab() {
       var sel = document.getElementById('colab-cargo-select');
       if(sel) sel.selectedIndex = 0;
       fecharModal('modal-novo-colab');
-      adicionarLinhaColab(uid, nome, email, cargoNome + ' · ' + cbo, depto, unidade, admissao, 'ativo');
-      atualizarContadorColab();
+      carregarColabs(); // recarrega lista completa do Firestore
       // WhatsApp opcional
       var msg = '✅ Colaborador cadastrado! E-mail de acesso enviado para: ' + email;
       if (whatsapp) {
@@ -3169,13 +3168,14 @@ function carregarColabs() {
         bdgColab.textContent = ativos;
         bdgColab.style.display = ativos > 0 ? '' : 'none';
       }
+      tbody.innerHTML = '';
       if (snap.empty) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum colaborador cadastrado ainda.</td></tr>';
         return;
       }
       snap.forEach(function(doc) {
         var d = doc.data();
-        var contato = d.whatsapp || d.email || '—';
+        var contato = d.email || d.whatsapp || '—';
         adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status);
       });
       atualizarContadorColab();
