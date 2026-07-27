@@ -20,12 +20,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--branco);-we
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 5%;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,15,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 @media(max-width:768px){nav{padding:12px 4%;}}
-.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;white-space:nowrap;}
 @media(max-width:640px){.nav-logo{font-size:14px;}}
 .nav-logo span{color:var(--verde);}
 .nav-links{display:flex;gap:24px;align-items:center;}
 @media(max-width:768px){.nav-links{gap:12px;}}
-@media(max-width:640px){.nav-links{gap:8px;flex-wrap:wrap;justify-content:center;}}
+@media(max-width:640px){.nav-links{display:none;}}
 .nav-links a{font-size:13px;color:var(--cinza2);text-decoration:none;transition:color .15s;}
 @media(max-width:768px){.nav-links a{font-size:12px;}}
 @media(max-width:640px){.nav-links a{font-size:11px;}}
@@ -36,7 +36,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 5%;display:flex
 .btn-nav:hover{opacity:.85;}
 
 /* HERO */
-.hero{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:100px 5% 60px;text-align:center;position:relative;}
+.hero{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:100px 5% 60px;text-align:center;position:relative;overflow:hidden;}
 @media(max-width:768px){.hero{padding:80px 5% 40px;min-height:auto;}}
 .hero-tag{display:inline-flex;align-items:center;gap:6px;background:var(--roxo-xp);border:1px solid rgba(123,0,196,.3);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;color:#C084FC;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px;}
 .hero h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:20px;}
@@ -149,6 +149,27 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
     <a href="index.html" class="btn-nav">← Site principal</a>
     <a href="admin.html" class="btn-nav" style="background:rgba(123,0,196,.15);color:var(--roxo);border:1px solid rgba(123,0,196,.3);">Já sou parceiro → Login</a>
   </div>
+
+  <!-- Hamburguer mobile -->
+  <button id="rep-hamburguer" onclick="toggleRepNav()" style="display:none;background:none;border:none;cursor:pointer;padding:8px;font-size:22px;color:#fff;line-height:1;margin-left:auto;">☰</button>
+  <div id="rep-mobile-menu" style="display:none;position:fixed;top:56px;left:0;right:0;background:rgba(13,12,20,0.98);backdrop-filter:blur(14px);border-bottom:1px solid #2A1A3E;padding:20px 5%;z-index:9999;flex-direction:column;gap:16px;">
+    <a href="#como" onclick="toggleRepNav()" style="font-size:15px;color:#C8B8E8;text-decoration:none;">Como funciona</a>
+    <a href="#simulador" onclick="toggleRepNav()" style="font-size:15px;color:#C8B8E8;text-decoration:none;">Simulador</a>
+    <a href="#credenciar" onclick="toggleRepNav()" style="font-size:15px;color:#C8B8E8;text-decoration:none;">Aplicar</a>
+    <div style="height:1px;background:#2A1A3E;"></div>
+    <a href="https://luciakratz-arch.github.io/NR-1Map/" style="font-size:14px;color:#C8B8E8;text-decoration:none;" onclick="toggleRepNav()">← Site principal</a>
+    <a href="admin.html" onclick="toggleRepNav()" style="background:var(--roxo);color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;text-align:center;">Já sou parceiro → Login</a>
+  </div>
+  <style>@media(max-width:640px){#rep-hamburguer{display:block!important;}}</style>
+  <script>
+  function toggleRepNav(){
+    var m=document.getElementById('rep-mobile-menu');
+    var b=document.getElementById('rep-hamburguer');
+    var open=m.style.display==='flex';
+    m.style.display=open?'none':'flex';
+    b.textContent=open?'☰':'✕';
+  }
+  </script>
 </nav>
 
 <!-- HERO -->
@@ -367,6 +388,7 @@ footer p{font-size:12px;color:var(--cinza);line-height:1.6;}
 @media(max-width:700px){
   #assinatura-rep-grid{grid-template-columns:1fr !important;}
   .sim-resultado{grid-template-columns:1fr !important;}
+  .honorarios-grid{grid-template-columns:1fr !important;}
 }
 </style>
 
