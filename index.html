@@ -20,7 +20,14 @@
 </head>
 <body>
 
-<nav id="nav-placeholder" class="nav"></nav>
+<nav id="nav-placeholder" class="nav">
+  <a href="admin.html" id="nav-mobile-login" style="position:fixed;top:16px;right:16px;z-index:9999;background:#0A6E4F;color:#fff;font-size:12px;font-weight:700;padding:9px 15px;border-radius:8px;text-decoration:none;white-space:nowrap;">Acessar</a>
+</nav>
+<script>
+if(window.innerWidth > 640) {
+  document.getElementById('nav-mobile-login').style.display = 'none';
+}
+</script>
 
 <section class="hero">
   <div class="hero-eyebrow">Conformidade NR-1 ativa</div>
