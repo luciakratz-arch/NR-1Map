@@ -237,22 +237,27 @@
 })();
 </script>
 
-<!-- CARREGA SEÇÕES EXTERNAS + SCRIPTS -->
+<!-- CARREGA SEÇÕES EXTERNAS — app.js só inicia após todas prontas -->
 <script>
-function loadSection(url, placeholderId) {
-  fetch(url)
-    .then(function(r) { return r.text(); })
-    .then(function(html) { document.getElementById(placeholderId).innerHTML = html; });
-}
-loadSection('nav.html',          'nav-placeholder');
-loadSection('assinatura.html',   'criadora-placeholder');
-loadSection('leads.html',        'leads-placeholder');
-loadSection('depoimentos.html',  'depoimentos-placeholder');
-loadSection('precos.html',       'precos-placeholder');
-</script>
+var _secoes = [
+  ['nav.html',         'nav-placeholder'],
+  ['assinatura.html',  'criadora-placeholder'],
+  ['leads.html',       'leads-placeholder'],
+  ['depoimentos.html', 'depoimentos-placeholder'],
+  ['precos.html',      'precos-placeholder']
+];
 
-<!-- APP JS (carrega por último para garantir DOM das seções) -->
-<script src="app.js" defer></script>
+Promise.all(_secoes.map(function(s) {
+  return fetch(s[0])
+    .then(function(r) { return r.text(); })
+    .then(function(html) { document.getElementById(s[1]).innerHTML = html; });
+})).then(function() {
+  // Todas as seções no DOM — carrega o app.js agora
+  var script = document.createElement('script');
+  script.src = 'app.js';
+  document.body.appendChild(script);
+});
+</script>
 
 </body>
 </html>
