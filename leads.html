@@ -1,0 +1,163 @@
+<!-- CAPTURA DE LEADS -->
+<section id="contato" style="padding:96px 5%;background:var(--preto);border-top:3px solid var(--verde-claro);">
+  <div style="max-width:640px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="display:inline-block;background:var(--roxo-xp);border:1px solid rgba(123,0,196,0.2);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">E-book gratuito</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px;">Receba a NR-1 explicada<br/>no seu e-mail</h2>
+      <p style="font-size:15px;color:#8A9590;line-height:1.65;max-width:480px;margin:0 auto;">Enviaremos o e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> + o resumo técnico da norma. Nossa equipe também entrará em contato.</p>
+    </div>
+
+    <div style="height:3px;background:#1E2A28;border-radius:2px;margin-bottom:32px;">
+      <div id="lead-prog" style="height:100%;background:var(--verde-claro);border-radius:2px;width:25%;transition:width .3s;"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="lead-step-1">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 1 de 4 — Seus dados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Seu nome</label>
+            <input id="l-nome" type="text" placeholder="Nome completo" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Cargo / função</label>
+            <input id="l-cargo" type="text" placeholder="Ex: Diretora de RH" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">E-mail profissional *</label>
+          <input id="l-email" type="email" placeholder="seu@empresa.com.br" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">WhatsApp (opcional)</label>
+          <input id="l-wpp" type="tel" placeholder="(11) 9 9999-0000" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+      </div>
+      <button onclick="leadStep(2)" style="width:100%;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="lead-step-2" style="display:none;">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 2 de 4 — Sua empresa</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Nome da empresa</label>
+          <input id="l-empresa" type="text" placeholder="Razão social ou nome fantasia" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Segmento</label>
+          <select id="l-segmento" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;">
+            <option value="">Selecione...</option>
+            <option>Saúde / Clínicas / Hospitais</option>
+            <option>Educação / Escolas / Faculdades</option>
+            <option>Comércio / Varejo</option>
+            <option>Serviços / Consultoria</option>
+            <option>Indústria / Manufatura</option>
+            <option>Tecnologia</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:8px;">Número de colaboradores</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-porte-opts">
+            <div onclick="selPorte(this,'Até 5')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">Até 5</span>
+            </div>
+            <div onclick="selPorte(this,'6 a 20')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">6 a 20</span>
+            </div>
+            <div onclick="selPorte(this,'21 a 50')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">21 a 50</span>
+            </div>
+            <div onclick="selPorte(this,'51 a 100')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
+              <span style="font-size:13px;color:#8A9590;">51 a 100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="leadStep(1)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
+        <button onclick="leadStep(3)" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="lead-step-3" style="display:none;">
+      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
+        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 3 de 4 — Uma pergunta rápida</div>
+        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Como você avalia a conformidade da sua empresa com a NR-1 hoje?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;" id="l-nivel-opts">
+          <div onclick="selNivel(this,'Não sei por onde começar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">😰</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Não sei por onde começar</div>
+          </div>
+          <div onclick="selNivel(this,'Já ouvi mas não adotei nada')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">🤔</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já ouvi, mas não adotei nada</div>
+          </div>
+          <div onclick="selNivel(this,'Tenho algo mas incompleto')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">📋</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho algo, mas incompleto</div>
+          </div>
+          <div onclick="selNivel(this,'Já fui notificado ou multado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">⚠️</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já fui notificado ou multado</div>
+          </div>
+          <div onclick="selNivel(this,'Tudo documentado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">✅</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho tudo documentado</div>
+          </div>
+          <div onclick="selNivel(this,'Avaliando soluções')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
+            <div style="font-size:20px;margin-bottom:4px;">🔍</div>
+            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Estou avaliando soluções</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Maior preocupação atual?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-concern-opts">
+          <div onclick="selConcern(this,'Evitar multas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Evitar multas e autuações</span>
+          </div>
+          <div onclick="selConcern(this,'Reduzir afastamentos')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Reduzir afastamentos</span>
+          </div>
+          <div onclick="selConcern(this,'Evitar processos trabalhistas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Evitar processos trabalhistas</span>
+          </div>
+          <div onclick="selConcern(this,'Cuidar do bem-estar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
+            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
+            <span style="font-size:12px;color:#8A9590;">Cuidar do bem-estar da equipe</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="leadStep(2)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
+        <button onclick="enviarLead()" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Receber e-book gratuito →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 CONFIRMAÇÃO -->
+    <div id="lead-step-4" style="display:none;text-align:center;">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--verde-xp);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;">✓</div>
+      <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;">Cadastro confirmado!</h3>
+      <p style="font-size:14px;color:#8A9590;line-height:1.65;max-width:400px;margin:0 auto 24px;">O e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> será enviado para o seu e-mail em instantes. Nossa equipe entrará em contato em breve.</p>
+      <div style="background:#181D1B;border-radius:10px;padding:20px;border:1px solid #2A2E2C;text-align:left;max-width:400px;margin:0 auto;">
+        <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:10px;">Você vai receber:</div>
+        <div style="font-size:13px;color:#8A9590;line-height:1.8;">
+          ✓ E-book NR-1 Descomplicada (PDF)<br/>
+          ✓ Resumo técnico da norma por segmento<br/>
+          ✓ Interpretação de Dejours, Herzberg e Maslow<br/>
+          ✓ Contato da nossa equipe
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
