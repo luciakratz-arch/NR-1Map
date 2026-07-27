@@ -3010,10 +3010,17 @@ function salvarNovoColab() {
   var btn = document.querySelector('#modal-novo-colab .btn-primary');
   if (btn) { btn.textContent = 'Cadastrando...'; btn.disabled = true; }
 
-  // Cria usuário no Firebase Auth
-  window.nr1mapAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
+  // Usa secondaryApp para não deslogar o RH
+  var firebaseConfig = {apiKey:'AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4',authDomain:'entrevista-inicial.firebaseapp.com',projectId:'entrevista-inicial',storageBucket:'entrevista-inicial.firebasestorage.app',messagingSenderId:'437375609844',appId:'1:437375609844:web:9435b1fb3b21778f2e27a1'};
+  var secApp;
+  try { secApp = firebase.app('nr1map-colab-sec'); }
+  catch(e) { secApp = firebase.initializeApp(firebaseConfig, 'nr1map-colab-sec'); }
+  var secAuth = firebase.auth(secApp);
+
+  secAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
     .then(function(cred) {
       var uid = cred.user.uid;
+      secAuth.signOut(); // desloga do app secundário imediatamente
       return window.nr1mapDb.collection('nr1map_colaboradores').doc(uid).set({
         empresaId: empresaId,
         nome: nome,
