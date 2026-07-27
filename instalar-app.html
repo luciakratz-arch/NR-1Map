@@ -83,6 +83,63 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
   <a href="https://luciakratz-arch.github.io/NR-1Map/" class="hero-btn">🚀 Abrir o App agora</a>
 </section>
 
+<!-- BOTÃO INSTALAR PWA -->
+<section style="padding:32px 24px 0;max-width:800px;margin:0 auto;text-align:center;">
+  <!-- Android/Chrome -->
+  <button id="btn-pwa" style="display:none;background:#12A073;color:#fff;border:none;border-radius:12px;padding:16px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;align-items:center;gap:10px;margin-bottom:8px;">
+    📲 Instalar o NR-1 Map agora
+  </button>
+  <p id="btn-pwa-sub" style="display:none;font-size:12px;color:#6B7370;margin-bottom:0;">Toque para adicionar à sua tela inicial automaticamente</p>
+
+  <!-- iOS Safari -->
+  <div id="ios-tip" style="display:none;background:#E4F5EF;border:1px solid #0A6E4F;border-radius:12px;padding:18px 20px;font-size:14px;color:#0A6E4F;line-height:1.6;text-align:left;">
+    <strong>iPhone / iPad:</strong> Toque em <strong>⬆️ Compartilhar</strong> na barra inferior do Safari e selecione <strong>"Adicionar à Tela de Início"</strong>.
+  </div>
+
+  <!-- Já instalado -->
+  <div id="pwa-ok" style="display:none;background:#E4F5EF;border:1px solid #0A6E4F;border-radius:12px;padding:16px 20px;font-size:14px;color:#0A6E4F;">
+    ✅ Você já está usando o NR-1 Map como app instalado!
+  </div>
+</section>
+
+<script>
+(function(){
+  // Já rodando como PWA instalado
+  if(window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone){
+    document.getElementById('pwa-ok').style.display='block';
+    return;
+  }
+  // iOS Safari
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isSafari=/safari/i.test(navigator.userAgent)&&!/crios|fxios|chrome/i.test(navigator.userAgent);
+  if(isIOS&&isSafari){
+    document.getElementById('ios-tip').style.display='block';
+    return;
+  }
+  // Android/Chrome — aguarda beforeinstallprompt
+  var deferred=null;
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    deferred=e;
+    var btn=document.getElementById('btn-pwa');
+    var sub=document.getElementById('btn-pwa-sub');
+    btn.style.display='inline-flex';
+    sub.style.display='block';
+    btn.addEventListener('click',function(){
+      deferred.prompt();
+      deferred.userChoice.then(function(r){
+        deferred=null;
+        btn.style.display='none';
+        sub.style.display='none';
+        if(r.outcome==='accepted'){
+          document.getElementById('pwa-ok').style.display='block';
+        }
+      });
+    });
+  });
+})();
+</script>
+
 <!-- BENEFÍCIOS -->
 <section class="beneficios">
   <div class="section-title">Por que instalar?</div>
@@ -96,57 +153,6 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
 </section>
 
 <!-- INSTRUÇÕES -->
-<section style="padding:0 24px 32px;max-width:800px;margin:0 auto;">
-  <div id="pwa-install-wrap" style="text-align:center;">
-    <!-- Botão Android/Chrome — aparece quando beforeinstallprompt dispara -->
-    <button id="btn-instalar-pwa" style="display:none;background:#12A073;color:#fff;border:none;border-radius:10px;padding:16px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;gap:8px;align-items:center;margin-bottom:12px;">
-      📲 Instalar o NR-1 Map agora
-    </button>
-    <!-- Mensagem iOS Safari -->
-    <div id="ios-install-tip" style="display:none;background:#E4F5EF;border:1px solid #12A073;border-radius:10px;padding:16px 20px;font-size:14px;color:#0A6E4F;line-height:1.6;text-align:left;">
-      <strong>iPhone/iPad:</strong> Toque em <strong>⬆️ Compartilhar</strong> na barra inferior do Safari e depois em <strong>"Adicionar à Tela de Início"</strong>.
-    </div>
-    <!-- Já instalado -->
-    <div id="pwa-standalone-msg" style="display:none;background:#E4F5EF;border:1px solid #12A073;border-radius:10px;padding:16px 20px;font-size:14px;color:#0A6E4F;">
-      ✅ Você já está usando o NR-1 Map como app instalado!
-    </div>
-  </div>
-  <script>
-  (function(){
-    // Já rodando como PWA instalado
-    if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone){
-      document.getElementById('pwa-standalone-msg').style.display='block';
-      return;
-    }
-    // iOS Safari
-    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-    var isSafari=/safari/i.test(navigator.userAgent)&&!/chrome/i.test(navigator.userAgent);
-    if(isIOS&&isSafari){
-      document.getElementById('ios-install-tip').style.display='block';
-      return;
-    }
-    // Android/Chrome — aguarda beforeinstallprompt
-    var deferredPrompt=null;
-    window.addEventListener('beforeinstallprompt',function(e){
-      e.preventDefault();
-      deferredPrompt=e;
-      var btn=document.getElementById('btn-instalar-pwa');
-      btn.style.display='inline-flex';
-      btn.addEventListener('click',function(){
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(r){
-          deferredPrompt=null;
-          if(r.outcome==='accepted'){
-            btn.style.display='none';
-            document.getElementById('pwa-standalone-msg').style.display='block';
-          }
-        });
-      });
-    });
-  })();
-  </script>
-</section>
-
 <section class="instrucoes">
   <div class="section-title">Como instalar</div>
   <div class="section-sub">Escolha o seu sistema abaixo e siga os passos — leva menos de 1 minuto.</div>
