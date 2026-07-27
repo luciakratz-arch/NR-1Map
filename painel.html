@@ -1587,11 +1587,15 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="modal" style="max-width:540px;width:95%;">
     <div class="modal-header"><h3>✏️ Editar Colaborador</h3><button class="modal-close" onclick="document.getElementById('modal-edit-colab').classList.remove('open')">✕</button></div>
     <div class="grid-2" style="margin-bottom:12px;">
-      <div class="form-group"><label class="form-label">Nome</label><input class="form-control" id="ec-nome" placeholder="Anônimo se vazio"/></div>
-      <div class="form-group"><label class="form-label">WhatsApp / E-mail</label><input class="form-control" id="ec-contato"/></div>
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-control" id="ec-nome" placeholder="Nome completo"/></div>
+      <div class="form-group"><label class="form-label">E-mail</label><input class="form-control" type="email" id="ec-email"/></div>
     </div>
     <div class="grid-2" style="margin-bottom:12px;">
-      <div class="form-group"><label class="form-label">Cargo (CBO)</label><input class="form-control" id="ec-cargo"/></div>
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="ec-whatsapp" placeholder="62 9 9999-0000"/></div>
+      <div class="form-group"><label class="form-label">Cargo</label><input class="form-control" id="ec-cargo"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">CBO</label><input class="form-control" id="ec-cbo" placeholder="Ex: 1111-05"/></div>
       <div class="form-group"><label class="form-label">Departamento</label><input class="form-control" id="ec-depto"/></div>
     </div>
     <div class="grid-2" style="margin-bottom:12px;">
@@ -2080,65 +2084,93 @@ function toggleRHSubcat(hdr){
 function editarColab(btn) {
   var row = btn.closest('tr');
   if(!row) return;
-  var cells = Array.from(row.querySelectorAll('td'));
-  document.getElementById('ec-nome').value = cells[0].innerText.trim() === '—' ? '' : cells[0].innerText.trim();
-  document.getElementById('ec-contato').value = cells[1].innerText.trim();
-  document.getElementById('ec-cargo').value = cells[2].innerText.trim();
-  document.getElementById('ec-depto').value = cells[3].innerText.trim();
-  document.getElementById('ec-unidade').value = cells[4].innerText.trim();
-  document.getElementById('ec-admissao').value = '';
-  document.getElementById('ec-status').value = row.dataset.status || 'ativo';
+  var docId = row.dataset.docid || null;
   window._editColabRow = row;
-  window._editColabDocId = row.dataset.docid || null;
-  document.getElementById('modal-edit-colab').classList.add('open');
+  window._editColabDocId = docId;
+
+  // Limpa campos
+  ['ec-nome','ec-email','ec-whatsapp','ec-cargo','ec-cbo','ec-depto','ec-unidade'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('ec-admissao').value = '';
+  document.getElementById('ec-status').value = 'ativo';
+
+  // Busca dados reais do Firestore
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).get()
+      .then(function(doc) {
+        if (!doc.exists) return;
+        var d = doc.data();
+        document.getElementById('ec-nome').value     = d.nome || '';
+        document.getElementById('ec-email').value    = d.email || '';
+        document.getElementById('ec-whatsapp').value = d.whatsapp || '';
+        // Cargo pode vir como "Cargo · CBO" ou separado
+        var cargoNome = d.cargo || '';
+        var cboval    = d.cbo || '';
+        if (!cboval && cargoNome.includes(' · ')) {
+          var partes = cargoNome.split(' · ');
+          cargoNome = partes[0];
+          cboval    = partes[1] || '';
+        }
+        document.getElementById('ec-cargo').value    = cargoNome;
+        document.getElementById('ec-cbo').value      = cboval;
+        document.getElementById('ec-depto').value    = d.departamento || d.setor || '';
+        document.getElementById('ec-unidade').value  = d.unidade || '';
+        document.getElementById('ec-admissao').value = d.admissao || '';
+        document.getElementById('ec-status').value   = d.status || 'ativo';
+        document.getElementById('modal-edit-colab').classList.add('open');
+      })
+      .catch(function(e) {
+        console.log(e);
+        document.getElementById('modal-edit-colab').classList.add('open');
+      });
+  } else {
+    // Fallback: lê das células da tabela
+    var cells = Array.from(row.querySelectorAll('td'));
+    document.getElementById('ec-nome').value    = cells[0] ? cells[0].innerText.trim() : '';
+    document.getElementById('ec-email').value   = cells[1] ? cells[1].innerText.trim() : '';
+    document.getElementById('ec-cargo').value   = cells[2] ? cells[2].innerText.trim() : '';
+    document.getElementById('ec-depto').value   = cells[3] ? cells[3].innerText.trim() : '';
+    document.getElementById('ec-unidade').value = cells[4] ? cells[4].innerText.trim() : '';
+    document.getElementById('ec-status').value  = row.dataset.status || 'ativo';
+    document.getElementById('modal-edit-colab').classList.add('open');
+  }
 }
 
 function salvarEditColab() {
-  var row = window._editColabRow;
+  var row   = window._editColabRow;
+  var docId = window._editColabDocId;
   if(!row) return;
-  var cells = Array.from(row.querySelectorAll('td'));
-  var nome    = document.getElementById('ec-nome').value.trim() || '—';
-  var contato = document.getElementById('ec-contato').value.trim();
-  var cargo   = document.getElementById('ec-cargo').value.trim();
-  var depto   = document.getElementById('ec-depto').value.trim();
-  var unidade = document.getElementById('ec-unidade').value.trim();
-  var status  = document.getElementById('ec-status').value || 'ativo';
 
-  // Atualiza tabela imediatamente
-  cells[0].innerText = nome;
-  cells[1].innerText = contato;
-  cells[2].innerText = cargo;
-  cells[3].innerText = depto;
-  cells[4].innerText = unidade;
-  row.dataset.nome   = nome;
-  row.dataset.status = status;
-  // Atualiza badge de status
-  var badgeStatus = cells[7];
-  if(badgeStatus) badgeStatus.innerHTML = status === 'ativo'
-    ? '<span class="bdg-s s-ok"><span class="dot"></span>Ativo</span>'
-    : '<span class="bdg-s s-warn"><span class="dot"></span>Inativo</span>';
+  var nome     = document.getElementById('ec-nome').value.trim() || '—';
+  var email    = document.getElementById('ec-email').value.trim();
+  var whatsapp = document.getElementById('ec-whatsapp').value.replace(/[^0-9]/g,'');
+  var cargo    = document.getElementById('ec-cargo').value.trim();
+  var cbo      = document.getElementById('ec-cbo').value.trim();
+  var depto    = document.getElementById('ec-depto').value.trim();
+  var unidade  = document.getElementById('ec-unidade').value.trim();
+  var admissao = document.getElementById('ec-admissao').value;
+  var status   = document.getElementById('ec-status').value || 'ativo';
 
   document.getElementById('modal-edit-colab').classList.remove('open');
 
-  // Salva no Firestore se tiver docId
-  var docId = window._editColabDocId;
+  // Salva no Firestore
   if (docId && window.nr1mapDb) {
-    var whatsapp = '', email = '';
-    if (contato.includes('@')) { email = contato; } else { whatsapp = contato.replace(/[^0-9]/g,''); }
     window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).update({
       nome: nome,
-      whatsapp: whatsapp,
       email: email,
+      whatsapp: whatsapp,
       cargo: cargo,
+      cbo: cbo,
+      setor: depto,
       departamento: depto,
       unidade: unidade,
+      admissao: admissao,
       status: status,
       atualizadoEm: new Date().toISOString()
     }).then(function(){
-      atualizarContadorColab();
+      carregarColabs(); // recarrega lista para refletir mudanças
     }).catch(function(e){ console.log('Erro ao atualizar colaborador:', e); });
-  } else {
-    atualizarContadorColab();
   }
 }
 
@@ -3010,17 +3042,10 @@ function salvarNovoColab() {
   var btn = document.querySelector('#modal-novo-colab .btn-primary');
   if (btn) { btn.textContent = 'Cadastrando...'; btn.disabled = true; }
 
-  // Usa secondaryApp para não deslogar o RH
-  var firebaseConfig = {apiKey:'AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4',authDomain:'entrevista-inicial.firebaseapp.com',projectId:'entrevista-inicial',storageBucket:'entrevista-inicial.firebasestorage.app',messagingSenderId:'437375609844',appId:'1:437375609844:web:9435b1fb3b21778f2e27a1'};
-  var secApp;
-  try { secApp = firebase.app('nr1map-colab-sec'); }
-  catch(e) { secApp = firebase.initializeApp(firebaseConfig, 'nr1map-colab-sec'); }
-  var secAuth = firebase.auth(secApp);
-
-  secAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
+  // Cria usuário no Firebase Auth
+  window.nr1mapAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
     .then(function(cred) {
       var uid = cred.user.uid;
-      secAuth.signOut(); // desloga do app secundário imediatamente
       return window.nr1mapDb.collection('nr1map_colaboradores').doc(uid).set({
         empresaId: empresaId,
         nome: nome,
@@ -3059,7 +3084,8 @@ function salvarNovoColab() {
       var sel = document.getElementById('colab-cargo-select');
       if(sel) sel.selectedIndex = 0;
       fecharModal('modal-novo-colab');
-      carregarColabs(); // recarrega lista completa do Firestore
+      adicionarLinhaColab(uid, nome, email, cargoNome + ' · ' + cbo, depto, unidade, admissao, 'ativo');
+      atualizarContadorColab();
       // WhatsApp opcional
       var msg = '✅ Colaborador cadastrado! E-mail de acesso enviado para: ' + email;
       if (whatsapp) {
@@ -3175,14 +3201,13 @@ function carregarColabs() {
         bdgColab.textContent = ativos;
         bdgColab.style.display = ativos > 0 ? '' : 'none';
       }
-      tbody.innerHTML = '';
       if (snap.empty) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum colaborador cadastrado ainda.</td></tr>';
         return;
       }
       snap.forEach(function(doc) {
         var d = doc.data();
-        var contato = d.email || d.whatsapp || '—';
+        var contato = d.whatsapp || d.email || '—';
         adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status);
       });
       atualizarContadorColab();
