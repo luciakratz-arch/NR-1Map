@@ -283,9 +283,8 @@ function assinarAgora() {
 }
 
 // ─── INIT ───────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  selectOpcao('mensal');
-});
+// Executado após todas as seções externas estarem no DOM
+selectOpcao('mensal');
 
 // ─── SERVICE WORKER ──────────────────────
 if ('serviceWorker' in navigator) {
