@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="assinatura.css">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0A6E4F">
@@ -20,14 +21,6 @@
 <body>
 
 <div id="nav-placeholder"></div>
-
-<script>
-  fetch('nav.html')
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById('nav-placeholder').innerHTML = data;
-    });
-</script>
 
 <section class="hero">
   <div class="hero-eyebrow">Conformidade NR-1 ativa</div>
@@ -117,8 +110,6 @@
   </div>
 </section>
 
-
-
 <section class="prova">
   <h2>Números que justificam cada real investido.</h2>
   <div class="prova-grid">
@@ -129,100 +120,55 @@
   </div>
 </section>
 
-<!-- ASSINATURA TÉCNICA -->
+<!-- SEÇÃO ASSINATURA TÉCNICA -->
 <section id="assinatura" style="padding:96px 5%;background:var(--branco);border-top:1px solid var(--linha);">
   <div style="max-width:1100px;margin:0 auto;">
-
-    <!-- HEADER -->
     <div style="margin-bottom:52px;">
       <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--roxo);margin-bottom:12px;">Validade jurídica</div>
       <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--preto);line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;">Laudo com assinatura digital. <em style="font-style:normal;color:var(--verde);">Sem custo de cartório.</em></h2>
       <p style="font-size:15px;color:var(--cinza-medio);max-width:560px;line-height:1.7;">Todo laudo gerado pelo NR-1 Map já sai pronto para fiscalização — com assinatura eletrônica da psicóloga responsável pela metodologia e campo para a empresa assinar digitalmente via gov.br.</p>
     </div>
-
-    <!-- DOIS BLOCOS LADO A LADO -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px;">
-
-      <!-- BLOCO 1: O que já vem no laudo -->
       <div style="background:var(--verde-xp);border:1.5px solid rgba(10,110,79,0.2);border-radius:14px;padding:32px;">
         <div style="font-size:22px;margin-bottom:16px;">📄</div>
         <h3 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--preto);margin-bottom:8px;">Já incluso em todos os planos</h3>
         <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:20px;">Sem custo adicional, todo laudo gerado vem com:</p>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-              <span style="color:#fff;font-size:11px;font-weight:700;">✓</span>
-            </div>
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:#fff;font-size:11px;font-weight:700;">✓</span></div>
             <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.6;"><strong>Assinatura eletrônica da Dra. Lucia Kratz (CRP 09/20590)</strong> — valida a metodologia científica do documento</p>
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-              <span style="color:#fff;font-size:11px;font-weight:700;">✓</span>
-            </div>
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:#fff;font-size:11px;font-weight:700;">✓</span></div>
             <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.6;"><strong>Campo de assinatura gov.br para o responsável da empresa</strong> — assine em assinador.iti.gov.br e o documento tem validade jurídica plena</p>
           </div>
           <div style="display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-              <span style="color:#fff;font-size:11px;font-weight:700;">✓</span>
-            </div>
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:#fff;font-size:11px;font-weight:700;">✓</span></div>
             <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.6;"><strong>Válido para fiscalização do MTE e processos trabalhistas</strong> — conforme Lei 14.063/2020</p>
           </div>
         </div>
       </div>
-
-      <!-- BLOCO 2: Serviço premium -->
       <div style="background:var(--roxo-xp);border:1.5px solid rgba(123,0,196,0.2);border-radius:14px;padding:32px;position:relative;">
         <div style="position:absolute;top:20px;right:20px;background:var(--roxo);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;">Serviço adicional</div>
         <div style="font-size:22px;margin-bottom:16px;">✍️</div>
         <h3 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--preto);margin-bottom:8px;">Assinatura técnica da psicóloga</h3>
         <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:20px;">Para empresas que não têm responsável técnico para assinar — a Dra. Lucia Kratz lê, valida e assina o laudo via gov.br em até 48h úteis.</p>
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;">
-            <span style="font-size:13px;color:var(--cinza-escuro);">Até 20 colaboradores</span>
-            <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 97</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;">
-            <span style="font-size:13px;color:var(--cinza-escuro);">21 a 100 colaboradores</span>
-            <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 197</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;">
-            <span style="font-size:13px;color:var(--cinza-escuro);">Acima de 100 colaboradores</span>
-            <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 297</span>
-          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;"><span style="font-size:13px;color:var(--cinza-escuro);">Até 20 colaboradores</span><span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 97</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;"><span style="font-size:13px;color:var(--cinza-escuro);">21 a 100 colaboradores</span><span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 197</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(123,0,196,0.08);border-radius:8px;"><span style="font-size:13px;color:var(--cinza-escuro);">Acima de 100 colaboradores</span><span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--roxo);">R$ 297</span></div>
         </div>
-        <a href="#fale-conosco" style="display:inline-flex;align-items:center;gap:8px;background:var(--roxo);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-          Solicitar assinatura técnica →
-        </a>
+        <a href="#fale-conosco" style="display:inline-flex;align-items:center;gap:8px;background:var(--roxo);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Solicitar assinatura técnica →</a>
       </div>
-
     </div>
-
-    <!-- BANNER JURÍDICO -->
     <div style="background:var(--cinza-claro);border:1px solid var(--linha);border-radius:10px;padding:18px 24px;display:flex;align-items:flex-start;gap:14px;">
       <span style="font-size:20px;flex-shrink:0;">⚖️</span>
       <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.65;"><strong>Lei 14.063/2020 — Assinatura Eletrônica:</strong> A assinatura digital realizada via gov.br (conta Prata ou Ouro) ou certificado ICP-Brasil tem validade jurídica plena em todo território nacional, equivalendo à assinatura física reconhecida em cartório. Documentos assinados dessa forma são aceitos por órgãos públicos, inclusive pelo MTE.</p>
     </div>
-
   </div>
 </section>
 
-
-<!-- RESPONSIVO ASSINATURA -->
-<link rel="stylesheet" href="assinatura.css">
-
 <div id="criadora-placeholder"></div>
-
-<script>
-  fetch('assinatura.html')
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById('criadora-placeholder').innerHTML = data;
-    });
-</script>
-
-
-
-
 
 <section class="faq" id="faq">
   <div class="section-eyebrow">Perguntas frequentes</div>
@@ -251,420 +197,8 @@
   </div>
 </section>
 
-
-
-
-<!-- CAPTURA DE LEADS -->
-<section id="contato" style="padding:96px 5%;background:var(--preto);border-top:3px solid var(--verde-claro);">
-  <div style="max-width:640px;margin:0 auto;">
-    <div style="text-align:center;margin-bottom:40px;">
-      <div style="display:inline-block;background:var(--roxo-xp);border:1px solid rgba(123,0,196,0.2);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">E-book gratuito</div>
-      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px;">Receba a NR-1 explicada<br/>no seu e-mail</h2>
-      <p style="font-size:15px;color:#8A9590;line-height:1.65;max-width:480px;margin:0 auto;">Enviaremos o e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> + o resumo técnico da norma. Nossa equipe também entrará em contato.</p>
-    </div>
-
-    <!-- PROGRESS BAR -->
-    <div style="height:3px;background:#1E2A28;border-radius:2px;margin-bottom:32px;">
-      <div id="lead-prog" style="height:100%;background:var(--verde-claro);border-radius:2px;width:25%;transition:width .3s;"></div>
-    </div>
-
-    <!-- STEP 1 -->
-    <div id="lead-step-1">
-      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
-        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 1 de 4 — Seus dados</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-          <div>
-            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Seu nome</label>
-            <input id="l-nome" type="text" placeholder="Nome completo" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
-          </div>
-          <div>
-            <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Cargo / função</label>
-            <input id="l-cargo" type="text" placeholder="Ex: Diretora de RH" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">E-mail profissional *</label>
-          <input id="l-email" type="email" placeholder="seu@empresa.com.br" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">WhatsApp (opcional)</label>
-          <input id="l-wpp" type="tel" placeholder="(11) 9 9999-0000" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
-        </div>
-      </div>
-      <button onclick="leadStep(2)" style="width:100%;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
-    </div>
-
-    <!-- STEP 2 -->
-    <div id="lead-step-2" style="display:none;">
-      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
-        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 2 de 4 — Sua empresa</div>
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Nome da empresa</label>
-          <input id="l-empresa" type="text" placeholder="Razão social ou nome fantasia" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='var(--verde-claro)'" onblur="this.style.borderColor='#2A2E2C'"/>
-        </div>
-        <div style="margin-bottom:14px;">
-          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:4px;">Segmento</label>
-          <select id="l-segmento" style="width:100%;padding:10px 12px;background:#0D1210;border:1px solid #2A2E2C;border-radius:7px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;">
-            <option value="">Selecione...</option>
-            <option>Saúde / Clínicas / Hospitais</option>
-            <option>Educação / Escolas / Faculdades</option>
-            <option>Comércio / Varejo</option>
-            <option>Serviços / Consultoria</option>
-            <option>Indústria / Manufatura</option>
-            <option>Tecnologia</option>
-            <option>Outro</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#8A9590;display:block;margin-bottom:8px;">Número de colaboradores</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-porte-opts">
-            <div onclick="selPorte(this,'Até 5')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
-              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
-              <span style="font-size:13px;color:#8A9590;">Até 5</span>
-            </div>
-            <div onclick="selPorte(this,'6 a 20')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
-              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
-              <span style="font-size:13px;color:#8A9590;">6 a 20</span>
-            </div>
-            <div onclick="selPorte(this,'21 a 50')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
-              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
-              <span style="font-size:13px;color:#8A9590;">21 a 50</span>
-            </div>
-            <div onclick="selPorte(this,'51 a 100')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;">
-              <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio"></div>
-              <span style="font-size:13px;color:#8A9590;">51 a 100</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="leadStep(1)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
-        <button onclick="leadStep(3)" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Continuar →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div id="lead-step-3" style="display:none;">
-      <div style="background:#181D1B;border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid #2A2E2C;">
-        <div style="font-size:11px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">Passo 3 de 4 — Uma pergunta rápida</div>
-        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Como você avalia a conformidade da sua empresa com a NR-1 hoje?</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;" id="l-nivel-opts">
-          <div onclick="selNivel(this,'Não sei por onde começar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">😰</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Não sei por onde começar</div>
-          </div>
-          <div onclick="selNivel(this,'Já ouvi mas não adotei nada')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">🤔</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já ouvi, mas não adotei nada</div>
-          </div>
-          <div onclick="selNivel(this,'Tenho algo mas incompleto')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">📋</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho algo, mas incompleto</div>
-          </div>
-          <div onclick="selNivel(this,'Já fui notificado ou multado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">⚠️</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Já fui notificado ou multado</div>
-          </div>
-          <div onclick="selNivel(this,'Tudo documentado')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">✅</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Tenho tudo documentado</div>
-          </div>
-          <div onclick="selNivel(this,'Avaliando soluções')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;">
-            <div style="font-size:20px;margin-bottom:4px;">🔍</div>
-            <div style="font-size:11px;color:#8A9590;line-height:1.3;">Estou avaliando soluções</div>
-          </div>
-        </div>
-        <div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:14px;">Maior preocupação atual?</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="l-concern-opts">
-          <div onclick="selConcern(this,'Evitar multas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
-            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
-            <span style="font-size:12px;color:#8A9590;">Evitar multas e autuações</span>
-          </div>
-          <div onclick="selConcern(this,'Reduzir afastamentos')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
-            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
-            <span style="font-size:12px;color:#8A9590;">Reduzir afastamentos</span>
-          </div>
-          <div onclick="selConcern(this,'Evitar processos trabalhistas')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
-            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
-            <span style="font-size:12px;color:#8A9590;">Evitar processos trabalhistas</span>
-          </div>
-          <div onclick="selConcern(this,'Cuidar do bem-estar')" style="border:1.5px solid #2A2E2C;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;">
-            <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2E2C;flex-shrink:0;" class="l-radio-c"></div>
-            <span style="font-size:12px;color:#8A9590;">Cuidar do bem-estar da equipe</span>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="leadStep(2)" style="padding:14px 20px;background:transparent;color:#8A9590;border:1px solid #2A2E2C;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">← Voltar</button>
-        <button onclick="enviarLead()" style="flex:1;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Receber e-book gratuito →</button>
-      </div>
-    </div>
-
-    <!-- STEP 4 CONFIRMAÇÃO -->
-    <div id="lead-step-4" style="display:none;text-align:center;">
-      <div style="width:64px;height:64px;border-radius:50%;background:var(--verde-xp);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;">✓</div>
-      <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;">Cadastro confirmado!</h3>
-      <p style="font-size:14px;color:#8A9590;line-height:1.65;max-width:400px;margin:0 auto 24px;">O e-book <strong style="color:#fff;">NR-1 Descomplicada</strong> será enviado para o seu e-mail em instantes. Nossa equipe entrará em contato em breve.</p>
-      <div style="background:#181D1B;border-radius:10px;padding:20px;border:1px solid #2A2E2C;text-align:left;max-width:400px;margin:0 auto;">
-        <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:10px;">Você vai receber:</div>
-        <div style="font-size:13px;color:#8A9590;line-height:1.8;">
-          ✓ E-book NR-1 Descomplicada (PDF)<br/>
-          ✓ Resumo técnico da norma por segmento<br/>
-          ✓ Interpretação de Dejours, Herzberg e Maslow<br/>
-          ✓ Contato da nossa equipe
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<script>
-var leadData = { porte: '', nivel: '', concern: '' };
-
-function leadStep(n) {
-  if (n === 2 && !document.getElementById('l-email').value) {
-    alert('Por favor informe seu e-mail.');
-    return;
-  }
-  for (var i = 1; i <= 4; i++) {
-    var el = document.getElementById('lead-step-' + i);
-    if (el) el.style.display = i === n ? 'block' : 'none';
-  }
-  document.getElementById('lead-prog').style.width = (n * 25) + '%';
-}
-
-function selPorte(el, val) {
-  leadData.porte = val;
-  document.querySelectorAll('#l-porte-opts > div').forEach(function(d) {
-    d.style.borderColor = '#2A2E2C';
-    d.querySelector('.l-radio').style.background = 'transparent';
-    d.querySelector('span').style.color = '#8A9590';
-  });
-  el.style.borderColor = 'var(--verde-claro)';
-  el.querySelector('.l-radio').style.background = 'var(--verde-claro)';
-  el.querySelector('span').style.color = '#fff';
-}
-
-function selNivel(el, val) {
-  leadData.nivel = val;
-  document.querySelectorAll('#l-nivel-opts > div').forEach(function(d) {
-    d.style.borderColor = '#2A2E2C';
-    d.querySelector('div:last-child').style.color = '#8A9590';
-  });
-  el.style.borderColor = 'var(--verde-claro)';
-  el.querySelector('div:last-child').style.color = '#fff';
-}
-
-function selConcern(el, val) {
-  leadData.concern = val;
-  document.querySelectorAll('#l-concern-opts > div').forEach(function(d) {
-    d.style.borderColor = '#2A2E2C';
-    d.querySelector('.l-radio-c').style.background = 'transparent';
-    d.querySelector('span').style.color = '#8A9590';
-  });
-  el.style.borderColor = 'var(--verde-claro)';
-  el.querySelector('.l-radio-c').style.background = 'var(--verde-claro)';
-  el.querySelector('span').style.color = '#fff';
-}
-
-async function enviarLead() {
-  var payload = {
-    nome: document.getElementById('l-nome').value,
-    cargo: document.getElementById('l-cargo').value,
-    email: document.getElementById('l-email').value,
-    whatsapp: document.getElementById('l-wpp').value,
-    empresa: document.getElementById('l-empresa').value,
-    segmento: document.getElementById('l-segmento').value,
-    porte: leadData.porte,
-    nivel_nr1: leadData.nivel,
-    preocupacao: leadData.concern,
-    data: new Date().toISOString()
-  };
-
-  // Salva lead no Firestore — coleção nr1map_leads
-  try {
-    await window.nr1mapDb.collection('nr1map_leads').add(payload);
-  } catch(e) {
-    console.log('Firestore lead error:', e);
-  }
-
-  // Mostra confirmação independente do resultado
-  leadStep(4);
-}
-</script>
-
-
-<!-- DEPOIMENTOS -->
-<section id="depoimentos" style="padding:96px 5%;background:var(--cinza-claro);">
-  <div style="max-width:1100px;margin:0 auto;">
-    <div style="margin-bottom:48px;">
-      <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--verde);margin-bottom:12px;">Depoimentos</div>
-      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--preto);line-height:1.15;letter-spacing:-.02em;margin-bottom:8px;">O que dizem sobre o NR-1 Map</h2>
-      <p style="font-size:15px;color:var(--cinza-medio);">Resultados reais de empresas que cumpriram a NR-1.</p>
-    </div>
-
-    <!-- CARROSSEL -->
-    <div style="position:relative;">
-      <div id="dep-track" class="dep-track-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;overflow:hidden;">
-
-        <!-- Card 1 -->
-        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
-          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
-          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">M.F.S.</div>
-          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Gestora de RH · Clínica Médica</div>
-          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Em menos de 72h tínhamos o laudo técnico completo. Nunca imaginei que cumprir a NR-1 pudesse ser tão simples. A equipe da fiscalização aceitou a documentação sem nenhuma ressalva."</p>
-          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
-              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Fico muito feliz que a documentação atendeu plenamente a fiscalização. É exatamente para isso que o NR-1 Map foi criado!</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
-          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
-          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">R.A.M.</div>
-          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Diretor · Escola de Idiomas</div>
-          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Descobrimos através das pesquisas pulso que dois setores estavam com índices críticos de esgotamento. Agimos antes do afastamento. Economizamos muito mais do que o custo da assinatura."</p>
-          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
-              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Prevenção é sempre o melhor caminho. Fico feliz que conseguiram agir a tempo!</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="dep-card" style="background:var(--branco);border-radius:12px;padding:28px;border:1px solid var(--linha);">
-          <div style="color:var(--roxo);font-size:18px;margin-bottom:12px;">★★★★★</div>
-          <div style="font-weight:600;font-size:14px;color:var(--preto);margin-bottom:2px;">C.B.</div>
-          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:14px;">Proprietária · Contabilidade</div>
-          <p style="font-size:13px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:16px;">"Tenho 8 funcionários e não sabia nem que precisava disso. O sistema é muito fácil — minha equipe respondeu pelo WhatsApp e em dias já tinha o laudo. Vale cada centavo."</p>
-          <div style="background:var(--verde-xp);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
-            <div style="width:28px;height:28px;border-radius:50%;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;">LK</div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:3px;">Dra. Lucia Kratz</div>
-              <div style="font-size:12px;color:var(--verde);line-height:1.5;">Obrigada pela confiança! Empresas de todos os portes merecem ter acesso a isso.</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- SETAS -->
-      <button onclick="depNav(-1)" style="position:absolute;left:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--branco);border:1px solid var(--linha);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:2;">‹</button>
-      <button onclick="depNav(1)" style="position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--branco);border:1px solid var(--linha);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:2;">›</button>
-    </div>
-
-    <!-- BOTÃO ENVIAR DEPOIMENTO -->
-    <div style="text-align:center;margin-top:40px;">
-      <button onclick="abrirFormDep()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--roxo);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
-        ✍ Compartilhar meu depoimento
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- MODAL DEPOIMENTO -->
-<div id="modal-dep" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:var(--branco);border-radius:14px;padding:32px;max-width:480px;width:90%;max-height:90vh;overflow-y:auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Compartilhar depoimento</h3>
-      <button onclick="fecharFormDep()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--cinza-medio);">×</button>
-    </div>
-    <div style="font-size:12px;color:var(--cinza-medio);background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:18px;">
-      Seu depoimento será avaliado antes de ser publicado.
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Identificação (pode usar iniciais)</label>
-      <input id="dep-nome" type="text" placeholder="Ex: M.F.S." style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;" />
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Cargo e empresa</label>
-      <input id="dep-cargo" type="text" placeholder="Ex: Gestora de RH · Clínica Médica" style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;" />
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:6px;">Avaliação</label>
-      <div style="display:flex;gap:6px;" id="dep-stars">
-        <span onclick="setStar(5)" style="font-size:24px;cursor:pointer;color:var(--roxo);">★</span>
-        <span onclick="setStar(4)" style="font-size:24px;cursor:pointer;color:var(--roxo);">★</span>
-        <span onclick="setStar(3)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
-        <span onclick="setStar(2)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
-        <span onclick="setStar(1)" style="font-size:24px;cursor:pointer;color:var(--linha);">★</span>
-      </div>
-    </div>
-    <div style="margin-bottom:18px;">
-      <label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Seu depoimento</label>
-      <textarea id="dep-texto" placeholder="Conte sua experiência com o NR-1 Map..." style="width:100%;padding:9px 12px;border:1px solid var(--linha);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;resize:vertical;min-height:100px;"></textarea>
-    </div>
-    <button onclick="enviarDep()" style="width:100%;padding:13px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
-      Enviar depoimento →
-    </button>
-  </div>
-</div>
-
-<script>
-// CARROSSEL
-var depIndex = 0;
-function depNav(dir) {
-  var cards = document.querySelectorAll('.dep-card');
-  depIndex = Math.max(0, Math.min(depIndex + dir, cards.length - 3));
-  // simple highlight effect
-  cards.forEach(function(c, i) {
-    c.style.opacity = (i >= depIndex && i < depIndex + 3) ? '1' : '0.4';
-  });
-}
-
-// MODAL
-function abrirFormDep() {
-  var m = document.getElementById('modal-dep');
-  m.style.display = 'flex';
-}
-function fecharFormDep() {
-  document.getElementById('modal-dep').style.display = 'none';
-}
-
-var depStars = 5;
-function setStar(n) {
-  depStars = n;
-  var stars = document.querySelectorAll('#dep-stars span');
-  stars.forEach(function(s, i) {
-    s.style.color = (5 - i) <= n ? 'var(--roxo)' : 'var(--linha)';
-  });
-}
-
-async function enviarDep() {
-  var payload = {
-    nome: document.getElementById('dep-nome').value,
-    cargo: document.getElementById('dep-cargo').value,
-    texto: document.getElementById('dep-texto').value,
-    estrelas: depStars,
-    status: 'pendente',
-    data: new Date().toISOString()
-  };
-
-  if (!payload.nome || !payload.texto) {
-    alert('Por favor preencha ao menos o nome e o depoimento.');
-    return;
-  }
-
-  // Salva depoimento no Firestore — coleção nr1map_depoimentos
-  try {
-    await window.nr1mapDb.collection('nr1map_depoimentos').add(payload);
-  } catch(e) {
-    console.log('Firestore dep error:', e);
-  }
-
-  fecharFormDep();
-  alert('✅ Depoimento enviado! Será publicado após aprovação.');
-}
-</script>
-
-
+<div id="leads-placeholder"></div>
+<div id="depoimentos-placeholder"></div>
 
 <section class="cta-final">
   <h2>Cada mês sem diagnóstico é <em>evidência contra</em> você.</h2>
@@ -673,398 +207,7 @@ async function enviarDep() {
   <p class="cta-garantia">Sem fidelidade · Sem taxa de setup · Cancele a qualquer momento</p>
 </section>
 
-<!-- PREÇOS -->
-<section class="precos" id="precos">
-  <div class="section-eyebrow">Planos e preços</div>
-  <h2 class="section-title">Escolha o modelo ideal para sua empresa.</h2>
-  <p style="font-size:15px;color:var(--cinza-medio);max-width:560px;line-height:1.65;margin-bottom:40px;">Clique na opção desejada e simule o valor exato pelo número de colaboradores.</p>
-
-  <!-- TABELA COMPARATIVA -->
-  <div style="max-width:860px;margin-bottom:48px;overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead>
-        <tr>
-          <th style="padding:14px 16px;text-align:left;color:var(--cinza-medio);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid var(--linha);width:40%;"></th>
-          <th style="padding:14px 16px;text-align:center;border-bottom:2px solid var(--linha);width:30%;">
-            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--roxo);">Uso Único</div>
-            <div style="font-size:11px;color:var(--cinza-medio);margin-top:3px;">Diagnóstico pontual · 30 dias</div>
-          </th>
-          <th style="padding:14px 16px;text-align:center;border-bottom:2px solid var(--verde);width:30%;background:var(--verde-xp);border-radius:12px 12px 0 0;">
-            <div style="position:relative;">
-              <div style="position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:var(--verde);color:#fff;font-size:10px;font-weight:700;padding:3px 14px;border-radius:100px;white-space:nowrap;letter-spacing:.07em;">RECOMENDADO</div>
-            </div>
-            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--verde);">Assinatura Mensal</div>
-            <div style="font-size:11px;color:var(--cinza-medio);margin-top:3px;">Gestão contínua · Sem expiração</div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-
-        <!-- GRUPO: DIAGNÓSTICO -->
-        <tr><td colspan="3" style="padding:10px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);background:var(--cinza-claro);">📊 Diagnóstico e Pesquisas</td></tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Diagnóstico Geral</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Questionário completo enviado via WhatsApp aos colaboradores de forma 100% anônima. Avalia os 4 módulos: Fisiológico, Segurança, Relacionamentos e Motivação.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Pesquisa Pulso</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Pesquisas rápidas e rotativas enviadas via WhatsApp. Monitora subcategorias específicas com maior frequência, mantendo o diagnóstico sempre atualizado.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;color:var(--cinza-medio);">❌</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Painel de Planejamento de Pesquisas</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Agenda e gerencia os ciclos de Diagnóstico e Pulso. A IA sugere automaticamente as próximas subcategorias a monitorar com base nos piores IBPs.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;color:var(--cinza-medio);">❌</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <!-- GRUPO: RELATÓRIOS -->
-        <tr><td colspan="3" style="padding:10px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);background:var(--cinza-claro);">📄 Relatórios e Documentação</td></tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Laudo Técnico Psicossocial</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Documento técnico assinado pela Dra. Lucia Kratz (CRP 09/20590) com análise do IBP por módulo e subcategoria, conforme GRO/NR-1.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Mapa de Risco por CBO</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Visualização dos riscos psicossociais segmentada por cargo (CBO). Identifica quais funções concentram maior sofrimento patogênico.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Plano de Ação 5W2H</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Plano de ação editável com ações corretivas e preventivas para cada risco identificado. Pronto para anexar ao PGR.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Relatório Consolidado com Evidências</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Relatório completo com histórico de ciclos, evolução do IBP ao longo do tempo e evidências documentais para defesa em fiscalização do MTE ou processos trabalhistas.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;">
-            <div style="font-size:11px;color:var(--cinza-medio);">Até o<br/>Plano de Ação</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;background:var(--verde-xp);">
-            <div style="font-size:11px;color:var(--verde);font-weight:600;">Com Evidências<br/>e Histórico ✅</div>
-          </td>
-        </tr>
-
-        <!-- GRUPO: COLABORADORES -->
-        <tr><td colspan="3" style="padding:10px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);background:var(--cinza-claro);">👥 Portal do Colaborador</td></tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Envio via WhatsApp com link anônimo</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Cada colaborador recebe um link único via WhatsApp. Responde pelo celular sem cadastro ou senha. O RH nunca tem acesso à identidade do respondente.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Botão de solicitar ajuda</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Canal sigiloso dentro do portal do colaborador para solicitar apoio psicológico, denunciar assédio ou acionar emergência emocional — sem identificação.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <tr style="border-bottom:1px solid var(--linha);">
-          <td style="padding:12px 16px;">
-            <div style="font-weight:600;color:var(--preto);margin-bottom:2px;">Painel Dinâmico IBP</div>
-            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;">Painel do RH com velocímetros IBP por módulo (Fisiológico, Segurança, Relacionamentos, Motivação) atualizado em tempo real conforme as respostas chegam.</div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;">✅</td>
-          <td style="padding:12px 16px;text-align:center;font-size:18px;background:var(--verde-xp);">✅</td>
-        </tr>
-
-        <!-- GRUPO: QUANDO USAR -->
-        <tr><td colspan="3" style="padding:10px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);background:var(--cinza-claro);">💡 Quando usar</td></tr>
-
-        <tr>
-          <td style="padding:12px 16px;"></td>
-          <td style="padding:12px 16px;text-align:center;vertical-align:top;">
-            <div style="background:var(--roxo-xp);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--roxo);line-height:1.6;text-align:left;">
-              ✔ Auditoria ou fiscalização iminente<br/>
-              ✔ Primeira adequação à NR-1<br/>
-              ✔ Diagnóstico pontual sem recorrência<br/>
-              ✔ Empresa que quer testar o sistema
-            </div>
-          </td>
-          <td style="padding:12px 16px;text-align:center;background:var(--verde-xp);vertical-align:top;">
-            <div style="background:#fff;border-radius:8px;padding:10px 12px;font-size:11px;color:var(--verde);line-height:1.6;text-align:left;border:1px solid rgba(10,110,79,.15);">
-              ✔ Gestão contínua de saúde mental<br/>
-              ✔ Conformidade permanente NR-1<br/>
-              ✔ Monitoramento de evolução do IBP<br/>
-              ✔ Empresas com RH ativo
-            </div>
-          </td>
-        </tr>
-
-      </tbody>
-    </table>
-  </div>
-
-  <!-- CARDS SELETORES -->
-  <div class="planos-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;margin-bottom:36px;">
-
-    <!-- CARD ASSINATURA — selecionado por padrão -->
-    <div id="card-mensal" onclick="selectOpcao('mensal')" style="border:2.5px solid var(--verde);border-radius:14px;padding:24px;cursor:pointer;background:var(--verde-xp);position:relative;transition:all .2s;">
-      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--verde);color:#fff;font-size:10px;font-weight:700;padding:3px 14px;border-radius:100px;letter-spacing:.07em;white-space:nowrap;">RECOMENDADO</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--verde);background:var(--verde);display:flex;align-items:center;justify-content:center;" id="radio-mensal">
-          <div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div>
-        </div>
-        <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--verde);">Assinatura Mensal</span>
-      </div>
-      <div style="font-size:12px;color:var(--cinza-medio);line-height:1.6;margin-bottom:14px;">Gestão contínua · Diagnóstico + Painel IA + Pesquisas Pulso semanais anônimas via WhatsApp</div>
-      <div style="font-size:11px;color:var(--verde);font-weight:600;">A partir de R$ 35,00/colaborador/mês</div>
-      <div style="margin-top:12px;font-size:11px;color:var(--cinza-medio);">✓ Cancele quando quiser</div>
-    </div>
-
-    <!-- CARD USO ÚNICO -->
-    <div id="card-unico" onclick="selectOpcao('unico')" style="border:2px solid var(--linha);border-radius:14px;padding:24px;cursor:pointer;background:var(--branco);position:relative;transition:all .2s;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--linha);background:var(--branco);display:flex;align-items:center;justify-content:center;" id="radio-unico"></div>
-        <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--cinza-escuro);">Uso Único</span>
-      </div>
-      <div style="font-size:12px;color:var(--cinza-medio);line-height:1.6;margin-bottom:14px;">Diagnóstico pontual · Laudo Técnico + Mapa de Risco + Plano 5W2H · Validade 30 dias</div>
-      <div style="font-size:11px;color:var(--roxo);font-weight:600;">A partir de R$ 49,00/colaborador · pagamento único</div>
-      <div style="margin-top:12px;font-size:11px;color:var(--cinza-medio);">✓ Sem assinatura ou fidelidade</div>
-    </div>
-
-  </div>
-
-  <!-- CALCULADORA DINÂMICA -->
-  <div style="background:var(--preto);border-radius:16px;padding:36px;max-width:720px;margin-bottom:40px;">
-    <div id="calc-titulo" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;"></div>
-    <div id="calc-sub" style="font-size:12px;color:#8A9590;margin-bottom:20px;"></div>
-
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
-      <input type="range" id="slider-n" min="1" max="500" value="10" oninput="calcValor(this.value)" style="flex:1;min-width:180px;" id="slider-n"/>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <input type="number" id="input-n" min="1" max="500" value="10"
-          oninput="calcValor(this.value);document.getElementById('slider-n').value=this.value"
-          style="width:64px;padding:8px;font-size:16px;font-weight:700;border:1px solid #2A2E2C;border-radius:7px;background:#181D1B;color:#fff;text-align:center;font-family:'Syne',sans-serif;"/>
-        <span style="font-size:13px;color:#8A9590;">colaboradores</span>
-      </div>
-    </div>
-
-    <div id="calc-faixa" style="font-size:11px;font-weight:600;margin-bottom:20px;"></div>
-
-    <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px;">
-      <div>
-        <div style="font-size:10px;color:#8A9590;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;" id="calc-label-valor"></div>
-        <div id="calc-total" style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:#fff;line-height:1;"></div>
-        <div id="calc-detalhe" style="font-size:12px;color:#8A9590;margin-top:4px;"></div>
-      </div>
-      <div id="calc-itens" style="font-size:12px;color:#4A5450;line-height:1.8;padding-bottom:4px;"></div>
-    </div>
-
-    <!-- TABELA DE FAIXAS INLINE -->
-    <div id="tabela-faixas" style="border-radius:9px;overflow:hidden;border:1px solid #2A2E2C;">
-      <div class="tf-head" style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#181D1B;padding:8px 14px;font-size:10px;font-weight:600;color:#4A5450;text-transform:uppercase;letter-spacing:.06em;">
-        <span>Colaboradores</span><span style="text-align:center;">Por pessoa</span><span class="tf-ex-col" style="text-align:right;">Exemplo</span>
-      </div>
-      <div id="tf-row-1" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-2" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-4" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-5" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-6" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;transition:background .2s;"></div>
-      <div id="tf-row-enterprise" style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid #1E2A28;font-size:12px;align-items:center;background:rgba(123,0,196,.08);"></div>
-    </div>
-
-    <div style="margin-top:20px;">
-      <button id="calc-btn" class="btn-cta" onclick="assinarAgora()" style="border:none;cursor:pointer;"></button>
-    </div>
-  </div>
-
-  <!-- INCLUSO -->
-  <div style="max-width:720px;background:var(--cinza-claro);border-radius:10px;padding:18px 22px;border:1px solid var(--linha);">
-    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;">Incluído em todos os planos</div>
-    <div class="incluso-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;font-size:12px;color:var(--cinza-medio);">
-      <span>✓ Diagnóstico Geral (Maslow + Herzberg + Dejours)</span>
-      <span>✓ Laudo Técnico Psicossocial</span>
-      <span>✓ Mapa de Risco Psicossocial</span>
-      <span>✓ Plano de Ação 5W2H editável</span>
-      <span>✓ Envio por WhatsApp e E-mail</span>
-      <span>✓ Respostas 100% anônimas por CBO</span>
-    </div>
-  </div>
-  <!-- BANNER LEGAL NR-1 -->
-  <div style="max-width:720px;margin-top:20px;background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:20px 24px;border:1px solid #2A1A3E;display:flex;align-items:flex-start;gap:16px;">
-    <div style="font-size:28px;flex-shrink:0;">⚖️</div>
-    <div>
-      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">Obrigatório para toda empresa com CLT — sem exceção de porte</div>
-      <div style="font-size:12px;color:#8A9590;line-height:1.7;">A <strong style="color:#C8D4D0;">Portaria MTE nº 1.419/2024</strong> exige gestão de riscos psicossociais para <strong style="color:#C8D4D0;">todos os empregadores CLT</strong>, independentemente do número de funcionários. Micro, pequena, média ou grande — a lei não abre exceções.<br/>
-      <span style="color:var(--verde-claro);font-weight:600;">1 afastamento por burnout custa em média R$ 80.000 em indenização. O NR-1 Map custa a partir de R$ 175/mês.</span></div>
-    </div>
-  </div>
-
-  <!-- ENTERPRISE -->
-  <div style="max-width:720px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;background:var(--cinza-claro);border-radius:10px;padding:16px 20px;border:1px solid var(--linha);flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--preto);">Acima de 501 colaboradores?</div>
-      <div style="font-size:12px;color:var(--cinza-medio);margin-top:3px;">Pacote personalizado com SLA, integrações e proposta sob medida.</div>
-    </div>
-    <a href="#contato" style="display:inline-flex;align-items:center;gap:6px;background:var(--roxo);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;white-space:nowrap;">💬 Falar com especialista →</a>
-  </div>
-</section>
-
-<script>
-var opcaoAtiva = 'mensal';
-
-var dados = {
-  mensal: {
-    titulo: 'Assinatura Mensal — Gestão Contínua',
-    sub: 'Diagnóstico Inicial + Painel IA + Pesquisas Pulso semanais anônimas via WhatsApp',
-    labelValor: 'Valor mensal',
-    sufixo: '/mês',
-    cor: 'var(--verde-claro)',
-    btn: 'Assinar agora com este valor →',
-    itens: '✓ Diagnóstico Inicial completo|✓ Painel dinâmico Prazer/Sofrimento|✓ Pesquisa Pulso semanal anônima|✓ Atualizações de IA contínuas',
-    faixas: [
-      { label: 'Até 5', unit: 35, ex: '5 × R$35 = R$175' },
-      { label: '6 a 20', unit: 25, ex: '10 × R$25 = R$250' },
-      { label: '21 a 50', unit: 20, ex: '30 × R$20 = R$600' },
-      { label: '51 a 100', unit: 16.5, ex: '60 × R$16,50 = R$990' },
-      { label: '101 a 200', unit: 13, ex: '150 × R$13 = R$1.950' },
-      { label: '201 a 500 ⭐', unit: 10, ex: '300 × R$10 = R$3.000' }
-    ]
-  },
-  unico: {
-    titulo: 'Uso Único — Diagnóstico Pontual',
-    sub: 'Laudo Técnico + Mapa de Risco + Plano 5W2H · Validade 30 dias · Pagamento único',
-    labelValor: 'Valor total',
-    sufixo: '',
-    cor: 'var(--roxo-claro)',
-    btn: 'Contratar diagnóstico pontual →',
-    itens: '✓ Laudo Técnico Psicossocial|✓ Mapa de Risco por CBO|✓ Plano de Ação 5W2H|✓ Sem assinatura ou fidelidade',
-    faixas: [
-      { label: 'Até 5', unit: 97, ex: '5 × R$97 = R$485' },
-      { label: '6 a 20', unit: 79, ex: '10 × R$79 = R$790' },
-      { label: '21 a 50', unit: 59, ex: '30 × R$59 = R$1.770' },
-      { label: '51 a 100', unit: 49, ex: '60 × R$49 = R$2.940' },
-      { label: '101 a 200', unit: 39, ex: '150 × R$39 = R$5.850' },
-      { label: '201 a 500', unit: 29, ex: '300 × R$29 = R$8.700' }
-    ]
-  }
-};
-
-function selectOpcao(op) {
-  opcaoAtiva = op;
-  var d = dados[op];
-
-  // Atualizar cards
-  var cardM = document.getElementById('card-mensal');
-  var cardU = document.getElementById('card-unico');
-  var radioM = document.getElementById('radio-mensal');
-  var radioU = document.getElementById('radio-unico');
-
-  if (op === 'mensal') {
-    cardM.style.border = '2.5px solid var(--verde)';
-    cardM.style.background = 'var(--verde-xp)';
-    radioM.style.background = 'var(--verde)';
-    radioM.style.borderColor = 'var(--verde)';
-    radioM.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div>';
-    cardU.style.border = '2px solid var(--linha)';
-    cardU.style.background = 'var(--branco)';
-    radioU.style.background = 'var(--branco)';
-    radioU.style.borderColor = 'var(--linha)';
-    radioU.innerHTML = '';
-  } else {
-    cardU.style.border = '2.5px solid var(--roxo)';
-    cardU.style.background = 'var(--roxo-xp)';
-    radioU.style.background = 'var(--roxo)';
-    radioU.style.borderColor = 'var(--roxo)';
-    radioU.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div>';
-    cardM.style.border = '2px solid var(--linha)';
-    cardM.style.background = 'var(--branco)';
-    radioM.style.background = 'var(--branco)';
-    radioM.style.borderColor = 'var(--linha)';
-    radioM.innerHTML = '';
-  }
-
-  // Atualizar slider color
-  document.getElementById('slider-n').style.accentColor = op === 'mensal' ? '#12A073' : '#9B30E0';
-
-  // Atualizar textos
-  document.getElementById('calc-titulo').textContent = d.titulo;
-  document.getElementById('calc-sub').textContent = d.sub;
-  document.getElementById('calc-label-valor').textContent = d.labelValor;
-  document.getElementById('calc-itens').innerHTML = d.itens.split('|').join('<br/>');
-  document.getElementById('calc-btn').textContent = d.btn;
-  document.getElementById('calc-faixa').style.color = d.cor;
-
-  calcValor(document.getElementById('input-n').value);
-}
-
-function calcValor(n) {
-  n = Math.min(500, Math.max(1, parseInt(n) || 1));
-  document.getElementById('slider-n').value = n;
-  document.getElementById('input-n').value = n;
-
-  var d = dados[opcaoAtiva];
-  var faixas = d.faixas;
-  var fi = n <= 5 ? 0 : n <= 20 ? 1 : n <= 50 ? 2 : n <= 100 ? 3 : n <= 200 ? 4 : 5;
-  var unit = faixas[fi].unit;
-  var total = n * unit;
-
-  // PISO MÍNIMO ANTIDECRÉSCIMO
-  // O valor total nunca pode ser menor que o teto da faixa anterior
-  // Tetos: Faixa1=5*unit0, Faixa2=20*unit1, Faixa3=50*unit2
-  if (fi === 1) { var piso = 5   * faixas[0].unit; if (total < piso) total = piso; }
-  if (fi === 2) { var piso = 20  * faixas[1].unit; if (total < piso) total = piso; }
-  if (fi === 3) { var piso = 50  * faixas[2].unit; if (total < piso) total = piso; }
-  if (fi === 4) { var piso = 100 * faixas[3].unit; if (total < piso) total = piso; }
-  if (fi === 5) { var piso = 200 * faixas[4].unit; if (total < piso) total = piso; }
-
-  document.getElementById('calc-faixa').textContent = 'Faixa ' + (fi+1) + ' — ' + faixas[fi].label + ' colaboradores';
-  document.getElementById('calc-total').textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('calc-detalhe').textContent = n + ' × R$ ' + unit.toFixed(2).replace('.', ',') + (d.sufixo ? ' / colaborador/mês' : ' / colaborador · pagamento único');
-
-  // Tabela de faixas
-  var cor = opcaoAtiva === 'mensal' ? '#12A073' : '#9B30E0';
-  faixas.forEach(function(f, i) {
-    var row = document.getElementById('tf-row-' + (i+1));
-    var ativo = i === fi;
-    row.style.background = ativo ? (opcaoAtiva === 'mensal' ? 'rgba(18,160,115,0.12)' : 'rgba(123,0,196,0.12)') : 'transparent';
-    row.innerHTML =
-      '<span style="font-weight:' + (ativo?'700':'400') + ';color:' + (ativo?'#fff':'#8A9590') + ';">' + f.label + '</span>' +
-      '<span style="text-align:center;color:' + (ativo?cor:'#4A5450') + ';font-weight:' + (ativo?'700':'400') + ';">R$ ' + f.unit.toFixed(2).replace('.', ',') + '</span>' +
-      '<span style="text-align:right;color:#4A5450;font-size:11px;">' + f.ex + '</span>';
-  });
-}
-
-// Inicializar com Assinatura selecionada
-selectOpcao('mensal');
-</script>
+<div id="precos-placeholder"></div>
 
 <footer>
   <div class="footer-logo">
@@ -1075,57 +218,7 @@ selectOpcao('mensal');
   <p>Política de Privacidade · Termos de Uso</p>
 </footer>
 
-
-
-
-<script>
-var NR1MAP_CHECKOUT_URL = "https://script.google.com/macros/s/AKfycbwDh6ZydEUKFWzYUqYPe9VbulmN7MRbRbs9PoLK7DAbo4VkTqFdacfPLRodtQ2x_0_qXA/exec";
-
-async function irParaCheckout(qtd, tipo, nome, email, empresa) {
-  qtd = qtd || 1;
-  tipo = tipo || 'mensal';
-  
-  var btn = document.getElementById('btn-checkout-' + tipo);
-  if (btn) {
-    btn.textContent = 'Aguarde...';
-    btn.disabled = true;
-  }
-
-  try {
-    var url = NR1MAP_CHECKOUT_URL + 
-      '?qtd=' + qtd + 
-      '&tipo=' + tipo + 
-      '&nome=' + encodeURIComponent(nome || '') + 
-      '&email=' + encodeURIComponent(email || '') + 
-      '&empresa=' + encodeURIComponent(empresa || '');
-
-    var resp = await fetch(url);
-    var data = await resp.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert('Erro ao processar pagamento. Tente novamente.');
-      if (btn) { btn.textContent = 'Assinar agora com este valor →'; btn.disabled = false; }
-    }
-  } catch(e) {
-    alert('Erro de conexão. Tente novamente.');
-    if (btn) { btn.textContent = 'Assinar agora com este valor →'; btn.disabled = false; }
-  }
-}
-
-// Função chamada pelo botão da calculadora
-function assinarAgora() {
-  var qtd = parseInt(document.getElementById('input-n') ? document.getElementById('input-n').value : 10);
-  var tipo = window.opcaoAtiva || 'mensal';
-  irParaCheckout(qtd, tipo);
-}
-</script>
-
-<!-- ═══════════════════════════════════════════════
-     FIREBASE SDK — NR-1 Map (PSI Entrevista Inicial)
-     Firestore: coleções prefixadas com nr1map_
-     ═══════════════════════════════════════════════ -->
+<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
@@ -1136,31 +229,30 @@ function assinarAgora() {
     projectId: "entrevista-inicial",
     storageBucket: "entrevista-inicial.firebasestorage.app",
     messagingSenderId: "437375609844",
-    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1",
-    measurementId: "G-M39SQ1HHE8"
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
   };
-
-  // Inicializa apenas se ainda não inicializado (evita conflito com outros apps no mesmo projeto)
   var app;
-  try {
-    app = firebase.app('nr1map');
-  } catch(e) {
-    app = firebase.initializeApp(firebaseConfig, 'nr1map');
-  }
-
-  // Expõe o Firestore globalmente para as funções da página
+  try { app = firebase.app('nr1map'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map'); }
   window.nr1mapDb = firebase.firestore(app);
 })();
 </script>
 
+<!-- CARREGA SEÇÕES EXTERNAS + SCRIPTS -->
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/NR-1Map/sw.js')
-      .then(function(reg) { console.log('[NR-1 Map] SW registrado:', reg.scope); })
-      .catch(function(err) { console.log('[NR-1 Map] SW falhou:', err); });
-  });
+function loadSection(url, placeholderId) {
+  fetch(url)
+    .then(function(r) { return r.text(); })
+    .then(function(html) { document.getElementById(placeholderId).innerHTML = html; });
 }
+loadSection('nav.html',          'nav-placeholder');
+loadSection('assinatura.html',   'criadora-placeholder');
+loadSection('leads.html',        'leads-placeholder');
+loadSection('depoimentos.html',  'depoimentos-placeholder');
+loadSection('precos.html',       'precos-placeholder');
 </script>
+
+<!-- APP JS (carrega por último para garantir DOM das seções) -->
+<script src="app.js" defer></script>
+
 </body>
 </html>
