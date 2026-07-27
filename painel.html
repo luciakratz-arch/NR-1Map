@@ -1564,6 +1564,14 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div style="background:var(--cinza-claro);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:8px;">
       🔐 Um e-mail com link de acesso será enviado automaticamente. Se informar WhatsApp, um link também será gerado para envio via WhatsApp.
     </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <div class="form-label">Nível de acesso ao painel</div>
+      <select class="form-control" id="colab-nivel">
+        <option value="colaborador">👤 Colaborador — só acessa área pessoal</option>
+        <option value="gestor">👔 Gestor / Diretor — acessa painel RH (somente leitura)</option>
+        <option value="rh">🏢 RH — acesso completo ao painel</option>
+      </select>
+    </div>
     <div style="display:flex;gap:8px;margin-top:6px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button>
       <button class="btn btn-primary" style="flex:1;" onclick="salvarNovoColab()">Cadastrar e enviar acesso</button>
@@ -1606,6 +1614,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <select class="form-control" id="ec-status">
         <option value="ativo">Ativo</option>
         <option value="inativo">Inativo</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Nível de acesso</label>
+      <select class="form-control" id="ec-nivel">
+        <option value="colaborador">👤 Colaborador</option>
+        <option value="gestor">👔 Gestor / Diretor</option>
+        <option value="rh">🏢 RH</option>
       </select>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -2118,6 +2133,7 @@ function editarColab(btn) {
         document.getElementById('ec-unidade').value  = d.unidade || '';
         document.getElementById('ec-admissao').value = d.admissao || '';
         document.getElementById('ec-status').value   = d.status || 'ativo';
+        document.getElementById('ec-nivel').value    = d.nivelAcesso || 'colaborador';
         document.getElementById('modal-edit-colab').classList.add('open');
       })
       .catch(function(e) {
@@ -2150,7 +2166,8 @@ function salvarEditColab() {
   var depto    = document.getElementById('ec-depto').value.trim();
   var unidade  = document.getElementById('ec-unidade').value.trim();
   var admissao = document.getElementById('ec-admissao').value;
-  var status   = document.getElementById('ec-status').value || 'ativo';
+  var status      = document.getElementById('ec-status').value || 'ativo';
+  var nivelAcesso = document.getElementById('ec-nivel').value || 'colaborador';
 
   document.getElementById('modal-edit-colab').classList.remove('open');
 
@@ -2167,6 +2184,7 @@ function salvarEditColab() {
       unidade: unidade,
       admissao: admissao,
       status: status,
+      nivelAcesso: nivelAcesso,
       atualizadoEm: new Date().toISOString()
     }).then(function(){
       carregarColabs(); // recarrega lista para refletir mudanças
@@ -3027,6 +3045,8 @@ function salvarNovoColab() {
   var unidade  = (document.getElementById('colab-unidade')||{}).value.trim() || '';
   var admissao = (document.getElementById('colab-admissao')||{}).value || '';
 
+  var nivelAcesso = (document.getElementById('colab-nivel')||{}).value || 'colaborador';
+
   if (!nome)     { alert('Informe o nome do colaborador.'); return; }
   if (!email)    { alert('Informe o e-mail do colaborador.'); return; }
   if (!cargoVal) { alert('Selecione o cargo do colaborador.'); return; }
@@ -3058,6 +3078,7 @@ function salvarNovoColab() {
         unidade: unidade,
         admissao: admissao,
         status: 'ativo',
+        nivelAcesso: nivelAcesso,
         criadoEm: new Date().toISOString()
       }).then(function() {
         return window.nr1mapDb.collection('nr1map_usuarios_pf').doc(uid).set({
@@ -3066,7 +3087,8 @@ function salvarNovoColab() {
           email: email,
           cargo: cargoNome,
           cbo: cbo,
-          tipo: 'colaborador',
+          tipo: nivelAcesso === 'colaborador' ? 'colaborador' : 'gestor',
+          nivelAcesso: nivelAcesso,
           status: 'ativo',
           criadoEm: new Date().toISOString()
         });
@@ -3216,7 +3238,10 @@ function carregarColabs() {
       }
       snap.forEach(function(doc) {
         var d = doc.data();
-        var contato = d.email || d.whatsapp || '—';
+        var contato = '';
+        if (d.email) contato += d.email;
+        if (d.whatsapp) contato += (contato ? '<br><span style="font-size:11px;color:#6b7280;">📱 ' + d.whatsapp + '</span>' : d.whatsapp);
+        if (!contato) contato = '—';
         adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status);
       });
       atualizarContadorColab();
@@ -3229,6 +3254,32 @@ function carregarColabs() {
 
 <!-- FIREBASE SDK -->
 <script>
+function aplicarRestricoesPorNivel(nivel) {
+  if (nivel !== 'gestor') return;
+  // Gestor: somente leitura — esconde botões de ação
+  var style = document.createElement('style');
+  style.textContent = [
+    '.btn-danger { display:none !important; }',
+    '#btn-novo-colab { display:none !important; }',
+    '.btn[onclick*="salvar"], .btn[onclick*="excluir"], .btn[onclick*="deletar"] { display:none !important; }',
+    '#btn-importar-planilha { display:none !important; }',
+    '#btn-iniciar-diagnostico { pointer-events:none; opacity:.5; }',
+    '.sidebar-gestor-badge { display:inline-block !important; }',
+  ].join('\n');
+  document.head.appendChild(style);
+  // Badge na sidebar indicando nível
+  setTimeout(function(){
+    var nomeEl = document.querySelector('.sidebar-empresa .nome');
+    if(nomeEl && !document.getElementById('gestor-badge')){
+      var badge = document.createElement('span');
+      badge.id = 'gestor-badge';
+      badge.style.cssText = 'display:inline-block;background:#7B00C4;color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle;';
+      badge.textContent = 'GESTOR';
+      nomeEl.appendChild(badge);
+    }
+  }, 1000);
+}
+
 function carregarEmpresa(uid, email) {
   window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
   .then(function(snap){
@@ -3697,7 +3748,23 @@ function carregarCargos(empresaId) {
 
   window.nr1mapAuth.onAuthStateChanged(function(user){
     if(user){
-      carregarEmpresa(user.uid, user.email);
+      // Verifica nível de acesso antes de carregar o painel
+      window.nr1mapDb.collection('nr1map_usuarios_pf').doc(user.uid).get()
+        .then(function(doc){
+          if(doc.exists){
+            var nivel = doc.data().nivelAcesso || doc.data().tipo || '';
+            if(nivel === 'colaborador'){
+              window.nr1mapAuth.signOut();
+              alert('Acesso restrito. Use a aba Usuário para acessar sua área.');
+              window.location.href = 'admin.html';
+              return;
+            }
+            window._nivelAcesso = nivel; // 'rh', 'gestor'
+            aplicarRestricoesPorNivel(nivel);
+          }
+          carregarEmpresa(user.uid, user.email);
+        })
+        .catch(function(){ carregarEmpresa(user.uid, user.email); });
     } else {
       var uid = sessionStorage.getItem('nr1map_rh_uid');
       var email = sessionStorage.getItem('nr1map_rh_email');
