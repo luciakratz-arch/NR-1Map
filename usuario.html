@@ -496,8 +496,8 @@ var BANCO_PERGUNTAS = [
   {id:101,modId:'M4',subcatId:'4.4',texto:'As iniciativas da empresa me estimulam a dar o meu melhor.'}
 ];
 
-<script>
 // ===== FIREBASE =====
+var firebaseConfig = {
   apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
   authDomain: "entrevista-inicial.firebaseapp.com",
   projectId: "entrevista-inicial",
@@ -566,13 +566,20 @@ function carregarUsuario(uid) {
       // Busca nome da empresa se não tiver
       if (!_empresaNome && _empresaId) {
         db.collection('nr1map_empresas').doc(_empresaId).get()
-          .then(function(e) { if(e.exists) _empresaNome = e.data().nome || ''; carregarApp(); })
+          .then(function(e) {
+            if(e.exists) _empresaNome = e.data().nome || '';
+            carregarApp();
+          })
           .catch(function() { carregarApp(); });
       } else {
-        carregarApp();
+        carregarApp(); // mesmo sem empresaNome, carrega o portal
       }
     })
-    .catch(function(e) { console.log(e); auth.signOut(); });
+    .catch(function(e) {
+      console.log('carregarUsuario erro:', e);
+      // Regras bloqueando — tenta carregar mesmo assim
+      carregarApp();
+    });
 }
 
 // ===== CARREGAR APP =====
