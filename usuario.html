@@ -532,13 +532,24 @@ var _authTimeout = setTimeout(function() {
 }, 5000);
 
 auth.onAuthStateChanged(function(user) {
-  clearTimeout(_authTimeout); // cancela o timeout se Auth responder
+  clearTimeout(_authTimeout);
   if (user) {
     _uid = user.uid;
     carregarUsuario(_uid);
   } else {
-    // Não autenticado — volta para o login
-    window.location.href = 'admin.html';
+    // Tenta re-autenticar com credenciais salvas no sessionStorage
+    var email = sessionStorage.getItem('nr1map_user_email');
+    var pwd   = sessionStorage.getItem('nr1map_user_pwd');
+    if (email && pwd) {
+      auth.signInWithEmailAndPassword(email, pwd)
+        .then(function(cred) {
+          _uid = cred.user.uid;
+          carregarUsuario(_uid);
+        })
+        .catch(function() { window.location.href = 'admin.html'; });
+    } else {
+      window.location.href = 'admin.html';
+    }
   }
 });
 
