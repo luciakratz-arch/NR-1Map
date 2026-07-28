@@ -1499,22 +1499,25 @@ function entrarRH() {
     });
 }
 function entrarUser() {
-  var email = (document.getElementById('user-email')||{}).value.trim();
-  var senha = (document.getElementById('user-senha')||{}).value;
+  var email = document.getElementById('user-email').value.trim();
+  var senha = document.getElementById('user-senha').value;
   if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
   var btn = document.querySelector('#login-user .login-btn');
-  if (btn) { btn.textContent = 'Entrando...'; btn.disabled = true; }
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
   window.nr1mapAuth.signInWithEmailAndPassword(email, senha)
     .then(function(cred) {
       sessionStorage.setItem('nr1map_user_uid', cred.user.uid);
       sessionStorage.setItem('nr1map_user_email', cred.user.email);
+      sessionStorage.setItem('nr1map_user_pwd', senha);
       window.location.href = 'usuario.html';
     })
     .catch(function(e) {
       var msg = 'E-mail ou senha incorretos.';
       if (e.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos.';
       alert(msg);
-      if (btn) { btn.textContent = 'Entrar na minha área'; btn.disabled = false; }
+      btn.textContent = 'Entrar na minha área';
+      btn.disabled = false;
     });
 }
 
