@@ -526,7 +526,13 @@ var _respostas = {};
 var _respostasFreq = {};
 var _streak = 0;
 
+// Timeout de segurança — se em 5s não detectar sessão, redireciona para login
+var _authTimeout = setTimeout(function() {
+  window.location.href = 'admin.html';
+}, 5000);
+
 auth.onAuthStateChanged(function(user) {
+  clearTimeout(_authTimeout); // cancela o timeout se Auth responder
   if (user) {
     _uid = user.uid;
     carregarUsuario(_uid);
