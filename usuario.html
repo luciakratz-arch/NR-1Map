@@ -506,7 +506,7 @@ var firebaseConfig = {
   appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
 };
 var fbApp;
-try { fbApp = firebase.app('nr1map-user'); } catch(e) { fbApp = firebase.initializeApp(firebaseConfig, 'nr1map-user'); }
+try { fbApp = firebase.app('nr1map'); } catch(e) { fbApp = firebase.initializeApp(firebaseConfig, 'nr1map'); }
 var db = firebase.firestore(fbApp);
 var auth = firebase.auth(fbApp);
 
@@ -545,24 +545,14 @@ auth.onAuthStateChanged(function(user) {
 function carregarUsuario(uid) {
   db.collection('nr1map_usuarios_pf').doc(uid).get()
     .then(function(doc) {
-      if (!doc.exists) {
-        // Não é colaborador cadastrado — redireciona para login RH
-        auth.signOut();
-        window.location.href = 'admin.html';
-        return;
+      if (doc.exists) {
+        var d = doc.data();
+        _empresaId = d.empresaId || '';
+        _empresaNome = d.empresaNome || '';
+        _cargo = d.cargo || '';
+        _cbo = d.cbo || '';
+        _setor = d.departamento || d.setor || '';
       }
-      var d = doc.data();
-      if (d.tipo !== 'colaborador') {
-        // É RH ou gestor — não tem acesso aqui, vai para login
-        auth.signOut();
-        window.location.href = 'admin.html';
-        return;
-      }
-      _empresaId = d.empresaId || '';
-      _empresaNome = d.empresaNome || '';
-      _cargo = d.cargo || '';
-      _cbo = d.cbo || '';
-      _setor = d.departamento || d.setor || '';
       // Busca nome da empresa se não tiver
       if (!_empresaNome && _empresaId) {
         db.collection('nr1map_empresas').doc(_empresaId).get()
@@ -572,12 +562,11 @@ function carregarUsuario(uid) {
           })
           .catch(function() { carregarApp(); });
       } else {
-        carregarApp(); // mesmo sem empresaNome, carrega o portal
+        carregarApp();
       }
     })
     .catch(function(e) {
       console.log('carregarUsuario erro:', e);
-      // Regras bloqueando — tenta carregar mesmo assim
       carregarApp();
     });
 }
