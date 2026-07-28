@@ -3128,8 +3128,9 @@ function salvarNovoColab() {
       // WhatsApp opcional
       var msg = '✅ Colaborador cadastrado! E-mail de acesso enviado para: ' + email;
       if (whatsapp) {
+        var nomeEmp = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome && window.nr1mapEmpresa.nome !== 'Empresa') ? window.nr1mapEmpresa.nome : 'sua empresa';
         var txt = 'Olá ' + nome + '! 👋\n\nVocê foi cadastrado(a) no *NR-1 Map* de *' +
-          (window.nr1mapEmpresa.nome || 'sua empresa') + '*.\n\n' +
+          nomeEmp + '*.\n\n' +
           '📧 Acesse com o e-mail: *' + email + '*\n' +
           '🔑 Verifique seu e-mail para criar sua senha.\n\n' +
           'Acesse: https://luciakratz-arch.github.io/NR-1Map/usuario.html';
