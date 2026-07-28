@@ -545,9 +545,19 @@ auth.onAuthStateChanged(function(user) {
 function carregarUsuario(uid) {
   db.collection('nr1map_usuarios_pf').doc(uid).get()
     .then(function(doc) {
-      if (!doc.exists) { auth.signOut(); return; }
+      if (!doc.exists) {
+        // Não é colaborador cadastrado — redireciona para login RH
+        auth.signOut();
+        window.location.href = 'admin.html';
+        return;
+      }
       var d = doc.data();
-      if (d.tipo !== 'colaborador') { auth.signOut(); window.location.href = 'admin.html'; return; }
+      if (d.tipo !== 'colaborador') {
+        // É RH ou gestor — não tem acesso aqui, vai para login
+        auth.signOut();
+        window.location.href = 'admin.html';
+        return;
+      }
       _empresaId = d.empresaId || '';
       _empresaNome = d.empresaNome || '';
       _cargo = d.cargo || '';
