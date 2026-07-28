@@ -435,6 +435,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <th onclick="ordenar('admissao')">Admissão <span class="sort">↕</span></th>
               <th>Demissão</th>
               <th>Status</th>
+              <th>Acesso</th>
               <th>Link pesquisa</th>
               <th></th>
             </tr>
@@ -3136,17 +3137,23 @@ function salvarNovoColab() {
   });
 }
 
-function adicionarLinhaColab(docId, nome, contato, cargo, depto, unidade, admissao, status) {
+function adicionarLinhaColab(docId, nome, contato, cargo, depto, unidade, admissao, status, nivelAcesso) {
   var tbody = document.getElementById('tbody-colab');
   if (!tbody) return;
   var tr = document.createElement('tr');
-  tr.dataset.nome = nome || '';
+  tr.dataset.nome   = nome || '';
   tr.dataset.status = status || 'ativo';
-  tr.dataset.docid = docId;
+  tr.dataset.docid  = docId;
   var badgeStatus = status === 'ativo'
     ? '<span class="bdg-s s-ok"><span class="dot"></span>Ativo</span>'
     : '<span class="bdg-s s-warn"><span class="dot"></span>Inativo</span>';
-  tr.innerHTML = '<td>' + (nome||'—') + '</td>' +
+  var nivel = nivelAcesso || 'colaborador';
+  var badgeNivel =
+    nivel === 'rh'     ? '<span style="background:#0A6E4F;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">🏢 RH</span>' :
+    nivel === 'gestor' ? '<span style="background:#7B00C4;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">👔 Gestor</span>' :
+                         '<span style="background:#e5e7eb;color:#374151;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">👤 Colab.</span>';
+  tr.innerHTML =
+    '<td>' + (nome||'—') + '</td>' +
     '<td>' + (contato||'—') + '</td>' +
     '<td>' + (cargo||'—') + '</td>' +
     '<td>' + (depto||'—') + '</td>' +
@@ -3154,6 +3161,7 @@ function adicionarLinhaColab(docId, nome, contato, cargo, depto, unidade, admiss
     '<td>' + (admissao||'—') + '</td>' +
     '<td>—</td>' +
     '<td>' + badgeStatus + '</td>' +
+    '<td>' + badgeNivel + '</td>' +
     '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
     '<td>' +
       '<button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button>' +
@@ -3242,7 +3250,7 @@ function carregarColabs() {
         if (d.email) contato += d.email;
         if (d.whatsapp) contato += (contato ? '<br><span style="font-size:11px;color:#6b7280;">📱 ' + d.whatsapp + '</span>' : d.whatsapp);
         if (!contato) contato = '—';
-        adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status);
+        adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status, d.nivelAcesso || 'colaborador');
       });
       atualizarContadorColab();
     }).catch(function(e) {
