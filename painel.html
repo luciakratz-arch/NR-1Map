@@ -3610,12 +3610,25 @@ function dispararPesquisa(tipo) {
           return;
         }
 
-        fetch(disparoUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-        .then(function(r){ return r.json(); })
+        // Google Apps Script requer JSONP para evitar CORS
+        var cbName = 'nr1cb_' + Date.now();
+        var getUrl = disparoUrl + '?dados=' + encodeURIComponent(JSON.stringify(payload)) + '&callback=' + cbName;
+        var scriptTag = document.createElement('script');
+        scriptTag.src = getUrl;
+        var jsonpPromise = new Promise(function(resolve, reject) {
+          window[cbName] = function(res) {
+            delete window[cbName];
+            document.body.removeChild(scriptTag);
+            resolve(res);
+          };
+          scriptTag.onerror = function() {
+            delete window[cbName];
+            document.body.removeChild(scriptTag);
+            reject(new Error('Falha ao conectar com o script de disparo.'));
+          };
+        });
+        document.body.appendChild(scriptTag);
+        jsonpPromise
         .then(function(res) {
           var html = '<div style="max-height:50vh;overflow-y:auto;">';
 
