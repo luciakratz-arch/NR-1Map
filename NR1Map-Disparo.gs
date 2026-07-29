@@ -8,12 +8,12 @@ function doPost(e) { return handleDisparo(e); }
 function handleDisparo(e) {
   try {
     // Suporte a GET (params) e POST (payload JSON)
+    var cb = (e.parameter && e.parameter.callback) || null;
     var dados;
     if (e.postData && e.postData.contents) {
       dados = JSON.parse(e.postData.contents);
     } else {
       dados = e.parameter || {};
-      // Se veio como string JSON no param "dados"
       if (dados.dados) dados = JSON.parse(dados.dados);
     }
 
@@ -23,7 +23,7 @@ function handleDisparo(e) {
     var colaboradores = dados.colaboradores || []; // [{nome, email, whatsapp, token}]
 
     if (colaboradores.length === 0) {
-      return resposta({ erro: 'Nenhum colaborador recebido.' });
+      return resposta({ erro: 'Nenhum colaborador recebido.' }, cb);
     }
 
     var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
@@ -73,11 +73,11 @@ function handleDisparo(e) {
       ok: true,
       enviados: enviados.length,
       erros: erros,
-      waLinks: waLinks  // frontend abre esses links em sequência
-    });
+      waLinks: waLinks
+    }, cb);
 
   } catch(err) {
-    return resposta({ erro: err.message });
+    return resposta({ erro: err.message }, cb);
   }
 }
 
@@ -103,8 +103,14 @@ function montarEmailHTML(nome, empresa, tipotxt, link) {
     '</div></body></html>';
 }
 
-function resposta(obj) {
+function resposta(obj, callback) {
+  var json = JSON.stringify(obj);
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
   return ContentService
-    .createTextOutput(JSON.stringify(obj))
+    .createTextOutput(json)
     .setMimeType(ContentService.MimeType.JSON);
 }
