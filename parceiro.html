@@ -566,9 +566,18 @@ function exibirCredenciaisPar(email, senha) {
 
 function copiarCredenciaisPar() {
   var c = window._parCredAtual || {};
-  var texto = '🔐 Acesso NR-1 Map\n\nE-mail: ' + (c.email||'') + '\nSenha: ' + (c.senha||'') + '\nLink: painel.html';
+  var texto = '🔐 *Acesso NR-1 Map*\n\n' +
+    'Olá! Sua empresa foi cadastrada no NR-1 Map.\n\n' +
+    'Para acessar seu painel:\n' +
+    '1️⃣ Verifique seu e-mail: *' + (c.email||'') + '*\n' +
+    '2️⃣ Clique no link *Redefinir senha* que chegou\n' +
+    '⚠️ Pode estar na pasta Spam ou Atualizações!\n' +
+    '3️⃣ Crie sua senha\n' +
+    '4️⃣ Acesse: https://luciakratz-arch.github.io/NR-1Map/admin.html\n' +
+    '5️⃣ Clique na aba *RH / Empresa* e entre com seu e-mail e senha\n\n' +
+    '✅ Pronto! Seu painel estará disponível.';
   navigator.clipboard.writeText(texto).then(function(){
-    alert('✅ Credenciais copiadas!\n\nCole no WhatsApp e envie ao cliente.');
+    alert('✅ Mensagem copiada! Cole no WhatsApp e envie ao cliente.');
   }).catch(function(){ alert('Copie manualmente:\n\n' + texto); });
 }
 
