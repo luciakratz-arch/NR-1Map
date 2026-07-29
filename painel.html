@@ -2353,8 +2353,8 @@ function atualizarBadgePendentes(){
   const total=document.querySelectorAll('#tbody-plano tr').length;
   let pendentes=0;
   document.querySelectorAll('#tbody-plano tr').forEach(tr=>{
-    const status=tr.querySelector('select').value;
-    if(status!=='Concluída')pendentes++;
+    const sel=tr.querySelector('select');
+    if(sel && sel.value!=='Concluída')pendentes++;
   });
   const bdg=document.getElementById('bdg-plano-pendentes');
   if(bdg)bdg.textContent=pendentes;
