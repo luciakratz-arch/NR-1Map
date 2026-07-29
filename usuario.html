@@ -377,6 +377,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <button class="nav-item" id="nav-acolhimento" onclick="showView('acolhimento')">
       <span class="ni">🫶</span><span class="nl">Acolhimento</span>
     </button>
+    <button class="nav-item" onclick="window.location.href='instalar-app.html'">
+      <span class="ni">📲</span><span class="nl">App</span>
+    </button>
+    <button class="nav-item" onclick="sair()">
+      <span class="ni">🚪</span><span class="nl">Sair</span>
+    </button>
   </div>
 
 </div>
@@ -1045,13 +1051,13 @@ function selecionarIdentifFala(tipo) {
   var btnIden = document.getElementById('fala-btn-identificado');
   var campoNome = document.getElementById('fala-nome');
   if (tipo === 'anonimo') {
-    btnAnon.style.background = '#10b981'; btnAnon.style.color = '#fff'; btnAnon.style.borderColor = '#10b981';
-    btnIden.style.background = '#fff'; btnIden.style.color = '#374151'; btnIden.style.borderColor = '#e8ecf0';
-    campoNome.style.display = 'none';
+    btnAnon.style.background='#10b981';btnAnon.style.color='#fff';btnAnon.style.borderColor='#10b981';
+    btnIden.style.background='#fff';btnIden.style.color='#374151';btnIden.style.borderColor='#e8ecf0';
+    if(campoNome) campoNome.style.display='none';
   } else {
-    btnIden.style.background = '#10b981'; btnIden.style.color = '#fff'; btnIden.style.borderColor = '#10b981';
-    btnAnon.style.background = '#fff'; btnAnon.style.color = '#374151'; btnAnon.style.borderColor = '#e8ecf0';
-    campoNome.style.display = 'block';
+    btnIden.style.background='#10b981';btnIden.style.color='#fff';btnIden.style.borderColor='#10b981';
+    btnAnon.style.background='#fff';btnAnon.style.color='#374151';btnAnon.style.borderColor='#e8ecf0';
+    if(campoNome) { campoNome.style.display='block'; campoNome.value = _nomeColab || ''; }
   }
 }
 
