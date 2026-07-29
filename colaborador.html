@@ -1037,6 +1037,7 @@ function enviarRespostas() {
 
   tokenQuery
     .then(function(snap) {
+      console.log('STEP 1: batch commit iniciando');
       var batch = db.batch();
       batch.set(refResp, payload);
       if (!snap.empty) {
@@ -1045,7 +1046,7 @@ function enviarRespostas() {
       return batch.commit();
     })
     .then(function() {
-      // Histórico pessoal (merge)
+      console.log('STEP 2: batch OK, salvando histórico em nr1map_respostas_colab');
       return refHist.set({
         historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr }),
         streak: (_streak + 1)
