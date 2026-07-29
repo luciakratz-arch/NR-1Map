@@ -1035,17 +1035,38 @@ function enviarRespostas() {
     ? db.collection('nr1map_tokens').where('codigo', '==', _token).get()
     : Promise.resolve({ empty: true, docs: [] });
 
+  // Referência ao documento do ciclo (agrega totais)
+  var refCiclo = db.collection('nr1map_respostas').doc(_empresaId)
+    .collection('ciclos').doc(_pesquisaId);
+
   // Salvar resposta primeiro (sem depender do token)
   refResp.set(payload)
     .then(function() {
       console.log('STEP 1: resposta salva OK');
-      // Invalidar token separadamente (não bloqueia o fluxo)
+      // Invalidar token separadamente
       tokenQuery.then(function(snap) {
         if (!snap.empty) {
           snap.docs[0].ref.update({ usado: true, usadoEm: agora.toISOString() })
             .catch(function(e){ console.log('Token update ignorado:', e.message); });
         }
       }).catch(function(){});
+      // Atualizar documento do ciclo com IBP agregado
+      return refCiclo.get();
+    })
+    .then(function(cicloDoc) {
+      var totalAnterior = cicloDoc.exists ? (cicloDoc.data().totalRespostas || 0) : 0;
+      var ibpAnterior = cicloDoc.exists ? (cicloDoc.data().ibpGeral || 0) : 0;
+      var novoTotal = totalAnterior + 1;
+      var novoIbp = ((ibpAnterior * totalAnterior) + ibpGeral) / novoTotal;
+      novoIbp = Math.round(novoIbp * 100) / 100;
+      return refCiclo.set({
+        tipo: _tipoPesquisa === 'diagnostico' ? 'geral' : 'pulso',
+        empresaId: _empresaId,
+        ibpGeral: novoIbp,
+        totalRespostas: novoTotal,
+        criadoEm: cicloDoc.exists ? cicloDoc.data().criadoEm : agora.toISOString(),
+        atualizadoEm: agora.toISOString()
+      }, { merge: true });
     })
     .then(function() {
       console.log('STEP 2: salvando histórico em nr1map_respostas_colab');
