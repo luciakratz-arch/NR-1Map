@@ -194,7 +194,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <div class="header-logo">NR-1<span>Map</span></div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="font-size:12px;color:#6b7280;" id="hdr-empresa">—</div>
-      <div class="avatar">CA</div>
+      <div class="avatar" id="user-avatar">CA</div>
     </div>
   </div>
 
@@ -203,8 +203,8 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <!-- HOME -->
     <div class="view active" id="view-home">
       <div class="welcome-hero">
-        <div class="welcome-tag">Bem-vindo(a)</div>
-        <div class="welcome-title">Seu espaço privativo</div>
+        <div class="welcome-tag" id="welcome-tag">Bem-vindo(a)</div>
+        <div class="welcome-title" id="welcome-title">Seu espaço privativo</div>
         <div class="welcome-sub">Responda pesquisas, acompanhe seu bem-estar e fale o que pensa — com total anonimato.</div>
         <div class="welcome-badge">🔒 100% anônimo · RH não identifica você</div>
       </div>
@@ -298,8 +298,17 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <div style="font-size:14px;font-weight:600;color:#111827;">Espaço de Fala</div>
       </div>
       <div class="card">
-        <div class="card-title">💬 Sugestão anônima</div>
-        <div class="card-sub">Sua contribuição chega ao RH de forma agrupada — nunca identificada.</div>
+        <div class="card-title">💬 Sugestão</div>
+        <div class="card-sub">Sua contribuição chega ao RH de forma agrupada. Você escolhe se quer se identificar ou não.</div>
+        <!-- Identificação opcional -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:500;color:#374151;margin-bottom:6px;">Como enviar?</div>
+          <div style="display:flex;gap:8px;">
+            <button id="fala-btn-anonimo" onclick="selecionarIdentifFala('anonimo')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #10b981;background:#10b981;color:#fff;font-size:12px;cursor:pointer;">🔒 Anônimo</button>
+            <button id="fala-btn-identificado" onclick="selecionarIdentifFala('identificado')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e8ecf0;background:#fff;color:#374151;font-size:12px;cursor:pointer;">👤 Me identificar</button>
+          </div>
+          <input type="text" id="fala-nome" placeholder="Seu nome" style="display:none;width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box;"/>
+        </div>
         <div style="font-size:12px;font-weight:500;color:#374151;margin-bottom:8px;">Categoria</div>
         <div class="categoria-chips" id="cat-chips">
           <div class="chip sel" onclick="selCat(this)">Processos</div>
@@ -311,7 +320,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         </div>
         <textarea class="sugestao-textarea" id="sug-texto" placeholder="Descreva sua sugestão..." maxlength="500" oninput="contarChars(this)"></textarea>
         <div class="char-count" id="char-count">0 / 500</div>
-        <button class="btn-primary" style="margin-top:12px;" onclick="enviarSugestao()">Enviar anonimamente →</button>
+        <button class="btn-primary" style="margin-top:12px;" onclick="enviarSugestao()">Enviar →</button>
       </div>
     </div>
 
@@ -376,10 +385,28 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-cham-titulo">Solicitar apoio</div>
-    <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:16px;">Descreva brevemente sua situação. Você será contactado pela consultoria com total sigilo.</div>
-    <textarea style="width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:80px;" id="cham-texto" placeholder="Opcional — você pode enviar sem texto também."></textarea>
+    <!-- Info da consultora -->
+    <div style="background:#f5f0ff;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:28px;">👩‍⚕️</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#7B00C4;">Dra. Lucia Kratz</div>
+        <div style="font-size:11px;color:#6b7280;">Psicóloga · CRP 09/20590</div>
+        <div style="font-size:11px;color:#6b7280;">Atendimento inicial de orientação</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:12px;">Descreva brevemente sua situação. Você será contactada pela consultoria com total sigilo.</div>
+    <!-- Identificação opcional -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:500;color:#374151;margin-bottom:6px;">Como deseja se identificar?</div>
+      <div style="display:flex;gap:8px;">
+        <button id="btn-anonimo" onclick="selecionarIdentif('anonimo')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #7B00C4;background:#7B00C4;color:#fff;font-size:12px;cursor:pointer;">🔒 Anônimo</button>
+        <button id="btn-identificado" onclick="selecionarIdentif('identificado')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e8ecf0;background:#fff;color:#374151;font-size:12px;cursor:pointer;">👤 Me identificar</button>
+      </div>
+      <input type="text" id="cham-nome" placeholder="Seu nome (opcional)" style="display:none;width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box;"/>
+    </div>
+    <textarea style="width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:80px;box-sizing:border-box;" id="cham-texto" placeholder="Opcional — você pode enviar sem texto também."></textarea>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
-      <button style="padding:14px;border-radius:10px;border:none;background:#7B00C4;color:#fff;font-size:14px;font-weight:600;cursor:pointer;" onclick="confirmarChamado()">Enviar chamado com sigilo</button>
+      <button style="padding:14px;border-radius:10px;border:none;background:#7B00C4;color:#fff;font-size:14px;font-weight:600;cursor:pointer;" onclick="confirmarChamado()">Enviar via WhatsApp →</button>
       <button style="padding:14px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;color:#6b7280;font-size:14px;cursor:pointer;" onclick="document.getElementById('modal-chamado').classList.remove('open')">Cancelar</button>
     </div>
   </div>
@@ -514,6 +541,7 @@ var auth = firebase.auth(fbApp);
 var _uid = null;
 var _empresaId = null;
 var _empresaNome = '';
+var _nomeColab = '';
 var _tipoPesquisa = '';
 var _pesquisaId = null;
 var _cargo = '';
@@ -560,6 +588,7 @@ function carregarUsuario(uid) {
         var d = doc.data();
         _empresaId = d.empresaId || '';
         _empresaNome = d.empresaNome || '';
+      _nomeColab = d.nome || '';
         _cargo = d.cargo || '';
         _cbo = d.cbo || '';
         _setor = d.departamento || d.setor || '';
@@ -592,6 +621,20 @@ function carregarApp() {
   if (screenApp) screenApp.style.display = 'block';
   var hdrEmpresa = document.getElementById('hdr-empresa');
   if (hdrEmpresa) hdrEmpresa.textContent = _empresaNome;
+  // Boas-vindas com nome
+  var tag = document.getElementById('welcome-tag');
+  if (tag && _nomeColab) tag.textContent = 'Olá, ' + _nomeColab.split(' ')[0] + '! 👋';
+  var title = document.getElementById('welcome-title');
+  if (title) title.textContent = 'Seu espaço privativo';
+  // Avatar com iniciais
+  var av = document.getElementById('user-avatar');
+  if (av && _nomeColab) {
+    var partes = _nomeColab.trim().split(' ');
+    av.textContent = partes.length > 1
+      ? partes[0][0] + partes[partes.length-1][0]
+      : partes[0].substring(0,2);
+    av.textContent = av.textContent.toUpperCase();
+  }
 
   // Busca pesquisa ativa da empresa
   db.collection('nr1map_selecoes').doc(_empresaId).get()
@@ -973,27 +1016,210 @@ function enviarSugestao() {
 
 // ===== CANAL DE ACOLHIMENTO =====
 var _tipoChamado = '';
+var _identifChamado = 'anonimo';
+var _identifFala = 'anonimo';
+
+function selecionarIdentif(tipo) {
+  _identifChamado = tipo;
+  var btnAnon = document.getElementById('btn-anonimo');
+  var btnIden = document.getElementById('btn-identificado');
+  var campoNome = document.getElementById('cham-nome');
+  if (tipo === 'anonimo') {
+    btnAnon.style.background = '#7B00C4'; btnAnon.style.color = '#fff'; btnAnon.style.borderColor = '#7B00C4';
+    btnIden.style.background = '#fff'; btnIden.style.color = '#374151'; btnIden.style.borderColor = '#e8ecf0';
+    campoNome.style.display = 'none';
+  } else {
+    btnIden.style.background = '#7B00C4'; btnIden.style.color = '#fff'; btnIden.style.borderColor = '#7B00C4';
+    btnAnon.style.background = '#fff'; btnAnon.style.color = '#374151'; btnAnon.style.borderColor = '#e8ecf0';
+    campoNome.style.display = 'block';
+  }
+}
+
+function selecionarIdentifFala(tipo) {
+  _identifFala = tipo;
+  var btnAnon = document.getElementById('fala-btn-anonimo');
+  var btnIden = document.getElementById('fala-btn-identificado');
+  var campoNome = document.getElementById('fala-nome');
+  if (tipo === 'anonimo') {
+    btnAnon.style.background = '#10b981'; btnAnon.style.color = '#fff'; btnAnon.style.borderColor = '#10b981';
+    btnIden.style.background = '#fff'; btnIden.style.color = '#374151'; btnIden.style.borderColor = '#e8ecf0';
+    campoNome.style.display = 'none';
+  } else {
+    btnIden.style.background = '#10b981'; btnIden.style.color = '#fff'; btnIden.style.borderColor = '#10b981';
+    btnAnon.style.background = '#fff'; btnAnon.style.color = '#374151'; btnAnon.style.borderColor = '#e8ecf0';
+    campoNome.style.display = 'block';
+  }
+}
+
 function abrirChamado(tipo) {
   _tipoChamado = tipo;
+  _identifChamado = 'anonimo';
   var titulos = { apoio: 'Solicitar apoio psicológico', assedio: 'Denúncia de assédio', emergencia: 'Emergência emocional' };
   document.getElementById('modal-cham-titulo').textContent = titulos[tipo] || 'Chamado';
+  document.getElementById('cham-texto').value = '';
+  document.getElementById('cham-nome').value = '';
+  document.getElementById('cham-nome').style.display = 'none';
+  document.getElementById('btn-anonimo').style.background = '#7B00C4';
+  document.getElementById('btn-anonimo').style.color = '#fff';
+  document.getElementById('btn-identificado').style.background = '#fff';
+  document.getElementById('btn-identificado').style.color = '#374151';
   document.getElementById('modal-chamado').classList.add('open');
 }
+
 function confirmarChamado() {
   var texto = document.getElementById('cham-texto').value.trim();
+  var nomeId = _identifChamado === 'identificado'
+    ? (document.getElementById('cham-nome').value.trim() || 'Identificado')
+    : 'Anônimo';
+  var tipoLabel = { apoio: 'Apoio Psicológico', assedio: 'Denúncia de Assédio', emergencia: 'Emergência Emocional' }[_tipoChamado] || _tipoChamado;
+
+  // Salva no Firestore
   db.collection('nr1map_chamados').add({
     empresaId: _empresaId,
+    empresaNome: _empresaNome,
+    cargo: _cargo,
     tipo: _tipoChamado,
+    identificacao: nomeId,
     texto: texto || '(sem descrição)',
     criadoEm: new Date().toISOString()
+  });
+
+  // Abre WhatsApp com mensagem pré-formatada para Dra. Lucia
+  var msg = '🆘 *NR-1 Map — Canal de Acolhimento*\n\n' +
+    '*Tipo:* ' + tipoLabel + '\n' +
+    '*Empresa:* ' + (_empresaNome || 'Não informada') + '\n' +
+    '*Cargo:* ' + (_cargo || 'Não informado') + '\n' +
+    '*Identificação:* ' + nomeId + '\n\n' +
+    (texto ? '*Mensagem:* ' + texto + '\n\n' : '') +
+    '_(Enviado pelo portal NR-1 Map)_';
+
+  document.getElementById('modal-chamado').classList.remove('open');
+  window.open('https://wa.me/5562991546757?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function enviarSugestao() {
+  var texto = document.getElementById('sug-texto').value.trim();
+  var cat = '';
+  document.querySelectorAll('.chip.sel').forEach(function(c){ cat = c.textContent; });
+  if (!texto) { alert('Digite sua sugestão antes de enviar.'); return; }
+  var nomeId = _identifFala === 'identificado'
+    ? (document.getElementById('fala-nome').value.trim() || 'Identificado')
+    : 'Anônimo';
+  db.collection('nr1map_sugestoes').add({
+    empresaId: _empresaId,
+    empresaNome: _empresaNome,
+    cargo: _cargo,
+    categoria: cat,
+    identificacao: nomeId,
+    texto: texto,
+    criadoEm: new Date().toISOString()
   }).then(function() {
-    document.getElementById('modal-chamado').classList.remove('open');
-    document.getElementById('cham-texto').value = '';
-    alert('Chamado registrado com sigilo. A consultoria entrará em contato em breve.');
+    document.getElementById('sug-texto').value = '';
+    document.getElementById('char-count').textContent = '0 / 500';
+    alert('Sugestão enviada com sucesso!');
   }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
 }
 
 function sair() {
   auth.signOut().then(function() { window.location.href = 'admin.html'; });
 }
+</script>
+
+<!-- TECLADO VIRTUAL -->
+<div id="teclado-virtual" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:#f1f5f9;border-top:1px solid #e2e8f0;padding:8px;z-index:9999;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="font-size:11px;color:#6b7280;">Teclado virtual</span>
+    <button onclick="fecharTeclado()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;">✕</button>
+  </div>
+  <div id="tv-linhas"></div>
+  <div style="display:flex;gap:4px;margin-top:4px;">
+    <button onclick="tvEspaco()" style="flex:3;padding:10px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;">espaço</button>
+    <button onclick="tvApagar()" style="flex:1;padding:10px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;">⌫</button>
+    <button onclick="fecharTeclado()" style="flex:1;padding:10px;background:#10b981;border:none;border-radius:6px;font-size:13px;color:#fff;cursor:pointer;">OK</button>
+  </div>
+</div>
+
+<script>
+var _tvCampo = null;
+var _tvMaiusculo = false;
+var _tvTeclas = [
+  ['1','2','3','4','5','6','7','8','9','0'],
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['⇧','z','x','c','v','b','n','m','.','@']
+];
+
+function abrirTeclado(campo) {
+  _tvCampo = campo;
+  _tvMaiusculo = false;
+  renderTeclado();
+  document.getElementById('teclado-virtual').style.display = 'block';
+  setTimeout(function() { campo.scrollIntoView({behavior:'smooth',block:'center'}); }, 100);
+}
+
+function fecharTeclado() {
+  document.getElementById('teclado-virtual').style.display = 'none';
+  _tvCampo = null;
+}
+
+function renderTeclado() {
+  var linhas = document.getElementById('tv-linhas');
+  linhas.innerHTML = '';
+  _tvTeclas.forEach(function(linha) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:3px;margin-bottom:4px;justify-content:center;';
+    linha.forEach(function(t) {
+      var btn = document.createElement('button');
+      var label = (t === '⇧') ? '⇧' : (_tvMaiusculo ? t.toUpperCase() : t);
+      btn.textContent = label;
+      btn.style.cssText = 'flex:1;max-width:36px;padding:9px 4px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;';
+      if (t === '⇧') btn.style.background = _tvMaiusculo ? '#7B00C4' : '#fff';
+      btn.onclick = function() {
+        if (t === '⇧') { _tvMaiusculo = !_tvMaiusculo; renderTeclado(); return; }
+        if (_tvCampo) {
+          var v = _tvCampo.value;
+          var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
+          var char = _tvMaiusculo ? t.toUpperCase() : t;
+          _tvCampo.value = v.substring(0,s) + char + v.substring(s);
+          _tvCampo.selectionStart = _tvCampo.selectionEnd = s + 1;
+          _tvCampo.dispatchEvent(new Event('input'));
+        }
+      };
+      div.appendChild(btn);
+    });
+    linhas.appendChild(div);
+  });
+}
+
+function tvEspaco() {
+  if (!_tvCampo) return;
+  var v = _tvCampo.value;
+  var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
+  _tvCampo.value = v.substring(0,s) + ' ' + v.substring(s);
+  _tvCampo.selectionStart = _tvCampo.selectionEnd = s + 1;
+}
+
+function tvApagar() {
+  if (!_tvCampo) return;
+  var v = _tvCampo.value;
+  var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
+  if (s > 0) {
+    _tvCampo.value = v.substring(0,s-1) + v.substring(s);
+    _tvCampo.selectionStart = _tvCampo.selectionEnd = s - 1;
+    _tvCampo.dispatchEvent(new Event('input'));
+  }
+}
+
+// Ativa teclado virtual em todos os campos ao focar
+document.addEventListener('DOMContentLoaded', function() {
+  function ativarTV(el) {
+    if (el.getAttribute('data-tv')) return;
+    el.setAttribute('data-tv','1');
+    el.addEventListener('focus', function() { abrirTeclado(el); });
+  }
+  document.querySelectorAll('input[type=text],input[type=email],textarea').forEach(ativarTV);
+  new MutationObserver(function() {
+    document.querySelectorAll('input[type=text],input[type=email],textarea').forEach(ativarTV);
+  }).observe(document.body, {childList:true, subtree:true});
+});
 </script>
