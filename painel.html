@@ -3019,8 +3019,10 @@ function carregarAgenda() {
           '<div class="agenda-info"><h4>'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+(d.tema?' — '+d.tema:'')+'</h4>'+
           '<p>'+info.join(' · ')+'</p></div>'+
           '<span class="agenda-tipo '+tipoCls+'">'+tipoLabel+'</span>'+
-          '<button class="btn-del-ag" style="margin-left:8px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">🗑️</button>';
+          '<button class="btn-edit-ag" style="background:none;border:none;cursor:pointer;color:#7B00C4;font-size:14px;margin-left:4px;">✏️</button>'+
+          '<button class="btn-del-ag" style="margin-left:4px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">🗑️</button>';
         div.querySelector('.btn-del-ag').addEventListener('click', (function(id){ return function(){ excluirAgendamento(id); }; })(item.id));
+        div.querySelector('.btn-edit-ag').addEventListener('click', (function(item){ return function(){ editarAgendamento(item); }; })(item));
         lista.appendChild(div);
       });
       if (titulo) titulo.textContent = 'Agenda';
@@ -3036,7 +3038,7 @@ function salvarAgendamento() {
   var agTipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso';
   var agCanal = document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp';
   var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
-  window.nr1mapDb.collection('nr1map_agenda').add({
+  var agendaData = {
     empresaId: empresaId,
     tipo: agTipo,
     tema: document.getElementById('ag-tema') ? document.getElementById('ag-tema').value.trim() : '',
@@ -3045,15 +3047,37 @@ function salvarAgendamento() {
     unidade: agUnidade,
     status: data === hoje ? 'disparado' : 'agendado',
     criadoEm: new Date().toISOString()
-  }).then(function() {
+  };
+
+  var promise;
+  if (window._editAgendaId) {
+    promise = window.nr1mapDb.collection('nr1map_agenda').doc(window._editAgendaId).update(agendaData);
+    window._editAgendaId = null;
+  } else {
+    promise = window.nr1mapDb.collection('nr1map_agenda').add(agendaData);
+  }
+
+  promise.then(function() {
     fecharModal('modal-agendar');
     carregarAgenda();
-    // Se data for hoje, navegar para tela de disparo após fechar modal
     if (data === hoje) {
       var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
       setTimeout(function(){ sv(tipoDisparo); }, 600);
     }
   }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function editarAgendamento(item) {
+  var d = item.d;
+  // Preencher modal com dados existentes
+  if (document.getElementById('ag-tipo')) document.getElementById('ag-tipo').value = d.tipo || 'geral';
+  if (document.getElementById('ag-data')) document.getElementById('ag-data').value = d.data || '';
+  if (document.getElementById('ag-prazo')) document.getElementById('ag-prazo').value = d.prazo || '7';
+  if (document.getElementById('ag-unidade')) document.getElementById('ag-unidade').value = d.unidade || 'Todas';
+  if (document.getElementById('ag-canal')) document.getElementById('ag-canal').value = d.canal || 'WhatsApp';
+  // Armazenar id para atualizar em vez de criar novo
+  window._editAgendaId = item.id;
+  abrirModal('modal-agendar');
 }
 
 function excluirAgendamento(docId) {
