@@ -1378,7 +1378,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
       <div class="topbar-title">🧩 Módulos e Perguntas — Selecionar</div>
     </div>
-    <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
+      <button class="btn btn-primary btn-sm" onclick="_salvarSelecoes();this.textContent='✅ Salvo!';var b=this;setTimeout(function(){b.textContent='💾 Salvar seleção';},2000);">💾 Salvar seleção</button>
+    </div>
   </div>
   <div class="content">
 
