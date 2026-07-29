@@ -736,6 +736,30 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <button class="btn btn-roxo" style="width:100%;" onclick="solicitarAssinaturaLucia()">📋 Solicitar Assinatura da Dra. Lucia Kratz</button>
         </div>
 
+        <!-- OUVIDORIA -->
+        <div style="margin-top:18px;">
+          <div class="title" style="margin-bottom:6px;">📣 Canal de Ouvidoria</div>
+          <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:14px;">
+            Configure o canal de ouvidoria da empresa. Este e-mail receberá os chamados enviados pelos colaboradores pelo Canal de Acolhimento, com número de protocolo automático para rastreamento.
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">Nome do Responsável pela Ouvidoria</div>
+            <input class="form-control" id="ouv-nome" placeholder="Ex: Maria Silva — Gestora de RH"/>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">E-mail da Ouvidoria *</div>
+            <input class="form-control" type="email" id="ouv-email" placeholder="ouvidoria@suaempresa.com.br"/>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Telefone / WhatsApp (opcional)</div>
+            <input class="form-control" id="ouv-telefone" placeholder="(62) 9 9999-0000"/>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;font-size:11px;color:#166534;line-height:1.6;margin-bottom:14px;">
+            🔒 Os chamados chegam com número de protocolo automático (ex: <strong>OUV-2026-0001</strong>), data, tipo e — se o colaborador optar — o nome dele. O anonimato é preservado quando solicitado.
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="salvarOuvidoria()">💾 Salvar Canal de Ouvidoria</button>
+        </div>
+
       </div>
     </div>
 
@@ -2254,7 +2278,7 @@ function sv(id){
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
-  if(id==='cobranding') _carregarResponsavelTecnico();
+  if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); }
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
   if(id==='mapa-risco' && window.nr1mapEmpresa) carregarMapaRisco(window.nr1mapEmpresa.id);
   if(id==='relatorio-anual' && window.nr1mapEmpresa) carregarRelatorioAnual(window.nr1mapEmpresa.id);
@@ -2372,6 +2396,36 @@ function gerarPdfPlano(){
 
 
 /* ===== RESPONSÁVEL TÉCNICO ===== */
+function salvarOuvidoria() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var nome     = (document.getElementById('ouv-nome')||{}).value.trim();
+  var email    = (document.getElementById('ouv-email')||{}).value.trim();
+  var telefone = (document.getElementById('ouv-telefone')||{}).value.trim();
+  if (!email) { alert('Informe o e-mail da ouvidoria.'); return; }
+  var btn = document.querySelector('[onclick="salvarOuvidoria()"]');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update({
+    ouvidoria: { nome: nome, email: email, telefone: telefone }
+  }).then(function() {
+    if (btn) { btn.textContent = '💾 Salvar Canal de Ouvidoria'; btn.disabled = false; }
+    alert('Canal de ouvidoria salvo com sucesso!');
+  }).catch(function(e) {
+    if (btn) { btn.textContent = '💾 Salvar Canal de Ouvidoria'; btn.disabled = false; }
+    alert('Erro ao salvar: ' + e.message);
+  });
+}
+
+function carregarOuvidoria(empresa) {
+  var ouv = empresa.ouvidoria || {};
+  var n = document.getElementById('ouv-nome');
+  var e = document.getElementById('ouv-email');
+  var t = document.getElementById('ouv-telefone');
+  if (n) n.value = ouv.nome || '';
+  if (e) e.value = ouv.email || '';
+  if (t) t.value = ouv.telefone || '';
+}
+
 function salvarResponsavelTecnico() {
   var nome      = document.getElementById('rt-nome').value.trim();
   var cargo     = document.getElementById('rt-cargo').value.trim();
