@@ -210,7 +210,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .link-box .link-url{flex:1;font-family:monospace;font-size:11px;color:var(--verde);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* DISPARO OPTS */
-.disparo-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.disparo-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
 .d-opt{border:2px solid var(--linha);border-radius:8px;padding:14px;cursor:pointer;transition:all .15s;text-align:center;}
 .d-opt:hover{border-color:var(--verde-claro);background:var(--verde-xp);}
 .d-opt.sel{border-color:var(--verde);background:var(--verde-xp);}
@@ -1454,6 +1454,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div class="disparo-opts">
             <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
             <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
           </div>
         </div>
         <!-- Seletor de versão -->
@@ -1540,8 +1541,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
             </div>
           </div>
-            <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
-            <div class="form-group"><div class="form-label">Canal</div><select class="form-control"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
+            <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control" id="pulso-unidade"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
+            <div class="form-group"><div class="form-label">Canal</div><select class="form-control" id="pulso-canal"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
           </div>
           <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPesquisa('pulso')">📡 Disparar Pesquisa Pulso</button>
         </div>
@@ -3027,17 +3028,30 @@ function salvarAgendamento() {
   if (!empresaId || !window.nr1mapDb) return;
   var data = document.getElementById('ag-data') ? document.getElementById('ag-data').value : '';
   if (!data) { alert('Selecione a data de disparo.'); return; }
+  var hoje = new Date().toISOString().slice(0,10);
+  var agTipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso';
+  var agCanal = document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp';
+  var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
   window.nr1mapDb.collection('nr1map_agenda').add({
     empresaId: empresaId,
-    tipo: document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso',
+    tipo: agTipo,
     tema: document.getElementById('ag-tema') ? document.getElementById('ag-tema').value.trim() : '',
     data: data,
-    canal: document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp',
-    status: 'agendado',
+    canal: agCanal,
+    unidade: agUnidade,
+    status: data === hoje ? 'disparado' : 'agendado',
     criadoEm: new Date().toISOString()
   }).then(function() {
     fecharModal('modal-agendar');
     carregarAgenda();
+    // Se data for hoje, navegar para tela de disparo
+    if (data === hoje) {
+      var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+      sv(tipoDisparo);
+      setTimeout(function(){
+        alert('✅ Agendado! Configure o canal e dispare agora.');
+      }, 400);
+    }
   }).catch(function(e){ alert('Erro: ' + e.message); });
 }
 
@@ -3565,12 +3579,16 @@ function dispararPesquisa(tipo) {
           html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);">';
           html += '<span style="font-size:13px;color:var(--preto);">' + l.nome + '</span>';
           var canalOpt = document.querySelector('.d-opt.sel .d-lb');
-          var canal = canalOpt ? canalOpt.textContent.trim() : 'WhatsApp';
+          var canalVal = canalOpt ? canalOpt.textContent.trim() : 'WhatsApp';
+          if (tipo === 'pulso') {
+            var pulsoCanal = document.getElementById('pulso-canal');
+            if (pulsoCanal) canalVal = pulsoCanal.value;
+          }
           html += '<div style="display:flex;gap:6px;">';
-          if (canal === 'WhatsApp' || canal === 'Ambos') {
+          if (canalVal === 'WhatsApp' || canalVal === 'Ambos') {
             html += '<a href="' + waUrl + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">📱 WhatsApp</a>';
           }
-          if (canal === 'E-mail' || canal === 'Ambos') {
+          if (canalVal === 'E-mail' || canalVal === 'Ambos') {
             var assunto = encodeURIComponent('Pesquisa de bem-estar — ' + tipotxt);
             var corpo = encodeURIComponent('Olá ' + l.nome + ',\n\nSua empresa está realizando uma pesquisa de bem-estar no trabalho.\n\nSuas respostas são 100% anônimas.\n\nAcesse: ' + link + '\n\nO link expira em 48 horas.');
             var emailUrl = l.email ? 'mailto:' + l.email + '?subject=' + assunto + '&body=' + corpo : '#';
