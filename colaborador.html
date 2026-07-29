@@ -1035,18 +1035,20 @@ function enviarRespostas() {
     ? db.collection('nr1map_tokens').where('codigo', '==', _token).get()
     : Promise.resolve({ empty: true, docs: [] });
 
-  tokenQuery
-    .then(function(snap) {
-      console.log('STEP 1: batch commit iniciando');
-      var batch = db.batch();
-      batch.set(refResp, payload);
-      if (!snap.empty) {
-        batch.update(snap.docs[0].ref, { usado: true, usadoEm: agora.toISOString() });
-      }
-      return batch.commit();
+  // Salvar resposta primeiro (sem depender do token)
+  refResp.set(payload)
+    .then(function() {
+      console.log('STEP 1: resposta salva OK');
+      // Invalidar token separadamente (não bloqueia o fluxo)
+      tokenQuery.then(function(snap) {
+        if (!snap.empty) {
+          snap.docs[0].ref.update({ usado: true, usadoEm: agora.toISOString() })
+            .catch(function(e){ console.log('Token update ignorado:', e.message); });
+        }
+      }).catch(function(){});
     })
     .then(function() {
-      console.log('STEP 2: batch OK, salvando histórico em nr1map_respostas_colab');
+      console.log('STEP 2: salvando histórico em nr1map_respostas_colab');
       return refHist.set({
         historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr }),
         streak: (_streak + 1)
