@@ -164,7 +164,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <div class="termo-demo-label">Experimente o termômetro abaixo:</div>
     <div class="slider-wrap">
       <div id="demo-valor" style="text-align:center;font-size:28px;font-weight:700;color:#f59e0b;margin-bottom:4px;">0</div>
-      <div id="demo-zona" style="text-align:center;font-size:12px;font-weight:500;color:#92400e;margin-bottom:14px;">Zona de Defesa Oculta</div>
+      <div id="demo-zona" style="text-align:center;font-size:12px;font-weight:500;color:#92400e;margin-bottom:14px;">Vale observar</div>
       <input type="range" class="slider-input" min="-50" max="50" value="0" oninput="demoSlider(this)" style="width:100%;"/>
       <div class="slider-labels-row">
         <span>−5<br/>Sofrimento</span>
@@ -178,21 +178,21 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#fee2e2;border-radius:10px;border-left:4px solid #ef4444;">
       <span style="font-size:20px;flex-shrink:0;">😔</span>
       <div>
-        <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:2px;">Sofrimento Patogênico (−5 a −1,5)</div>
+        <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:2px;">Momento difícil</div>
         <div style="font-size:11px;color:#7f1d1d;line-height:1.5;">Arraste para a esquerda quando algo está te prejudicando de verdade no trabalho.</div>
       </div>
     </div>
     <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#fef3c7;border-radius:10px;border-left:4px solid #f59e0b;">
       <span style="font-size:20px;flex-shrink:0;">😐</span>
       <div>
-        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:2px;">Defesa Oculta (−1,4 a +1,4)</div>
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:2px;">Vale observar</div>
         <div style="font-size:11px;color:#78350f;line-height:1.5;">Zona intermediária — nem bom, nem ruim. Pode esconder cansaço acumulado.</div>
       </div>
     </div>
     <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#dcfce7;border-radius:10px;border-left:4px solid #10b981;">
       <span style="font-size:20px;flex-shrink:0;">😊</span>
       <div>
-        <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:2px;">Terreno Fértil (+1,5 a +5)</div>
+        <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:2px;">Você está bem!</div>
         <div style="font-size:11px;color:#14532d;line-height:1.5;">Arraste para a direita quando você sente prazer, propósito e bem-estar no trabalho.</div>
       </div>
     </div>
@@ -768,7 +768,7 @@ function carregarHistorico() {
       lista.innerHTML = '';
       hist.slice(-6).reverse().forEach(function(h) {
         var cor = h.ibp >= 1.5 ? '#10b981' : h.ibp <= -1.5 ? '#ef4444' : '#f59e0b';
-        var zona = h.ibp >= 1.5 ? 'Terreno Fértil' : h.ibp <= -1.5 ? 'Sofrimento Patogênico' : 'Defesa Oculta';
+        var zona = h.ibp >= 1.5 ? 'Você está bem!' : h.ibp <= -1.5 ? 'Momento difícil' : 'Vale observar';
         var item = document.createElement('div');
         item.className = 'hist-item';
         item.innerHTML = '<div class="hist-dot" style="background:'+cor+';"></div>' +
@@ -802,9 +802,9 @@ function demoSlider(input) {
   var rounded = Math.round(val * 10) / 10;
   document.getElementById('demo-valor').textContent = (rounded > 0 ? '+' : '') + rounded.toFixed(1);
   var cor, zona;
-  if (val >= 1.5) { cor = '#10b981'; zona = 'Terreno Fértil'; }
-  else if (val <= -1.5) { cor = '#ef4444'; zona = 'Sofrimento Patogênico'; }
-  else { cor = '#f59e0b'; zona = 'Defesa Oculta'; }
+  if (val >= 1.5) { cor = '#10b981'; zona = 'Você está bem!'; }
+  else if (val <= -1.5) { cor = '#ef4444'; zona = 'Momento difícil'; }
+  else { cor = '#f59e0b'; zona = 'Vale observar'; }
   document.getElementById('demo-valor').style.color = cor;
   document.getElementById('demo-zona').style.color = cor;
   document.getElementById('demo-zona').textContent = zona;
@@ -962,9 +962,9 @@ function freqParaValor(freq, invertida) {
 }
 
 function getZona(v) {
-  if (v >= 1.5) return { nome: 'Terreno Fértil', cor: '#10b981' };
-  if (v <= -1.5) return { nome: 'Sofrimento Patogênico', cor: '#ef4444' };
-  return { nome: 'Defesa Oculta', cor: '#f59e0b' };
+  if (v >= 1.5) return { nome: 'Você está bem!', cor: '#10b981' };
+  if (v <= -1.5) return { nome: 'Momento difícil', cor: '#ef4444' };
+  return { nome: 'Vale observar', cor: '#f59e0b' };
 }
 
 function blocoCompleto() {
