@@ -3,6 +3,17 @@
 // Scripts da landing page (index.html)
 // ═══════════════════════════════════════
 
+// ─── NAV MOBILE ─────────────────────────
+function toggleNavMobile(){
+  var m=document.getElementById('nav-mobile-menu');
+  var b=document.getElementById('nav-hamburguer');
+  if(!m||!b) return;
+  var open=m.style.display==='flex';
+  m.style.display=open?'none':'flex';
+  m.style.pointerEvents=open?'none':'all';
+  b.textContent=open?'☰':'✕';
+}
+
 // ─── FAQ ────────────────────────────────
 function toggleFaq(btn) {
   var item = btn.parentElement;
