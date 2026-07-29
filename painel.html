@@ -2290,9 +2290,10 @@ function sv(id){
   if(id==='planejamento') carregarAgenda();
 }
 function swTab(tab,targetId){
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  var container = tab.closest('.card') || document;
+  container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   tab.classList.add('active');
-  parent.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
+  container.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
   const t=document.getElementById(targetId);
   if(t)t.classList.add('active');
 }
