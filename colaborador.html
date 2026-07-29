@@ -662,9 +662,10 @@ function carregarApp() {
   document.getElementById('hdr-empresa').textContent = _empresaNome;
 
   // Carrega seleções da empresa e pesquisa ativa
+  // Usar Promise.allSettled para não bloquear se alguma coleção der erro de permissão
   Promise.all([
-    db.collection('nr1map_selecoes').doc(_empresaId).get(),
-    db.collection('nr1map_streak').doc(_empresaId + '_' + _pesquisaId).get()
+    db.collection('nr1map_selecoes').doc(_empresaId).get().catch(function(){ return {exists:false, data:function(){return {};}}; }),
+    db.collection('nr1map_streak').doc(_empresaId + '_' + _pesquisaId).get().catch(function(){ return {exists:false, data:function(){return {};}}; })
   ]).then(function(results) {
     var selDoc = results[0];
     var strDoc = results[1];
