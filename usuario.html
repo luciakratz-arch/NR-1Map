@@ -335,7 +335,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <span style="font-size:24px;">🧠</span>
         <div>
           <div style="font-size:13px;font-weight:600;color:#111827;">Solicitar apoio psicológico</div>
-          <div style="font-size:11px;color:#6b7280;">Será encaminhado à <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-apoio"></span> para atendimento inicial de orientação.</div>
+          <div style="font-size:11px;color:#6b7280;">Quero conversar com um profissional de saúde mental.</div>
         </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
@@ -343,7 +343,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <span style="font-size:24px;">🛡️</span>
         <div>
           <div style="font-size:13px;font-weight:600;color:#111827;">Denúncia de assédio</div>
-          <div style="font-size:11px;color:#6b7280;">Será encaminhado à <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-assedio"></span> com sigilo absoluto e número de protocolo.</div>
+          <div style="font-size:11px;color:#6b7280;">Relato sigiloso de situação de abuso no trabalho.</div>
         </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
@@ -351,7 +351,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <span style="font-size:24px;">🆘</span>
         <div>
           <div style="font-size:13px;font-weight:600;color:#111827;">Situação de emergência emocional</div>
-          <div style="font-size:11px;color:#6b7280;">Contato imediato com a <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-emergencia"></span>. Você receberá um protocolo de atendimento.</div>
+          <div style="font-size:11px;color:#6b7280;">Estou em crise e preciso de apoio imediato.</div>
         </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
@@ -409,6 +409,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <div style="font-size:12px;font-weight:600;color:#7B00C4;">Dra. Lucia Kratz</div>
         <div style="font-size:11px;color:#6b7280;">Psicóloga · CRP 09/20590</div>
         <div style="font-size:11px;color:#6b7280;">Atendimento inicial de orientação</div>
+        <div id="modal-aviso-ouvidoria" style="display:none;font-size:11px;color:#7B00C4;margin-top:3px;font-weight:500;"></div>
       </div>
     </div>
     <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:12px;">Descreva brevemente sua situação. Você será contactada pela consultoria com total sigilo.</div>
@@ -1175,13 +1176,14 @@ function enviarSugestao() {
 }
 
 function atualizarAvisosOuvidoria(ouv) {
-  var sufixo = ouv && ouv.nome
-    ? ' e à ouvidoria da empresa (' + ouv.nome + ')'
-    : ' e à ouvidoria da empresa (se cadastrada)';
-  ['apoio','assedio','emergencia'].forEach(function(tipo) {
-    var el = document.getElementById('aviso-ouv-' + tipo);
-    if (el) el.textContent = sufixo;
-  });
+  var el = document.getElementById('modal-aviso-ouvidoria');
+  if (!el) return;
+  if (ouv && ouv.nome) {
+    el.textContent = '📣 Também notifica a ouvidoria: ' + ouv.nome;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 function abrirWppEmergencia() {
