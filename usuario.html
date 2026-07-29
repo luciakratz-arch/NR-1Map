@@ -353,10 +353,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
           <div><div style="font-size:13px;font-weight:600;color:#166534;">WhatsApp de emergência</div><div style="font-size:12px;color:#16a34a;">Toque para acionar agora</div></div>
         </div>
       </a>
-      <div style="margin-top:12px;display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;border:1.5px solid #e8ecf0;">
-        <span style="font-size:24px;">📞</span>
-        <div><div style="font-size:13px;font-weight:600;color:#111827;">CVV</div><div style="font-size:12px;color:#6b7280;">Ligue <strong>188</strong> · 24h · gratuito · sigiloso</div></div>
-      </div>
+      <a href="tel:188" style="text-decoration:none;">
+        <div style="margin-top:12px;display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;border:1.5px solid #e8ecf0;cursor:pointer;">
+          <span style="font-size:24px;">📞</span>
+          <div><div style="font-size:13px;font-weight:600;color:#111827;">CVV</div><div style="font-size:12px;color:#6b7280;">Ligue <strong>188</strong> · 24h · gratuito · sigiloso</div></div>
+        </div>
+      </a>
     </div>
 
   </div><!-- /main -->
@@ -402,7 +404,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <button id="btn-anonimo" onclick="selecionarIdentif('anonimo')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #7B00C4;background:#7B00C4;color:#fff;font-size:12px;cursor:pointer;">🔒 Anônimo</button>
         <button id="btn-identificado" onclick="selecionarIdentif('identificado')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e8ecf0;background:#fff;color:#374151;font-size:12px;cursor:pointer;">👤 Me identificar</button>
       </div>
-      <input type="text" id="cham-nome" placeholder="Seu nome (opcional)" style="display:none;width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box;"/>
+      <div id="cham-nome-display" style="display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:#f5f0ff;font-size:13px;color:#7B00C4;font-weight:500;">👤 <span id="cham-nome-txt"></span></div>
     </div>
     <textarea style="width:100%;padding:12px;border-radius:10px;border:1.5px solid #e8ecf0;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:80px;box-sizing:border-box;" id="cham-texto" placeholder="Opcional — você pode enviar sem texto também."></textarea>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
@@ -1023,15 +1025,17 @@ function selecionarIdentif(tipo) {
   _identifChamado = tipo;
   var btnAnon = document.getElementById('btn-anonimo');
   var btnIden = document.getElementById('btn-identificado');
-  var campoNome = document.getElementById('cham-nome');
+  var nomeDisplay = document.getElementById('cham-nome-display');
+  var nomeTxt = document.getElementById('cham-nome-txt');
   if (tipo === 'anonimo') {
-    btnAnon.style.background = '#7B00C4'; btnAnon.style.color = '#fff'; btnAnon.style.borderColor = '#7B00C4';
-    btnIden.style.background = '#fff'; btnIden.style.color = '#374151'; btnIden.style.borderColor = '#e8ecf0';
-    campoNome.style.display = 'none';
+    btnAnon.style.background='#7B00C4';btnAnon.style.color='#fff';btnAnon.style.borderColor='#7B00C4';
+    btnIden.style.background='#fff';btnIden.style.color='#374151';btnIden.style.borderColor='#e8ecf0';
+    if(nomeDisplay) nomeDisplay.style.display='none';
   } else {
-    btnIden.style.background = '#7B00C4'; btnIden.style.color = '#fff'; btnIden.style.borderColor = '#7B00C4';
-    btnAnon.style.background = '#fff'; btnAnon.style.color = '#374151'; btnAnon.style.borderColor = '#e8ecf0';
-    campoNome.style.display = 'block';
+    btnIden.style.background='#7B00C4';btnIden.style.color='#fff';btnIden.style.borderColor='#7B00C4';
+    btnAnon.style.background='#fff';btnAnon.style.color='#374151';btnAnon.style.borderColor='#e8ecf0';
+    if(nomeDisplay) nomeDisplay.style.display='block';
+    if(nomeTxt) nomeTxt.textContent = _nomeColab || 'Colaborador';
   }
 }
 
@@ -1057,19 +1061,19 @@ function abrirChamado(tipo) {
   var titulos = { apoio: 'Solicitar apoio psicológico', assedio: 'Denúncia de assédio', emergencia: 'Emergência emocional' };
   document.getElementById('modal-cham-titulo').textContent = titulos[tipo] || 'Chamado';
   document.getElementById('cham-texto').value = '';
-  document.getElementById('cham-nome').value = '';
-  document.getElementById('cham-nome').style.display = 'none';
-  document.getElementById('btn-anonimo').style.background = '#7B00C4';
-  document.getElementById('btn-anonimo').style.color = '#fff';
-  document.getElementById('btn-identificado').style.background = '#fff';
-  document.getElementById('btn-identificado').style.color = '#374151';
+  var nd = document.getElementById('cham-nome-display');
+  if(nd) nd.style.display='none';
+  var ba = document.getElementById('btn-anonimo');
+  var bi = document.getElementById('btn-identificado');
+  if(ba){ba.style.background='#7B00C4';ba.style.color='#fff';}
+  if(bi){bi.style.background='#fff';bi.style.color='#374151';}
   document.getElementById('modal-chamado').classList.add('open');
 }
 
 function confirmarChamado() {
   var texto = document.getElementById('cham-texto').value.trim();
   var nomeId = _identifChamado === 'identificado'
-    ? (document.getElementById('cham-nome').value.trim() || 'Identificado')
+    ? (_nomeColab || 'Colaborador')
     : 'Anônimo';
   var tipoLabel = { apoio: 'Apoio Psicológico', assedio: 'Denúncia de Assédio', emergencia: 'Emergência Emocional' }[_tipoChamado] || _tipoChamado;
 
@@ -1125,101 +1129,55 @@ function sair() {
 }
 </script>
 
-<!-- TECLADO VIRTUAL -->
-<div id="teclado-virtual" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:#f1f5f9;border-top:1px solid #e2e8f0;padding:8px;z-index:9999;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-    <span style="font-size:11px;color:#6b7280;">Teclado virtual</span>
-    <button onclick="fecharTeclado()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;">✕</button>
-  </div>
-  <div id="tv-linhas"></div>
-  <div style="display:flex;gap:4px;margin-top:4px;">
-    <button onclick="tvEspaco()" style="flex:3;padding:10px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;">espaço</button>
-    <button onclick="tvApagar()" style="flex:1;padding:10px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;">⌫</button>
-    <button onclick="fecharTeclado()" style="flex:1;padding:10px;background:#10b981;border:none;border-radius:6px;font-size:13px;color:#fff;cursor:pointer;">OK</button>
-  </div>
-</div>
 
 <script>
-var _tvCampo = null;
-var _tvMaiusculo = false;
-var _tvTeclas = [
-  ['1','2','3','4','5','6','7','8','9','0'],
-  ['q','w','e','r','t','y','u','i','o','p'],
-  ['a','s','d','f','g','h','j','k','l'],
-  ['⇧','z','x','c','v','b','n','m','.','@']
-];
-
-function abrirTeclado(campo) {
-  _tvCampo = campo;
-  _tvMaiusculo = false;
-  renderTeclado();
-  document.getElementById('teclado-virtual').style.display = 'block';
-  setTimeout(function() { campo.scrollIntoView({behavior:'smooth',block:'center'}); }, 100);
-}
-
-function fecharTeclado() {
-  document.getElementById('teclado-virtual').style.display = 'none';
-  _tvCampo = null;
-}
-
-function renderTeclado() {
-  var linhas = document.getElementById('tv-linhas');
-  linhas.innerHTML = '';
-  _tvTeclas.forEach(function(linha) {
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;gap:3px;margin-bottom:4px;justify-content:center;';
-    linha.forEach(function(t) {
-      var btn = document.createElement('button');
-      var label = (t === '⇧') ? '⇧' : (_tvMaiusculo ? t.toUpperCase() : t);
-      btn.textContent = label;
-      btn.style.cssText = 'flex:1;max-width:36px;padding:9px 4px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;cursor:pointer;';
-      if (t === '⇧') btn.style.background = _tvMaiusculo ? '#7B00C4' : '#fff';
-      btn.onclick = function() {
-        if (t === '⇧') { _tvMaiusculo = !_tvMaiusculo; renderTeclado(); return; }
-        if (_tvCampo) {
-          var v = _tvCampo.value;
-          var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
-          var char = _tvMaiusculo ? t.toUpperCase() : t;
-          _tvCampo.value = v.substring(0,s) + char + v.substring(s);
-          _tvCampo.selectionStart = _tvCampo.selectionEnd = s + 1;
-          _tvCampo.dispatchEvent(new Event('input'));
-        }
-      };
-      div.appendChild(btn);
-    });
-    linhas.appendChild(div);
-  });
-}
-
-function tvEspaco() {
-  if (!_tvCampo) return;
-  var v = _tvCampo.value;
-  var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
-  _tvCampo.value = v.substring(0,s) + ' ' + v.substring(s);
-  _tvCampo.selectionStart = _tvCampo.selectionEnd = s + 1;
-}
-
-function tvApagar() {
-  if (!_tvCampo) return;
-  var v = _tvCampo.value;
-  var s = _tvCampo.selectionStart !== undefined ? _tvCampo.selectionStart : v.length;
-  if (s > 0) {
-    _tvCampo.value = v.substring(0,s-1) + v.substring(s);
-    _tvCampo.selectionStart = _tvCampo.selectionEnd = s - 1;
-    _tvCampo.dispatchEvent(new Event('input'));
+// ===== SPEECH TO TEXT (microfone nos campos) =====
+function ativarMicrofone(campoId) {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Seu navegador não suporta reconhecimento de voz. Use o Chrome.'); return;
   }
+  var campo = document.getElementById(campoId);
+  if (!campo) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = new SR();
+  rec.lang = 'pt-BR';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.onresult = function(e) {
+    var texto = e.results[0][0].transcript;
+    campo.value = (campo.value ? campo.value + ' ' : '') + texto;
+    campo.dispatchEvent(new Event('input'));
+  };
+  rec.onerror = function(e) { console.log('Mic erro:', e.error); };
+  rec.start();
+  var btn = document.querySelector('[data-mic="'+campoId+'"]');
+  if(btn) { btn.textContent='🔴'; setTimeout(function(){ btn.textContent='🎤'; }, 5000); }
 }
 
-// Ativa teclado virtual em todos os campos ao focar
+// Adiciona botão 🎤 em todos os textareas e inputs de texto
 document.addEventListener('DOMContentLoaded', function() {
-  function ativarTV(el) {
-    if (el.getAttribute('data-tv')) return;
-    el.setAttribute('data-tv','1');
-    el.addEventListener('focus', function() { abrirTeclado(el); });
+  function adicionarMic(el) {
+    if (el.getAttribute('data-mic-added')) return;
+    el.setAttribute('data-mic-added','1');
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    var btn = document.createElement('button');
+    btn.textContent = '🎤';
+    btn.setAttribute('data-mic', el.id || '');
+    btn.style.cssText = 'position:absolute;right:8px;bottom:8px;background:none;border:none;font-size:18px;cursor:pointer;opacity:.7;';
+    btn.title = 'Falar para preencher';
+    btn.onclick = function(e) { e.preventDefault(); ativarMicrofone(el.id); };
+    wrap.appendChild(btn);
   }
-  document.querySelectorAll('input[type=text],input[type=email],textarea').forEach(ativarTV);
+  document.querySelectorAll('textarea, input[type=text]').forEach(function(el) {
+    if (el.id) adicionarMic(el);
+  });
   new MutationObserver(function() {
-    document.querySelectorAll('input[type=text],input[type=email],textarea').forEach(ativarTV);
+    document.querySelectorAll('textarea:not([data-mic-added]), input[type=text]:not([data-mic-added])').forEach(function(el) {
+      if (el.id) adicionarMic(el);
+    });
   }).observe(document.body, {childList:true, subtree:true});
 });
 </script>
