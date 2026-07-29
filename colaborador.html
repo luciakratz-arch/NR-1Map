@@ -1053,6 +1053,7 @@ function enviarRespostas() {
       }, { merge: true });
     })
     .then(function() {
+      console.log('STEP 3: tudo salvo, mostrando conclusão. ibpGeral=', ibpGeral);
       atualizarTermometro(ibpGeral);
       showView('concluido');
       // Esconde card de pesquisa ativa
