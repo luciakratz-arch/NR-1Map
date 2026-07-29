@@ -1064,7 +1064,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== PLANEJAMENTO ===== -->
 <div id="view-planejamento" class="view">
-  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
   <div class="content">
     <div class="grid-2">
       <div class="card">
@@ -1613,6 +1613,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="ag-data"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control" id="ag-prazo"><option value="7">7 dias</option><option value="14">14 dias</option></select></div></div>
     <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="ag-unidade"><option value="Todas">Todas</option><option value="Goiânia">Goiânia</option><option value="Brasília">Brasília</option><option value="Belo Horizonte">Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control" id="ag-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
+    <div id="btn-disparar-agora-wrap" style="display:none;margin-top:8px;"><button class="btn btn-primary" style="width:100%;background:#25D366;border-color:#25D366;" onclick="dispararDoAgendamento()">🚀 Salvar e Disparar agora</button></div>
   </div>
 </div>
 
@@ -3066,15 +3067,25 @@ function salvarAgendamento() {
 
 function editarAgendamento(item) {
   var d = item.d;
-  // Preencher modal com dados existentes
   if (document.getElementById('ag-tipo')) document.getElementById('ag-tipo').value = d.tipo || 'geral';
   if (document.getElementById('ag-data')) document.getElementById('ag-data').value = d.data || '';
   if (document.getElementById('ag-prazo')) document.getElementById('ag-prazo').value = d.prazo || '7';
   if (document.getElementById('ag-unidade')) document.getElementById('ag-unidade').value = d.unidade || 'Todas';
   if (document.getElementById('ag-canal')) document.getElementById('ag-canal').value = d.canal || 'WhatsApp';
-  // Armazenar id para atualizar em vez de criar novo
   window._editAgendaId = item.id;
+  // Mostrar botão de disparar agora
+  var wrap = document.getElementById('btn-disparar-agora-wrap');
+  if (wrap) wrap.style.display = 'block';
   abrirModal('modal-agendar');
+}
+
+function dispararDoAgendamento() {
+  // Salvar primeiro, depois navegar para disparo
+  salvarAgendamento();
+  var tipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'geral';
+  var tipoDisparo = tipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+  fecharModal('modal-agendar');
+  setTimeout(function(){ sv(tipoDisparo); }, 400);
 }
 
 function excluirAgendamento(docId) {
