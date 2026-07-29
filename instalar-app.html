@@ -72,8 +72,27 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
 
 <nav class="nav">
   <a href="https://luciakratz-arch.github.io/NR-1Map/" class="nav-logo">NR-1<span>Map</span></a>
-  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="nav-back">← Voltar ao site</a>
+  <a id="btn-voltar" href="https://luciakratz-arch.github.io/NR-1Map/" class="nav-back">← Voltar</a>
 </nav>
+<script>
+(function(){
+  var ref = document.referrer || '';
+  var btn = document.getElementById('btn-voltar');
+  if (ref.indexOf('usuario.html') > -1) {
+    btn.href = 'usuario.html';
+    btn.textContent = '← Voltar à minha área';
+  } else if (ref.indexOf('painel.html') > -1) {
+    btn.href = 'painel.html';
+    btn.textContent = '← Voltar ao painel';
+  } else if (ref.indexOf('admin.html') > -1) {
+    btn.href = 'admin.html';
+    btn.textContent = '← Voltar ao login';
+  } else {
+    btn.href = 'index.html';
+    btn.textContent = '← Voltar ao site';
+  }
+})();
+</script>
 
 <!-- HERO -->
 <section class="hero">
