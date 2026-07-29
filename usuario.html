@@ -1082,8 +1082,8 @@ function confirmarChamado() {
     ? (_nomeColab || 'Colaborador')
     : 'Anônimo';
   var tipoLabel = { apoio: 'Apoio Psicológico', assedio: 'Denúncia de Assédio', emergencia: 'Emergência Emocional' }[_tipoChamado] || _tipoChamado;
+  var protocolo = 'OUV-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
 
-  // Salva no Firestore
   db.collection('nr1map_chamados').add({
     empresaId: _empresaId,
     empresaNome: _empresaNome,
@@ -1091,11 +1091,12 @@ function confirmarChamado() {
     tipo: _tipoChamado,
     identificacao: nomeId,
     texto: texto || '(sem descrição)',
+    protocolo: protocolo,
     criadoEm: new Date().toISOString()
   });
 
-  // Abre WhatsApp com mensagem pré-formatada para Dra. Lucia
-  var msg = '🆘 *NR-1 Map — Canal de Acolhimento*\n\n' +
+  var msg = '🆘 *NR-1 Map — Canal de Acolhimento*\n' +
+    '*Protocolo:* ' + protocolo + '\n\n' +
     '*Tipo:* ' + tipoLabel + '\n' +
     '*Empresa:* ' + (_empresaNome || 'Não informada') + '\n' +
     '*Cargo:* ' + (_cargo || 'Não informado') + '\n' +
@@ -1104,7 +1105,33 @@ function confirmarChamado() {
     '_(Enviado pelo portal NR-1 Map)_';
 
   document.getElementById('modal-chamado').classList.remove('open');
-  window.open('https://wa.me/5562991546757?text=' + encodeURIComponent(msg), '_blank');
+
+  db.collection('nr1map_empresas').doc(_empresaId).get()
+    .then(function(doc) {
+      var ouv = doc.exists && doc.data().ouvidoria ? doc.data().ouvidoria : null;
+      if (ouv && ouv.email) {
+        db.collection('nr1map_emails').add({
+          to: ouv.email,
+          message: {
+            subject: '📣 NR-1 Map — Chamado ' + protocolo,
+            html: '<p><strong>Protocolo:</strong> ' + protocolo + '</p>' +
+              '<p><strong>Tipo:</strong> ' + tipoLabel + '</p>' +
+              '<p><strong>Empresa:</strong> ' + (_empresaNome||'') + '</p>' +
+              '<p><strong>Cargo:</strong> ' + (_cargo||'') + '</p>' +
+              '<p><strong>Identificação:</strong> ' + nomeId + '</p>' +
+              (texto ? '<p><strong>Mensagem:</strong> ' + texto + '</p>' : '') +
+              '<hr/><p style="font-size:11px;color:#666;">Enviado via NR-1 Map · ' + new Date().toLocaleString('pt-BR') + '</p>'
+          }
+        });
+      }
+      window.open('https://wa.me/5562991546757?text=' + encodeURIComponent(msg), '_blank');
+      setTimeout(function() {
+        alert('✅ Chamado enviado!\n\nProtocolo: ' + protocolo + '\n\nGuarde este número para acompanhamento.');
+      }, 500);
+    })
+    .catch(function() {
+      window.open('https://wa.me/5562991546757?text=' + encodeURIComponent(msg), '_blank');
+    });
 }
 
 function enviarSugestao() {
