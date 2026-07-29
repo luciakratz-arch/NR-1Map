@@ -638,9 +638,14 @@ function validarToken(codigo) {
       carregarApp();
     })
     .catch(function(e) {
-      console.log(e);
-      btn.textContent = 'Acessar minha área →'; btn.disabled = false;
-      alert('Erro ao verificar código. Tente novamente.');
+      console.log('Erro validarToken:', e);
+      var loading = document.getElementById('screen-loading');
+      if (loading) loading.remove();
+      var btn = document.getElementById('btn-entrar');
+      if (btn) { btn.textContent = 'Acessar minha área →'; btn.disabled = false; }
+      document.getElementById('screen-login').style.display = 'block';
+      var erroEl = document.getElementById('otp-erro');
+      if (erroEl) { erroEl.style.display = 'block'; erroEl.textContent = 'Erro ao verificar acesso: ' + e.message; }
     });
 }
 
