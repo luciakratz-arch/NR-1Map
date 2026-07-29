@@ -333,20 +333,29 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
       </div>
       <div class="canal-opt" onclick="abrirChamado('apoio')">
         <span style="font-size:24px;">🧠</span>
-        <div><div style="font-size:13px;font-weight:600;color:#111827;">Solicitar apoio psicológico</div><div style="font-size:11px;color:#6b7280;">Quero conversar com um profissional de saúde mental.</div></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#111827;">Solicitar apoio psicológico</div>
+          <div style="font-size:11px;color:#6b7280;">Será encaminhado à <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-apoio"></span> para atendimento inicial de orientação.</div>
+        </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
       <div class="canal-opt" onclick="abrirChamado('assedio')">
         <span style="font-size:24px;">🛡️</span>
-        <div><div style="font-size:13px;font-weight:600;color:#111827;">Denúncia de assédio</div><div style="font-size:11px;color:#6b7280;">Relato sigiloso de situação de abuso no trabalho.</div></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#111827;">Denúncia de assédio</div>
+          <div style="font-size:11px;color:#6b7280;">Será encaminhado à <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-assedio"></span> com sigilo absoluto e número de protocolo.</div>
+        </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
       <div class="canal-opt" onclick="abrirChamado('emergencia')">
         <span style="font-size:24px;">🆘</span>
-        <div><div style="font-size:13px;font-weight:600;color:#111827;">Situação de emergência emocional</div><div style="font-size:11px;color:#6b7280;">Estou em crise e preciso de apoio imediato.</div></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#111827;">Situação de emergência emocional</div>
+          <div style="font-size:11px;color:#6b7280;">Contato imediato com a <strong>Dra. Lucia Kratz (CRP 09/20590)</strong><span id="aviso-ouv-emergencia"></span>. Você receberá um protocolo de atendimento.</div>
+        </div>
         <div style="color:#d1d5db;font-size:18px;margin-left:auto;">›</div>
       </div>
-      <div style="text-align:center;font-size:11px;color:#6b7280;margin:14px 0;line-height:1.5;">🔒 Todos os chamados são tratados com sigilo absoluto.</div>
+      <div style="text-align:center;font-size:11px;color:#6b7280;margin:14px 0;line-height:1.5;">🔒 Todos os chamados são tratados com sigilo absoluto e recebem número de protocolo.</div>
       <div onclick="abrirWppEmergencia()" style="cursor:pointer;text-decoration:none;">
         <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f0fdf4;border-radius:12px;border:1.5px solid #bbf7d0;">
           <span style="font-size:24px;">🟢</span>
@@ -605,11 +614,19 @@ function carregarUsuario(uid) {
       if (!_empresaNome && _empresaId) {
         db.collection('nr1map_empresas').doc(_empresaId).get()
           .then(function(e) {
-            if(e.exists) _empresaNome = e.data().nome || '';
+            if(e.exists) {
+              _empresaNome = e.data().nome || '';
+              atualizarAvisosOuvidoria(e.data().ouvidoria || null);
+            }
             carregarApp();
           })
           .catch(function() { carregarApp(); });
       } else {
+        if (_empresaId) {
+          db.collection('nr1map_empresas').doc(_empresaId).get()
+            .then(function(e) { if(e.exists) atualizarAvisosOuvidoria(e.data().ouvidoria || null); })
+            .catch(function(){});
+        }
         carregarApp();
       }
     })
@@ -1155,6 +1172,16 @@ function enviarSugestao() {
     document.getElementById('char-count').textContent = '0 / 500';
     alert('Sugestão enviada com sucesso!');
   }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
+}
+
+function atualizarAvisosOuvidoria(ouv) {
+  var sufixo = ouv && ouv.nome
+    ? ' e à ouvidoria da empresa (' + ouv.nome + ')'
+    : ' e à ouvidoria da empresa (se cadastrada)';
+  ['apoio','assedio','emergencia'].forEach(function(tipo) {
+    var el = document.getElementById('aviso-ouv-' + tipo);
+    if (el) el.textContent = sufixo;
+  });
 }
 
 function abrirWppEmergencia() {
