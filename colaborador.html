@@ -1030,13 +1030,15 @@ function enviarRespostas() {
   // Histórico pessoal (por token — ligado ao aparelho, não à identidade)
   var refHist = db.collection('nr1map_respostas_colab').doc(_empresaId + '_' + _pesquisaId);
 
-  // Invalida token
-  db.collection('nr1map_tokens').where('codigo', '==', _token).get()
+  // Invalida token e salva resposta
+  var tokenQuery = _token
+    ? db.collection('nr1map_tokens').where('codigo', '==', _token).get()
+    : Promise.resolve({ empty: true, docs: [] });
+
+  tokenQuery
     .then(function(snap) {
       var batch = db.batch();
-      // Salva resposta agregada
       batch.set(refResp, payload);
-      // Invalida token
       if (!snap.empty) {
         batch.update(snap.docs[0].ref, { usado: true, usadoEm: agora.toISOString() });
       }
