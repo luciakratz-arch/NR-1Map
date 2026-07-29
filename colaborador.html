@@ -744,8 +744,11 @@ function carregarApp() {
     }
 
     // Exibe card de pesquisa ativa
-    var label = _tipoPesquisa === 'robusta' ? 'Pesquisa Robusta' : 'Pesquisa Pulso — Esta semana';
-    var info = _perguntas.length + ' perguntas · ' + _blocos.length + ' blocos de 7';
+    var label = (_tipoPesquisa === 'diagnostico' || _tipoPesquisa === 'robusta')
+      ? 'Diagnóstico de Bem-Estar'
+      : 'Pesquisa Rápida — Esta semana';
+    var info = 'Responda no seu ritmo. Leva cerca de ' +
+      (_perguntas.length <= 21 ? '10' : _perguntas.length <= 54 ? '25' : '45') + ' minutos.';
     document.getElementById('tipo-pesquisa-label').textContent = label;
     document.getElementById('pesquisa-info').textContent = info;
     document.getElementById('card-pesquisa-ativa').style.display = 'block';
@@ -830,7 +833,7 @@ function renderBloco() {
   // Header do bloco
   var hdr = document.createElement('div');
   hdr.className = 'bloco-header';
-  hdr.innerHTML = '<span class="bloco-prog-txt">Bloco ' + (_blocoAtual+1) + ' de ' + _blocos.length + '</span>' +
+  hdr.innerHTML = '<span class="bloco-prog-txt">Parte ' + (_blocoAtual+1) + ' de ' + _blocos.length + '</span>' +
     '<span class="bloco-badge">' + bloco.length + ' perguntas</span>';
   container.appendChild(hdr);
 
@@ -848,7 +851,8 @@ function renderBloco() {
 
     var num = document.createElement('div');
     num.className = 'pergunta-num-badge';
-    num.textContent = 'Pergunta ' + (pergInicioBloco + idx + 1) + ' de ' + totalPergs;
+    num.textContent = '';
+    num.style.display = 'none';
     card.appendChild(num);
 
     var txt = document.createElement('div');
