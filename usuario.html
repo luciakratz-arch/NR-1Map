@@ -600,41 +600,53 @@ auth.onAuthStateChanged(function(user) {
 });
 
 function carregarUsuario(uid) {
-  db.collection('nr1map_usuarios_pf').doc(uid).get()
-    .then(function(doc) {
-      if (doc.exists) {
-        var d = doc.data();
-        _empresaId = d.empresaId || '';
-        _empresaNome = d.empresaNome || '';
-      _nomeColab = d.nome || '';
-        _cargo = d.cargo || '';
-        _cbo = d.cbo || '';
-        _setor = d.departamento || d.setor || '';
-      }
-      // Busca nome da empresa se não tiver
-      if (!_empresaNome && _empresaId) {
+  // Busca dados em paralelo das duas collections
+  Promise.all([
+    db.collection('nr1map_usuarios_pf').doc(uid).get().catch(function(){return null;}),
+    db.collection('nr1map_colaboradores').doc(uid).get().catch(function(){return null;})
+  ]).then(function(results) {
+    var pf = results[0];
+    var colab = results[1];
+
+    // Prioriza nr1map_colaboradores para nome (dados mais recentes e corretos)
+    if (colab && colab.exists) {
+      var c = colab.data();
+      _nomeColab = c.nome || '';
+      _empresaId = c.empresaId || '';
+      _cargo     = c.cargo || '';
+      _cbo       = c.cbo || '';
+      _setor     = c.departamento || c.setor || '';
+    }
+    // Complementa com nr1map_usuarios_pf se faltar algo
+    if (pf && pf.exists) {
+      var d = pf.data();
+      if (!_nomeColab) _nomeColab = d.nome || '';
+      if (!_empresaId) _empresaId = d.empresaId || '';
+      if (!_cargo)     _cargo     = d.cargo || '';
+    }
+
+    if (!_empresaNome && _empresaId) {
+      db.collection('nr1map_empresas').doc(_empresaId).get()
+        .then(function(e) {
+          if(e.exists) {
+            _empresaNome = e.data().nome || '';
+            atualizarAvisosOuvidoria(e.data().ouvidoria || null);
+          }
+          carregarApp();
+        })
+        .catch(function() { carregarApp(); });
+    } else {
+      if (_empresaId) {
         db.collection('nr1map_empresas').doc(_empresaId).get()
-          .then(function(e) {
-            if(e.exists) {
-              _empresaNome = e.data().nome || '';
-              atualizarAvisosOuvidoria(e.data().ouvidoria || null);
-            }
-            carregarApp();
-          })
-          .catch(function() { carregarApp(); });
-      } else {
-        if (_empresaId) {
-          db.collection('nr1map_empresas').doc(_empresaId).get()
-            .then(function(e) { if(e.exists) atualizarAvisosOuvidoria(e.data().ouvidoria || null); })
-            .catch(function(){});
-        }
-        carregarApp();
+          .then(function(e) { if(e.exists) atualizarAvisosOuvidoria(e.data().ouvidoria || null); })
+          .catch(function(){});
       }
-    })
-    .catch(function(e) {
-      console.log('carregarUsuario erro:', e);
       carregarApp();
-    });
+    }
+  }).catch(function(e) {
+    console.log('carregarUsuario erro:', e);
+    carregarApp();
+  });
 }
 
 // ===== CARREGAR APP =====
