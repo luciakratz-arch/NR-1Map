@@ -388,6 +388,9 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <button class="nav-item" id="nav-acolhimento" onclick="showView('acolhimento')">
       <span class="ni">🫶</span><span class="nl">Acolhimento</span>
     </button>
+    <button class="nav-item" onclick="window.location.href='instalar-app.html'">
+      <span class="ni">📲</span><span class="nl">App</span>
+    </button>
   </div>
 
 </div>
@@ -1124,3 +1127,54 @@ function confirmarChamado() {
 </script>
 </body>
 </html>
+
+<script>
+// ===== SPEECH TO TEXT =====
+function ativarMicrofone(campoId) {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Seu navegador não suporta reconhecimento de voz. Use o Chrome.'); return;
+  }
+  var campo = document.getElementById(campoId);
+  if (!campo) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = new SR();
+  rec.lang = 'pt-BR';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.onresult = function(e) {
+    var texto = e.results[0][0].transcript;
+    campo.value = (campo.value ? campo.value + ' ' : '') + texto;
+    campo.dispatchEvent(new Event('input'));
+  };
+  rec.onerror = function(e) { console.log('Mic erro:', e.error); };
+  rec.start();
+  var btn = document.querySelector('[data-mic="'+campoId+'"]');
+  if(btn) { btn.textContent='🔴'; setTimeout(function(){ btn.textContent='🎤'; }, 5000); }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  function adicionarMic(el) {
+    if (el.getAttribute('data-mic-added')) return;
+    el.setAttribute('data-mic-added','1');
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    var btn = document.createElement('button');
+    btn.textContent = '🎤';
+    btn.setAttribute('data-mic', el.id || '');
+    btn.style.cssText = 'position:absolute;right:8px;bottom:8px;background:none;border:none;font-size:18px;cursor:pointer;opacity:.7;';
+    btn.title = 'Falar para preencher';
+    btn.onclick = function(e) { e.preventDefault(); ativarMicrofone(el.id); };
+    wrap.appendChild(btn);
+  }
+  document.querySelectorAll('textarea, input[type=text]').forEach(function(el) {
+    if (el.id) adicionarMic(el);
+  });
+  new MutationObserver(function() {
+    document.querySelectorAll('textarea:not([data-mic-added]), input[type=text]:not([data-mic-added])').forEach(function(el) {
+      if (el.id) adicionarMic(el);
+    });
+  }).observe(document.body, {childList:true, subtree:true});
+});
+</script>
