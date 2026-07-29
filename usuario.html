@@ -409,7 +409,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <div style="font-size:12px;font-weight:600;color:#7B00C4;">Dra. Lucia Kratz</div>
         <div style="font-size:11px;color:#6b7280;">Psicóloga · CRP 09/20590</div>
         <div style="font-size:11px;color:#6b7280;">Atendimento inicial de orientação</div>
-        <div id="modal-aviso-ouvidoria" style="display:none;font-size:11px;color:#7B00C4;margin-top:3px;font-weight:500;"></div>
+        <div style="font-size:11px;color:#7B00C4;margin-top:3px;font-weight:500;">📣 Se sua empresa possui ouvidoria cadastrada, ela também receberá este chamado.</div>
       </div>
     </div>
     <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:12px;">Descreva brevemente sua situação. Você será contactada pela consultoria com total sigilo.</div>
@@ -1103,6 +1103,11 @@ function abrirChamado(tipo) {
   var bi = document.getElementById('btn-identificado');
   if(ba){ba.style.background='#7B00C4';ba.style.color='#fff';}
   if(bi){bi.style.background='#fff';bi.style.color='#374151';}
+  // Mostra aviso de ouvidoria se cadastrada
+  if (window._ouvNome) {
+    var el = document.getElementById('modal-aviso-ouvidoria');
+    if(el){ el.textContent = '📣 Também notifica a ouvidoria: ' + window._ouvNome; el.style.display='block'; }
+  }
   document.getElementById('modal-chamado').classList.add('open');
 }
 
@@ -1188,10 +1193,12 @@ function enviarSugestao() {
 }
 
 function atualizarAvisosOuvidoria(ouv) {
+  window._ouvNome = ouv && ouv.nome ? ouv.nome : null;
+  window._ouvEmail = ouv && ouv.email ? ouv.email : null;
   var el = document.getElementById('modal-aviso-ouvidoria');
   if (!el) return;
-  if (ouv && ouv.nome) {
-    el.textContent = '📣 Também notifica a ouvidoria: ' + ouv.nome;
+  if (window._ouvNome) {
+    el.textContent = '📣 Também notifica a ouvidoria: ' + window._ouvNome;
     el.style.display = 'block';
   } else {
     el.style.display = 'none';
