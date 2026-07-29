@@ -3067,25 +3067,29 @@ function salvarAgendamento() {
 
 function editarAgendamento(item) {
   var d = item.d;
-  if (document.getElementById('ag-tipo')) document.getElementById('ag-tipo').value = d.tipo || 'geral';
-  if (document.getElementById('ag-data')) document.getElementById('ag-data').value = d.data || '';
-  if (document.getElementById('ag-prazo')) document.getElementById('ag-prazo').value = d.prazo || '7';
-  if (document.getElementById('ag-unidade')) document.getElementById('ag-unidade').value = d.unidade || 'Todas';
-  if (document.getElementById('ag-canal')) document.getElementById('ag-canal').value = d.canal || 'WhatsApp';
-  window._editAgendaId = item.id;
-  // Mostrar botão de disparar agora
-  var wrap = document.getElementById('btn-disparar-agora-wrap');
-  if (wrap) wrap.style.display = 'block';
-  abrirModal('modal-agendar');
-}
+  var tipoDisparo = d.tipo === 'geral' ? 'diagnostico' : 'nova-pulso';
 
-function dispararDoAgendamento() {
-  // Salvar primeiro, depois navegar para disparo
-  salvarAgendamento();
-  var tipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'geral';
-  var tipoDisparo = tipo === 'geral' ? 'diagnostico' : 'nova-pulso';
-  fecharModal('modal-agendar');
-  setTimeout(function(){ sv(tipoDisparo); }, 400);
+  // Navegar direto para a tela de disparo
+  sv(tipoDisparo);
+
+  // Após carregar a tela, pré-selecionar o canal salvo
+  setTimeout(function() {
+    var canal = d.canal || 'WhatsApp';
+
+    if (tipoDisparo === 'diagnostico') {
+      // Selecionar canal no Diagnóstico Geral
+      document.querySelectorAll('.d-opt').forEach(function(opt) {
+        opt.classList.remove('sel');
+        if (opt.querySelector('.d-lb') && opt.querySelector('.d-lb').textContent.trim() === canal) {
+          opt.classList.add('sel');
+        }
+      });
+    } else {
+      // Selecionar canal na Pesquisa Pulso
+      var pulsoCanal = document.getElementById('pulso-canal');
+      if (pulsoCanal) pulsoCanal.value = canal;
+    }
+  }, 300);
 }
 
 function excluirAgendamento(docId) {
