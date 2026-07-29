@@ -3536,35 +3536,59 @@ function dispararPesquisa(tipo) {
         links.push({
           nome: colab.nome || 'Colaborador',
           whatsapp: (colab.whatsapp || '').replace(/[^0-9]/g, ''),
+          email: colab.email || '',
           token: token
         });
       });
 
       batch.commit().then(function() {
-        // Abre WhatsApp para cada colaborador sequencialmente
         var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
         var tipotxt = tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnóstico Geral';
+
+        // Detectar canal selecionado
+        var canalSel = 'WhatsApp';
+        var optSel = document.querySelector('.d-opt.sel .d-lb');
+        if (optSel) canalSel = optSel.textContent.trim();
 
         // Mostra modal com resumo e links
         var html = '<div style="max-height:60vh;overflow-y:auto;">';
         links.forEach(function(l) {
           var link = base + l.token;
-          var saudacao = 'Ola ' + l.nome + '!';
-          var msgTxt = saudacao + '\n\n' +
+          var msgTxt = 'Ola ' + l.nome + '!\n\n' +
             'A sua empresa esta realizando uma pesquisa de bem-estar no trabalho.\n\n' +
             'Suas respostas sao 100% anonimas.\n\n' +
             'Acesse pelo link abaixo e responda em poucos minutos:\n' +
-            link + '\n\n' +
-            'O link expira em 48 horas.';
+            link + '\n\nO link expira em 48 horas.';
           var msg = encodeURIComponent(msgTxt);
-          var waUrl = l.whatsapp
-            ? 'https://wa.me/55' + l.whatsapp + '?text=' + msg
-            : '#';
 
           html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);">';
           html += '<span style="font-size:13px;color:var(--preto);">' + l.nome + '</span>';
-          html += '<a href="' + waUrl + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">📱 Enviar</a>';
-          html += '</div>';
+          html += '<div style="display:flex;gap:6px;">';
+
+          // Botão WhatsApp
+          if (canalSel === 'WhatsApp' || canalSel === 'Ambos') {
+            var waUrl = l.whatsapp ? 'https://wa.me/55' + l.whatsapp + '?text=' + msg : '#';
+            html += '<a href="' + waUrl + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;" ' + (!l.whatsapp ? 'title="WhatsApp não cadastrado"' : '') + '>📱 WhatsApp</a>';
+          }
+
+          // Botão E-mail
+          if (canalSel === 'E-mail' || canalSel === 'Ambos') {
+            var assunto = encodeURIComponent('Pesquisa de bem-estar — ' + tipotxt);
+            var corpo = encodeURIComponent('Olá ' + l.nome + ',
+
+Sua empresa está realizando uma pesquisa de bem-estar no trabalho.
+
+Suas respostas são 100% anônimas.
+
+Acesse pelo link abaixo e responda em poucos minutos:
+' + link + '
+
+O link expira em 48 horas.');
+            var emailUrl = l.email ? 'mailto:' + l.email + '?subject=' + assunto + '&body=' + corpo : '#';
+            html += '<a href="' + emailUrl + '" style="background:#7B00C4;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;" ' + (!l.email ? 'title="E-mail não cadastrado"' : '') + '>✉️ E-mail</a>';
+          }
+
+          html += '</div></div>';
         });
         html += '</div>';
 
