@@ -3044,13 +3044,10 @@ function salvarAgendamento() {
   }).then(function() {
     fecharModal('modal-agendar');
     carregarAgenda();
-    // Se data for hoje, navegar para tela de disparo
+    // Se data for hoje, navegar para tela de disparo após fechar modal
     if (data === hoje) {
       var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
-      sv(tipoDisparo);
-      setTimeout(function(){
-        alert('✅ Agendado! Configure o canal e dispare agora.');
-      }, 400);
+      setTimeout(function(){ sv(tipoDisparo); }, 600);
     }
   }).catch(function(e){ alert('Erro: ' + e.message); });
 }
