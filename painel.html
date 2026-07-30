@@ -593,7 +593,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <button class="btn-aba aba-ativa" id="aba-cl" onclick="swCargos('lista')">📋 Lista de Cargos</button>
       <button class="btn-aba" id="aba-co" onclick="swCargos('org')">🌳 Organograma</button>
       <button class="btn-aba" id="aba-cn" onclick="swCargos('niveis')">🎨 Níveis Hierárquicos</button>
-      <button class="btn-aba" id="aba-ud" onclick="swCargos('unidepts')">🏢 Unidades e Depts</button>
     </div>
     <div id="pc-lista">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</p>
@@ -625,51 +624,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
         </div>
       </div>
     </div>
-
-    <!-- ===== UNIDADES E DEPARTAMENTOS ===== -->
-    <div id="pc-unidepts" style="display:none;">
-      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:16px;">Cadastre as unidades (filiais/plantas) e departamentos. Eles serão usados em todo o painel — disparo de pesquisas, cadastro de colaboradores e organograma.</p>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-
-        <!-- UNIDADES -->
-        <div class="card">
-          <div class="card-header"><div class="title">🏭 Unidades / Filiais</div><div class="subtitle">Bases físicas ou regionais da empresa</div></div>
-          <div class="card-body" style="padding:0;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Cidade/Estado</th><th></th></tr></thead>
-              <tbody id="tbody-unidades"></tbody>
-            </table>
-            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
-              <input class="form-control" id="nova-unidade-nome" placeholder="Ex: Matriz Goiânia" style="flex:1;font-size:12px;"/>
-              <input class="form-control" id="nova-unidade-cidade" placeholder="Cidade/UF" style="width:120px;font-size:12px;"/>
-              <button class="btn btn-primary btn-sm" onclick="addUnidade()">+ Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- DEPARTAMENTOS -->
-        <div class="card">
-          <div class="card-header"><div class="title">🗂 Departamentos / Áreas</div><div class="subtitle">Divisões funcionais da organização</div></div>
-          <div class="card-body" style="padding:0;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Tipo</th><th></th></tr></thead>
-              <tbody id="tbody-departamentos"></tbody>
-            </table>
-            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
-              <input class="form-control" id="novo-depto-nome" placeholder="Ex: Financeiro, RH, TI..." style="flex:1;font-size:12px;"/>
-              <select class="form-control" id="novo-depto-tipo" style="width:120px;font-size:12px;">
-                <option value="operacional">Operacional</option>
-                <option value="staff">Staff / Assessoria</option>
-                <option value="suporte">Suporte</option>
-              </select>
-              <button class="btn btn-primary btn-sm" onclick="addDepartamento()">+ Add</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
   </div>
 </div>
 
@@ -692,9 +646,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="form-group"><div class="form-label">Nível hierárquico *</div>
       <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
       <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
-    </div>
-    <div class="form-group"><div class="form-label">Departamento</div>
-      <select class="form-control" id="nc-depto"><option value="">— Nenhum —</option></select>
     </div>
     <div class="form-group"><div class="form-label">Reporta a</div>
       <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
@@ -1113,7 +1064,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== PLANEJAMENTO ===== -->
 <div id="view-planejamento" class="view">
-  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;var mh=document.querySelector('#modal-agendar .modal-header h3');if(mh)mh.textContent='Agendar pesquisa';_popularModalAgenda();abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
   <div class="content">
     <div class="grid-2">
       <div class="card">
@@ -1659,8 +1610,26 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="modal">
     <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
     <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control" id="ag-tipo"><option value="pulso">Pesquisa Pulso</option><option value="geral">Diagnóstico Geral</option></select></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="ag-data"/></div><div class="form-group"><div class="form-label">Prazo de resposta</div><select class="form-control" id="ag-prazo"><option value="7">7 dias</option><option value="14">14 dias</option></select></div></div>
-    <div class="form-row"><div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="ag-unidade"><option value="Todas">Todas</option><option value="Goiânia">Goiânia</option><option value="Brasília">Brasília</option><option value="Belo Horizonte">Belo Horizonte</option></select></div><div class="form-group"><div class="form-label">Canal</div><select class="form-control" id="ag-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="ag-data"/></div>
+      <div class="form-group"><div class="form-label">Prazo de resposta</div>
+        <select class="form-control" id="ag-prazo">
+          <option value="2">2 dias</option>
+          <option value="7" selected>7 dias</option>
+          <option value="14">14 dias</option>
+          <option value="30">1 mês (30 dias)</option>
+          <option value="60">2 meses (60 dias)</option>
+          <option value="90">3 meses (90 dias)</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;margin-bottom:8px;margin-top:4px;">🎯 Público-alvo</div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="ag-unidade"><option value="Todas">Todas as unidades</option></select></div>
+      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="ag-depto"><option value="Todos">Todos os departamentos</option></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Cargo</div><select class="form-control" id="ag-cargo"><option value="Todos">Todos os cargos</option></select></div>
+    <div class="form-group"><div class="form-label">Canal de envio</div><select class="form-control" id="ag-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
     <div id="btn-disparar-agora-wrap" style="display:none;margin-top:8px;"><button class="btn btn-primary" style="width:100%;background:#25D366;border-color:#25D366;" onclick="dispararDoAgendamento()">🚀 Salvar e Disparar agora</button></div>
   </div>
@@ -2691,16 +2660,13 @@ var niveisHier = [
 ];
 
 var cargos = [];
-var unidades = [];
-var departamentos = [];
 
 function swCargos(aba) {
   document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
   document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
   document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
-  document.getElementById('pc-unidepts').style.display = aba === 'unidepts' ? 'block' : 'none';
-  var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn', unidepts:'aba-ud'};
-  ['lista','org','niveis','unidepts'].forEach(function(a) {
+  ['lista','org','niveis'].forEach(function(a) {
+    var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn'};
     var el = document.getElementById(ids[a]);
     if (el) { el.classList.remove('aba-ativa'); if (a === aba) el.classList.add('aba-ativa'); }
   });
@@ -2708,7 +2674,6 @@ function swCargos(aba) {
   if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
   if (aba === 'org') renderOrg();
   if (aba === 'niveis') renderNiveis();
-  if (aba === 'unidepts') { renderUnidades(); renderDepartamentos(); }
 }
 
 function getNivel(id) {
@@ -2754,7 +2719,6 @@ function renderCargos() {
     for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
     selRep.innerHTML = opRep;
   }
-  _popularSelectsDepto();
   // Popula select de cargos no modal de colaborador
   var selCargo = document.getElementById('colab-cargo-select');
   if (selCargo) {
@@ -2816,141 +2780,6 @@ function delCargo(id) {
   renderCargos();
 }
 
-/* ===== UNIDADES ===== */
-function renderUnidades() {
-  var tbody = document.getElementById('tbody-unidades');
-  if (!tbody) return;
-  if (!unidades.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhuma unidade cadastrada.</td></tr>'; return; }
-  var html = '';
-  unidades.forEach(function(u) {
-    html += '<tr style="border-bottom:1px solid var(--linha);">';
-    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + u.nome + '</td>';
-    html += '<td style="padding:8px 12px;font-size:12px;color:var(--cinza-medio);">' + (u.cidade || '—') + '</td>';
-    html += '<td style="padding:8px 12px;text-align:right;"><button class="btn btn-danger btn-sm" onclick="delUnidade(\'' + u.id + '\')">🗑️</button></td>';
-    html += '</tr>';
-  });
-  tbody.innerHTML = html;
-  _popularSelectsUnidade();
-}
-
-function addUnidade() {
-  var nome = (document.getElementById('nova-unidade-nome').value || '').trim();
-  var cidade = (document.getElementById('nova-unidade-cidade').value || '').trim();
-  if (!nome) { alert('Informe o nome da unidade.'); return; }
-  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  var obj = { id: 'un' + Date.now(), nome: nome, cidade: cidade, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
-  if (window.nr1mapDb && empresaId) {
-    window.nr1mapDb.collection('nr1map_unidades').add(obj).then(function(doc) {
-      obj.id = doc.id;
-      unidades.push(obj);
-      document.getElementById('nova-unidade-nome').value = '';
-      document.getElementById('nova-unidade-cidade').value = '';
-      renderUnidades();
-    }).catch(function(e) { alert('Erro: ' + e.message); });
-  } else {
-    unidades.push(obj);
-    document.getElementById('nova-unidade-nome').value = '';
-    document.getElementById('nova-unidade-cidade').value = '';
-    renderUnidades();
-  }
-}
-
-function delUnidade(id) {
-  if (!confirm('Excluir esta unidade?')) return;
-  unidades = unidades.filter(function(u) { return u.id !== id; });
-  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_unidades').doc(id).delete().catch(function(e){ console.log(e); });
-  renderUnidades();
-}
-
-function _popularSelectsUnidade() {
-  var opts = '<option value="Todas">Todas as unidades</option>';
-  unidades.forEach(function(u) { opts += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
-  ['ag-unidade','pulso-unidade'].forEach(function(sid) {
-    var sel = document.getElementById(sid);
-    if (sel) { var cur = sel.value; sel.innerHTML = opts; sel.value = cur || 'Todas'; }
-  });
-}
-
-function carregarUnidades(empresaId) {
-  if (!window.nr1mapDb || !empresaId) return;
-  window.nr1mapDb.collection('nr1map_unidades').where('empresaId','==',empresaId).get()
-    .then(function(snap) {
-      unidades = [];
-      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; unidades.push(d); });
-      _popularSelectsUnidade();
-    }).catch(function(e){ console.log('unidades err:', e); });
-}
-
-/* ===== DEPARTAMENTOS ===== */
-function renderDepartamentos() {
-  var tbody = document.getElementById('tbody-departamentos');
-  if (!tbody) return;
-  if (!departamentos.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhum departamento cadastrado.</td></tr>'; return; }
-  var tiposLabel = { operacional: 'Operacional', staff: '⚡ Staff / Assessoria', suporte: 'Suporte' };
-  var html = '';
-  departamentos.forEach(function(d) {
-    html += '<tr style="border-bottom:1px solid var(--linha);">';
-    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + d.nome + '</td>';
-    html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (tiposLabel[d.tipo] || d.tipo) + '</td>';
-    html += '<td style="padding:8px 12px;text-align:right;"><button class="btn btn-danger btn-sm" onclick="delDepartamento(\'' + d.id + '\')">🗑️</button></td>';
-    html += '</tr>';
-  });
-  tbody.innerHTML = html;
-  _popularSelectsDepto();
-}
-
-function addDepartamento() {
-  var nome = (document.getElementById('novo-depto-nome').value || '').trim();
-  var tipo = document.getElementById('novo-depto-tipo').value;
-  if (!nome) { alert('Informe o nome do departamento.'); return; }
-  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  var obj = { id: 'dp' + Date.now(), nome: nome, tipo: tipo, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
-  if (window.nr1mapDb && empresaId) {
-    window.nr1mapDb.collection('nr1map_departamentos').add(obj).then(function(doc) {
-      obj.id = doc.id;
-      departamentos.push(obj);
-      document.getElementById('novo-depto-nome').value = '';
-      renderDepartamentos();
-    }).catch(function(e) { alert('Erro: ' + e.message); });
-  } else {
-    departamentos.push(obj);
-    document.getElementById('novo-depto-nome').value = '';
-    renderDepartamentos();
-  }
-}
-
-function delDepartamento(id) {
-  if (!confirm('Excluir este departamento?')) return;
-  departamentos = departamentos.filter(function(d) { return d.id !== id; });
-  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_departamentos').doc(id).delete().catch(function(e){ console.log(e); });
-  renderDepartamentos();
-}
-
-function _popularSelectsDepto() {
-  var selDepto = document.getElementById('nc-depto');
-  if (selDepto) {
-    var opts = '<option value="">— Nenhum —</option>';
-    departamentos.forEach(function(d) { opts += '<option value="' + d.id + '">' + d.nome + '</option>'; });
-    selDepto.innerHTML = opts;
-  }
-  var selColabDepto = document.getElementById('colab-depto');
-  if (selColabDepto && selColabDepto.tagName === 'SELECT') {
-    var opts2 = '<option value="">— Nenhum —</option>';
-    departamentos.forEach(function(d) { opts2 += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
-    selColabDepto.innerHTML = opts2;
-  }
-}
-
-function carregarDepartamentos(empresaId) {
-  if (!window.nr1mapDb || !empresaId) return;
-  window.nr1mapDb.collection('nr1map_departamentos').where('empresaId','==',empresaId).get()
-    .then(function(snap) {
-      departamentos = [];
-      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; departamentos.push(d); });
-      _popularSelectsDepto();
-    }).catch(function(e){ console.log('departamentos err:', e); });
-}
-
 function buscarCBO(query) {
   var div = document.getElementById('nc-cbo-drop');
   if (!div) return;
@@ -3003,12 +2832,11 @@ function salvarCargo() {
   var cbo = document.getElementById('nc-cbo-val').value || document.getElementById('nc-cbo-busca').value.trim();
   var nvId = document.getElementById('nc-nivel').value;
   var repId = document.getElementById('nc-reporta').value || null;
-  var deptoId = document.getElementById('nc-depto') ? (document.getElementById('nc-depto').value || null) : null;
   if (!nome) { alert('Informe o nome do cargo.'); return; }
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
   if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
   var empresaId = window.nr1mapEmpresa.id;
-  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, deptoId:deptoId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
       .then(function(doc) {
@@ -3226,6 +3054,9 @@ function salvarAgendamento() {
   var agTipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso';
   var agCanal = document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp';
   var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
+  var agPrazo = document.getElementById('ag-prazo') ? document.getElementById('ag-prazo').value : '7';
+  var agDepto = document.getElementById('ag-depto') ? document.getElementById('ag-depto').value : 'Todos';
+  var agCargo = document.getElementById('ag-cargo') ? document.getElementById('ag-cargo').value : 'Todos';
   var agendaData = {
     empresaId: empresaId,
     tipo: agTipo,
@@ -3233,6 +3064,9 @@ function salvarAgendamento() {
     data: data,
     canal: agCanal,
     unidade: agUnidade,
+    prazo: agPrazo,
+    depto: agDepto,
+    cargo: agCargo,
     status: data === hoje ? 'disparado' : 'agendado',
     criadoEm: new Date().toISOString()
   };
@@ -3257,29 +3091,64 @@ function salvarAgendamento() {
 
 function editarAgendamento(item) {
   var d = item.d;
-  var tipoDisparo = d.tipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+  var docId = item.id;
 
-  // Navegar direto para a tela de disparo
-  sv(tipoDisparo);
+  window._editAgendaId = docId;
 
-  // Após carregar a tela, pré-selecionar o canal salvo
-  setTimeout(function() {
-    var canal = d.canal || 'WhatsApp';
+  var agTipo = document.getElementById('ag-tipo');
+  var agData = document.getElementById('ag-data');
+  var agCanal = document.getElementById('ag-canal');
+  var agUnidade = document.getElementById('ag-unidade');
+  var agPrazo = document.getElementById('ag-prazo');
+  var agDepto = document.getElementById('ag-depto');
+  var agCargo = document.getElementById('ag-cargo');
 
-    if (tipoDisparo === 'diagnostico') {
-      // Selecionar canal no Diagnóstico Geral
-      document.querySelectorAll('.d-opt').forEach(function(opt) {
-        opt.classList.remove('sel');
-        if (opt.querySelector('.d-lb') && opt.querySelector('.d-lb').textContent.trim() === canal) {
-          opt.classList.add('sel');
-        }
-      });
-    } else {
-      // Selecionar canal na Pesquisa Pulso
-      var pulsoCanal = document.getElementById('pulso-canal');
-      if (pulsoCanal) pulsoCanal.value = canal;
-    }
-  }, 300);
+  if (agTipo) agTipo.value = d.tipo || 'pulso';
+  if (agData) agData.value = d.data || '';
+  if (agCanal) agCanal.value = d.canal || 'WhatsApp';
+  if (agUnidade) agUnidade.value = d.unidade || 'Todas';
+  if (agPrazo) agPrazo.value = d.prazo || '7';
+  if (agDepto) agDepto.value = d.depto || 'Todos';
+  if (agCargo) agCargo.value = d.cargo || 'Todos';
+
+  var mhdr = document.querySelector('#modal-agendar .modal-header h3');
+  if (mhdr) mhdr.textContent = '✏️ Editar agendamento';
+
+  var wrap = document.getElementById('btn-disparar-agora-wrap');
+  if (wrap) wrap.style.display = 'block';
+
+  _popularModalAgenda();
+
+  // Restaurar valores após popular os selects
+  if (agUnidade) agUnidade.value = d.unidade || 'Todas';
+  if (agDepto) agDepto.value = d.depto || 'Todos';
+  if (agCargo) agCargo.value = d.cargo || 'Todos';
+
+  abrirModal('modal-agendar');
+}
+
+function _popularModalAgenda() {
+  // Popula select de unidade
+  var selUn = document.getElementById('ag-unidade');
+  if (selUn) {
+    var optsUn = '<option value="Todas">Todas as unidades</option>';
+    (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+    selUn.innerHTML = optsUn;
+  }
+  // Popula select de departamento
+  var selDp = document.getElementById('ag-depto');
+  if (selDp) {
+    var optsDp = '<option value="Todos">Todos os departamentos</option>';
+    (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+    selDp.innerHTML = optsDp;
+  }
+  // Popula select de cargo
+  var selCg = document.getElementById('ag-cargo');
+  if (selCg) {
+    var optsCg = '<option value="Todos">Todos os cargos</option>';
+    (cargos || []).forEach(function(c) { optsCg += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
+    selCg.innerHTML = optsCg;
+  }
 }
 
 function excluirAgendamento(docId) {
@@ -3742,6 +3611,12 @@ function dispararPesquisa(tipo) {
     alert('Erro: empresa não carregada.'); return;
   }
 
+  // Ler filtros de público-alvo do modal de agendamento (se aberto) ou da tela de disparo
+  var filtroUnidade = (document.getElementById('ag-unidade') && document.getElementById('ag-unidade').value) || 'Todas';
+  var filtroDepto   = (document.getElementById('ag-depto')   && document.getElementById('ag-depto').value)   || 'Todos';
+  var filtroCargo   = (document.getElementById('ag-cargo')   && document.getElementById('ag-cargo').value)   || 'Todos';
+  var prazoVal      = parseInt((document.getElementById('ag-prazo') && document.getElementById('ag-prazo').value) || '7', 10);
+
   // Busca colaboradores ativos
   window.nr1mapDb.collection('nr1map_colaboradores')
     .where('empresaId', '==', empresaId)
@@ -3752,12 +3627,27 @@ function dispararPesquisa(tipo) {
         alert('Nenhum colaborador ativo cadastrado.'); return;
       }
 
-      var total = snap.size;
+      // Filtrar pelo público-alvo
+      var colabsFiltrados = [];
+      snap.forEach(function(doc) {
+        var c = doc.data(); c._id = doc.id;
+        var okUnidade = filtroUnidade === 'Todas' || (c.unidade || '') === filtroUnidade;
+        var okDepto   = filtroDepto   === 'Todos' || (c.depto || c.departamento || '') === filtroDepto;
+        var okCargo   = filtroCargo   === 'Todos' || (c.cargo || '').indexOf(filtroCargo) !== -1;
+        if (okUnidade && okDepto && okCargo) colabsFiltrados.push({ doc: doc, data: c });
+      });
+
+      if (!colabsFiltrados.length) {
+        alert('Nenhum colaborador encontrado com os filtros de público-alvo selecionados.'); return;
+      }
+
+      var total = colabsFiltrados.length;
       var batch = window.nr1mapDb.batch();
       var links = [];
+      var expiraMsec = prazoVal * 24 * 3600 * 1000;
 
-      snap.forEach(function(doc) {
-        var colab = doc.data();
+      colabsFiltrados.forEach(function(item) {
+        var colab = item.data;
         var token = gerarToken6();
         var ref = window.nr1mapDb.collection('nr1map_tokens').doc();
 
@@ -3765,13 +3655,13 @@ function dispararPesquisa(tipo) {
           codigo: token,
           empresaId: empresaId,
           empresaNome: window.nr1mapEmpresa.nome || '',
-          colaboradorId: doc.id,
+          colaboradorId: item.doc.id,
           colaboradorNome: colab.nome || '',
           whatsapp: colab.whatsapp || '',
           tipo: tipo,
           usado: false,
           criadoEm: new Date().toISOString(),
-          expiraEm: new Date(Date.now() + 48 * 3600 * 1000).toISOString()
+          expiraEm: new Date(Date.now() + expiraMsec).toISOString()
         });
 
         links.push({
@@ -3827,6 +3717,7 @@ function dispararPesquisa(tipo) {
           tipo: tipo,
           canal: canalVal,
           empresa: empresaNome,
+          prazo: prazoVal,
           colaboradores: links.map(function(l){ return { nome:l.nome, email:l.email, whatsapp:l.whatsapp, token:l.token }; })
         };
 
@@ -4084,8 +3975,6 @@ function aplicarEmpresa(e) {
   if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
   if(nmEl) nmEl.textContent=e.responsavel||'—';
   carregarCargos(e.id);
-  carregarUnidades(e.id);
-  carregarDepartamentos(e.id);
   carregarDashboard(e.id);
   carregarColabs();
   carregarHistoricoReal(e.id);
