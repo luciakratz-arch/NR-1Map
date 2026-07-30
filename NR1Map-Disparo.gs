@@ -17,10 +17,19 @@ function handleDisparo(e) {
       if (dados.dados) dados = JSON.parse(dados.dados);
     }
 
-    var tipo       = dados.tipo       || 'diagnostico'; // 'diagnostico' ou 'pulso'
-    var canal      = dados.canal      || 'WhatsApp';    // 'WhatsApp', 'E-mail', 'Ambos'
+    var tipo       = dados.tipo       || 'diagnostico';
+    var canal      = dados.canal      || 'WhatsApp';
     var empresa    = dados.empresa    || 'sua empresa';
-    var colaboradores = dados.colaboradores || []; // [{nome, email, whatsapp, token}]
+    var prazo      = parseInt(dados.prazo || 7, 10);
+    var colaboradores = dados.colaboradores || [];
+
+    var prazoTxt;
+    if (prazo <= 1)       prazoTxt = '24 horas';
+    else if (prazo < 30)  prazoTxt = prazo + ' dias';
+    else if (prazo === 30) prazoTxt = '1 mês';
+    else if (prazo === 60) prazoTxt = '2 meses';
+    else if (prazo === 90) prazoTxt = '3 meses';
+    else                   prazoTxt = prazo + ' dias';
 
     if (colaboradores.length === 0) {
       return resposta({ erro: 'Nenhum colaborador recebido.' }, cb);
@@ -42,7 +51,7 @@ function handleDisparo(e) {
         if (c.email) {
           try {
             var assunto = tipotxt + ' — ' + empresa;
-            var corpo   = montarEmailHTML(nome, empresa, tipotxt, link);
+            var corpo   = montarEmailHTML(nome, empresa, tipotxt, link, prazoTxt);
             GmailApp.sendEmail(c.email, assunto, '', { htmlBody: corpo, name: 'NR-1 Map — ' + empresa });
             enviados.push({ nome: nome, canal: 'email', status: 'ok' });
           } catch(err) {
@@ -60,7 +69,7 @@ function handleDisparo(e) {
           empresa + ' está realizando uma pesquisa de bem-estar no trabalho.\n\n' +
           'Suas respostas são 100% anônimas.\n\n' +
           'Acesse pelo link abaixo e responda em poucos minutos:\n' +
-          link + '\n\nO link expira em 48 horas.';
+          link + '\n\nO link expira em ' + prazoTxt + '.';
         waLinks.push({
           nome: nome,
           whatsapp: wpp,
@@ -81,7 +90,8 @@ function handleDisparo(e) {
   }
 }
 
-function montarEmailHTML(nome, empresa, tipotxt, link) {
+function montarEmailHTML(nome, empresa, tipotxt, link, prazoTxt) {
+  prazoTxt = prazoTxt || '7 dias';
   return '<!DOCTYPE html><html><body style="font-family:Inter,sans-serif;background:#f4f7f5;margin:0;padding:20px;">' +
     '<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">' +
     '<div style="background:#0A6E4F;padding:28px 32px;">' +
@@ -95,7 +105,7 @@ function montarEmailHTML(nome, empresa, tipotxt, link) {
     'Suas respostas são <strong>100% anônimas</strong> e tabuladas por cargo — ninguém terá acesso às suas respostas individuais.' +
     '</p>' +
     '<a href="' + link + '" style="display:block;background:#0A6E4F;color:#fff;text-align:center;padding:14px 24px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:20px;">Responder agora →</a>' +
-    '<p style="font-size:12px;color:#9CA3AF;line-height:1.6;">O link expira em 48 horas. Se tiver dúvidas, entre em contato com o RH da sua empresa.</p>' +
+    '<p style="font-size:12px;color:#9CA3AF;line-height:1.6;">O link expira em ' + prazoTxt + '. Se tiver dúvidas, entre em contato com o RH da sua empresa.</p>' +
     '</div>' +
     '<div style="background:#f4f7f5;padding:16px 32px;text-align:center;">' +
     '<p style="font-size:11px;color:#9CA3AF;margin:0;">NR-1 Map · Gestão de Riscos Psicossociais · Portaria MTE nº 1.419/2024</p>' +
