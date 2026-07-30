@@ -3710,35 +3710,22 @@ function carregarHistoricoUnificado(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var el = document.getElementById('hist-timeline-body');
   if (!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...<br/><small style="font-size:10px;opacity:0.5;">empresaId: ' + empresaId + '</small></div>';
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
 
-  // Tenta com o empresaId direto
+  // Busca direta pelo path — funciona mesmo sem campo empresaId nos ciclos
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
     .then(function(snap) {
       if (snap.empty) {
-        // Tenta buscar via collectionGroup (caso empresaId no doc pai seja diferente)
-        return window.nr1mapDb.collectionGroup('ciclos')
-          .where('empresaId', '==', empresaId).get()
-          .then(function(snap2) {
-            if (snap2.empty) {
-              el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
-              return;
-            }
-            window._histCiclos = [];
-            snap2.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
-            window._histCiclos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
-            renderHistoricoUnificado();
-          });
+        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+        return;
       }
       window._histCiclos = [];
       snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
-      console.log('HISTORICO: ' + window._histCiclos.length + ' ciclos encontrados:', window._histCiclos.map(function(c){ return {id:c._id, tipo:c.tipo, criadoEm:c.criadoEm}; }));
       window._histCiclos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
       renderHistoricoUnificado();
     }).catch(function(e){
-      console.log('historico err:', e);
-      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro ao carregar: ' + e.message + '</div>';
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro: ' + e.message + '</div>';
     });
 }
 
@@ -3751,7 +3738,7 @@ function renderHistoricoUnificado() {
   var filtrados = ciclos.filter(function(d) {
     if (filtro === 'todos') return true;
     var t = d.tipo || 'geral';
-    if (filtro === 'geral') return t === 'geral' || t === 'diagnostico';
+    if (filtro === 'geral') return d.tipo !== 'pulso';
     return t === filtro;
   });
   if (!filtrados.length) {
@@ -3759,7 +3746,7 @@ function renderHistoricoUnificado() {
     return;
   }
   el.innerHTML = filtrados.map(function(d) {
-    var isGeral = (d.tipo || 'geral') === 'geral' || d.tipo === 'diagnostico';
+    var isGeral = d.tipo !== 'pulso';
     var cor     = isGeral ? '#0A6E4F' : '#7B00C4';
     var bgCor   = isGeral ? 'rgba(10,110,79,0.06)' : 'rgba(123,0,196,0.06)';
     var borda   = isGeral ? 'rgba(10,110,79,0.2)'  : 'rgba(123,0,196,0.15)';
