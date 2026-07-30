@@ -3737,16 +3737,17 @@ function renderHistoricoUnificado() {
   var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   var filtrados = ciclos.filter(function(d) {
     if (filtro === 'todos') return true;
-    var t = d.tipo || 'geral';
-    if (filtro === 'geral') return d.tipo !== 'pulso';
-    return t === filtro;
+    var _t = d.tipo || d.Tipo || '';
+    if (filtro === 'geral') return _t !== 'pulso';
+    return _t === filtro;
   });
   if (!filtrados.length) {
     el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum item para este filtro.</div>';
     return;
   }
   el.innerHTML = filtrados.map(function(d) {
-    var isGeral = d.tipo !== 'pulso';
+    var t = d.tipo || d.Tipo || '';
+    var isGeral = t !== 'pulso';
     var cor     = isGeral ? '#0A6E4F' : '#7B00C4';
     var bgCor   = isGeral ? 'rgba(10,110,79,0.06)' : 'rgba(123,0,196,0.06)';
     var borda   = isGeral ? 'rgba(10,110,79,0.2)'  : 'rgba(123,0,196,0.15)';
