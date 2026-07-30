@@ -3628,8 +3628,9 @@ function carregarHistoricoUnificado(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var el = document.getElementById('hist-timeline-body');
   if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-    .collection('ciclos').orderBy('criadoEm','desc').limit(20).get()
+    .collection('ciclos').get()
     .then(function(snap) {
       if (snap.empty) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
@@ -3637,6 +3638,10 @@ function carregarHistoricoUnificado(empresaId) {
       }
       window._histCiclos = [];
       snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
+      // Ordenar por criadoEm desc no cliente
+      window._histCiclos.sort(function(a,b) {
+        return (b.criadoEm || '') > (a.criadoEm || '') ? 1 : -1;
+      });
       renderHistoricoUnificado();
     }).catch(function(){ el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Sem dados.</div>'; });
 }
