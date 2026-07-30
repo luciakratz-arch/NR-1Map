@@ -1064,7 +1064,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== PLANEJAMENTO ===== -->
 <div id="view-planejamento" class="view">
-  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;var mh=document.querySelector('#modal-agendar .modal-header h3');if(mh)mh.textContent='Agendar pesquisa';abrirModal('modal-agendar')">+ Agendar pesquisa</button></div></div>
   <div class="content">
     <div class="grid-2">
       <div class="card">
@@ -3067,29 +3067,33 @@ function salvarAgendamento() {
 
 function editarAgendamento(item) {
   var d = item.d;
-  var tipoDisparo = d.tipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+  var docId = item.id;
 
-  // Navegar direto para a tela de disparo
-  sv(tipoDisparo);
+  // Guardar ID para o salvarAgendamento usar update em vez de add
+  window._editAgendaId = docId;
 
-  // Após carregar a tela, pré-selecionar o canal salvo
-  setTimeout(function() {
-    var canal = d.canal || 'WhatsApp';
+  // Preencher campos do modal
+  var agTipo = document.getElementById('ag-tipo');
+  var agData = document.getElementById('ag-data');
+  var agCanal = document.getElementById('ag-canal');
+  var agUnidade = document.getElementById('ag-unidade');
+  var agPrazo = document.getElementById('ag-prazo');
 
-    if (tipoDisparo === 'diagnostico') {
-      // Selecionar canal no Diagnóstico Geral
-      document.querySelectorAll('.d-opt').forEach(function(opt) {
-        opt.classList.remove('sel');
-        if (opt.querySelector('.d-lb') && opt.querySelector('.d-lb').textContent.trim() === canal) {
-          opt.classList.add('sel');
-        }
-      });
-    } else {
-      // Selecionar canal na Pesquisa Pulso
-      var pulsoCanal = document.getElementById('pulso-canal');
-      if (pulsoCanal) pulsoCanal.value = canal;
-    }
-  }, 300);
+  if (agTipo) agTipo.value = d.tipo || 'pulso';
+  if (agData) agData.value = d.data || '';
+  if (agCanal) agCanal.value = d.canal || 'WhatsApp';
+  if (agUnidade) agUnidade.value = d.unidade || 'Todas';
+  if (agPrazo) agPrazo.value = d.prazo || '7';
+
+  // Alterar título do modal para modo edição
+  var mhdr = document.querySelector('#modal-agendar .modal-header h3');
+  if (mhdr) mhdr.textContent = '✏️ Editar agendamento';
+
+  // Mostrar botão "Salvar e Disparar agora"
+  var wrap = document.getElementById('btn-disparar-agora-wrap');
+  if (wrap) wrap.style.display = 'block';
+
+  abrirModal('modal-agendar');
 }
 
 function excluirAgendamento(docId) {
