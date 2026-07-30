@@ -3711,21 +3711,34 @@ function carregarHistoricoUnificado(empresaId) {
   var el = document.getElementById('hist-timeline-body');
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
+
+  // Tenta com o empresaId direto
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
     .then(function(snap) {
       if (snap.empty) {
-        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
-        return;
+        // Tenta buscar via collectionGroup (caso empresaId no doc pai seja diferente)
+        return window.nr1mapDb.collectionGroup('ciclos')
+          .where('empresaId', '==', empresaId).get()
+          .then(function(snap2) {
+            if (snap2.empty) {
+              el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+              return;
+            }
+            window._histCiclos = [];
+            snap2.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
+            window._histCiclos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+            renderHistoricoUnificado();
+          });
       }
       window._histCiclos = [];
       snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
-      // Ordenar por criadoEm desc no cliente
-      window._histCiclos.sort(function(a,b) {
-        return (b.criadoEm || '') > (a.criadoEm || '') ? 1 : -1;
-      });
+      window._histCiclos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
       renderHistoricoUnificado();
-    }).catch(function(){ el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Sem dados.</div>'; });
+    }).catch(function(e){
+      console.log('historico err:', e);
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro ao carregar: ' + e.message + '</div>';
+    });
 }
 
 function renderHistoricoUnificado() {
