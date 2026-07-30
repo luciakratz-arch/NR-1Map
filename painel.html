@@ -593,6 +593,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <button class="btn-aba aba-ativa" id="aba-cl" onclick="swCargos('lista')">📋 Lista de Cargos</button>
       <button class="btn-aba" id="aba-co" onclick="swCargos('org')">🌳 Organograma</button>
       <button class="btn-aba" id="aba-cn" onclick="swCargos('niveis')">🎨 Níveis Hierárquicos</button>
+      <button class="btn-aba" id="aba-ud" onclick="swCargos('unidepts')">🏢 Unidades e Depts</button>
     </div>
     <div id="pc-lista">
       <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</p>
@@ -624,6 +625,48 @@ textarea.form-control{resize:vertical;min-height:70px;}
         </div>
       </div>
     </div>
+
+    <!-- ===== UNIDADES E DEPARTAMENTOS ===== -->
+    <div id="pc-unidepts" style="display:none;">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:16px;">Cadastre as unidades (filiais/plantas) e departamentos. Eles serão usados em todo o painel.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <!-- UNIDADES -->
+        <div class="card">
+          <div class="card-header"><div class="title">🏭 Unidades / Filiais</div><div class="subtitle">Bases físicas ou regionais da empresa</div></div>
+          <div class="card-body" style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Cidade/Estado</th><th></th></tr></thead>
+              <tbody id="tbody-unidades"></tbody>
+            </table>
+            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
+              <input class="form-control" id="nova-unidade-nome" placeholder="Ex: Matriz Goiânia" style="flex:1;font-size:12px;"/>
+              <input class="form-control" id="nova-unidade-cidade" placeholder="Cidade/UF" style="width:120px;font-size:12px;"/>
+              <button class="btn btn-primary btn-sm" onclick="addUnidade()">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <!-- DEPARTAMENTOS -->
+        <div class="card">
+          <div class="card-header"><div class="title">🗂 Departamentos / Áreas</div><div class="subtitle">Divisões funcionais da organização</div></div>
+          <div class="card-body" style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nível</th><th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Tipo</th><th></th></tr></thead>
+              <tbody id="tbody-departamentos"></tbody>
+            </table>
+            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
+              <input class="form-control" id="novo-depto-nome" placeholder="Ex: Financeiro, RH, TI..." style="flex:1;font-size:12px;"/>
+              <select class="form-control" id="novo-depto-nivel" style="width:150px;font-size:12px;"><option value="">Nível hierárquico</option></select>
+              <select class="form-control" id="novo-depto-tipo" style="width:130px;font-size:12px;">
+                <option value="operacional">Operacional</option>
+                <option value="staff">Staff / Assessoria</option>
+                <option value="suporte">Suporte</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="addDepartamento()">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -646,6 +689,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="form-group"><div class="form-label">Nível hierárquico *</div>
       <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
       <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
+    </div>
+    <div class="form-group"><div class="form-label">Departamento</div>
+      <select class="form-control" id="nc-depto"><option value="">— Nenhum —</option></select>
     </div>
     <div class="form-group"><div class="form-label">Reporta a</div>
       <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
@@ -1032,7 +1078,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card-body">
         <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Preencha e salve como .xlsx ou .csv. Colunas obrigatórias marcadas com *</p>
         <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:12px;"><strong style="color:var(--preto);">Colunas:</strong> nome · whatsapp_ou_email* · cargo_cbo* · departamento · unidade · data_admissao · data_demissao</div>
-        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm">⬇ Excel (.xlsx)</button><button class="btn btn-ghost btn-sm">⬇ CSV</button></div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="baixarModeloCSV()">⬇ CSV</button><button class="btn btn-ghost btn-sm" onclick="baixarModeloExcel()">⬇ Excel (.xlsx)</button></div>
       </div>
     </div>
     <div class="card" style="margin-bottom:14px;">
@@ -1580,8 +1626,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Departamento</div><input class="form-control" id="colab-depto" placeholder="Ex: RH"/></div>
-      <div class="form-group"><div class="form-label">Unidade / Filial</div><input class="form-control" id="colab-unidade" placeholder="Ex: Goiânia"/></div>
+      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="colab-depto"><option value="">— Nenhum —</option></select></div>
+      <div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control" id="colab-unidade"><option value="">— Nenhuma —</option></select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="colab-admissao"/></div>
@@ -2321,6 +2367,30 @@ function selOpt(el){
   el.closest('.disparo-opts').querySelectorAll('.d-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');
 }
+function baixarModeloCSV() {
+  var cabecalho = 'nome,whatsapp_ou_email,cargo_cbo,departamento,unidade,data_admissao,data_demissao';
+  var exemplo = 'João Silva,62999990000,Analista de RH · 2521-05,Recursos Humanos,Matriz Goiânia,2024-01-15,';
+  var blob = new Blob([cabecalho + '\n' + exemplo], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'modelo_colaboradores_NR1Map.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function baixarModeloExcel() {
+  // Gera XLSX mínimo via CSV com extensão xlsx (abre no Excel)
+  // Para XLSX real seria necessário biblioteca externa
+  var cabecalho = 'nome\twhatsapp_ou_email\tcargo_cbo\tdepartamento\tunidade\tdata_admissao\tdata_demissao';
+  var exemplo = 'João Silva\t62999990000\tAnalista de RH · 2521-05\tRecursos Humanos\tMatriz Goiânia\t2024-01-15\t';
+  var blob = new Blob([cabecalho + '\n' + exemplo], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'modelo_colaboradores_NR1Map.xls';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
 function handleUpload(input){
   if(input.files&&input.files[0]){
     const z=document.querySelector('.upload-zone');
@@ -2660,13 +2730,17 @@ var niveisHier = [
 ];
 
 var cargos = [];
+var unidades = [];
+var departamentos = [];
 
 function swCargos(aba) {
   document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
   document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
   document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
-  ['lista','org','niveis'].forEach(function(a) {
-    var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn'};
+  var udEl = document.getElementById('pc-unidepts');
+  if (udEl) udEl.style.display = aba === 'unidepts' ? 'block' : 'none';
+  var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn', unidepts:'aba-ud'};
+  ['lista','org','niveis','unidepts'].forEach(function(a) {
     var el = document.getElementById(ids[a]);
     if (el) { el.classList.remove('aba-ativa'); if (a === aba) el.classList.add('aba-ativa'); }
   });
@@ -2674,6 +2748,7 @@ function swCargos(aba) {
   if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
   if (aba === 'org') renderOrg();
   if (aba === 'niveis') renderNiveis();
+  if (aba === 'unidepts') { renderUnidades(); renderDepartamentos(); }
 }
 
 function getNivel(id) {
@@ -2719,6 +2794,7 @@ function renderCargos() {
     for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
     selRep.innerHTML = opRep;
   }
+  _popularSelectsDepto();
   // Popula select de cargos no modal de colaborador
   var selCargo = document.getElementById('colab-cargo-select');
   if (selCargo) {
@@ -2780,6 +2856,274 @@ function delCargo(id) {
   renderCargos();
 }
 
+/* ===== UNIDADES ===== */
+function renderUnidades() {
+  var tbody = document.getElementById('tbody-unidades');
+  if (!tbody) return;
+  if (!unidades.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhuma unidade cadastrada.</td></tr>'; return; }
+  var html = '';
+  unidades.forEach(function(u) {
+    html += '<tr style="border-bottom:1px solid var(--linha);">';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + u.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:12px;color:var(--cinza-medio);">' + (u.cidade || '—') + '</td>';
+    html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delUnidade(\"" + u.id + "\")'>🗑️</button></td>";
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  _popularSelectsUnidade();
+}
+function addUnidade() {
+  var nome = (document.getElementById('nova-unidade-nome').value || '').trim();
+  var cidade = (document.getElementById('nova-unidade-cidade').value || '').trim();
+  if (!nome) { alert('Informe o nome da unidade.'); return; }
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var obj = { id: 'un' + Date.now(), nome: nome, cidade: cidade, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
+  if (window.nr1mapDb && empresaId) {
+    window.nr1mapDb.collection('nr1map_unidades').add(obj).then(function(doc) {
+      obj.id = doc.id; unidades.push(obj);
+      document.getElementById('nova-unidade-nome').value = '';
+      document.getElementById('nova-unidade-cidade').value = '';
+      renderUnidades();
+    }).catch(function(e) { alert('Erro: ' + e.message); });
+  } else {
+    unidades.push(obj);
+    document.getElementById('nova-unidade-nome').value = '';
+    document.getElementById('nova-unidade-cidade').value = '';
+    renderUnidades();
+  }
+}
+function delUnidade(id) {
+  if (!confirm('Excluir esta unidade?')) return;
+  unidades = unidades.filter(function(u) { return u.id !== id; });
+  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_unidades').doc(id).delete().catch(function(e){ console.log(e); });
+  renderUnidades();
+}
+function _popularSelectsUnidade() {
+  var opts = '<option value="Todas">Todas as unidades</option>';
+  unidades.forEach(function(u) { opts += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+  ['ag-unidade','pulso-unidade'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) { var cur = sel.value; sel.innerHTML = opts; sel.value = cur || 'Todas'; }
+  });
+  // Select de unidade no cadastro de colaborador
+  var selColab = document.getElementById('colab-unidade');
+  if (selColab && selColab.tagName === 'SELECT') {
+    var optsColab = '<option value="">— Nenhuma —</option>';
+    unidades.forEach(function(u) { optsColab += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+    var cur = selColab.value;
+    selColab.innerHTML = optsColab;
+    if (cur) selColab.value = cur;
+  }
+}
+function carregarUnidades(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_unidades').where('empresaId','==',empresaId).get()
+    .then(function(snap) {
+      unidades = [];
+      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; unidades.push(d); });
+      _popularSelectsUnidade();
+    }).catch(function(e){ console.log('unidades err:', e); });
+}
+
+/* ===== DEPARTAMENTOS ===== */
+function renderDepartamentos() {
+  var tbody = document.getElementById('tbody-departamentos');
+  if (!tbody) return;
+  // Popular select de nível no formulário
+  var selNv = document.getElementById('novo-depto-nivel');
+  if (selNv) {
+    var optsNv = '<option value="">Nível hierárquico</option>';
+    niveisHier.forEach(function(nv) { optsNv += '<option value="' + nv.id + '">' + nv.nome + '</option>'; });
+    selNv.innerHTML = optsNv;
+  }
+  if (!departamentos.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhum departamento cadastrado.</td></tr>'; return; }
+  var tiposLabel = { operacional: 'Operacional', staff: '⚡ Staff', suporte: 'Suporte' };
+  var html = '';
+  departamentos.forEach(function(d) {
+    var nvNome = '';
+    niveisHier.forEach(function(nv) { if (nv.id === d.nvId) nvNome = nv.nome; });
+    html += '<tr style="border-bottom:1px solid var(--linha);">';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + d.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (nvNome || '—') + '</td>';
+    html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (tiposLabel[d.tipo] || d.tipo) + '</td>';
+    html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delDepartamento(\"" + d.id + "\")'>🗑️</button></td>";
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  _popularSelectsDepto();
+}
+function addDepartamento() {
+  var nome  = (document.getElementById('novo-depto-nome').value || '').trim();
+  var nvId  = document.getElementById('novo-depto-nivel').value;
+  var tipo  = document.getElementById('novo-depto-tipo').value;
+  if (!nome) { alert('Informe o nome do departamento.'); return; }
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var obj = { id: 'dp' + Date.now(), nome: nome, nvId: nvId, tipo: tipo, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
+  if (window.nr1mapDb && empresaId) {
+    window.nr1mapDb.collection('nr1map_departamentos').add(obj).then(function(doc) {
+      obj.id = doc.id; departamentos.push(obj);
+      document.getElementById('novo-depto-nome').value = '';
+      renderDepartamentos();
+    }).catch(function(e) { alert('Erro: ' + e.message); });
+  } else {
+    departamentos.push(obj);
+    document.getElementById('novo-depto-nome').value = '';
+    renderDepartamentos();
+  }
+}
+function delDepartamento(id) {
+  if (!confirm('Excluir este departamento?')) return;
+  departamentos = departamentos.filter(function(d) { return d.id !== id; });
+  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_departamentos').doc(id).delete().catch(function(e){ console.log(e); });
+  renderDepartamentos();
+}
+function _popularSelectsDepto() {
+  // Modal novo cargo
+  var selDepto = document.getElementById('nc-depto');
+  if (selDepto) {
+    var opts = '<option value="">— Nenhum —</option>';
+    departamentos.forEach(function(d) { opts += '<option value="' + d.id + '">' + d.nome + '</option>'; });
+    selDepto.innerHTML = opts;
+  }
+  // Modal novo colaborador
+  var selColabDepto = document.getElementById('colab-depto');
+  if (selColabDepto && selColabDepto.tagName === 'SELECT') {
+    var optsC = '<option value="">— Nenhum —</option>';
+    departamentos.forEach(function(d) { optsC += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+    var cur = selColabDepto.value;
+    selColabDepto.innerHTML = optsC;
+    if (cur) selColabDepto.value = cur;
+  }
+}
+function carregarDepartamentos(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_departamentos').where('empresaId','==',empresaId).get()
+    .then(function(snap) {
+      departamentos = [];
+      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; departamentos.push(d); });
+      _popularSelectsDepto();
+    }).catch(function(e){ console.log('departamentos err:', e); });
+}
+
+/* ===== MODAL AGENDA — popular selects ===== */
+function _popularModalAgenda() {
+  var selUn = document.getElementById('ag-unidade');
+  if (selUn) {
+    var optsUn = '<option value="Todas">Todas as unidades</option>';
+    (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+    selUn.innerHTML = optsUn;
+  }
+  var selDp = document.getElementById('ag-depto');
+  if (selDp) {
+    var optsDp = '<option value="Todos">Todos os departamentos</option>';
+    (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+    selDp.innerHTML = optsDp;
+  }
+  var selCg = document.getElementById('ag-cargo');
+  if (selCg) {
+    var optsCg = '<option value="Todos">Todos os cargos</option>';
+    (cargos || []).forEach(function(c) { optsCg += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
+    selCg.innerHTML = optsCg;
+  }
+}
+
+/* ===== ORGANOGRAMA AGRUPADO POR DEPARTAMENTO ===== */
+function _orgV(el) {
+  var CW=148, CH=52, GX=24, GY=60, SEC_GAP=40, HDR=28;
+
+  // Agrupar cargos por departamento
+  var semDepto = [];
+  var porDepto = {};
+  cargos.forEach(function(c) {
+    if (!c.deptoId) { semDepto.push(c); return; }
+    if (!porDepto[c.deptoId]) porDepto[c.deptoId] = [];
+    porDepto[c.deptoId].push(c);
+  });
+
+  // Montar grupos: cada depto + cargos sem depto juntos no final
+  var grupos = [];
+  departamentos.forEach(function(dp) {
+    if (porDepto[dp.id] && porDepto[dp.id].length) {
+      grupos.push({ label: dp.nome, nvId: dp.nvId, cargos: porDepto[dp.id] });
+    }
+  });
+  if (semDepto.length) grupos.push({ label: null, cargos: semDepto });
+
+  // Se não há departamentos, fallback sem agrupamento
+  if (!grupos.length || (grupos.length === 1 && !grupos[0].label)) {
+    _orgVSimples(el, cargos, CW, CH, GX, GY);
+    return;
+  }
+
+  var svgParts = '', curY = 0, totalW = 0;
+
+  // Calcular largura máxima
+  grupos.forEach(function(g) {
+    var w = g.cargos.length * (CW + GX) - GX;
+    if (w > totalW) totalW = w;
+  });
+  totalW = Math.max(totalW + 40, 500);
+
+  grupos.forEach(function(g) {
+    // Cabeçalho do departamento
+    if (g.label) {
+      var nv = null;
+      if (g.nvId) niveisHier.forEach(function(n){ if(n.id===g.nvId) nv=n; });
+      var cor = nv ? nv.cor : '#6B7280';
+      svgParts += '<rect x="0" y="' + curY + '" width="' + totalW + '" height="' + HDR + '" rx="6" fill="' + cor + '22"/>';
+      svgParts += '<text x="12" y="' + (curY + 18) + '" font-size="11" font-weight="700" fill="' + cor + '" font-family="Inter,sans-serif">' + g.label + '</text>';
+      curY += HDR + 10;
+    }
+
+    // Posicionar cargos do grupo
+    var posMap = {};
+    var rw = g.cargos.length * (CW + GX) - GX;
+    var sx = Math.floor((totalW - rw) / 2);
+    g.cargos.forEach(function(c, i) { posMap[c.id] = { x: sx + i * (CW + GX), y: curY }; });
+
+    // Linhas entre cargos do mesmo grupo
+    g.cargos.forEach(function(cr) {
+      if (!cr.repId || !posMap[cr.id] || !posMap[cr.repId]) return;
+      var px = posMap[cr.repId].x + CW/2, py = posMap[cr.repId].y + CH;
+      var cx = posMap[cr.id].x + CW/2,    cy = posMap[cr.id].y;
+      var my = py + Math.floor(GY/2);
+      svgParts += '<path d="M' + px + ',' + py + ' L' + px + ',' + my + ' L' + cx + ',' + my + ' L' + cx + ',' + cy + '" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    });
+
+    // Cards
+    g.cargos.forEach(function(c) {
+      if (posMap[c.id]) svgParts += _card(posMap[c.id].x, posMap[c.id].y, c, CW, CH);
+    });
+
+    curY += CH + SEC_GAP;
+  });
+
+  el.innerHTML = '<svg width="' + totalW + '" height="' + (curY + 20) + '" xmlns="http://www.w3.org/2000/svg" style="display:block;">' + svgParts + '</svg>';
+}
+
+function _orgVSimples(el, lista, CW, CH, GX, GY) {
+  var nvMap = _nvMap(); var maxNv = 0;
+  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
+  var totalW = 0;
+  for (var nv=1; nv<=maxNv; nv++) { var rw=((nvMap[nv]||[]).length*(CW+GX)-GX); if(rw>totalW) totalW=rw; }
+  var posMap = {};
+  for (var nv=1; nv<=maxNv; nv++) {
+    var it=nvMap[nv]||[]; var rw=it.length*(CW+GX)-GX;
+    var sx=Math.floor((totalW-rw)/2);
+    for (var m=0; m<it.length; m++) posMap[it[m].id]={x:sx+m*(CW+GX),y:(nv-1)*(CH+GY)};
+  }
+  var svgW=Math.max(totalW+40,500), svgH=maxNv*(CH+GY)+40, lin='', cards='';
+  lista.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW/2,py=posMap[cr.repId].y+CH;
+    var cx=posMap[cr.id].x+CW/2,cy=posMap[cr.id].y;
+    var my=py+Math.floor(GY/2);
+    lin+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx+','+my+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+  });
+  lista.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
 function buscarCBO(query) {
   var div = document.getElementById('nc-cbo-drop');
   if (!div) return;
@@ -2832,11 +3176,12 @@ function salvarCargo() {
   var cbo = document.getElementById('nc-cbo-val').value || document.getElementById('nc-cbo-busca').value.trim();
   var nvId = document.getElementById('nc-nivel').value;
   var repId = document.getElementById('nc-reporta').value || null;
+  var deptoId = document.getElementById('nc-depto') ? (document.getElementById('nc-depto').value || null) : null;
   if (!nome) { alert('Informe o nome do cargo.'); return; }
   if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
   if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
   var empresaId = window.nr1mapEmpresa.id;
-  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, deptoId:deptoId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
       .then(function(doc) {
@@ -3051,12 +3396,12 @@ function salvarAgendamento() {
   var data = document.getElementById('ag-data') ? document.getElementById('ag-data').value : '';
   if (!data) { alert('Selecione a data de disparo.'); return; }
   var hoje = new Date().toISOString().slice(0,10);
-  var agTipo = document.getElementById('ag-tipo') ? document.getElementById('ag-tipo').value : 'pulso';
-  var agCanal = document.getElementById('ag-canal') ? document.getElementById('ag-canal').value : 'WhatsApp';
+  var agTipo    = document.getElementById('ag-tipo')    ? document.getElementById('ag-tipo').value    : 'pulso';
+  var agCanal   = document.getElementById('ag-canal')   ? document.getElementById('ag-canal').value   : 'WhatsApp';
   var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
-  var agPrazo = document.getElementById('ag-prazo') ? document.getElementById('ag-prazo').value : '7';
-  var agDepto = document.getElementById('ag-depto') ? document.getElementById('ag-depto').value : 'Todos';
-  var agCargo = document.getElementById('ag-cargo') ? document.getElementById('ag-cargo').value : 'Todos';
+  var agPrazo   = document.getElementById('ag-prazo')   ? document.getElementById('ag-prazo').value   : '7';
+  var agDepto   = document.getElementById('ag-depto')   ? document.getElementById('ag-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('ag-cargo')   ? document.getElementById('ag-cargo').value   : 'Todos';
   var agendaData = {
     empresaId: empresaId,
     tipo: agTipo,
@@ -3092,24 +3437,25 @@ function salvarAgendamento() {
 function editarAgendamento(item) {
   var d = item.d;
   var docId = item.id;
-
   window._editAgendaId = docId;
 
-  var agTipo = document.getElementById('ag-tipo');
-  var agData = document.getElementById('ag-data');
-  var agCanal = document.getElementById('ag-canal');
-  var agUnidade = document.getElementById('ag-unidade');
-  var agPrazo = document.getElementById('ag-prazo');
-  var agDepto = document.getElementById('ag-depto');
-  var agCargo = document.getElementById('ag-cargo');
+  _popularModalAgenda();
 
-  if (agTipo) agTipo.value = d.tipo || 'pulso';
-  if (agData) agData.value = d.data || '';
-  if (agCanal) agCanal.value = d.canal || 'WhatsApp';
+  var agTipo    = document.getElementById('ag-tipo');
+  var agData    = document.getElementById('ag-data');
+  var agCanal   = document.getElementById('ag-canal');
+  var agUnidade = document.getElementById('ag-unidade');
+  var agPrazo   = document.getElementById('ag-prazo');
+  var agDepto   = document.getElementById('ag-depto');
+  var agCargo   = document.getElementById('ag-cargo');
+
+  if (agTipo)    agTipo.value    = d.tipo    || 'pulso';
+  if (agData)    agData.value    = d.data    || '';
+  if (agCanal)   agCanal.value   = d.canal   || 'WhatsApp';
   if (agUnidade) agUnidade.value = d.unidade || 'Todas';
-  if (agPrazo) agPrazo.value = d.prazo || '7';
-  if (agDepto) agDepto.value = d.depto || 'Todos';
-  if (agCargo) agCargo.value = d.cargo || 'Todos';
+  if (agPrazo)   agPrazo.value   = d.prazo   || '7';
+  if (agDepto)   agDepto.value   = d.depto   || 'Todos';
+  if (agCargo)   agCargo.value   = d.cargo   || 'Todos';
 
   var mhdr = document.querySelector('#modal-agendar .modal-header h3');
   if (mhdr) mhdr.textContent = '✏️ Editar agendamento';
@@ -3117,38 +3463,7 @@ function editarAgendamento(item) {
   var wrap = document.getElementById('btn-disparar-agora-wrap');
   if (wrap) wrap.style.display = 'block';
 
-  _popularModalAgenda();
-
-  // Restaurar valores após popular os selects
-  if (agUnidade) agUnidade.value = d.unidade || 'Todas';
-  if (agDepto) agDepto.value = d.depto || 'Todos';
-  if (agCargo) agCargo.value = d.cargo || 'Todos';
-
   abrirModal('modal-agendar');
-}
-
-function _popularModalAgenda() {
-  // Popula select de unidade
-  var selUn = document.getElementById('ag-unidade');
-  if (selUn) {
-    var optsUn = '<option value="Todas">Todas as unidades</option>';
-    (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
-    selUn.innerHTML = optsUn;
-  }
-  // Popula select de departamento
-  var selDp = document.getElementById('ag-depto');
-  if (selDp) {
-    var optsDp = '<option value="Todos">Todos os departamentos</option>';
-    (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
-    selDp.innerHTML = optsDp;
-  }
-  // Popula select de cargo
-  var selCg = document.getElementById('ag-cargo');
-  if (selCg) {
-    var optsCg = '<option value="Todos">Todos os cargos</option>';
-    (cargos || []).forEach(function(c) { optsCg += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
-    selCg.innerHTML = optsCg;
-  }
 }
 
 function excluirAgendamento(docId) {
@@ -3611,13 +3926,11 @@ function dispararPesquisa(tipo) {
     alert('Erro: empresa não carregada.'); return;
   }
 
-  // Ler filtros de público-alvo do modal de agendamento (se aberto) ou da tela de disparo
   var filtroUnidade = (document.getElementById('ag-unidade') && document.getElementById('ag-unidade').value) || 'Todas';
   var filtroDepto   = (document.getElementById('ag-depto')   && document.getElementById('ag-depto').value)   || 'Todos';
   var filtroCargo   = (document.getElementById('ag-cargo')   && document.getElementById('ag-cargo').value)   || 'Todos';
   var prazoVal      = parseInt((document.getElementById('ag-prazo') && document.getElementById('ag-prazo').value) || '7', 10);
 
-  // Busca colaboradores ativos
   window.nr1mapDb.collection('nr1map_colaboradores')
     .where('empresaId', '==', empresaId)
     .where('status', '==', 'ativo')
@@ -3627,12 +3940,11 @@ function dispararPesquisa(tipo) {
         alert('Nenhum colaborador ativo cadastrado.'); return;
       }
 
-      // Filtrar pelo público-alvo
       var colabsFiltrados = [];
       snap.forEach(function(doc) {
         var c = doc.data(); c._id = doc.id;
         var okUnidade = filtroUnidade === 'Todas' || (c.unidade || '') === filtroUnidade;
-        var okDepto   = filtroDepto   === 'Todos' || (c.depto || c.departamento || '') === filtroDepto;
+        var okDepto   = filtroDepto   === 'Todos' || (c.depto || c.departamento || c.setor || '') === filtroDepto;
         var okCargo   = filtroCargo   === 'Todos' || (c.cargo || '').indexOf(filtroCargo) !== -1;
         if (okUnidade && okDepto && okCargo) colabsFiltrados.push({ doc: doc, data: c });
       });
@@ -3975,6 +4287,8 @@ function aplicarEmpresa(e) {
   if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
   if(nmEl) nmEl.textContent=e.responsavel||'—';
   carregarCargos(e.id);
+  carregarUnidades(e.id);
+  carregarDepartamentos(e.id);
   carregarDashboard(e.id);
   carregarColabs();
   carregarHistoricoReal(e.id);
