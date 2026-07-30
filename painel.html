@@ -3719,18 +3719,58 @@ function carregarHistoricoUnificado(empresaId) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
         return;
       }
-      window._histCiclos = [];
+      // Separar ciclos com dados dos vazios
+      var ciclosComDados = [];
+      var ciclosVazios = [];
       snap.forEach(function(doc) {
-        var d = doc.data();
-        d._id = doc.id;
-        // Normalizar tipo (minúsculo ou maiúsculo)
+        var d = doc.data(); d._id = doc.id;
         d._tipo = d.tipo || d.Tipo || 'geral';
-        window._histCiclos.push(d);
+        if (d.ibpGeral !== undefined || d.totalRespostas) {
+          ciclosComDados.push(d);
+        } else {
+          ciclosVazios.push(doc);
+        }
       });
-      window._histCiclos.sort(function(a,b){
-        return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1;
+
+      // Para ciclos vazios, buscar dados nas subcoleções respostas
+      var promises = ciclosVazios.map(function(cicloDoc) {
+        return window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+          .collection('ciclos').doc(cicloDoc.id)
+          .collection('respostas').get()
+          .then(function(respSnap) {
+            if (respSnap.empty) return null;
+            var soma = 0, n = 0, tipo = 'geral', criadoEm = '', tema = '';
+            respSnap.forEach(function(r) {
+              var rd = r.data();
+              if (rd.ibpGeral !== undefined) { soma += rd.ibpGeral; n++; }
+              if (rd.tipo || rd.Tipo) tipo = rd.tipo || rd.Tipo;
+              if (rd.criadoEm && !criadoEm) criadoEm = rd.criadoEm;
+              if (rd.tema) tema = rd.tema;
+            });
+            if (!n) return null;
+            return {
+              _id: cicloDoc.id,
+              _tipo: tipo,
+              tipo: tipo,
+              ibpGeral: Math.round((soma/n)*100)/100,
+              totalRespostas: n,
+              criadoEm: criadoEm,
+              tema: tema
+            };
+          });
       });
-      renderHistoricoUnificado();
+
+      return Promise.all(promises).then(function(extras) {
+        var todos = ciclosComDados.slice();
+        extras.forEach(function(e) { if (e) todos.push(e); });
+        todos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+        if (!todos.length) {
+          el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+          return;
+        }
+        window._histCiclos = todos;
+        renderHistoricoUnificado();
+      });
     }).catch(function(e){
       el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro: ' + e.message + '</div>';
     });
