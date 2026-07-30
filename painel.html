@@ -448,16 +448,30 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== AUTOCADASTRO ===== -->
 <div id="view-historico" class="view">
-  <div class="topbar"><div class="topbar-title">Histórico completo</div><div class="topbar-actions">
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as pesquisas</option><option>Diagnóstico Geral</option><option>Pesquisa Pulso</option></select>
-    <select class="form-control" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option></select>
+  <div class="topbar"><div class="topbar-title">Histórico de pesquisas</div><div class="topbar-actions">
+    <select class="form-control" id="hist-filtro-tipo" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;" onchange="renderHistoricoUnificado()">
+      <option value="todos">Todos os tipos</option>
+      <option value="geral">Diagnóstico Geral</option>
+      <option value="pulso">Pesquisa Pulso</option>
+    </select>
     <button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">📄 Relatório anual</button>
   </div></div>
   <div class="content">
     <div class="grid-2">
       <div class="card">
-        <div class="card-header"><div class="title">Linha do tempo</div></div>
-        <div class="card-body" style="padding:8px 16px;">
+        <div class="card-header">
+          <div class="title">Linha do tempo</div>
+          <div class="subtitle" style="display:flex;gap:14px;margin-top:4px;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0A6E4F;opacity:0.7;"></span>Diagnóstico
+            </span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7B00C4;opacity:0.6;"></span>Pulso
+            </span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:8px 16px;" id="hist-timeline-body">
+          <div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando histórico...</div>
         </div>
       </div>
       <div class="card">
@@ -1493,8 +1507,27 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div class="card-body">
         <div class="alerta"><span>ℹ</span><p><strong>14 colaboradores ativos</strong> receberão o link. Respostas 100% anônimas — tabuladas por cargo CBO.</p></div>
         <div class="form-row" style="margin-bottom:12px;">
-          <div class="form-group"><div class="form-label">Prazo para resposta</div><select class="form-control"><option>7 dias</option><option>14 dias</option><option>30 dias</option></select></div>
-          <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control"><option>Todas as unidades</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="ag-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="ag-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="ag-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
         </div>
         <div class="form-group"><div class="form-label">Canal de envio</div>
           <div class="disparo-opts">
@@ -1542,24 +1575,52 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== PULSO ===== -->
 <div id="view-pulso" class="view">
-  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">+ Nova Pesquisa Pulso</button></div></div>
-  <div class="content">
-    <div class="ia-box" style="margin-bottom:16px;"><div class="ia-lbl">🤖 Sugestão da IA</div><div class="ia-txt"><strong>Disparar Pulso: Esgotamento / Sobrecarga</strong></div><div class="ia-sub">Piorou 8 pts desde o último diagnóstico — maior deterioração do período</div><div style="margin-top:10px;"><button class="btn btn-roxo btn-sm" onclick="sv('nova-pulso')">Aceitar sugestão →</button></div></div>
-    <div class="card"><div class="card-header"><div class="title">Histórico de Pulsos</div></div>
-      <div class="card-body" style="padding:8px 16px;">
-        <div id="pulso-historico-body"><div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando histórico de pulsos...</div></div>
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div></div>
+  <div class="content" style="max-width:620px;">
+
+    <!-- CARD 1: Configurar disparo -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Público-alvo e canal de envio</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p>Respostas <strong>100% anônimas</strong> — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="pulso-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="pulso-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="pulso-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ===== NOVA PULSO ===== -->
-<div id="view-nova-pulso" class="view">
-  <div class="topbar"><div class="topbar-title">Nova Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('pulso')">← Voltar</button></div></div>
-  <div class="content" style="max-width:620px;">
+    <!-- CARD 2: Conteúdo da Pulso -->
     <div class="card">
+      <div class="card-header"><div class="title">Conteúdo da pesquisa</div><div class="subtitle">Tema e perguntas desta semana</div></div>
       <div class="card-body">
-        <div class="ia-box"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
+        <div class="ia-box" style="margin-bottom:12px;"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
         <div class="tabs">
           <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
           <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
@@ -1572,7 +1633,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
         </div>
         <div id="t-esc" class="view">
-          <div class="form-group"><div class="form-label">Indicador para a Pulso</div><select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select></div>
+          <div class="form-group"><div class="form-label">Indicador para a Pulso</div>
+            <select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select>
+          </div>
         </div>
         <div id="t-pers" class="view">
           <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
@@ -1587,13 +1650,96 @@ textarea.form-control{resize:vertical;min-height:70px;}
               <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
             </div>
           </div>
-            <div class="form-group"><div class="form-label">Unidade(s)</div><select class="form-control" id="pulso-unidade"><option>Todas</option><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select></div>
-            <div class="form-group"><div class="form-label">Canal</div><select class="form-control" id="pulso-canal"><option>WhatsApp</option><option>E-mail</option><option>Ambos</option></select></div>
+        </div>
+        <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPulsoComCanal()">📡 Disparar Pesquisa Pulso</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== NOVA PULSO ===== -->
+<div id="view-nova-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('pulso')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+
+    <!-- CARD 1: Configurar disparo (mesmo padrão do Diagnóstico) -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Público-alvo e canal de envio</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p>Respostas <strong>100% anônimas</strong> — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
           </div>
-          <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPesquisa('pulso')">📡 Disparar Pesquisa Pulso</button>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="pulso-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="pulso-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="pulso-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- CARD 2: Conteúdo da Pulso -->
+    <div class="card">
+      <div class="card-header"><div class="title">Conteúdo da pesquisa</div><div class="subtitle">Tema e perguntas desta semana</div></div>
+      <div class="card-body">
+        <div class="ia-box" style="margin-bottom:12px;"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
+          <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
+          <div class="tab" onclick="swTab(this,'t-pers')">Pergunta própria</div>
+        </div>
+        <div id="t-sug" class="view active">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 perguntas geradas sobre <strong>Esgotamento / Sobrecarga</strong>:</p>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Nas últimas semanas, as demandas de trabalho superaram minha capacidade?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Consigo descansar adequadamente fora do horário de trabalho?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
+        </div>
+        <div id="t-esc" class="view">
+          <div class="form-group"><div class="form-label">Indicador para a Pulso</div>
+            <select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select>
+          </div>
+        </div>
+        <div id="t-pers" class="view">
+          <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
+          <div class="form-group"><div class="form-label">Segunda pergunta (opcional)</div><textarea class="form-control" placeholder="Pergunta adicional..."></textarea></div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--linha);">
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Quantas perguntas esta semana?</div>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="btn-qtd active" id="qtd-1" onclick="selecionarQtd(1)">1 pergunta</button>
+              <button class="btn-qtd" id="qtd-2" onclick="selecionarQtd(2)">2 perguntas</button>
+              <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPulsoComCanal()">📡 Disparar Pesquisa Pulso</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2350,6 +2496,7 @@ function sv(id){
   if(id==='relatorio-anual' && window.nr1mapEmpresa) carregarRelatorioAnual(window.nr1mapEmpresa.id);
   if(id==='relatorios' && window.nr1mapEmpresa) carregarRelatorios(window.nr1mapEmpresa.id);
   if(id==='planejamento') carregarAgenda();
+  if(id==='historico' && window.nr1mapEmpresa) carregarHistoricoUnificado(window.nr1mapEmpresa.id);
 }
 function swTab(tab,targetId){
   var container = tab.closest('.card') || document;
@@ -2905,6 +3052,7 @@ function _popularSelectsUnidade() {
     var sel = document.getElementById(sid);
     if (sel) { var cur = sel.value; sel.innerHTML = opts; sel.value = cur || 'Todas'; }
   });
+  // Também popular o select na view-diagnostico (mesmo id ag-unidade já cobre)
   // Select de unidade no cadastro de colaborador
   var selColab = document.getElementById('colab-unidade');
   if (selColab && selColab.tagName === 'SELECT') {
@@ -2985,6 +3133,24 @@ function _popularSelectsDepto() {
     departamentos.forEach(function(d) { opts += '<option value="' + d.id + '">' + d.nome + '</option>'; });
     selDepto.innerHTML = opts;
   }
+  // Selects de depto nas telas de disparo
+  ['ag-depto','pulso-depto'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) {
+      var optsD = '<option value="Todos">Todos os departamentos</option>';
+      departamentos.forEach(function(d) { optsD += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+      var cur = sel.value; sel.innerHTML = optsD; sel.value = cur || 'Todos';
+    }
+  });
+  // Selects de cargo nas telas de disparo
+  ['ag-cargo','pulso-cargo'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) {
+      var optsC2 = '<option value="Todos">Todos os cargos</option>';
+      cargos.forEach(function(c) { optsC2 += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
+      var cur = sel.value; sel.innerHTML = optsC2; sel.value = cur || 'Todos';
+    }
+  });
   // Modal novo colaborador
   var selColabDepto = document.getElementById('colab-depto');
   if (selColabDepto && selColabDepto.tagName === 'SELECT') {
@@ -3429,9 +3595,131 @@ function salvarAgendamento() {
     carregarAgenda();
     if (data === hoje) {
       var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
-      setTimeout(function(){ sv(tipoDisparo); }, 600);
+      setTimeout(function(){
+        sv(tipoDisparo);
+        _preencherTelaDisparo({ prazo: agPrazo, unidade: agUnidade, depto: agDepto, cargo: agCargo, canal: agCanal, tipo: agTipo });
+      }, 600);
     }
   }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function dispararPulsoComCanal() {
+  // Lê canal do d-opt (mesmo padrão do diagnóstico)
+  var optSel = document.querySelector('#view-nova-pulso .d-opt.sel .d-lb');
+  var canalVal = optSel ? optSel.textContent.trim() : 'WhatsApp';
+  var elCanal = document.getElementById('pulso-canal');
+  if (!elCanal) {
+    // Injeta valor temporário para dispararPesquisa ler
+    var tmp = document.createElement('select');
+    tmp.id = 'pulso-canal'; tmp.style.display = 'none';
+    var op = document.createElement('option');
+    op.value = canalVal; op.selected = true;
+    tmp.appendChild(op);
+    document.body.appendChild(tmp);
+    dispararPesquisa('pulso');
+    setTimeout(function(){ document.body.removeChild(tmp); }, 2000);
+  } else {
+    elCanal.value = canalVal;
+    dispararPesquisa('pulso');
+  }
+}
+
+function carregarHistoricoUnificado(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('hist-timeline-body');
+  if (!el) return;
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(20).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+        return;
+      }
+      window._histCiclos = [];
+      snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
+      renderHistoricoUnificado();
+    }).catch(function(){ el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Sem dados.</div>'; });
+}
+
+function renderHistoricoUnificado() {
+  var el = document.getElementById('hist-timeline-body');
+  if (!el) return;
+  var filtro = (document.getElementById('hist-filtro-tipo') || {}).value || 'todos';
+  var ciclos = window._histCiclos || [];
+  var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var filtrados = ciclos.filter(function(d) {
+    if (filtro === 'todos') return true;
+    return (d.tipo || 'geral') === filtro;
+  });
+  if (!filtrados.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum item para este filtro.</div>';
+    return;
+  }
+  el.innerHTML = filtrados.map(function(d) {
+    var isGeral = (d.tipo || 'geral') === 'geral';
+    var cor     = isGeral ? '#0A6E4F' : '#7B00C4';
+    var bgCor   = isGeral ? 'rgba(10,110,79,0.06)' : 'rgba(123,0,196,0.06)';
+    var borda   = isGeral ? 'rgba(10,110,79,0.2)'  : 'rgba(123,0,196,0.15)';
+    var label   = isGeral ? 'Diagnóstico Geral'    : 'Pesquisa Pulso';
+    var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+    var dataStr = dt ? meses[dt.getMonth()] + ' ' + dt.getFullYear() : '—';
+    var respostas = d.totalRespostas || 0;
+    var ibp = d.ibpGeral !== undefined ? (parseFloat(d.ibpGeral) > 0 ? '+' : '') + parseFloat(d.ibpGeral).toFixed(1) : '—';
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;">' +
+      '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + cor + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:12px;font-weight:600;color:' + cor + ';">' + label + (d.tema ? ' — ' + d.tema : '') + '</div>' +
+        '<div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;">' + dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp + '</div>' +
+      '</div>' +
+      '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(\'laudo-tecnico\')">Ver laudo</button>' +
+    '</div>';
+  }).join('');
+}
+
+function dispararDoAgendamento() {
+  // Lê os valores atuais do modal de agendamento, salva e navega para a tela de disparo preenchida
+  var agTipo    = document.getElementById('ag-tipo')    ? document.getElementById('ag-tipo').value    : 'pulso';
+  var agPrazo   = document.getElementById('ag-prazo')   ? document.getElementById('ag-prazo').value   : '7';
+  var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
+  var agDepto   = document.getElementById('ag-depto')   ? document.getElementById('ag-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('ag-cargo')   ? document.getElementById('ag-cargo').value   : 'Todos';
+  var agCanal   = document.getElementById('ag-canal')   ? document.getElementById('ag-canal').value   : 'WhatsApp';
+  salvarAgendamento();
+  var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+  setTimeout(function() {
+    sv(tipoDisparo);
+    _preencherTelaDisparo({ prazo: agPrazo, unidade: agUnidade, depto: agDepto, cargo: agCargo, canal: agCanal, tipo: agTipo });
+  }, 700);
+}
+
+function _preencherTelaDisparo(d) {
+  // Prazo — mesmo select em ambas as telas
+  var elPrazo = document.getElementById('ag-prazo');
+  if (elPrazo) elPrazo.value = d.prazo || '7';
+
+  // Unidade
+  var elUn = document.getElementById(d.tipo === 'pulso' ? 'pulso-unidade' : 'ag-unidade');
+  if (elUn) elUn.value = d.unidade || 'Todas';
+
+  // Departamento
+  var elDp = document.getElementById(d.tipo === 'pulso' ? 'pulso-depto' : 'ag-depto');
+  if (elDp) elDp.value = d.depto || 'Todos';
+
+  // Cargo
+  var elCg = document.getElementById(d.tipo === 'pulso' ? 'pulso-cargo' : 'ag-cargo');
+  if (elCg) elCg.value = d.cargo || 'Todos';
+
+  // Canal — Diagnóstico usa .d-opt, Pulso usa select
+  if (d.tipo === 'geral') {
+    document.querySelectorAll('.d-opt').forEach(function(opt) {
+      opt.classList.remove('sel');
+      var lb = opt.querySelector('.d-lb');
+      if (lb && lb.textContent.trim() === (d.canal || 'WhatsApp')) opt.classList.add('sel');
+    });
+  } else {
+    var elCanal = document.getElementById('pulso-canal');
+    if (elCanal) elCanal.value = d.canal || 'WhatsApp';
+  }
 }
 
 function editarAgendamento(item) {
@@ -3926,10 +4214,15 @@ function dispararPesquisa(tipo) {
     alert('Erro: empresa não carregada.'); return;
   }
 
-  var filtroUnidade = (document.getElementById('ag-unidade') && document.getElementById('ag-unidade').value) || 'Todas';
-  var filtroDepto   = (document.getElementById('ag-depto')   && document.getElementById('ag-depto').value)   || 'Todos';
-  var filtroCargo   = (document.getElementById('ag-cargo')   && document.getElementById('ag-cargo').value)   || 'Todos';
-  var prazoVal      = parseInt((document.getElementById('ag-prazo') && document.getElementById('ag-prazo').value) || '7', 10);
+  // Para Pulso usa pulso-*, para Diagnóstico usa ag-*
+  var _unEl  = document.getElementById(tipo === 'pulso' ? 'pulso-unidade' : 'ag-unidade');
+  var _dpEl  = document.getElementById(tipo === 'pulso' ? 'pulso-depto'   : 'ag-depto');
+  var _cgEl  = document.getElementById(tipo === 'pulso' ? 'pulso-cargo'   : 'ag-cargo');
+  var _prEl  = document.getElementById('ag-prazo'); // mesmo select em ambas as telas
+  var filtroUnidade = (_unEl && _unEl.value) || 'Todas';
+  var filtroDepto   = (_dpEl && _dpEl.value) || 'Todos';
+  var filtroCargo   = (_cgEl && _cgEl.value) || 'Todos';
+  var prazoVal      = parseInt((_prEl && _prEl.value) || '7', 10);
 
   window.nr1mapDb.collection('nr1map_colaboradores')
     .where('empresaId', '==', empresaId)
@@ -4290,6 +4583,7 @@ function aplicarEmpresa(e) {
   carregarUnidades(e.id);
   carregarDepartamentos(e.id);
   carregarDashboard(e.id);
+  carregarHistoricoUnificado(e.id);
   carregarColabs();
   carregarHistoricoReal(e.id);
   carregarHistoricoPulso(e.id);
