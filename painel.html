@@ -3712,19 +3712,53 @@ function carregarHistoricoUnificado(empresaId) {
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
 
-  // Busca direta pelo path — funciona mesmo sem campo empresaId nos ciclos
+  // Os dados estão nas respostas dentro de cada ciclo, não no ciclo em si
+  // Busca todos os ciclos e depois a primeira resposta de cada um
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
-    .then(function(snap) {
-      if (snap.empty) {
+    .then(function(ciclosSnap) {
+      if (ciclosSnap.empty) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
         return;
       }
-      window._histCiclos = [];
-      snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; window._histCiclos.push(d); });
+      var promises = [];
+      ciclosSnap.forEach(function(cicloDoc) {
+        var p = window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+          .collection('ciclos').doc(cicloDoc.id)
+          .collection('respostas').limit(1).get()
+          .then(function(respSnap) {
+            if (respSnap.empty) return null;
+            var r = respSnap.docs[0].data();
+            // Mesclar dados do ciclo pai com dados da resposta
+            var cicloData = cicloDoc.data();
+            return {
+              _id: cicloDoc.id,
+              tipo: cicloData.tipo || r.tipo || r.Tipo || 'geral',
+              Tipo: cicloData.Tipo || r.Tipo || r.tipo || 'geral',
+              criadoEm: cicloData.criadoEm || r.criadoEm || '',
+              ibpGeral: cicloData.ibpGeral !== undefined ? cicloData.ibpGeral : (r.ibpGeral !== undefined ? r.ibpGeral : null),
+              totalRespostas: cicloData.totalRespostas || 1,
+              tema: cicloData.tema || r.tema || '',
+              ibpModulos: cicloData.ibpModulos || r.ibpModulos || null,
+              ibpSubcats: cicloData.ibpSubcats || r.ibpSubcats || null
+            };
+          });
+        promises.push(p);
+      });
+      return Promise.all(promises);
+    })
+    .then(function(results) {
+      if (!results) return;
+      window._histCiclos = results.filter(function(r){ return r !== null; });
       window._histCiclos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+      if (!window._histCiclos.length) {
+        var el2 = document.getElementById('hist-timeline-body');
+        if(el2) el2.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+        return;
+      }
       renderHistoricoUnificado();
-    }).catch(function(e){
+    })
+    .catch(function(e){
       el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro: ' + e.message + '</div>';
     });
 }
