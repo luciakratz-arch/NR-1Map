@@ -3666,17 +3666,23 @@ function renderHistoricoUnificado() {
     var bgCor   = isGeral ? 'rgba(10,110,79,0.06)' : 'rgba(123,0,196,0.06)';
     var borda   = isGeral ? 'rgba(10,110,79,0.2)'  : 'rgba(123,0,196,0.15)';
     var label   = isGeral ? 'Diagnóstico Geral'    : 'Pesquisa Pulso';
-    var dt = d.criadoEm ? new Date(d.criadoEm) : null;
-    var dataStr = dt ? meses[dt.getMonth()] + ' ' + dt.getFullYear() : '—';
+    // Suporta Timestamp Firestore (.toDate()), string ISO, ou ausente
+    var dt = null;
+    if (d.criadoEm) {
+      if (typeof d.criadoEm === 'object' && d.criadoEm.toDate) dt = d.criadoEm.toDate();
+      else dt = new Date(d.criadoEm);
+    }
+    var dataStr = (dt && !isNaN(dt)) ? (dt.getDate() + '/' + (dt.getMonth()+1) + '/' + dt.getFullYear()) : '—';
     var respostas = d.totalRespostas || 0;
     var ibp = d.ibpGeral !== undefined ? (parseFloat(d.ibpGeral) > 0 ? '+' : '') + parseFloat(d.ibpGeral).toFixed(1) : '—';
+    var cicloId = d._id || '';
     return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;">' +
       '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + cor + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
       '<div style="flex:1;">' +
         '<div style="font-size:12px;font-weight:600;color:' + cor + ';">' + label + (d.tema ? ' — ' + d.tema : '') + '</div>' +
         '<div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;">' + dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp + '</div>' +
       '</div>' +
-      '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(\'laudo-tecnico\')">Ver laudo</button>' +
+      '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="abrirLaudoDoCiclo(\'' + cicloId + '\',\'' + (d.tipo||'geral') + '\')">Ver laudo</button>' +
     '</div>';
   }).join('');
 }
@@ -4684,38 +4690,76 @@ function carregarCargos(empresaId) {
   });
 })();
 
+function abrirLaudoDoCiclo(cicloId, tipo) {
+  sv('laudo-tecnico');
+  if (!cicloId || !window.nr1mapEmpresa || !window.nr1mapDb) return;
+  var empresaId = window.nr1mapEmpresa.id;
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').doc(cicloId).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      _renderLaudoDados(doc.data());
+    }).catch(function(e){ console.log('ciclo err:',e); });
+}
+
+function _renderLaudoDados(d) {
+  var semDados = document.getElementById('laudo-sem-dados');
+  var comDados = document.getElementById('laudo-dados');
+  if (semDados) semDados.style.display = 'none';
+  if (comDados) comDados.style.display = 'block';
+  var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
+  var corFn  = function(ibp){ return ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b'; };
+  var nomesMod = {M1:'Fatores Fisiológicos',M2:'Fatores de Segurança',M3:'Fatores Sociais',M4:'Fatores Motivacionais'};
+  var mods = document.getElementById('laudo-modulos');
+  if (mods) {
+    if (d.ibpModulos && Object.keys(d.ibpModulos).length) {
+      var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;text-align:left;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Módulo</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona Dejours</th></tr></thead><tbody>';
+      Object.keys(d.ibpModulos).forEach(function(m){
+        var ibp=d.ibpModulos[m]; var s=ibp>=0?'+':'';
+        html+='<tr><td style="padding:8px;font-size:13px;border-bottom:1px solid #E5E7EB;">'+(nomesMod[m]||m)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
+      });
+      html+='</tbody></table>';
+      mods.innerHTML = html;
+    } else {
+      mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por módulo gerados após o próximo diagnóstico.</p>';
+    }
+  }
+  var subcatEl = document.getElementById('laudo-subcats');
+  if (subcatEl) {
+    var subcats = d.ibpSubcats || {};
+    if (Object.keys(subcats).length) {
+      var hsc = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Subcategoria</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona</th></tr></thead><tbody>';
+      Object.keys(subcats).forEach(function(sc){
+        var s=subcats[sc]; var ibp=typeof s==='object'?s.ibp:s; var sinal=ibp>=0?'+':'';
+        hsc+='<tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.nome||sc)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+sinal+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
+      });
+      hsc+='</tbody></table>';
+      subcatEl.innerHTML = hsc;
+    } else {
+      subcatEl.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por subcategoria gerados após o próximo diagnóstico.</p>';
+    }
+  }
+  var concl = document.getElementById('laudo-conclusao');
+  var ibpG = d.ibpGeral||0; var sg=ibpG>=0?'+':'';
+  if(concl) concl.innerHTML = '<p>Com base no Diagnóstico Psicossocial realizado conforme a <strong>Portaria MTE nº 1.419/2024</strong>, o IBP geral da organização foi de <strong style="color:'+corFn(ibpG)+'">'+sg+ibpG.toFixed(1)+'</strong>, zona de <strong>'+zonaFn(ibpG)+'</strong>.</p>';
+  var nomeEl = document.getElementById('laudo-responsavel-nome');
+  if(nomeEl && window.nr1mapEmpresa) nomeEl.textContent = window.nr1mapEmpresa.responsavel||window.nr1mapEmpresa.nome||'—';
+}
+
 function carregarLaudoTecnico(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var semDados = document.getElementById('laudo-sem-dados');
   var comDados = document.getElementById('laudo-dados');
+  // Busca sem orderBy para evitar exigência de índice
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-    .collection('ciclos').orderBy('criadoEm','desc').limit(1).get()
+    .collection('ciclos').get()
     .then(function(snap) {
       if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
-      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
-      var d = snap.docs[0].data();
-      var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
-      var corFn = function(ibp){ return ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b'; };
-      var nomesMod = {M1:'Fatores Fisiológicos',M2:'Fatores de Segurança',M3:'Fatores Sociais',M4:'Fatores Motivacionais'};
-      var mods = document.getElementById('laudo-modulos');
-      if (mods) {
-        if (d.ibpModulos && Object.keys(d.ibpModulos).length) {
-          var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;text-align:left;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Módulo</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona Dejours</th></tr></thead><tbody>';
-          Object.keys(d.ibpModulos).forEach(function(m){
-            var ibp=d.ibpModulos[m]; var s=ibp>=0?'+':'';
-            html+='<tr><td style="padding:8px;font-size:13px;border-bottom:1px solid #E5E7EB;">'+(nomesMod[m]||m)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
-          });
-          html+='</tbody></table>';
-          mods.innerHTML = html;
-        } else {
-          mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por módulo gerados após o próximo diagnóstico.</p>';
-        }
-      }
-      var concl = document.getElementById('laudo-conclusao');
-      var ibpG = d.ibpGeral||0; var s=ibpG>=0?'+':'';
-      if(concl) concl.innerHTML = '<p>Com base no Diagnóstico Psicossocial realizado conforme a <strong>Portaria MTE nº 1.419/2024</strong>, o IBP geral da organização foi de <strong style="color:'+corFn(ibpG)+'">'+s+ibpG.toFixed(1)+'</strong>, zona de <strong>'+zonaFn(ibpG)+'</strong>.</p>';
-      var nomeEl = document.getElementById('laudo-responsavel-nome');
-      if(nomeEl && window.nr1mapEmpresa) nomeEl.textContent = window.nr1mapEmpresa.responsavel||window.nr1mapEmpresa.nome||'—';
+      // Pegar o mais recente no cliente
+      var docs = [];
+      snap.forEach(function(d){ docs.push(d.data()); });
+      docs.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+      _renderLaudoDados(docs[0]);
     }).catch(function(e){ console.log('laudo err:',e); });
 }
 
@@ -4725,11 +4769,13 @@ function carregarMapaRisco(empresaId) {
   var comDados = document.getElementById('mapa-dados');
   var tbody = document.getElementById('mapa-tbody');
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-    .collection('ciclos').orderBy('criadoEm','desc').limit(1).get()
+    .collection('ciclos').get()
     .then(function(snap) {
       if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
       if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
-      var d = snap.docs[0].data();
+      var docs = []; snap.forEach(function(d){ docs.push(d.data()); });
+      docs.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+      var d = docs[0];
       var subcats = d.ibpSubcats||{};
       var groFn = function(ibp){ return ibp<=-3?'Intolerável':ibp<=-1.5?'Substancial':ibp<=0?'Moderado':ibp<=1.5?'Tolerável':'Trivial'; };
       var groCor = function(ibp){ return ibp<=-3?'#991b1b':ibp<=-1.5?'#c2410c':ibp<=0?'#b45309':ibp<=1.5?'#15803d':'#166534'; };
