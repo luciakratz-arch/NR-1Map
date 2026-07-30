@@ -3715,6 +3715,7 @@ function carregarHistoricoUnificado(empresaId) {
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
     .then(function(snap) {
+      alert('DEBUG: empresaId=' + empresaId + ' | ciclos encontrados=' + snap.size);
       if (snap.empty) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
         return;
