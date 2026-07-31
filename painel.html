@@ -507,7 +507,8 @@ textarea.form-control{resize:vertical;min-height:70px;}
       </div>
       <div class="card" style="margin-bottom:16px;">
         <div class="card-header"><div class="title">IBP por Subcategoria</div></div>
-        <div class="card-body"><div id="laudo-subcats"></div></div>
+        <div class="card-body"><div id="laudo-subcats"></div>
+          <div id="laudo-subcats-detail" style="margin-top:12px;"></div></div>
       </div>
       <div class="card" style="margin-bottom:16px;">
         <div class="card-header"><div class="title">Conclusão e Assinaturas</div></div>
@@ -838,6 +839,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="topbar-title">✅ Plano de Ação 5W2H</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="adicionarAcao()">+ Nova ação</button>
+      <button class="btn btn-roxo btn-sm" onclick="gerarSugestoesAutomaticas()">🤖 Sugestões automáticas</button>
       <button class="btn btn-primary btn-sm" onclick="gerarPdfPlano()">⬇ Gerar PDF</button>
     </div>
   </div>
@@ -3372,6 +3374,136 @@ function _orgVSimples(el, lista, CW, CH, GX, GY) {
   el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
 }
 
+/* ===== SUGESTÕES AUTOMÁTICAS DE PLANO DE AÇÃO ===== */
+var _SUGESTOES_BASE = {
+  '1.1': { modId:'M1', nome:'Ritmo de Trabalho', acao:'Revisar distribuição de tarefas e prazos; implementar metodologia de gestão de carga horária (ex: Kanban ou sprints semanais).', responsavel:'Gestão de RH', prazo:30 },
+  '1.2': { modId:'M1', nome:'Pausas e Descompressão', acao:'Estabelecer política formal de pausas; criar espaço físico de descompressão; comunicar e garantir cumprimento dos intervalos legais.', responsavel:'Gestão de RH', prazo:15 },
+  '1.3': { modId:'M1', nome:'Estresse e Esgotamento', acao:'Oferecer suporte psicológico (EAP ou psicólogo parceiro); promover programa de saúde mental; monitorar absenteísmo relacionado a estresse.', responsavel:'RH / Diretoria', prazo:30 },
+  '1.4': { modId:'M1', nome:'Ergonomia e Sobrecarga Cognitiva', acao:'Auditar ferramentas e sistemas utilizados; reduzir notificações desnecessárias; capacitar equipe para uso eficiente das tecnologias.', responsavel:'TI / RH', prazo:20 },
+  '2.1': { modId:'M2', nome:'Estabilidade Laboral', acao:'Comunicar política clara de remuneração e segurança no emprego; garantir pontualidade de pagamentos; estabelecer canais de diálogo com liderança.', responsavel:'Diretoria / RH', prazo:15 },
+  '2.2': { modId:'M2', nome:'Clareza de Papéis e Metas', acao:'Revisar e publicar descritivos de cargo; realizar reunião de alinhamento de metas trimestrais; eliminar ambiguidades nas ordens e processos.', responsavel:'Gestão / RH', prazo:20 },
+  '2.3': { modId:'M2', nome:'Segurança Psicológica', acao:'Treinar lideranças em feedback construtivo; implantar cultura de aprendizado com o erro; criar canal anônimo para sugestões e reclamações.', responsavel:'RH / Liderança', prazo:30 },
+  '2.4': { modId:'M2', nome:'Treinamento e Capacitação', acao:'Mapear gaps de competência por cargo; estruturar plano de capacitação anual; garantir treinamento antes de mudanças tecnológicas.', responsavel:'RH / T&D', prazo:45 },
+  '2.5': { modId:'M2', nome:'Segurança e Riscos Físicos', acao:'Realizar inspeção de segurança; atualizar fornecimento de EPIs; revisar protocolos de segurança conforme NR específicas da atividade.', responsavel:'SESMT / RH', prazo:15 },
+  '3.1': { modId:'M3', nome:'Relação com Liderança', acao:'Capacitar líderes em gestão humanizada; implantar reuniões 1:1 mensais; avaliar clima de relacionamento por equipe semestralmente.', responsavel:'RH / Diretoria', prazo:30 },
+  '3.2': { modId:'M3', nome:'Clima entre Pares', acao:'Promover dinâmicas de integração de equipe; mediar conflitos identificados; estabelecer código de conduta interpessoal.', responsavel:'RH / Gestão', prazo:20 },
+  '3.3': { modId:'M3', nome:'Fit Cultural', acao:'Comunicar valores e missão da empresa; promover encontros intergeracionais; revisar onboarding cultural de novos colaboradores.', responsavel:'RH / Comunicação', prazo:30 },
+  '3.4': { modId:'M3', nome:'Reconhecimento e Valor', acao:'Implantar programa formal de reconhecimento (mensal); garantir feedback positivo nas reuniões de equipe; reconhecer entregas excepcionais publicamente.', responsavel:'Liderança / RH', prazo:15 },
+  '3.5': { modId:'M3', nome:'Proteção contra Assédio', acao:'Divulgar política anti-assédio; treinar toda a equipe; estabelecer canal de denúncia seguro e anônimo; garantir investigação sigilosa.', responsavel:'RH / Jurídico', prazo:10 },
+  '4.1': { modId:'M4', nome:'Propósito e Significado', acao:'Comunicar impacto do trabalho de cada área; promover encontros de cultura; alinhar objetivos pessoais com metas da empresa (PDI).', responsavel:'RH / Liderança', prazo:30 },
+  '4.2': { modId:'M4', nome:'Identidade e Crescimento', acao:'Estruturar plano de carreira formal; oferecer cursos e certificações; criar trilhas de desenvolvimento por cargo.', responsavel:'RH / T&D', prazo:45 },
+  '4.3': { modId:'M4', nome:'Autonomia e Criatividade', acao:'Reduzir microgerenciamento; criar espaços de inovação (hackathons, grupos de melhoria); delegar decisões operacionais aos times.', responsavel:'Gestão / Diretoria', prazo:20 },
+  '4.4': { modId:'M4', nome:'Ações Motivadoras', acao:'Revisar política de benefícios e incentivos; promover eventos de integração genuínos; coletar feedback sobre o que motiva cada equipe.', responsavel:'RH / Diretoria', prazo:30 }
+};
+
+var _RISCO_GRO = function(ibp) {
+  if (ibp >= 2.5)  return { nivel:'Trivial',      cor:'#16a34a', badge:'background:#dcfce7;color:#166534' };
+  if (ibp >= 0.5)  return { nivel:'Tolerável',     cor:'#65a30d', badge:'background:#ecfccb;color:#365314' };
+  if (ibp >= -0.5) return { nivel:'Moderado',      cor:'#d97706', badge:'background:#fef3c7;color:#92400e' };
+  if (ibp >= -2.5) return { nivel:'Substancial',   cor:'#dc2626', badge:'background:#fee2e2;color:#991b1b' };
+  return              { nivel:'Intolerável',    cor:'#7f1d1d', badge:'background:#fecaca;color:#7f1d1d' };
+};
+
+var _ZONA_DEJOURS = function(ibp) {
+  if (ibp >= 1.5)  return 'Terreno Fértil';
+  if (ibp >= -1.5) return 'Defesa Oculta';
+  return 'Sofrimento Patogênico';
+};
+
+function gerarSugestoesAutomaticas() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  if (!window._histCiclos || !window._histCiclos.length) {
+    alert('Nenhum ciclo de diagnóstico encontrado. Carregue o Histórico primeiro.'); return;
+  }
+  // Pegar o ciclo mais recente
+  var ciclo = window._histCiclos[0];
+  var subcats = ciclo.ibpSubcats;
+  if (!subcats || !Object.keys(subcats).length) {
+    alert('Dados de subcategorias não disponíveis neste ciclo. Realize um novo Diagnóstico Geral para gerar sugestões automáticas.'); return;
+  }
+  var criticas = [];
+  Object.keys(subcats).forEach(function(k) {
+    var ibp = typeof subcats[k] === 'object' ? subcats[k].ibp : subcats[k];
+    if (ibp <= -0.5) criticas.push({ id: k, ibp: ibp });
+  });
+  if (!criticas.length) {
+    alert('Nenhuma subcategoria em risco identificada. Continue monitorando!'); return;
+  }
+  if (!confirm('Serão geradas ' + criticas.length + ' sugestões de ação para as subcategorias com risco identificado. Continuar?')) return;
+
+  var promises = criticas.map(function(sc) {
+    var base = _SUGESTOES_BASE[sc.id];
+    if (!base) return Promise.resolve();
+    var risco = _RISCO_GRO(sc.ibp);
+    var prazoDate = new Date(); prazoDate.setDate(prazoDate.getDate() + (base.prazo || 30));
+    var prazoStr = prazoDate.toISOString().split('T')[0];
+    return window.nr1mapDb.collection('nr1map_plano_acao').add({
+      empresaId: empresaId,
+      setor: base.nome,
+      acao: '[IA] ' + base.acao,
+      responsavel: base.responsavel,
+      status: 'pendente',
+      prazo: prazoStr,
+      risco: risco.nivel,
+      ibpOrigem: sc.ibp,
+      subcatId: sc.id,
+      modId: base.modId,
+      origem: 'automatica',
+      criadoEm: new Date().toISOString()
+    });
+  });
+
+  Promise.all(promises).then(function() {
+    alert('✅ ' + criticas.length + ' ações geradas no Plano de Ação!');
+    sv('plano-acao');
+  }).catch(function(e) { alert('Erro: ' + e.message); });
+}
+
+/* ===== LAUDO DETALHADO POR MÓDULO E SUBCATEGORIA ===== */
+function _renderLaudoDetalhado(ibpSubcats) {
+  var el = document.getElementById('laudo-subcats-detail');
+  if (!el || !ibpSubcats) return;
+
+  var modulos = [
+    { id:'M1', nome:'Fisiológico', cor:'#0A6E4F', subs:['1.1','1.2','1.3','1.4'] },
+    { id:'M2', nome:'Segurança',   cor:'#2563EB', subs:['2.1','2.2','2.3','2.4','2.5'] },
+    { id:'M3', nome:'Relacionamentos e Social', cor:'#D97706', subs:['3.1','3.2','3.3','3.4','3.5'] },
+    { id:'M4', nome:'Fatores Motivacionais',    cor:'#7B00C4', subs:['4.1','4.2','4.3','4.4'] }
+  ];
+
+  var html = '<div style="margin-top:20px;">';
+  modulos.forEach(function(mod) {
+    var temDados = mod.subs.some(function(s){ return ibpSubcats[s] !== undefined; });
+    if (!temDados) return;
+    html += '<div style="margin-bottom:16px;">';
+    html += '<div style="font-size:12px;font-weight:700;color:' + mod.cor + ';text-transform:uppercase;letter-spacing:0.5px;padding:6px 0;border-bottom:2px solid ' + mod.cor + ';margin-bottom:8px;">' + mod.nome + '</div>';
+    html += '<table style="width:100%;border-collapse:collapse;">';
+    html += '<thead><tr style="background:#f9fafb;"><th style="padding:6px 10px;font-size:10px;text-align:left;color:#6b7280;font-weight:600;text-transform:uppercase;">Subcategoria</th><th style="padding:6px 10px;font-size:10px;text-align:center;color:#6b7280;font-weight:600;text-transform:uppercase;">IBP</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Zona Dejours</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Risco GRO</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Ação sugerida</th></tr></thead><tbody>';
+    mod.subs.forEach(function(sid) {
+      var raw = ibpSubcats[sid];
+      if (raw === undefined) return;
+      var ibp = typeof raw === 'object' ? raw.ibp : raw;
+      var nome = (typeof raw === 'object' && raw.nome) ? raw.nome : (_SUGESTOES_BASE[sid] ? _SUGESTOES_BASE[sid].nome : sid);
+      var zona = _ZONA_DEJOURS(ibp);
+      var risco = _RISCO_GRO(ibp);
+      var sinal = ibp >= 0 ? '+' : '';
+      var base = _SUGESTOES_BASE[sid];
+      var acaoTxt = (ibp <= -0.5 && base) ? base.acao.substring(0,80) + '...' : '—';
+      html += '<tr style="border-bottom:1px solid #f3f4f6;">';
+      html += '<td style="padding:7px 10px;font-size:12px;"><strong>' + sid + '</strong> ' + nome + '</td>';
+      html += '<td style="padding:7px 10px;text-align:center;font-family:monospace;font-weight:700;font-size:13px;color:' + risco.cor + ';">' + sinal + ibp.toFixed(1) + '</td>';
+      html += '<td style="padding:7px 10px;font-size:11px;color:' + risco.cor + ';">' + zona + '</td>';
+      html += '<td style="padding:7px 10px;"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;' + risco.badge + '">' + risco.nivel + '</span></td>';
+      html += '<td style="padding:7px 10px;font-size:11px;color:#6b7280;">' + acaoTxt + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 function buscarCBO(query) {
   var div = document.getElementById('nc-cbo-drop');
   if (!div) return;
@@ -3712,67 +3844,76 @@ function carregarHistoricoUnificado(empresaId) {
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
 
+  var todos = [];
+
+  // Busca ciclos em nr1map_respostas
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
-    .then(function(snap) {
-      alert('DEBUG: empresaId=' + empresaId + ' | ciclos encontrados=' + snap.size);
-      if (snap.empty) {
+    .then(function(ciclosSnap) {
+      var promises = [];
+      ciclosSnap.forEach(function(cicloDoc) {
+        var d = cicloDoc.data();
+        d._id = cicloDoc.id;
+        d._tipo = d.tipo || d.Tipo || 'geral';
+
+        if (d.ibpGeral !== undefined) {
+          // Ciclo já tem dados agregados (versão nova)
+          todos.push(d);
+        } else {
+          // Ciclo vazio — buscar respostas internas e agregar
+          var p = window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+            .collection('ciclos').doc(cicloDoc.id)
+            .collection('respostas').get()
+            .then(function(respSnap) {
+              if (respSnap.empty) return;
+              var somaIbp = 0, n = 0, tipo = 'geral', criadoEm = '';
+              var ibpSubcats = {}, ibpModulos = {};
+              respSnap.forEach(function(r) {
+                var rd = r.data();
+                somaIbp += (rd.ibpGeral || 0); n++;
+                if (rd.tipo || rd.Tipo) tipo = rd.tipo || rd.Tipo;
+                if (rd.respondidoEm && !criadoEm) criadoEm = rd.respondidoEm;
+                if (rd.criadoEm && !criadoEm) criadoEm = rd.criadoEm;
+                // Agregar subcats
+                if (rd.ibpSubcats) {
+                  Object.keys(rd.ibpSubcats).forEach(function(k) {
+                    if (!ibpSubcats[k]) ibpSubcats[k] = { soma: 0, n: 0, nome: rd.ibpSubcats[k].nome, modId: rd.ibpSubcats[k].modId };
+                    ibpSubcats[k].soma += (rd.ibpSubcats[k].ibp || 0);
+                    ibpSubcats[k].n++;
+                  });
+                }
+              });
+              if (!n) return;
+              // Calcular médias das subcats
+              var subcatsMedia = {};
+              Object.keys(ibpSubcats).forEach(function(k) {
+                subcatsMedia[k] = { ibp: Math.round(ibpSubcats[k].soma/ibpSubcats[k].n * 100)/100, nome: ibpSubcats[k].nome, modId: ibpSubcats[k].modId };
+              });
+              todos.push({
+                _id: cicloDoc.id,
+                _tipo: tipo,
+                tipo: tipo,
+                ibpGeral: Math.round(somaIbp/n * 100)/100,
+                totalRespostas: n,
+                criadoEm: criadoEm,
+                ibpSubcats: subcatsMedia
+              });
+            });
+          promises.push(p);
+        }
+      });
+      return Promise.all(promises);
+    })
+    .then(function() {
+      if (!todos.length) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
         return;
       }
-      // Separar ciclos com dados dos vazios
-      var ciclosComDados = [];
-      var ciclosVazios = [];
-      snap.forEach(function(doc) {
-        var d = doc.data(); d._id = doc.id;
-        d._tipo = d.tipo || d.Tipo || 'geral';
-        if (d.ibpGeral !== undefined || d.totalRespostas) {
-          ciclosComDados.push(d);
-        } else {
-          ciclosVazios.push(doc);
-        }
-      });
-
-      // Para ciclos vazios, buscar dados nas subcoleções respostas
-      var promises = ciclosVazios.map(function(cicloDoc) {
-        return window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-          .collection('ciclos').doc(cicloDoc.id)
-          .collection('respostas').get()
-          .then(function(respSnap) {
-            if (respSnap.empty) return null;
-            var soma = 0, n = 0, tipo = 'geral', criadoEm = '', tema = '';
-            respSnap.forEach(function(r) {
-              var rd = r.data();
-              if (rd.ibpGeral !== undefined) { soma += rd.ibpGeral; n++; }
-              if (rd.tipo || rd.Tipo) tipo = rd.tipo || rd.Tipo;
-              if (rd.criadoEm && !criadoEm) criadoEm = rd.criadoEm;
-              if (rd.tema) tema = rd.tema;
-            });
-            if (!n) return null;
-            return {
-              _id: cicloDoc.id,
-              _tipo: tipo,
-              tipo: tipo,
-              ibpGeral: Math.round((soma/n)*100)/100,
-              totalRespostas: n,
-              criadoEm: criadoEm,
-              tema: tema
-            };
-          });
-      });
-
-      return Promise.all(promises).then(function(extras) {
-        var todos = ciclosComDados.slice();
-        extras.forEach(function(e) { if (e) todos.push(e); });
-        todos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
-        if (!todos.length) {
-          el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
-          return;
-        }
-        window._histCiclos = todos;
-        renderHistoricoUnificado();
-      });
-    }).catch(function(e){
+      todos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+      window._histCiclos = todos;
+      renderHistoricoUnificado();
+    })
+    .catch(function(e){
       el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro: ' + e.message + '</div>';
     });
 }
@@ -4902,6 +5043,8 @@ function _renderLaudoDados(d) {
   } else {
     if(nomeEl && window.nr1mapEmpresa) nomeEl.textContent = window.nr1mapEmpresa.responsavel||window.nr1mapEmpresa.nome||'—';
   }
+  // Tabela detalhada por módulo/subcategoria com risco GRO e ação sugerida
+  _renderLaudoDetalhado(d.ibpSubcats || {});
 }
 
 function carregarLaudoTecnico(empresaId) {
