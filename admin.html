@@ -199,6 +199,62 @@ tbody tr:hover td{background:#F5F8F7;}
 .subcat-adm-titulo{font-size:12px;font-weight:700;color:var(--roxo);}
 @media(max-width:640px){.subcat-adm-titulo{font-size:11px;}}
 
+/* ===== MOBILE DRAWER ===== */
+.adm-hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:7px;flex-direction:column;gap:5px;align-items:center;justify-content:center;flex-shrink:0;}
+.adm-hamburger span{display:block;width:20px;height:2px;background:var(--preto);border-radius:2px;}
+.adm-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;}
+.adm-sidebar-overlay.open{display:block;}
+
+@media(max-width:768px){
+  .adm-hamburger{display:flex;}
+
+  /* Reverter sidebar para drawer vertical */
+  .app{flex-direction:row !important;}
+  .sidebar{
+    position:fixed !important;top:0;left:0;height:100% !important;
+    width:260px !important;max-height:none !important;
+    flex-direction:column !important;
+    overflow-y:auto !important;overflow-x:hidden !important;
+    padding:0 !important;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:300;
+    order:0 !important;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .main{width:100%;overflow-x:hidden;}
+
+  /* Topbar */
+  .topbar{
+    padding:0 10px !important;
+    height:auto !important;
+    min-height:48px;
+    flex-wrap:wrap;
+    gap:6px;
+    padding-top:8px !important;
+    padding-bottom:8px !important;
+  }
+  .topbar-title{font-size:13px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;}
+
+  /* Grids */
+  .grid-2{grid-template-columns:1fr !important;}
+  .grid-4{grid-template-columns:1fr 1fr !important;}
+  [style*="grid-template-columns"]{grid-template-columns:1fr !important;}
+
+  /* Modais */
+  .modal-overlay{padding:8px;align-items:flex-end;}
+  .modal-overlay > div:not(.modal){width:96vw !important;max-width:96vw !important;max-height:88vh;overflow-y:auto;}
+
+  /* Conteúdo */
+  .content{padding:10px 8px !important;}
+  .card-header{flex-wrap:wrap;gap:6px;}
+}
+
+@media(max-width:400px){
+  .grid-4{grid-template-columns:1fr !important;}
+  .metrics{grid-template-columns:1fr !important;}
+  .topbar-title{max-width:120px;font-size:12px !important;}
+}
 </style>
 </head>
 <body>
@@ -279,6 +335,7 @@ tbody tr:hover td{background:#F5F8F7;}
 
 <!-- ========= PAINEL ADMIN MASTER ========= -->
 <div class="app" id="app-admin">
+  <div class="adm-sidebar-overlay" id="adm-sidebar-overlay" onclick="fecharAdmSidebar()"></div>
   <aside class="sidebar">
     <div class="sidebar-logo">NR-1<span>Map</span></div>
     <div class="sidebar-perfil">
@@ -1844,6 +1901,27 @@ function salvarEditDep() {
   document.getElementById('modal-edit-dep').classList.remove('open');
 }
 
+function abrirAdmSidebar(){
+  document.querySelector('#app-admin .sidebar').classList.add('open');
+  document.getElementById('adm-sidebar-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function fecharAdmSidebar(){
+  document.querySelector('#app-admin .sidebar').classList.remove('open');
+  document.getElementById('adm-sidebar-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('#app-admin .topbar').forEach(function(tb){
+    var hb=document.createElement('button');
+    hb.className='adm-hamburger';
+    hb.setAttribute('aria-label','Menu');
+    hb.innerHTML='<span></span><span></span><span></span>';
+    hb.onclick=abrirAdmSidebar;
+    tb.insertBefore(hb,tb.firstChild);
+  });
+});
+
 function sv(id) {
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
   var targetView = document.getElementById('view-' + id);
@@ -1851,6 +1929,7 @@ function sv(id) {
   document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
   var nav = document.getElementById('nav-' + id);
   if(nav) nav.classList.add('active');
+  fecharAdmSidebar();
   if(id === 'perguntas') renderAdm();
   if(id === 'parceiros') carregarParceiros();
   if(id === 'clientes') carregarClientes();
