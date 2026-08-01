@@ -4160,9 +4160,24 @@ function editarAgendamento(item) {
 }
 
 function excluirAgendamento(docId) {
-  if (!confirm('Excluir este agendamento?')) return;
-  window.nr1mapDb.collection('nr1map_agenda').doc(docId).delete()
-    .then(function(){ carregarAgenda(); });
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!confirm('ATENCAO\n\nExcluir este agendamento tambem apagara permanentemente todos os dados e respostas coletadas neste ciclo.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
+  var db = window.nr1mapDb;
+  var refCiclo = db.collection('nr1map_respostas').doc(empresaId).collection('ciclos').doc(docId);
+  refCiclo.collection('respostas').get().then(function(snap) {
+    var batch = db.batch();
+    snap.forEach(function(d) { batch.delete(d.ref); });
+    return batch.commit();
+  }).then(function() {
+    return refCiclo.delete();
+  }).then(function() {
+    return db.collection('nr1map_agenda').doc(docId).delete();
+  }).then(function() {
+    carregarAgenda();
+  }).catch(function(e) {
+    console.log('Erro ao excluir ciclo:', e);
+    db.collection('nr1map_agenda').doc(docId).delete().then(function(){ carregarAgenda(); });
+  });
 }
 
 function exportarOrgPDF() {
