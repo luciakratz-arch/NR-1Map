@@ -231,11 +231,105 @@ textarea.form-control{resize:vertical;min-height:70px;}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
+
+/* ===== MOBILE RESPONSIVO ===== */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:7px;flex-direction:column;gap:5px;align-items:center;justify-content:center;}
+.hamburger span{display:block;width:20px;height:2px;background:var(--preto);border-radius:2px;transition:all .2s;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;}
+.sidebar-overlay.open{display:block;}
+
+@media(max-width:768px){
+  :root{--sidebar:260px;}
+
+  /* ---- Hamburger ---- */
+  .hamburger{display:flex;}
+
+  /* ---- Sidebar drawer ---- */
+  .sidebar{
+    position:fixed;top:0;left:0;height:100%;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:300;
+    width:var(--sidebar);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .main{width:100%;overflow-x:hidden;}
+
+  /* ---- Topbar ---- */
+  .topbar{
+    padding:0 10px;
+    height:auto;
+    min-height:52px;
+    flex-wrap:wrap;
+    gap:6px;
+    padding-top:8px;
+    padding-bottom:8px;
+  }
+  .topbar-title{
+    font-size:13px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:160px;
+  }
+  /* Wrapper com botão Voltar + título longo */
+  .topbar-title-wrapper{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    flex:1;
+  }
+  .topbar-title-wrapper .topbar-title{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:12px;
+    max-width:120px;
+  }
+  .topbar-actions{gap:5px;flex-shrink:0;}
+  .topbar-actions .btn{font-size:11px;padding:5px 8px;}
+
+  /* ---- Grids nomeados ---- */
+  .metrics{grid-template-columns:1fr 1fr !important;}
+  .grid-2{grid-template-columns:1fr !important;}
+  .grid-3c{grid-template-columns:1fr !important;}
+  .form-row{grid-template-columns:1fr !important;}
+  .form-row-3{grid-template-columns:1fr !important;}
+  .disparo-opts{grid-template-columns:1fr !important;}
+  .dash-grid{grid-template-columns:1fr !important;}
+  .kpi-row{grid-template-columns:1fr 1fr !important;gap:8px !important;}
+
+  /* ---- Grids inline ---- */
+  [style*="grid-template-columns"]{grid-template-columns:1fr !important;}
+
+  /* ---- Tabelas ---- */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:480px;}
+
+  /* ---- Modais ---- */
+  .modal{width:96vw !important;max-width:96vw !important;max-height:88vh;overflow-y:auto;}
+  .modal-overlay{padding:8px;align-items:flex-end;}
+
+  /* ---- Conteúdo ---- */
+  .view{padding:10px !important;}
+  .sec-header{flex-direction:column;align-items:flex-start !important;gap:8px;}
+  .card{padding:12px !important;}
+  .btn-row{flex-wrap:wrap;}
+}
+
+@media(max-width:400px){
+  .metrics{grid-template-columns:1fr !important;}
+  .kpi-row{grid-template-columns:1fr !important;}
+  .topbar-title{max-width:100px;font-size:11px;}
+  .topbar-title-wrapper .topbar-title{max-width:80px;font-size:11px;}
+}
 </style>
 <script src="cbo-database.js"></script>
 </head>
 <body>
 <div class="app">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="fecharSidebar()"></div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -488,7 +582,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <!-- ===== LAUDO TÉCNICO ===== -->
 <div id="view-laudo-tecnico" class="view">
   <div class="topbar">
-    <div class="topbar-title">📋 Laudo Técnico Psicossocial</div>
+    <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('laudo_tecnico')">⬇ Exportar PDF</button>
     </div>
@@ -539,7 +633,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <!-- ===== MAPA DE RISCO ===== -->
 <div id="view-mapa-risco" class="view">
   <div class="topbar">
-    <div class="topbar-title">🗺 Mapa de Risco Psicossocial</div>
+    <div class="topbar-title" title="Mapa de Risco Psicossocial">🗺 Mapa de Risco</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('mapa_risco')">⬇ Exportar PDF</button>
     </div>
@@ -567,7 +661,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <!-- ===== RELATÓRIO ANUAL ===== -->
 <div id="view-relatorio-anual" class="view">
   <div class="topbar">
-    <div class="topbar-title">📊 Relatório Comparativo Anual</div>
+    <div class="topbar-title" title="Relatório Comparativo Anual">📊 Relatório Anual</div>
     <div class="topbar-actions">
       <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('relatorio_anual')">⬇ Exportar PDF</button>
     </div>
@@ -724,7 +818,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 
 <!-- ===== CO-BRANDING (LOGO DA EMPRESA) ===== -->
 <div id="view-cobranding" class="view">
-  <div class="topbar"><div class="topbar-title">🎨 Co-Branding — Logo da Empresa</div></div>
+  <div class="topbar"><div class="topbar-title" title="Co-Branding — Logo da Empresa">🎨 Co-Branding</div></div>
   <div class="content" style="max-width:640px;">
     <div class="card">
       <div class="card-header"><div class="title">Preview do cabeçalho co-branded</div><div class="subtitle">Como vai aparecer nos 4 documentos PDF do GRO (Inventário, Avaliação, Plano de Ação, Acompanhamento)</div></div>
@@ -901,7 +995,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <!-- ===== NORMA NR-1 ===== -->
 <div id="view-nr1" class="view">
   <div class="topbar">
-    <div class="topbar-title">📑 Norma NR-1 — Base Legal do NR-1 Map</div>
+    <div class="topbar-title" title="Norma NR-1 — Base Legal do NR-1 Map">📑 Norma NR-1</div>
     <div class="topbar-actions">
       <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/2024/portaria-mte-no-1-419-nr-01-gro-nova-redacao.pdf"
         target="_blank" class="btn btn-roxo btn-sm">📥 Baixar PDF Original (Gov.br)</a>
@@ -1443,9 +1537,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title-wrapper">
       <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
-      <div class="topbar-title">🧩 Módulos e Perguntas — Selecionar</div>
+      <div class="topbar-title" title="Módulos e Perguntas — Selecionar">🧩 Módulos e Perguntas</div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:10px;">
       <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
       <button class="btn btn-primary btn-sm" onclick="_salvarSelecoes();this.textContent='✅ Salvo!';var b=this;setTimeout(function(){b.textContent='💾 Salvar seleção';},2000);">💾 Salvar seleção</button>
     </div>
@@ -2490,6 +2584,29 @@ function salvarEditCargo() {
   alert('✅ Cargo atualizado!');
 }
 
+/* ===== MOBILE NAV ===== */
+function abrirSidebar(){
+  document.querySelector('.sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function fecharSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+/* Injeta hamburger em todas as topbars ao carregar */
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.topbar').forEach(function(tb){
+    var hb=document.createElement('button');
+    hb.className='hamburger';
+    hb.setAttribute('aria-label','Menu');
+    hb.innerHTML='<span></span><span></span><span></span>';
+    hb.onclick=abrirSidebar;
+    tb.insertBefore(hb,tb.firstChild);
+  });
+});
+
 function sv(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const el=document.getElementById('view-'+id);
@@ -2497,6 +2614,7 @@ function sv(id){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
   if(nav)nav.classList.add('active');
+  fecharSidebar();
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
