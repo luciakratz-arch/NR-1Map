@@ -4913,7 +4913,8 @@ function dispararPesquisa(tipo) {
           document.getElementById('modal-disp-body').innerHTML = html;
           // Salvar waLinks na agenda para resgatar depois
           if (window._editAgendaId && window.nr1mapDb && res.waLinks) {
-            window.nr1mapDb.collection('nr1map_agenda').doc(window._editAgendaId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
+            var _agId = window._currentAgendaId || window._editAgendaId;
+            if (_agId) window.nr1mapDb.collection('nr1map_agenda').doc(_agId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
           }
         })
         .catch(function(err) {
