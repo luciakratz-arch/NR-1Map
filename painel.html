@@ -3399,13 +3399,7 @@ function _popularModalAgenda() {
     }
   }
 
-  // Se já carregados, preenche direto
-  if ((unidades && unidades.length) || (departamentos && departamentos.length) || (cargos && cargos.length)) {
-    _preencher();
-    return;
-  }
-
-  // Senão busca no Firestore antes de preencher
+  // Sempre busca do Firestore para garantir dados atualizados
   if (!db || !empresaId) { _preencher(); return; }
   Promise.all([
     db.collection('nr1map_unidades').where('empresaId','==',empresaId).get(),
@@ -3416,7 +3410,7 @@ function _popularModalAgenda() {
     departamentos = []; results[1].forEach(function(d){ var x=d.data(); x.id=d.id; departamentos.push(x); });
     cargos = []; results[2].forEach(function(d){ var x=d.data(); x.id=d.id; cargos.push(x); });
     _preencher();
-  }).catch(function(){ _preencher(); });
+  }).catch(function(e){ console.log('popularModalAgenda err:', e); _preencher(); });
 }
 
 /* ===== ORGANOGRAMA AGRUPADO POR DEPARTAMENTO ===== */
