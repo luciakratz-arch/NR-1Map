@@ -4190,6 +4190,7 @@ function editarAgendamento(item) {
   var docId = item.id;
   window._editAgendaId = docId;
   window._currentAgendaId = docId;
+  try { localStorage.setItem('nr1map_agendaId', docId); } catch(e){}
 
   _popularModalAgenda();
 
@@ -4689,7 +4690,7 @@ function verLinksEnviados() {
   var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum + ' dias';
   var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
-  var agendaId = window._currentAgendaId || window._editAgendaId || '';
+  var agendaId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
   if (!agendaId) { alert('Abra o agendamento pelo lapis e dispare primeiro.'); return; }
   db.collection('nr1map_agenda').doc(agendaId).get().then(function(doc) {
     var waLinks = (doc.exists && doc.data().waLinks) ? doc.data().waLinks : [];
@@ -4916,7 +4917,7 @@ function dispararPesquisa(tipo) {
           document.getElementById('modal-disp-body').innerHTML = html;
           // Salvar waLinks na agenda para resgatar depois
           if (window._editAgendaId && window.nr1mapDb && res.waLinks) {
-            var _agId = window._currentAgendaId || window._editAgendaId;
+            var _agId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
             if (_agId) window.nr1mapDb.collection('nr1map_agenda').doc(_agId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
           }
         })
