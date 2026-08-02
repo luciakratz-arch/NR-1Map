@@ -3400,7 +3400,8 @@ function _popularModalAgenda() {
   }
 
   // Sempre busca do Firestore para garantir dados atualizados
-  if (!db || !empresaId) { _preencher(); return; }
+  console.log('[agenda] empresaId:', empresaId, 'db:', !!db);
+  if (!db || !empresaId) { console.log('[agenda] sem db ou empresaId, preenchendo vazio'); _preencher(); return; }
   Promise.all([
     db.collection('nr1map_unidades').where('empresaId','==',empresaId).get(),
     db.collection('nr1map_departamentos').where('empresaId','==',empresaId).get(),
