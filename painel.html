@@ -3939,7 +3939,10 @@ function salvarAgendamento() {
     promise = window.nr1mapDb.collection('nr1map_agenda').doc(window._editAgendaId).update(agendaData);
     window._editAgendaId = null;
   } else {
-    promise = window.nr1mapDb.collection('nr1map_agenda').add(agendaData);
+    promise = window.nr1mapDb.collection('nr1map_agenda').add(agendaData).then(function(ref){
+      window._currentAgendaId = ref.id;
+      return ref;
+    });
   }
 
   promise.then(function() {
@@ -4687,9 +4690,9 @@ function verLinksEnviados() {
   var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
   var agendaId = window._currentAgendaId || window._editAgendaId || '';
-  if (!agendaId) { alert('Abra o agendamento pelo lapis primeiro.'); return; }
+  if (!agendaId) { alert('Abra o agendamento pelo lapis e dispare primeiro.'); return; }
   db.collection('nr1map_agenda').doc(agendaId).get().then(function(doc) {
-    var waLinks = doc.exists ? (doc.data().waLinks || []) : [];
+    var waLinks = (doc.exists && doc.data().waLinks) ? doc.data().waLinks : [];
     var modal = document.getElementById('modal-disparo-confirmacao');
     if (!modal) {
       modal = document.createElement('div');
