@@ -4040,6 +4040,32 @@ function carregarHistoricoUnificado(empresaId) {
       return Promise.all(promises);
     })
     .then(function() {
+      // Buscar agendamentos planejados e adicionar ao histórico
+      return window.nr1mapDb.collection('nr1map_agenda')
+        .where('empresaId','==',empresaId)
+        .get()
+        .then(function(agSnap) {
+          agSnap.forEach(function(doc) {
+            var a = doc.data();
+            // Só adiciona se não houver ciclo já executado com mesmo id
+            var jaExiste = todos.some(function(c){ return c._id === doc.id; });
+            if (!jaExiste) {
+              todos.push({
+                _id: doc.id,
+                _tipo: a.tipo || 'geral',
+                tipo: a.tipo || 'geral',
+                ibpGeral: undefined,
+                totalRespostas: 0,
+                criadoEm: a.data || a.criadoEm || '',
+                _status: 'planejado',
+                _canal: a.canal,
+                _unidade: a.unidade
+              });
+            }
+          });
+        }).catch(function(){});
+    })
+    .then(function() {
       if (!todos.length) {
         el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
         return;
@@ -4087,16 +4113,25 @@ function renderHistoricoUnificado() {
     var respostas = d.totalRespostas || 0;
     var ibp = d.ibpGeral !== undefined ? (parseFloat(d.ibpGeral) > 0 ? '+' : '') + parseFloat(d.ibpGeral).toFixed(1) : '—';
     var cicloId = d._id || '';
-    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;">' +
-      '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + cor + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
+    var isPlanejado = d._status === 'planejado';
+    var badgePlan = isPlanejado ? '<span style="font-size:9px;font-weight:700;background:rgba(243,156,18,0.15);color:#F39C12;border:1px solid rgba(243,156,18,0.3);border-radius:20px;padding:1px 7px;margin-left:6px;">Planejado</span>' : '';
+    var subInfo = isPlanejado
+      ? (dataStr + ' · Aguardando respostas' + (d._canal ? ' · ' + d._canal : ''))
+      : (dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp);
+    var acaoBotao = isPlanejado
+      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(\'planejamento\')">Ver agenda</button>'
+      : '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="abrirLaudoDoCiclo(\'' + cicloId + '\',\'' + (d.tipo||'geral') + '\')">Ver laudo</button>';
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;' + (isPlanejado ? 'opacity:0.75;' : '') + '">' +
+      '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (isPlanejado ? '#F39C12' : cor) + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
       '<div style="flex:1;">' +
-        '<div style="font-size:12px;font-weight:600;color:' + cor + ';">' + label + (d.tema ? ' — ' + d.tema : '') + '</div>' +
-        '<div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;">' + dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp + '</div>' +
+        '<div style="font-size:12px;font-weight:600;color:' + cor + ';">' + label + (d.tema ? ' — ' + d.tema : '') + badgePlan + '</div>' +
+        '<div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;">' + subInfo + '</div>' +
       '</div>' +
-      '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="abrirLaudoDoCiclo(\'' + cicloId + '\',\'' + (d.tipo||'geral') + '\')">Ver laudo</button>' +
+      acaoBotao +
     '</div>';
   }).join('');
 }
+
 
 function dispararDoAgendamento() {
   // Lê os valores atuais do modal de agendamento, salva e navega para a tela de disparo preenchida
