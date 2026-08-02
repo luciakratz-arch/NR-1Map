@@ -4487,13 +4487,16 @@ function atualizarContadorColab() {
 function atualizarBadgePulso() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId || !window.nr1mapDb) return;
+  // Filtra por tipo='pulso' para nao contar tokens de diagnostico geral
   window.nr1mapDb.collection('nr1map_tokens')
     .where('empresaId', '==', empresaId)
+    .where('tipo', '==', 'pulso')
     .where('usado', '==', false)
     .get()
     .then(function(snap) {
       var bdg = document.getElementById('bdg-pulso');
       if (!bdg) return;
+      // So exibe badge se ha tokens pulso ativos reais (aguardando resposta)
       var ativos = snap.size;
       if (ativos > 0) {
         bdg.textContent = ativos;
