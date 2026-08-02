@@ -4055,7 +4055,8 @@ function carregarHistoricoUnificado(empresaId) {
             var a = doc.data();
             // Só adiciona se não houver ciclo já executado com mesmo id
             var jaExiste = todos.some(function(c){ return c._id === doc.id; });
-            if (!jaExiste) {
+            var foiDisparado = a.status === 'disparado';
+            if (!jaExiste && !foiDisparado) {
               todos.push({
                 _id: doc.id,
                 _tipo: a.tipo || 'geral',
