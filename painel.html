@@ -1905,11 +1905,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <div class="modal-overlay" id="modal-agendar">
   <div class="modal">
     <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
-    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control" id="ag-tipo"><option value="pulso">Pesquisa Pulso</option><option value="geral">Diagnóstico Geral</option></select></div>
+    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control" id="plan-tipo"><option value="pulso">Pesquisa Pulso</option><option value="geral">Diagnóstico Geral</option></select></div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="ag-data"/></div>
+      <div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="plan-data"/></div>
       <div class="form-group"><div class="form-label">Prazo de resposta</div>
-        <select class="form-control" id="ag-prazo">
+        <select class="form-control" id="plan-prazo">
           <option value="2">2 dias</option>
           <option value="7" selected>7 dias</option>
           <option value="14">14 dias</option>
@@ -1921,11 +1921,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
     <div style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;margin-bottom:8px;margin-top:4px;">🎯 Público-alvo</div>
     <div class="form-row">
-      <div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="ag-unidade"><option value="Todas">Todas as unidades</option></select></div>
-      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="ag-depto"><option value="Todos">Todos os departamentos</option></select></div>
+      <div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="plan-unidade"><option value="Todas">Todas as unidades</option></select></div>
+      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="plan-depto"><option value="Todos">Todos os departamentos</option></select></div>
     </div>
-    <div class="form-group"><div class="form-label">Cargo</div><select class="form-control" id="ag-cargo"><option value="Todos">Todos os cargos</option></select></div>
-    <div class="form-group"><div class="form-label">Canal de envio</div><select class="form-control" id="ag-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div>
+    <div class="form-group"><div class="form-label">Cargo</div><select class="form-control" id="plan-cargo"><option value="Todos">Todos os cargos</option></select></div>
+    <div class="form-group"><div class="form-label">Canal de envio</div><select class="form-control" id="plan-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div>
     <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
     <div id="btn-disparar-agora-wrap" style="display:none;margin-top:8px;"><button class="btn btn-primary" style="width:100%;background:#25D366;border-color:#25D366;" onclick="dispararDoAgendamento()">🚀 Salvar e Disparar agora</button></div>
   </div>
@@ -3250,7 +3250,7 @@ function delUnidade(id) {
 function _popularSelectsUnidade() {
   var opts = '<option value="Todas">Todas as unidades</option>';
   unidades.forEach(function(u) { opts += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
-  ['ag-unidade','pulso-unidade'].forEach(function(sid) {
+  ['ag-unidade','plan-unidade','pulso-unidade'].forEach(function(sid) {
     var sel = document.getElementById(sid);
     if (sel) { var cur = sel.value; sel.innerHTML = opts; sel.value = cur || 'Todas'; }
   });
@@ -3336,7 +3336,7 @@ function _popularSelectsDepto() {
     selDepto.innerHTML = opts;
   }
   // Selects de depto nas telas de disparo
-  ['ag-depto','pulso-depto'].forEach(function(sid) {
+  ['ag-depto','plan-depto','pulso-depto'].forEach(function(sid) {
     var sel = document.getElementById(sid);
     if (sel) {
       var optsD = '<option value="Todos">Todos os departamentos</option>';
@@ -3345,7 +3345,7 @@ function _popularSelectsDepto() {
     }
   });
   // Selects de cargo nas telas de disparo
-  ['ag-cargo','pulso-cargo'].forEach(function(sid) {
+  ['ag-cargo','plan-cargo','pulso-cargo'].forEach(function(sid) {
     var sel = document.getElementById(sid);
     if (sel) {
       var optsC2 = '<option value="Todos">Todos os cargos</option>';
@@ -3379,13 +3379,13 @@ function _popularModalAgenda() {
   var db = window.nr1mapDb;
 
   function _preencher() {
-    var selUn = document.getElementById('ag-unidade');
+    var selUn = document.getElementById('plan-unidade');
     if (selUn) {
       var optsUn = '<option value="Todas">Todas as unidades</option>';
       (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
       selUn.innerHTML = optsUn;
     }
-    var selDp = document.getElementById('ag-depto');
+    var selDp = document.getElementById('plan-depto');
     if (selDp) {
       var optsDp = '<option value="Todos">Todos os departamentos</option>';
       (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
@@ -3908,15 +3908,15 @@ function carregarAgenda() {
 function salvarAgendamento() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId || !window.nr1mapDb) return;
-  var data = document.getElementById('ag-data') ? document.getElementById('ag-data').value : '';
+  var data = document.getElementById('plan-data') ? document.getElementById('plan-data').value : '';
   if (!data) { alert('Selecione a data de disparo.'); return; }
   var hoje = new Date().toISOString().slice(0,10);
-  var agTipo    = document.getElementById('ag-tipo')    ? document.getElementById('ag-tipo').value    : 'pulso';
-  var agCanal   = document.getElementById('ag-canal')   ? document.getElementById('ag-canal').value   : 'WhatsApp';
-  var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
-  var agPrazo   = document.getElementById('ag-prazo')   ? document.getElementById('ag-prazo').value   : '7';
-  var agDepto   = document.getElementById('ag-depto')   ? document.getElementById('ag-depto').value   : 'Todos';
-  var agCargo   = document.getElementById('ag-cargo')   ? document.getElementById('ag-cargo').value   : 'Todos';
+  var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
+  var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
+  var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
+  var agPrazo   = document.getElementById('plan-prazo')   ? document.getElementById('plan-prazo').value   : '7';
+  var agDepto   = document.getElementById('plan-depto')   ? document.getElementById('plan-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('plan-cargo')   ? document.getElementById('plan-cargo').value   : 'Todos';
   var agendaData = {
     empresaId: empresaId,
     tipo: agTipo,
@@ -4100,12 +4100,12 @@ function renderHistoricoUnificado() {
 
 function dispararDoAgendamento() {
   // Lê os valores atuais do modal de agendamento, salva e navega para a tela de disparo preenchida
-  var agTipo    = document.getElementById('ag-tipo')    ? document.getElementById('ag-tipo').value    : 'pulso';
-  var agPrazo   = document.getElementById('ag-prazo')   ? document.getElementById('ag-prazo').value   : '7';
-  var agUnidade = document.getElementById('ag-unidade') ? document.getElementById('ag-unidade').value : 'Todas';
-  var agDepto   = document.getElementById('ag-depto')   ? document.getElementById('ag-depto').value   : 'Todos';
-  var agCargo   = document.getElementById('ag-cargo')   ? document.getElementById('ag-cargo').value   : 'Todos';
-  var agCanal   = document.getElementById('ag-canal')   ? document.getElementById('ag-canal').value   : 'WhatsApp';
+  var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
+  var agPrazo   = document.getElementById('plan-prazo')   ? document.getElementById('plan-prazo').value   : '7';
+  var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
+  var agDepto   = document.getElementById('plan-depto')   ? document.getElementById('plan-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('plan-cargo')   ? document.getElementById('plan-cargo').value   : 'Todos';
+  var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
   salvarAgendamento();
   var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
   setTimeout(function() {
@@ -4151,13 +4151,13 @@ function editarAgendamento(item) {
 
   _popularModalAgenda();
 
-  var agTipo    = document.getElementById('ag-tipo');
-  var agData    = document.getElementById('ag-data');
-  var agCanal   = document.getElementById('ag-canal');
-  var agUnidade = document.getElementById('ag-unidade');
-  var agPrazo   = document.getElementById('ag-prazo');
-  var agDepto   = document.getElementById('ag-depto');
-  var agCargo   = document.getElementById('ag-cargo');
+  var agTipo    = document.getElementById('plan-tipo');
+  var agData    = document.getElementById('plan-data');
+  var agCanal   = document.getElementById('plan-canal');
+  var agUnidade = document.getElementById('plan-unidade');
+  var agPrazo   = document.getElementById('plan-prazo');
+  var agDepto   = document.getElementById('plan-depto');
+  var agCargo   = document.getElementById('plan-cargo');
 
   if (agTipo)    agTipo.value    = d.tipo    || 'pulso';
   if (agData)    agData.value    = d.data    || '';
