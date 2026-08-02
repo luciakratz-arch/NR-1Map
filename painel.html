@@ -3935,6 +3935,7 @@ function salvarAgendamento() {
 
   var promise;
   if (window._editAgendaId) {
+    window._currentAgendaId = window._editAgendaId;
     promise = window.nr1mapDb.collection('nr1map_agenda').doc(window._editAgendaId).update(agendaData);
     window._editAgendaId = null;
   } else {
