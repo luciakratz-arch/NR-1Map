@@ -572,32 +572,96 @@ var _respostas = {};
 var _respostasFreq = {};
 var _streak = 0;
 
-// Timeout de segurança — se em 5s não detectar sessão, redireciona para login
-var _authTimeout = setTimeout(function() {
-  window.location.href = 'admin.html';
-}, 5000);
-
-auth.onAuthStateChanged(function(user) {
-  clearTimeout(_authTimeout);
-  if (user) {
-    _uid = user.uid;
-    carregarUsuario(_uid);
-  } else {
-    // Tenta re-autenticar com credenciais salvas no sessionStorage
-    var email = sessionStorage.getItem('nr1map_user_email');
-    var pwd   = sessionStorage.getItem('nr1map_user_pwd');
-    if (email && pwd) {
-      auth.signInWithEmailAndPassword(email, pwd)
-        .then(function(cred) {
-          _uid = cred.user.uid;
-          carregarUsuario(_uid);
-        })
-        .catch(function() { window.location.href = 'admin.html'; });
-    } else {
-      window.location.href = 'admin.html';
-    }
+// ===== DETECÇÃO DE TOKEN ANONIMO (Magic Link) =====
+var _tokenAnonimo = null;
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var tokenUrl = params.get('token');
+  if (tokenUrl) {
+    // Veio via Magic Link — validar token direto, sem Auth
+    clearTimeout(undefined); // nada a cancelar ainda
+    validarTokenAnonimo(tokenUrl);
+    return;
   }
-});
+  // Sem token — fluxo Auth normal
+  iniciarFluxoAuth();
+})();
+
+function validarTokenAnonimo(codigo) {
+  db.collection('nr1map_tokens').where('codigo', '==', codigo)
+    .get()
+    .then(function(snap) {
+      if (snap.empty) {
+        mostrarErroToken('Codigo invalido ou expirado. Solicite um novo ao seu RH.');
+        return;
+      }
+      var doc = snap.docs[0];
+      var data = doc.data();
+      if (data.usado) {
+        mostrarErroToken('Voce ja respondeu esta pesquisa. Aguarde o proximo ciclo!');
+        return;
+      }
+      var expira = data.expiraEm ? new Date(data.expiraEm).getTime()
+                 : data.criadoEm ? new Date(data.criadoEm).getTime() + 7*24*3600*1000
+                 : 0;
+      if (Date.now() > expira) {
+        mostrarErroToken('Este link expirou. Solicite um novo ao seu RH.');
+        return;
+      }
+      _tokenAnonimo = codigo;
+      _empresaId    = data.empresaId;
+      _tipoPesquisa = data.tipo || 'pulso';
+      _pesquisaId   = doc.id;
+      _empresaNome  = data.empresaNome || '';
+      _cargo        = data.cargo || '';
+      _cbo          = data.cbo || '';
+      _setor        = data.setor || '';
+      carregarApp();
+    })
+    .catch(function(e) {
+      mostrarErroToken('Erro ao verificar acesso: ' + e.message);
+    });
+}
+
+function mostrarErroToken(msg) {
+  var loading = document.getElementById('screen-loading');
+  if (loading) {
+    loading.innerHTML = '<div style="font-size:40px;margin-bottom:16px;">⚠️</div>'
+      + '<div style="font-size:15px;font-weight:600;color:#111827;margin-bottom:8px;">' + msg + '</div>'
+      + '<div style="font-size:12px;color:#9ca3af;">Entre em contato com o RH da sua empresa.</div>';
+  }
+}
+
+// Timeout de segurança — se em 5s não detectar sessão, redireciona para login
+var _authTimeout;
+
+function iniciarFluxoAuth() {
+  _authTimeout = setTimeout(function() {
+    window.location.href = 'admin.html';
+  }, 5000);
+
+  auth.onAuthStateChanged(function(user) {
+    clearTimeout(_authTimeout);
+    if (user) {
+      _uid = user.uid;
+      carregarUsuario(_uid);
+    } else {
+      // Tenta re-autenticar com credenciais salvas no sessionStorage
+      var email = sessionStorage.getItem('nr1map_user_email');
+      var pwd   = sessionStorage.getItem('nr1map_user_pwd');
+      if (email && pwd) {
+        auth.signInWithEmailAndPassword(email, pwd)
+          .then(function(cred) {
+            _uid = cred.user.uid;
+            carregarUsuario(_uid);
+          })
+          .catch(function() { window.location.href = 'admin.html'; });
+      } else {
+        window.location.href = 'admin.html';
+      }
+    }
+  });
+}
 
 function carregarUsuario(uid) {
   // Busca dados em paralelo das duas collections
