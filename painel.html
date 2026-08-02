@@ -4684,7 +4684,11 @@ function verLinksEnviados() {
   var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum + ' dias';
   var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
-  db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('tipo','==','diagnostico').where('usado','==',false).get().then(function(snap) {
+  var agora = new Date().toISOString();
+  var pesquisaId = window._editAgendaId || '';
+  var query = db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('tipo','==','diagnostico').where('usado','==',false).where('expiraEm','>',agora);
+  if (pesquisaId) query = query.where('pesquisaId','==',pesquisaId);
+  query.get().then(function(snap) {
     var modal = document.getElementById('modal-disparo-confirmacao');
     if (!modal) {
       modal = document.createElement('div');
@@ -4794,6 +4798,7 @@ function dispararPesquisa(tipo) {
           colaboradorNome: colab.nome || '',
           whatsapp: colab.whatsapp || '',
           tipo: tipo,
+          pesquisaId: window._editAgendaId || '',
           usado: false,
           criadoEm: new Date().toISOString(),
           expiraEm: new Date(Date.now() + expiraMsec).toISOString()
