@@ -4685,6 +4685,12 @@ function selecionarVersao(v) { aplicarVersao(v); }
 
 function dispararPesquisaVersao() { dispararPesquisa('diagnostico'); }
 function verLinksEnviados() {
+  // Reabrir modal que ja foi gerado na sessao atual
+  var modal = document.getElementById('modal-disparo-confirmacao');
+  if (modal) { modal.classList.add('open'); return; }
+  alert('Dispare primeiro para ver os links.');
+}
+function verLinksEnviadosLEGACY() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   var db = window.nr1mapDb;
   if (!empresaId || !db) { alert('Empresa nao carregada.'); return; }
