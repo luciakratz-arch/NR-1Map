@@ -5433,8 +5433,22 @@ function gerarRelatorio(tipo) {
 }
 </script>
 <script>
-// URL do script de disparo automático — atualize após publicar NR1Map-Disparo
+// URL do script de disparo automatico
 window.NR1MAP_DISPARO_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT2bVAoEkf6klteOEnH7d0fQa-kv8WvCw7k2h7boVqRpc2jhk0IftN2DGL/exec';
+</script>
+
+<script>
+// ============================================================
+// FUNCAO ISOLADA: Ver links ja enviados (nao altera nada acima)
+// ============================================================
+function verLinksEnviados() {
+  var modal = document.getElementById('modal-disparo-confirmacao');
+  if (modal) {
+    modal.classList.add('open');
+    return;
+  }
+  alert('Dispare primeiro para ver os links.');
+}
 </script>
 </body>
 </html>
