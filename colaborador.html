@@ -607,29 +607,35 @@ function entrarApp() {
 }
 
 function validarToken(codigo) {
-  // Busca token no Firestore
+  // Busca token no Firestore (sem filtrar por usado — checar manualmente)
   db.collection('nr1map_tokens').where('codigo', '==', codigo)
-    .where('usado', '==', false)
     .get()
     .then(function(snap) {
+      var erroEl = document.getElementById('otp-erro');
+      var btn = document.getElementById('btn-entrar');
       if (snap.empty) {
-        document.getElementById('otp-erro').style.display = 'block';
-        btn.textContent = 'Acessar minha área →'; btn.disabled = false;
+        erroEl.textContent = 'Código inválido ou expirado. Solicite um novo.';
+        erroEl.style.display = 'block';
+        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
         return;
       }
       var doc = snap.docs[0];
       var data = doc.data();
-      // Verifica expiracao pelo campo expiraEm (prazo real configurado)
+      // Verifica se já foi respondido
+      if (data.usado) {
+        erroEl.textContent = 'Voce ja respondeu esta pesquisa. Aguarde o proximo ciclo!';
+        erroEl.style.display = 'block';
+        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
+        return;
+      }
+      // Verifica expiração pelo campo expiraEm real
       var expira = data.expiraEm ? new Date(data.expiraEm).getTime()
                  : data.criadoEm ? new Date(data.criadoEm).getTime() + 7*24*3600*1000
                  : 0;
-      if (expira && Date.now() > expira) {
-        var loading2 = document.getElementById('screen-loading');
-        if (loading2) loading2.innerHTML = '<div style="text-align:center;padding:40px;">' +
-          '<div style="font-size:40px;margin-bottom:12px;">⏰</div>' +
-          '<div style="font-size:16px;font-weight:600;color:#111827;">Link expirado</div>' +
-          '<div style="font-size:13px;color:#6b7280;margin-top:8px;">Este link de acesso expirou. Solicite um novo link ao RH.</div>' +
-          '</div>';
+      if (Date.now() > expira) {
+        erroEl.textContent = 'Codigo expirado. Solicite um novo ao seu RH.';
+        erroEl.style.display = 'block';
+        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
         return;
       }
       _token = codigo;
