@@ -5066,6 +5066,14 @@ function carregarCargos(empresaId) {
         cargos.push(d);
       });
       renderCargos();
+      // Popular select do modal de agenda
+      var selCg = document.getElementById('ag-cargo');
+      if (selCg) {
+        selCg.innerHTML = '<option value="Todos">Todos os cargos</option>';
+        cargos.forEach(function(c) {
+          selCg.innerHTML += '<option value="' + c.nome + '">' + c.nome + '</option>';
+        });
+      }
     }).catch(function(e){ 
       console.log('Erro carregarCargos:', e);
       if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
