@@ -4701,10 +4701,67 @@ function selecionarVersao(v) { aplicarVersao(v); }
 
 function dispararPesquisaVersao() { dispararPesquisa('diagnostico'); }
 function verLinksEnviados() {
-  // Reabrir modal que ja foi gerado na sessao atual
-  var modal = document.getElementById('modal-disparo-confirmacao');
-  if (modal) { modal.classList.add('open'); return; }
-  alert('Dispare primeiro para ver os links.');
+  // Se modal ja existe na sessao, so abre
+  var modalExist = document.getElementById('modal-disparo-confirmacao');
+  if (modalExist) { modalExist.classList.add('open'); return; }
+
+  // Busca tokens no Firestore para a empresa ativa
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var db = window.nr1mapDb;
+  if (!empresaId || !db) { alert('Empresa nao carregada.'); return; }
+
+  // Usa pesquisaId da sessao atual; se nao tiver, busca todos nao usados
+  var pesquisaId = window._currentAgendaId || window._editAgendaId ||
+    (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
+
+  var query = pesquisaId
+    ? db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('pesquisaId','==',pesquisaId)
+    : db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('usado','==',false);
+
+  query.get().then(function(snap) {
+    var modal = document.createElement('div');
+    modal.id = 'modal-disparo-confirmacao';
+    modal.className = 'modal-overlay';
+    var mDiv = document.createElement('div');
+    mDiv.className = 'modal';
+    mDiv.style.cssText = 'max-width:520px;width:95%;';
+    var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+    var mH3 = document.createElement('h3'); mH3.textContent = 'Links gerados';
+    var mBtnX = document.createElement('button'); mBtnX.className = 'modal-close'; mBtnX.textContent = 'x';
+    mBtnX.onclick = function(){ modal.classList.remove('open'); };
+    mHdr.appendChild(mH3); mHdr.appendChild(mBtnX);
+    var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+    var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+    var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+    mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+    mFtr.appendChild(mFtrBtn);
+    mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+    modal.appendChild(mDiv);
+    document.body.appendChild(modal);
+
+    if (snap.empty) {
+      mBody.innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum token encontrado para esta empresa. Dispare uma pesquisa primeiro.</p>';
+      modal.classList.add('open');
+      return;
+    }
+
+    var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+    var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + snap.size + ' links</p>';
+    snap.forEach(function(td) {
+      var t = td.data();
+      var statusTxt = t.usado
+        ? '<span style="color:#ef4444;font-size:11px;">Respondido</span>'
+        : '<span style="color:#10b981;font-size:11px;">Pendente</span>';
+      var url = base + t.codigo;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;gap:8px;">' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (t.colaboradorNome || 'Colaborador') + '</div>' +
+        '<div>' + statusTxt + '</div></div>' +
+        '<a href="' + url + '" target="_blank" style="background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;">Abrir link</a>' +
+        '</div>';
+    });
+    mBody.innerHTML = html;
+    modal.classList.add('open');
+  }).catch(function(e) { alert('Erro ao buscar links: ' + e.message); });
 }
 function verLinksEnviadosLEGACY() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
@@ -5005,18 +5062,64 @@ function carregarDashboard(empresaId) {
       if(el2) el2.textContent=inativos+' inativos';
     }).catch(function(e){ console.log('colab err:',e); });
 
-  // Respostas do ciclo mais recente
+  // Respostas do ciclo mais recente com respostas (ordena por atualizadoEm)
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-    .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+    .collection('ciclos').orderBy('atualizadoEm','desc').limit(1)
     .get().then(function(cicloSnap){
-      if(cicloSnap.empty) return;
-      var cicloId = cicloSnap.docs[0].id;
+      if(cicloSnap.empty) {
+        // Fallback: tenta orderBy criadoEm
+        window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+          .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+          .get().then(function(s2){ if(!s2.empty) carregarCicloRespostas(empresaId, s2.docs[0]); });
+        return;
+      }
+      carregarCicloRespostas(empresaId, cicloSnap.docs[0]);
+    }).catch(function(e){
+      // Fallback para criadoEm se atualizadoEm nao indexado ainda
+      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+        .get().then(function(s2){ if(!s2.empty) carregarCicloRespostas(empresaId, s2.docs[0]); })
+        .catch(function(e2){ console.log('respostas err:', e2); });
+    });
+}
+
+function carregarCicloRespostas(empresaId, cicloDoc) {
+      var cicloId = cicloDoc.id;
+      // Usa totalRespostas do cicloDoc como fonte primaria
+      var totalAgg = cicloDoc.data().totalRespostas || 0;
+      var ibpGeralAgg = cicloDoc.data().ibpGeral;
 
       window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
         .collection('ciclos').doc(cicloId)
         .collection('respostas').get()
         .then(function(snap){
-          if(snap.empty) return;
+          var total = snap.size > 0 ? snap.size : totalAgg;
+          if(total === 0) return;
+
+          // Se subcoleção vazia mas cicloDoc tem ibpGeral agregado, usa direto
+          if(snap.size === 0 && ibpGeralAgg !== undefined && ibpGeralAgg !== null) {
+            var elResp2 = document.getElementById('mc-respondentes');
+            var elRespSub2 = document.getElementById('mc-respondentes-sub');
+            var ativosEl2 = document.getElementById('mc-colab-ativos');
+            var ativos2 = ativosEl2 ? parseInt(ativosEl2.textContent)||0 : 0;
+            if(elResp2) elResp2.textContent = total;
+            if(elRespSub2) elRespSub2.textContent = 'de ' + ativos2 + ' colaboradores';
+            var taxa2 = ativos2 > 0 ? Math.min(Math.round((total/ativos2)*100),100) : 0;
+            var elTaxa2 = document.getElementById('mc-taxa');
+            var elTaxaSub2 = document.getElementById('mc-taxa-sub');
+            if(elTaxa2) elTaxa2.textContent = taxa2 + '%';
+            if(elTaxaSub2) elTaxaSub2.textContent = ativos2 > 0 ? (ativos2-total)+' pendentes' : '—';
+            var zona2 = ibpGeralAgg>=1.5?'Terreno Fertil':ibpGeralAgg<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
+            var cor2 = ibpGeralAgg>=1.5?'var(--verde)':ibpGeralAgg<=-1.5?'#ef4444':'var(--laranja)';
+            var elG2 = document.getElementById('mc-ibp-geral');
+            var elZ2 = document.getElementById('mc-ibp-zona');
+            if(elG2){ elG2.textContent=(ibpGeralAgg>=0?'+':'')+ibpGeralAgg.toFixed(1); elG2.style.color=cor2; }
+            if(elZ2){ elZ2.textContent=zona2; elZ2.style.color=cor2; }
+            atualizarHistoricoTimeline(empresaId);
+            return;
+          }
+
+          // Agrega IBP real por módulo
           var total = snap.size;
           // Agrega IBP por módulo
           var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
@@ -5480,16 +5583,7 @@ window.NR1MAP_DISPARO_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT
 
 <script>
 // ============================================================
-// FUNCAO ISOLADA: Ver links ja enviados (nao altera nada acima)
-// ============================================================
-function verLinksEnviados() {
-  var modal = document.getElementById('modal-disparo-confirmacao');
-  if (modal) {
-    modal.classList.add('open');
-    return;
-  }
-  alert('Dispare primeiro para ver os links.');
-}
+// verLinksEnviados definida acima
 </script>
 </body>
 </html>
