@@ -3400,9 +3400,12 @@ function _popularModalAgenda() {
     _rebuild('ag-cargo', optsCg);
   }
 
-  // Sempre busca do Firestore para garantir dados atualizados
-  console.log('[agenda] empresaId:', empresaId, 'db:', !!db);
-  if (!db || !empresaId) { console.log('[agenda] sem db ou empresaId, preenchendo vazio'); _preencher(); return; }
+  // Usa arrays já carregados; se vazios, busca do Firestore
+  if ((cargos && cargos.length > 0) || (unidades && unidades.length > 0)) {
+    _preencher();
+    return;
+  }
+  if (!db || !empresaId) { _preencher(); return; }
   Promise.all([
     db.collection('nr1map_unidades').where('empresaId','==',empresaId).get(),
     db.collection('nr1map_departamentos').where('empresaId','==',empresaId).get(),
@@ -3412,7 +3415,7 @@ function _popularModalAgenda() {
     departamentos = []; results[1].forEach(function(d){ var x=d.data(); x.id=d.id; departamentos.push(x); });
     cargos = []; results[2].forEach(function(d){ var x=d.data(); x.id=d.id; cargos.push(x); });
     _preencher();
-  }).catch(function(e){ console.log('popularModalAgenda err:', e); _preencher(); });
+  }).catch(function(e){ _preencher(); });
 }
 
 /* ===== ORGANOGRAMA AGRUPADO POR DEPARTAMENTO ===== */
