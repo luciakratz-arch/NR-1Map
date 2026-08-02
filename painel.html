@@ -4119,7 +4119,7 @@ function renderHistoricoUnificado() {
       ? (dataStr + ' · Aguardando respostas' + (d._canal ? ' · ' + d._canal : ''))
       : (dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp);
     var acaoBotao = isPlanejado
-      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(\'planejamento\')">Ver agenda</button>'
+      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(&quot;planejamento&quot;)">Ver agenda</button>'
       : '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="abrirLaudoDoCiclo(\'' + cicloId + '\',\'' + (d.tipo||'geral') + '\')">Ver laudo</button>';
     return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;' + (isPlanejado ? 'opacity:0.75;' : '') + '">' +
       '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (isPlanejado ? '#F39C12' : cor) + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
