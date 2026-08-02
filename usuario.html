@@ -57,15 +57,15 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
 .slider-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:16px;}
 .zona-pills{display:flex;flex-direction:column;gap:8px;}
 .zona-pill{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;}
-/* PESQUISA EM BLOCOS */
-.bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.bloco-prog-txt{font-size:12px;color:#6b7280;}
-.bloco-badge{font-size:11px;color:#10b981;font-weight:600;background:#f0fdf4;padding:3px 10px;border-radius:20px;}
-.prog-bar{height:5px;background:#e8ecf0;border-radius:3px;margin-bottom:20px;overflow:hidden;}
-.prog-fill{height:100%;background:#10b981;border-radius:3px;transition:width .4s;}
-.pergunta-card{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:16px;margin-bottom:12px;}
+/* PESQUISA CARROSSEL - uma pergunta por vez */
+.carrossel-header{margin-bottom:14px;}
+.carrossel-contador{font-size:12px;color:#6b7280;margin-bottom:6px;text-align:center;}
+.prog-bar{height:6px;background:#e8ecf0;border-radius:3px;margin-bottom:20px;overflow:hidden;}
+.prog-fill{height:100%;background:#10b981;border-radius:3px;transition:width .35s ease;}
+.pergunta-card{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:20px 16px;animation:slideIn .22s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:translateX(0);}}
 .pergunta-num-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin-bottom:6px;}
-.pergunta-texto-bloco{font-size:14px;color:#111827;line-height:1.55;margin-bottom:16px;font-weight:400;}
+.pergunta-texto-bloco{font-size:15px;color:#111827;line-height:1.6;margin-bottom:20px;font-weight:500;}
 /* TERMÔMETRO INTERATIVO */
 .termo-interativo{position:relative;padding:16px 12px 8px;}
 .termo-valor-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:4px;transition:color .3s;}
@@ -81,10 +81,11 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
 .freq-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 .freq-label{font-size:13px;font-weight:500;color:#111827;}
 .freq-sub{font-size:11px;color:#9ca3af;margin-top:1px;}
-.btn-nav-bloco{display:flex;gap:10px;margin-top:16px;}
+.btn-nav-bloco{display:flex;gap:10px;margin-top:20px;}
 .btn-prev-bloco{flex:1;padding:13px;border-radius:10px;border:1.5px solid #e8ecf0;background:#fff;font-size:14px;font-weight:500;cursor:pointer;color:#6b7280;}
 .btn-next-bloco{flex:2;padding:13px;border-radius:10px;border:none;background:#10b981;color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
 .btn-next-bloco:disabled{background:#d1d5db;cursor:not-allowed;}
+.btn-next-bloco.aguardando{background:#9ca3af;cursor:not-allowed;}
 /* TERMÔMETRO PESSOAL */
 .termo-hero{background:#fff;border-radius:14px;border:1px solid #e8ecf0;padding:16px;margin-bottom:14px;}
 .termo-ibp-val{font-size:40px;font-weight:600;text-align:center;margin:8px 0 4px;}
@@ -790,10 +791,10 @@ function carregarApp() {
       }
       _perguntas = pool;
 
-      // Divide em blocos de 7
+      // Carrossel: uma pergunta por vez
       _blocos = [];
-      for (var k = 0; k < _perguntas.length; k += 7) {
-        _blocos.push(_perguntas.slice(k, k + 7));
+      for (var k = 0; k < _perguntas.length; k++) {
+        _blocos.push([_perguntas[k]]);
       }
 
       var label = _tipoPesquisa === 'robusta' ? 'Pesquisa Robusta' : 'Pesquisa Pulso — Esta semana';
@@ -874,114 +875,116 @@ function iniciarPesquisa() {
 }
 
 function renderBloco() {
-  var bloco = _blocos[_blocoAtual];
-  var totalPergs = _perguntas.length;
-  var pergInicioBloco = _blocoAtual * 7;
-  var pct = Math.round((pergInicioBloco / totalPergs) * 100);
+  var p = _perguntas[_blocoAtual];
+  var total = _perguntas.length;
+  var pct = Math.round((_blocoAtual / total) * 100);
   var container = document.getElementById('bloco-conteudo');
   container.innerHTML = '';
 
   var hdr = document.createElement('div');
-  hdr.className = 'bloco-header';
-  hdr.innerHTML = '<span class="bloco-prog-txt">Bloco ' + (_blocoAtual+1) + ' de ' + _blocos.length + '</span>' +
-    '<span class="bloco-badge">' + bloco.length + ' perguntas</span>';
+  hdr.className = 'carrossel-header';
+  hdr.innerHTML = '<div class="carrossel-contador">' + (_blocoAtual + 1) + ' de ' + total + '</div>' +
+    '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>';
   container.appendChild(hdr);
 
-  var barWrap = document.createElement('div');
-  barWrap.className = 'prog-bar';
-  barWrap.innerHTML = '<div class="prog-fill" style="width:'+pct+'%"></div>';
-  container.appendChild(barWrap);
+  var card = document.createElement('div');
+  card.className = 'pergunta-card';
+  card.id = 'pcard-' + p.id;
 
-  bloco.forEach(function(p, idx) {
-    var card = document.createElement('div');
-    card.className = 'pergunta-card';
-    card.id = 'pcard-' + p.id;
+  var txt = document.createElement('div');
+  txt.className = 'pergunta-texto-bloco';
+  txt.textContent = p.texto;
+  card.appendChild(txt);
 
-    var num = document.createElement('div');
-    num.className = 'pergunta-num-badge';
-    num.textContent = 'Pergunta ' + (pergInicioBloco + idx + 1) + ' de ' + totalPergs;
-    card.appendChild(num);
+  var freqWrap = document.createElement('div');
+  freqWrap.className = 'freq-group';
+  var freqOpcoes = [
+    { key: 'sempre',    label: 'Sempre',               sub: 'ou quase sempre',             cor: '#10b981', cls: 'sel-sempre'    },
+    { key: 'maioria',   label: 'Na maioria das vezes',  sub: '',                            cor: '#10b981', cls: 'sel-maioria'   },
+    { key: 'metade',    label: 'Na metade das vezes',   sub: 'as vezes sim, as vezes nao',  cor: '#f59e0b', cls: 'sel-metade'    },
+    { key: 'poucas',    label: 'Poucas vezes',          sub: '',                            cor: '#ef4444', cls: 'sel-poucas'    },
+    { key: 'raramente', label: 'Raramente',             sub: 'ou quase nunca',              cor: '#ef4444', cls: 'sel-raramente' }
+  ];
+  var freqSel = _respostasFreq[p.id] || null;
+  var invertida = p.invertida || false;
 
-    var txt = document.createElement('div');
-    txt.className = 'pergunta-texto-bloco';
-    txt.textContent = p.texto;
-    card.appendChild(txt);
-
-    var freqWrap = document.createElement('div');
-    freqWrap.className = 'freq-group';
-    var freqOpcoes = [
-      { key: 'sempre',    label: 'Sempre',               sub: 'ou quase sempre',            cor: '#10b981', cls: 'sel-sempre'    },
-      { key: 'maioria',   label: 'Na maioria das vezes',  sub: '',                           cor: '#10b981', cls: 'sel-maioria'   },
-      { key: 'metade',    label: 'Na metade das vezes',   sub: 'às vezes sim, às vezes não', cor: '#f59e0b', cls: 'sel-metade'    },
-      { key: 'poucas',    label: 'Poucas vezes',          sub: '',                           cor: '#ef4444', cls: 'sel-poucas'    },
-      { key: 'raramente', label: 'Raramente',             sub: 'ou quase nunca',             cor: '#ef4444', cls: 'sel-raramente' }
-    ];
-    var freqSel = _respostasFreq[p.id] || null;
-    var invertida = p.invertida || false;
-
-    freqOpcoes.forEach(function(op) {
-      var btn = document.createElement('button');
-      btn.className = 'freq-btn' + (freqSel === op.key ? ' ' + op.cls : '');
-      btn.dataset.pid = p.id;
-      btn.dataset.freq = op.key;
-      var dot = document.createElement('div');
-      dot.className = 'freq-dot';
-      dot.style.background = freqSel === op.key ? op.cor : '#e8ecf0';
-      var labelWrap = document.createElement('div');
-      var lbl = document.createElement('div');
-      lbl.className = 'freq-label';
-      lbl.textContent = op.label;
-      labelWrap.appendChild(lbl);
-      if (op.sub) {
-        var sub = document.createElement('div');
-        sub.className = 'freq-sub';
-        sub.textContent = op.sub;
-        labelWrap.appendChild(sub);
-      }
-      btn.appendChild(dot);
-      btn.appendChild(labelWrap);
-      btn.onclick = (function(pid, freq, opCls, opCor, inv) {
-        return function() {
-          freqWrap.querySelectorAll('.freq-btn').forEach(function(b) {
-            b.className = 'freq-btn';
-            b.querySelector('.freq-dot').style.background = '#e8ecf0';
-          });
-          this.className = 'freq-btn ' + opCls;
-          this.querySelector('.freq-dot').style.background = opCor;
-          _respostasFreq[pid] = freq;
-          _respostas[pid] = freqParaValor(freq, inv);
-          verificarBlocoCompleto();
-        };
-      })(p.id, op.key, op.cls, op.cor, invertida);
-      freqWrap.appendChild(btn);
-    });
-
-    card.appendChild(freqWrap);
-    container.appendChild(card);
+  freqOpcoes.forEach(function(op) {
+    var btn = document.createElement('button');
+    btn.className = 'freq-btn' + (freqSel === op.key ? ' ' + op.cls : '');
+    btn.dataset.pid = p.id;
+    btn.dataset.freq = op.key;
+    var dot = document.createElement('div');
+    dot.className = 'freq-dot';
+    dot.style.background = freqSel === op.key ? op.cor : '#e8ecf0';
+    var labelWrap = document.createElement('div');
+    var lbl = document.createElement('div');
+    lbl.className = 'freq-label';
+    lbl.textContent = op.label;
+    labelWrap.appendChild(lbl);
+    if (op.sub) {
+      var sub2 = document.createElement('div');
+      sub2.className = 'freq-sub';
+      sub2.textContent = op.sub;
+      labelWrap.appendChild(sub2);
+    }
+    btn.appendChild(dot);
+    btn.appendChild(labelWrap);
+    btn.onclick = (function(pid, freq, opCls, opCor, inv) {
+      return function() {
+        freqWrap.querySelectorAll('.freq-btn').forEach(function(b) {
+          b.className = 'freq-btn';
+          b.querySelector('.freq-dot').style.background = '#e8ecf0';
+        });
+        this.className = 'freq-btn ' + opCls;
+        this.querySelector('.freq-dot').style.background = opCor;
+        _respostasFreq[pid] = freq;
+        _respostas[pid] = freqParaValor(freq, inv);
+        setTimeout(function() {
+          if (_blocoAtual < _perguntas.length - 1) {
+            _blocoAtual++;
+            renderBloco();
+          } else {
+            verificarBlocoCompleto();
+          }
+        }, 320);
+      };
+    })(p.id, op.key, op.cls, op.cor, invertida);
+    freqWrap.appendChild(btn);
   });
+
+  card.appendChild(freqWrap);
+  container.appendChild(card);
 
   var nav = document.createElement('div');
   nav.className = 'btn-nav-bloco';
+
   if (_blocoAtual > 0) {
     var btnPrev = document.createElement('button');
     btnPrev.className = 'btn-prev-bloco';
-    btnPrev.textContent = '← Bloco anterior';
-    btnPrev.onclick = function() { _blocoAtual--; renderBloco(); window.scrollTo(0,0); };
+    btnPrev.textContent = '<- Anterior';
+    btnPrev.onclick = function() { _blocoAtual--; renderBloco(); };
     nav.appendChild(btnPrev);
   }
-  var btnNext = document.createElement('button');
-  btnNext.className = 'btn-next-bloco';
-  btnNext.id = 'btn-prox-bloco';
-  btnNext.textContent = _blocoAtual === _blocos.length - 1 ? 'Enviar respostas ✓' : 'Próximo bloco →';
-  btnNext.disabled = !blocoCompleto();
-  btnNext.onclick = function() {
-    if (_blocoAtual < _blocos.length - 1) {
-      _blocoAtual++; renderBloco(); window.scrollTo(0,0);
-    } else {
-      enviarRespostas();
-    }
-  };
-  nav.appendChild(btnNext);
+
+  var eUltima = (_blocoAtual === _perguntas.length - 1);
+  var jaRespondida = (_respostas[p.id] !== undefined);
+
+  if (eUltima) {
+    var btnEnv = document.createElement('button');
+    btnEnv.className = 'btn-next-bloco';
+    btnEnv.id = 'btn-prox-bloco';
+    btnEnv.textContent = 'Enviar respostas';
+    btnEnv.disabled = !todasRespondidas();
+    btnEnv.onclick = function() { enviarRespostas(); };
+    nav.appendChild(btnEnv);
+  } else if (!jaRespondida) {
+    var btnPular = document.createElement('button');
+    btnPular.className = 'btn-next-bloco aguardando';
+    btnPular.textContent = 'Selecione uma opcao acima';
+    btnPular.disabled = true;
+    nav.appendChild(btnPular);
+  }
+
   container.appendChild(nav);
 }
 
@@ -998,17 +1001,19 @@ function getZona(v) {
 }
 
 function blocoCompleto() {
-  var bloco = _blocos[_blocoAtual];
-  if (!bloco) return false;
-  for (var i = 0; i < bloco.length; i++) {
-    if (_respostas[bloco[i].id] === undefined) return false;
+  return _respostas[_perguntas[_blocoAtual] && _perguntas[_blocoAtual].id] !== undefined;
+}
+
+function todasRespondidas() {
+  for (var i = 0; i < _perguntas.length; i++) {
+    if (_respostas[_perguntas[i].id] === undefined) return false;
   }
   return true;
 }
 
 function verificarBlocoCompleto() {
   var btn = document.getElementById('btn-prox-bloco');
-  if (btn) btn.disabled = !blocoCompleto();
+  if (btn) btn.disabled = !todasRespondidas();
 }
 
 // ===== ENVIAR RESPOSTAS =====
