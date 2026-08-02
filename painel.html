@@ -4686,7 +4686,25 @@ function verLinksEnviados() {
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
   db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('tipo','==','diagnostico').where('usado','==',false).get().then(function(snap) {
     var modal = document.getElementById('modal-disparo-confirmacao');
-    if (!modal) { alert('Dispare primeiro para gerar os links.'); return; }
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modal-disparo-confirmacao';
+      modal.className = 'modal-overlay';
+      var mDiv = document.createElement('div'); mDiv.className = 'modal'; mDiv.style.cssText = 'max-width:520px;width:95%;';
+      var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+      var mH3 = document.createElement('h3'); mH3.id = 'modal-disp-titulo';
+      var mBtn = document.createElement('button'); mBtn.className = 'modal-close'; mBtn.textContent = 'x';
+      mBtn.onclick = function(){ modal.classList.remove('open'); };
+      mHdr.appendChild(mH3); mHdr.appendChild(mBtn);
+      var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+      var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+      var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+      mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+      mFtr.appendChild(mFtrBtn);
+      mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+      modal.appendChild(mDiv);
+      document.body.appendChild(modal);
+    }
     document.getElementById('modal-disp-titulo').textContent = 'Links enviados';
     if (snap.empty) {
       document.getElementById('modal-disp-body').innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum link ativo. Clique em Disparar para gerar.</p>';
