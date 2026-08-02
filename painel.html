@@ -4690,7 +4690,12 @@ function dispararPesquisa(tipo) {
   var _unEl  = document.getElementById(tipo === 'pulso' ? 'pulso-unidade' : 'ag-unidade');
   var _dpEl  = document.getElementById(tipo === 'pulso' ? 'pulso-depto'   : 'ag-depto');
   var _cgEl  = document.getElementById(tipo === 'pulso' ? 'pulso-cargo'   : 'ag-cargo');
-  var _prEl  = document.getElementById('ag-prazo'); // mesmo select em ambas as telas
+  // Pegar prazo do select visível na view ativa
+  var _prEl = null;
+  document.querySelectorAll('[id="ag-prazo"]').forEach(function(el){
+    if (el.offsetParent !== null) _prEl = el;
+  });
+  if (!_prEl) _prEl = document.getElementById('ag-prazo');
   var filtroUnidade = (_unEl && _unEl.value) || 'Todas';
   var filtroDepto   = (_dpEl && _dpEl.value) || 'Todos';
   var filtroCargo   = (_cgEl && _cgEl.value) || 'Todos';
