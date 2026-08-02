@@ -1668,7 +1668,6 @@ textarea.form-control{resize:vertical;min-height:70px;}
           </div>
         </div>
         <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisaVersao()">🚀 Disparar Diagnóstico Geral</button>
-        <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="verTokensEnviados('diagnostico')">📱 Ver links já enviados</button>
         <div style="margin-top:12px;padding:12px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;">
           <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">📄 Após receber as respostas</div>
           <button class="btn btn-primary" style="width:100%;" onclick="gerarLaudoCompleto()">📄 Gerar Laudo Técnico PDF</button>
@@ -4674,56 +4673,6 @@ function aplicarVersao(v) {
 function selecionarVersao(v) { aplicarVersao(v); }
 
 function dispararPesquisaVersao() { dispararPesquisa('diagnostico'); }
-
-function verTokensEnviados(tipo) {
-  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!empresaId || !window.nr1mapDb) { alert('Empresa nao carregada.'); return; }
-  var tipoToken = tipo === 'diagnostico' ? 'diagnostico' : 'pulso';
-  var prazoEl = document.getElementById('ag-prazo');
-  var prazoNum = parseInt((prazoEl && prazoEl.value) || '7', 10);
-  var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum < 30 ? prazoNum + ' dias' : prazoNum === 30 ? '1 mes' : prazoNum + ' dias';
-  var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
-  var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
-  window.nr1mapDb.collection('nr1map_tokens')
-    .where('empresaId', '==', empresaId)
-    .where('tipo', '==', tipoToken)
-    .where('usado', '==', false)
-    .get()
-    .then(function(snap) {
-      var modal = document.getElementById('modal-disparo-confirmacao');
-      if (!modal) { alert('Abra o disparo primeiro para gerar os tokens.'); return; }
-      var tipotxt = tipo === 'diagnostico' ? 'Diagnostico Geral' : 'Pesquisa Pulso';
-      document.getElementById('modal-disp-titulo').textContent = 'Links enviados - ' + tipotxt;
-      if (snap.empty) {
-        document.getElementById('modal-disp-body').innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum link ativo encontrado. Clique em Disparar para gerar.</p>';
-        modal.classList.add('open');
-        return;
-      }
-      var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + snap.size + ' links ativos</p>';
-      snap.forEach(function(doc) {
-        var t = doc.data();
-        var wpp = (t.whatsapp || '').replace(/[^0-9]/g, '');
-        var link = base + t.codigo;
-        var msg = 'Ola ' + (t.colaboradorNome || 'Colaborador') + '!
-
-' + empresaNome + ' esta realizando uma pesquisa de bem-estar no trabalho.
-
-Suas respostas sao 100% anonimas.
-
-Acesse pelo link abaixo e responda em poucos minutos:
-' + link + '
-
-O link expira em ' + prazoTxt + '.';
-        var url = wpp ? 'https://wa.me/55' + wpp + '?text=' + encodeURIComponent(msg) : null;
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;">' +
-          '<span style="flex:1;font-size:13px;font-weight:500;">' + (t.colaboradorNome || 'Colaborador') + '</span>' +
-          (url ? '<a href="' + url + '" target="_blank" style="font-size:11px;color:#25D366;font-weight:600;text-decoration:none;">Abrir WhatsApp</a>' : '<span style="font-size:11px;color:#9ca3af;">Sem WhatsApp</span>') +
-          '</div>';
-      });
-      document.getElementById('modal-disp-body').innerHTML = html;
-      modal.classList.add('open');
-    }).catch(function(e) { alert('Erro: ' + e.message); });
-}
 
 
 
