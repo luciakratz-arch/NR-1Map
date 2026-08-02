@@ -3379,25 +3379,30 @@ function _popularModalAgenda() {
   var db = window.nr1mapDb;
 
   function _preencher() {
-    function _rebuild(id, opts) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      var parent = el.parentNode;
-      var clone = el.cloneNode(false);
-      clone.innerHTML = opts;
-      parent.replaceChild(clone, el);
+    var selUn = document.getElementById('ag-unidade');
+    if (selUn) {
+      var optsUn = '<option value="Todas">Todas as unidades</option>';
+      (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+      selUn.innerHTML = optsUn;
     }
-    var optsUn = '<option value="Todas">Todas as unidades</option>';
-    (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
-    _rebuild('ag-unidade', optsUn);
-
-    var optsDp = '<option value="Todos">Todos os departamentos</option>';
-    (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
-    _rebuild('ag-depto', optsDp);
-
-    var optsCg = '<option value="Todos">Todos os cargos</option>';
-    (cargos || []).forEach(function(c) { optsCg += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
-    _rebuild('ag-cargo', optsCg);
+    var selDp = document.getElementById('ag-depto');
+    if (selDp) {
+      var optsDp = '<option value="Todos">Todos os departamentos</option>';
+      (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+      selDp.innerHTML = optsDp;
+    }
+    var selCg = document.getElementById('ag-cargo');
+    if (selCg) {
+      while (selCg.options.length > 0) selCg.remove(0);
+      var optTodos = document.createElement('option');
+      optTodos.value = 'Todos'; optTodos.text = 'Todos os cargos';
+      selCg.add(optTodos);
+      (cargos || []).forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.nome; opt.text = c.nome;
+        selCg.add(opt);
+      });
+    }
   }
 
   // Usa arrays já carregados; se vazios, busca do Firestore
