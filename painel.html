@@ -4185,6 +4185,7 @@ function editarAgendamento(item) {
   var d = item.d;
   var docId = item.id;
   window._editAgendaId = docId;
+  window._currentAgendaId = docId;
 
   _popularModalAgenda();
 
@@ -4684,7 +4685,7 @@ function verLinksEnviados() {
   var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum + ' dias';
   var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
-  var agendaId = window._editAgendaId || '';
+  var agendaId = window._currentAgendaId || window._editAgendaId || '';
   if (!agendaId) { alert('Abra o agendamento pelo lapis primeiro.'); return; }
   db.collection('nr1map_agenda').doc(agendaId).get().then(function(doc) {
     var waLinks = doc.exists ? (doc.data().waLinks || []) : [];
