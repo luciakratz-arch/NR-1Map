@@ -4225,21 +4225,33 @@ function editarAgendamento(item) {
 
 function excluirAgendamento(docId) {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!confirm('ATENCAO\n\nExcluir este agendamento tambem apagara permanentemente todos os dados e respostas coletadas neste ciclo.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
+  if (!confirm('ATENCAO\n\nExcluir este agendamento apagara permanentemente todos os dados, respostas e tokens vinculados.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
   var db = window.nr1mapDb;
+
+  // 1. Apagar respostas do ciclo
   var refCiclo = db.collection('nr1map_respostas').doc(empresaId).collection('ciclos').doc(docId);
   refCiclo.collection('respostas').get().then(function(snap) {
     var batch = db.batch();
     snap.forEach(function(d) { batch.delete(d.ref); });
     return batch.commit();
   }).then(function() {
+    // 2. Apagar documento do ciclo
     return refCiclo.delete();
   }).then(function() {
+    // 3. Apagar tokens vinculados ao pesquisaId
+    return db.collection('nr1map_tokens').where('pesquisaId', '==', docId).get();
+  }).then(function(tokSnap) {
+    if (tokSnap.empty) return Promise.resolve();
+    var batch2 = db.batch();
+    tokSnap.forEach(function(d) { batch2.delete(d.ref); });
+    return batch2.commit();
+  }).then(function() {
+    // 4. Apagar o agendamento
     return db.collection('nr1map_agenda').doc(docId).delete();
   }).then(function() {
     carregarAgenda();
   }).catch(function(e) {
-    console.log('Erro ao excluir ciclo:', e);
+    console.log('Erro ao excluir:', e);
     db.collection('nr1map_agenda').doc(docId).delete().then(function(){ carregarAgenda(); });
   });
 }
@@ -4792,38 +4804,59 @@ function dispararPesquisa(tipo) {
       }
 
       var total = colabsFiltrados.length;
-      var batch = window.nr1mapDb.batch();
       var links = [];
       var expiraMsec = prazoVal * 24 * 3600 * 1000;
+      var agora = new Date().toISOString();
+      var pesquisaId = window._currentAgendaId || window._editAgendaId || '';
 
-      colabsFiltrados.forEach(function(item) {
-        var colab = item.data;
-        var token = gerarToken6();
-        var ref = window.nr1mapDb.collection('nr1map_tokens').doc();
+      // Verificar tokens existentes para este ciclo antes de criar novos
+      var tokenQuery = pesquisaId
+        ? window.nr1mapDb.collection('nr1map_tokens').where('empresaId','==',empresaId).where('pesquisaId','==',pesquisaId).get()
+        : Promise.resolve({ docs: [] });
 
-        batch.set(ref, {
-          codigo: token,
-          empresaId: empresaId,
-          empresaNome: window.nr1mapEmpresa.nome || '',
-          colaboradorId: item.doc.id,
-          colaboradorNome: colab.nome || '',
-          whatsapp: colab.whatsapp || '',
-          tipo: tipo,
-          pesquisaId: window._currentAgendaId || window._editAgendaId || '',
-          usado: false,
-          criadoEm: new Date().toISOString(),
-          expiraEm: new Date(Date.now() + expiraMsec).toISOString()
+      tokenQuery.then(function(tokensSnap) {
+        // Mapear tokens existentes por colaboradorId
+        var tokensExistentes = {};
+        tokensSnap.docs && tokensSnap.docs.forEach(function(td) {
+          var t = td.data();
+          if (!t.usado && t.expiraEm > agora) {
+            tokensExistentes[t.colaboradorId] = t.codigo;
+          }
         });
 
-        links.push({
-          nome: colab.nome || 'Colaborador',
-          whatsapp: (colab.whatsapp || '').replace(/[^0-9]/g, ''),
-          email: colab.email || '',
-          token: token
-        });
-      });
+        var batch = window.nr1mapDb.batch();
+        colabsFiltrados.forEach(function(item) {
+          var colab = item.data;
+          // Reutilizar token existente ou criar novo
+          var token = tokensExistentes[item.doc.id] || gerarToken6();
+          var jaExiste = !!tokensExistentes[item.doc.id];
 
-      batch.commit().then(function() {
+          if (!jaExiste) {
+            var ref = window.nr1mapDb.collection('nr1map_tokens').doc();
+            batch.set(ref, {
+              codigo: token,
+              empresaId: empresaId,
+              empresaNome: window.nr1mapEmpresa.nome || '',
+              colaboradorId: item.doc.id,
+              colaboradorNome: colab.nome || '',
+              whatsapp: colab.whatsapp || '',
+              tipo: tipo,
+              pesquisaId: pesquisaId,
+              usado: false,
+              criadoEm: new Date().toISOString(),
+              expiraEm: new Date(Date.now() + expiraMsec).toISOString()
+            });
+          }
+
+          links.push({
+            nome: colab.nome || 'Colaborador',
+            whatsapp: (colab.whatsapp || '').replace(/[^0-9]/g, ''),
+            email: colab.email || '',
+            token: token
+          });
+        });
+
+        batch.commit().then(function() {
         var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
         var tipotxt = tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnóstico Geral';
         var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
@@ -4926,7 +4959,7 @@ function dispararPesquisa(tipo) {
           document.getElementById('modal-disp-titulo').textContent = '\u2705 ' + tipotxt + ' - ' + total + ' colaborador(es)';
           document.getElementById('modal-disp-body').innerHTML = html;
           // Salvar waLinks na agenda para resgatar depois
-          if (window._editAgendaId && window.nr1mapDb && res.waLinks) {
+          if (window.nr1mapDb && res.waLinks) {
             var _agId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
             if (_agId) window.nr1mapDb.collection('nr1map_agenda').doc(_agId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
           }
@@ -4939,6 +4972,11 @@ function dispararPesquisa(tipo) {
       }).catch(function(e) {
         console.log(e);
         alert('Erro ao gerar tokens. Tente novamente.');
+      });
+
+      }).catch(function(e) {
+        console.log(e);
+        alert('Erro ao verificar tokens existentes.');
       });
     })
     .catch(function(e) {
