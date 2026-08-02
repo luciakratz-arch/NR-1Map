@@ -4140,14 +4140,17 @@ function renderHistoricoUnificado() {
 
 
 function dispararDoAgendamento() {
-  // Lê os valores atuais do modal de agendamento, salva e navega para a tela de disparo preenchida
   var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
   var agPrazo   = document.getElementById('plan-prazo')   ? document.getElementById('plan-prazo').value   : '7';
   var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
   var agDepto   = document.getElementById('plan-depto')   ? document.getElementById('plan-depto').value   : 'Todos';
   var agCargo   = document.getElementById('plan-cargo')   ? document.getElementById('plan-cargo').value   : 'Todos';
   var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
+  // Capturar ID ANTES de salvarAgendamento zerar o _editAgendaId
+  var capturedId = window._editAgendaId || '';
+  try { if (capturedId) localStorage.setItem('nr1map_agendaId', capturedId); } catch(e){}
   salvarAgendamento();
+  window._currentAgendaId = capturedId;
   var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
   setTimeout(function() {
     sv(tipoDisparo);
