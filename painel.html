@@ -3910,7 +3910,7 @@ function salvarAgendamento() {
   if (!empresaId || !window.nr1mapDb) return;
   var data = document.getElementById('plan-data') ? document.getElementById('plan-data').value : '';
   if (!data) { alert('Selecione a data de disparo.'); return; }
-  var hoje = new Date().toISOString().slice(0,10);
+  var _d = new Date(); var hoje = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
   var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
   var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
   var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
