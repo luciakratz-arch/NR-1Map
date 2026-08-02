@@ -4795,7 +4795,7 @@ function dispararPesquisa(tipo) {
           colaboradorNome: colab.nome || '',
           whatsapp: colab.whatsapp || '',
           tipo: tipo,
-          pesquisaId: window._editAgendaId || '',
+          pesquisaId: window._currentAgendaId || window._editAgendaId || '',
           usado: false,
           criadoEm: new Date().toISOString(),
           expiraEm: new Date(Date.now() + expiraMsec).toISOString()
