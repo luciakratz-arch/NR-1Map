@@ -3391,18 +3391,7 @@ function _popularModalAgenda() {
       (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
       selDp.innerHTML = optsDp;
     }
-    var selCg = document.getElementById('ag-cargo');
-    if (selCg) {
-      while (selCg.options.length > 0) selCg.remove(0);
-      var optTodos = document.createElement('option');
-      optTodos.value = 'Todos'; optTodos.text = 'Todos os cargos';
-      selCg.add(optTodos);
-      (cargos || []).forEach(function(c) {
-        var opt = document.createElement('option');
-        opt.value = c.nome; opt.text = c.nome;
-        selCg.add(opt);
-      });
-    }
+    // ag-cargo já populado por carregarCargos()
   }
 
   // Usa arrays já carregados; se vazios, busca do Firestore
