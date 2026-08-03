@@ -267,33 +267,73 @@ def classificacao_gro(ibp):
 
 # ── Gerador de PDF ────────────────────────────────────────────────
 
-def gerar_pdf_laudo(dados):
-    """Delega para gerar_relatorio_final.py com dados completos do Firestore."""
+def gerar_pdf_por_tipo(dados, tipo):
+    """Roteia para o gerador correto conforme tipo solicitado."""
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
-    from gerar_relatorio_final import gerar_relatorio_final
-
-    # Monta o dict no formato esperado pelo novo gerador
-    payload = {
-        "empresa":             dados.get("empresa_nome", ""),
-        "cnpj":                dados.get("empresa_cnpj", ""),
-        "responsavel":         dados.get("responsavel", ""),
-        "responsavelTecnico":  dados.get("responsavelTecnico") or {},
-        "referencia":          dados.get("referencia", ""),
-        "colaboradoresAtivos": dados.get("num_colab", 0),
-        "respondentes":        dados.get("respondentes", 0),
-        "ibpGeral":            dados.get("ibp_geral"),
-        "ibpModulos":          dados.get("ibpModulos") or {},
-        "ibpSubcats":          dados.get("ibpSubcats") or {},
-        "porUnidade":          dados.get("porUnidade") or [],
-        "porCargo":            dados.get("porCargo") or [],
-        "acoes":               dados.get("acoes") or [],
-    }
 
     tmp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
     tmp.close()
-    gerar_relatorio_final(payload, output_path=tmp.name)
+
+    if tipo in ('laudo_tecnico', 'relatorio_anual', 'diagnostico_geral', None, ''):
+        from gerar_relatorio_final import gerar_relatorio_final
+        payload = {
+            "empresa":             dados.get("empresa_nome", ""),
+            "cnpj":                dados.get("empresa_cnpj", ""),
+            "responsavel":         dados.get("responsavel", ""),
+            "responsavelTecnico":  dados.get("responsavelTecnico") or {},
+            "referencia":          dados.get("referencia", ""),
+            "colaboradoresAtivos": dados.get("num_colab", 0),
+            "respondentes":        dados.get("respondentes", 0),
+            "ibpGeral":            dados.get("ibp_geral"),
+            "ibpModulos":          dados.get("ibpModulos") or {},
+            "ibpSubcats":          dados.get("ibpSubcats") or {},
+            "porUnidade":          dados.get("porUnidade") or [],
+            "porCargo":            dados.get("porCargo") or [],
+            "acoes":               dados.get("acoes") or [],
+        }
+        gerar_relatorio_final(payload, output_path=tmp.name)
+
+    elif tipo == 'mapa_risco':
+        from gerar_mapa_risco import gerar_mapa_risco
+        gerar_mapa_risco(dados=dados, output_path=tmp.name)
+
+    elif tipo == 'inventario':
+        from gerar_inventario_riscos import gerar_inventario
+        gerar_inventario(dados=dados, output_path=tmp.name)
+
+    elif tipo == 'plano_5w2h':
+        from gerar_plano_5w2h import gerar_5w2h
+        gerar_5w2h(dados=dados, output_path=tmp.name)
+
+    elif tipo == 'acompanhamento':
+        from gerar_acompanhamento import gerar_acompanhamento
+        gerar_acompanhamento(dados=dados, output_path=tmp.name)
+
+    else:
+        # Fallback: laudo tecnico
+        from gerar_relatorio_final import gerar_relatorio_final
+        payload = {
+            "empresa": dados.get("empresa_nome", ""),
+            "responsavelTecnico": dados.get("responsavelTecnico") or {},
+            "referencia": dados.get("referencia", ""),
+            "colaboradoresAtivos": dados.get("num_colab", 0),
+            "respondentes": dados.get("respondentes", 0),
+            "ibpGeral": dados.get("ibp_geral"),
+            "ibpModulos": dados.get("ibpModulos") or {},
+            "ibpSubcats": dados.get("ibpSubcats") or {},
+            "porUnidade": dados.get("porUnidade") or [],
+            "porCargo": dados.get("porCargo") or [],
+            "acoes": dados.get("acoes") or [],
+        }
+        gerar_relatorio_final(payload, output_path=tmp.name)
+
     return tmp.name
+
+
+def gerar_pdf_laudo(dados):
+    """Compatibilidade retroativa — gera laudo tecnico."""
+    return gerar_pdf_por_tipo(dados, 'laudo_tecnico')
 
 
 # ── Cloud Functions ───────────────────────────────────────────────
@@ -328,18 +368,30 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response('{"error": "Empresa não encontrada"}',
                                      status=404, mimetype='application/json')
 
-        # Gera PDF
-        pdf_path = gerar_pdf_laudo(dados)
+        # Tipo de documento solicitado
+        tipo = req.args.get('tipo') or (req.get_json(silent=True) or {}).get('tipo') or 'laudo_tecnico'
 
-        # Salva no Storage
-        nome = nome_arquivo('LaudoTecnicoFinal', dados['empresa_nome'])
+        # Gera PDF
+        pdf_path = gerar_pdf_por_tipo(dados, tipo)
+
+        # Nome do arquivo por tipo
+        nomes_tipo = {
+            'laudo_tecnico':    'LaudoTecnicoFinal',
+            'relatorio_anual':  'LaudoTecnicoFinal',
+            'mapa_risco':       'MapaDeRisco',
+            'inventario':       'InventarioDeRiscos',
+            'plano_5w2h':       'Plano5W2H',
+            'acompanhamento':   'Acompanhamento',
+        }
+        nome_tipo_str = nomes_tipo.get(tipo, 'LaudoTecnicoFinal')
+        nome = nome_arquivo(nome_tipo_str, dados['empresa_nome'])
         url  = salvar_storage(pdf_path, nome, empresa_id)
 
         # Registra no Firestore
         salvar_firestore(
             empresa_id,
             dados['empresa_nome'],
-            'Diagnóstico Geral',
+            tipo,
             url,
             dados['num_colab'],
             dados['ibp_geral']
@@ -348,7 +400,7 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         os.unlink(pdf_path)
 
         return https_fn.Response(
-            f'{{"success": true, "url": "{url}", "empresa": "{dados["empresa_nome"]}"}}',
+            f'{{"success": true, "url": "{url}", "tipo": "{tipo}", "empresa": "{dados["empresa_nome"]}"}}',
             status=200, mimetype='application/json'
         )
 
