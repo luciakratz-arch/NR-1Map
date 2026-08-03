@@ -131,17 +131,30 @@ def buscar_dados_empresa(empresa_id):
                 soma_geral += ibp_r
                 n_geral    += 1
 
-            # Subcategorias
+            # Subcategorias — suporta tanto dict {ibp, modId, nome} quanto float direto
             if d.get('ibpSubcats'):
                 for sc_id, val in d['ibpSubcats'].items():
+                    # Derivar modId do prefixo da subcat (ex: '2.1' -> 'M2')
+                    if isinstance(val, dict):
+                        ibp_val = float(val.get('ibp') or val.get('valor') or 0.0)
+                        mod_id  = val.get('modId') or ('M' + sc_id.split('.')[0]) if '.' in sc_id else 'M1'
+                        nome    = val.get('nome') or sc_id
+                    else:
+                        # val e um numero direto
+                        ibp_val = float(val or 0.0)
+                        mod_id  = ('M' + sc_id.split('.')[0]) if '.' in sc_id else 'M1'
+                        nome    = sc_id
                     if sc_id not in ibp_subcats:
                         ibp_subcats[sc_id] = {
                             'soma':  0.0, 'n': 0,
-                            'modId': val.get('modId', 'M1'),
-                            'nome':  val.get('nome', sc_id),
+                            'modId': mod_id,
+                            'nome':  nome,
                         }
-                    ibp_subcats[sc_id]['soma'] += val.get('ibp', 0.0)
-                    ibp_subcats[sc_id]['n']    += 1
+                    ibp_subcats[sc_id]['soma']  += ibp_val
+                    ibp_subcats[sc_id]['n']     += 1
+                    # Atualizar modId se vier mais completo
+                    if mod_id and mod_id != 'M1':
+                        ibp_subcats[sc_id]['modId'] = mod_id
 
             # Por colaborador (para segmentacao cargo/unidade)
             info_c = cargo_por_colab.get(colab_id, {})
