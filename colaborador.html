@@ -607,36 +607,48 @@ function entrarApp() {
   validarToken(codigo);
 }
 
+function mostrarAvisoToken(icone, titulo, msg) {
+  // Exibe aviso amigavel independente de ter vindo via URL ou OTP
+  var loading = document.getElementById('screen-loading');
+  if (loading) {
+    // Veio via Magic Link — substitui o loading por aviso
+    loading.innerHTML =
+      '<div style="text-align:center;padding:32px 24px;max-width:360px;">' +
+      '<div style="font-size:56px;margin-bottom:16px;">' + icone + '</div>' +
+      '<div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:10px;">' + titulo + '</div>' +
+      '<div style="font-size:14px;color:#6b7280;line-height:1.6;">' + msg + '</div>' +
+      '</div>';
+    return;
+  }
+  // Veio via OTP — usa elementos existentes da tela de login
+  var erroEl = document.getElementById('otp-erro');
+  var btn = document.getElementById('btn-entrar');
+  if (erroEl) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
+  if (btn) { btn.textContent = 'Acessar minha area ->'; btn.disabled = false; }
+}
+
 function validarToken(codigo) {
   // Busca token no Firestore (sem filtrar por usado — checar manualmente)
   db.collection('nr1map_tokens').where('codigo', '==', codigo)
     .get()
     .then(function(snap) {
-      var erroEl = document.getElementById('otp-erro');
-      var btn = document.getElementById('btn-entrar');
       if (snap.empty) {
-        erroEl.textContent = 'Código inválido ou expirado. Solicite um novo.';
-        erroEl.style.display = 'block';
-        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
+        mostrarAvisoToken('❌', 'Link invalido', 'Este codigo nao foi encontrado ou ja expirou. Solicite um novo ao seu RH.');
         return;
       }
       var doc = snap.docs[0];
       var data = doc.data();
-      // Verifica se já foi respondido
+      // Verifica se ja foi respondido
       if (data.usado) {
-        erroEl.textContent = 'Voce ja respondeu esta pesquisa. Aguarde o proximo ciclo!';
-        erroEl.style.display = 'block';
-        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
+        mostrarAvisoToken('✅', 'Questionario ja respondido!', 'Voce ja respondeu esta pesquisa com sucesso. Obrigado pela sua participacao! Aguarde o proximo ciclo.');
         return;
       }
-      // Verifica expiração pelo campo expiraEm real
+      // Verifica expiracao pelo campo expiraEm real
       var expira = data.expiraEm ? new Date(data.expiraEm).getTime()
                  : data.criadoEm ? new Date(data.criadoEm).getTime() + 7*24*3600*1000
                  : 0;
       if (Date.now() > expira) {
-        erroEl.textContent = 'Codigo expirado. Solicite um novo ao seu RH.';
-        erroEl.style.display = 'block';
-        btn.textContent = 'Acessar minha área ->'; btn.disabled = false;
+        mostrarAvisoToken('⏰', 'Link expirado', 'Este link de acesso expirou. Solicite um novo ao seu RH.');
         return;
       }
       _token = codigo;
@@ -647,18 +659,18 @@ function validarToken(codigo) {
       _cargo = data.cargo || '';
       _cbo = data.cbo || '';
       _setor = data.setor || '';
-      // Não marca como usado ainda — só após envio das respostas
+      // Nao marca como usado ainda — so apos envio das respostas
       carregarApp();
     })
     .catch(function(e) {
       console.log('Erro validarToken:', e);
+      mostrarAvisoToken('⚠️', 'Erro de conexao', 'Nao foi possivel verificar seu acesso. Tente novamente em instantes.');
       var loading = document.getElementById('screen-loading');
-      if (loading) loading.remove();
-      var btn = document.getElementById('btn-entrar');
-      if (btn) { btn.textContent = 'Acessar minha área →'; btn.disabled = false; }
-      document.getElementById('screen-login').style.display = 'block';
-      var erroEl = document.getElementById('otp-erro');
-      if (erroEl) { erroEl.style.display = 'block'; erroEl.textContent = 'Erro ao verificar acesso: ' + e.message; }
+      if (!loading) {
+        var btn = document.getElementById('btn-entrar');
+        if (btn) { btn.textContent = 'Acessar minha area ->'; btn.disabled = false; }
+        document.getElementById('screen-login').style.display = 'block';
+      }
     });
 }
 
