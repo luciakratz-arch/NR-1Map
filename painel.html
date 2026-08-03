@@ -6359,27 +6359,62 @@ function carregarMapaRisco(empresaId) {
       snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; allDocs.push(d); });
       allDocs.sort(function(a,b) { return (b.totalRespostas||0) - (a.totalRespostas||0) || ((b.atualizadoEm||b.criadoEm||'') > (a.atualizadoEm||a.criadoEm||'') ? 1 : -1); });
 
-      // Encontrar primeiro ciclo com ibpSubcats preenchido
-      var d = null;
-      for (var i = 0; i < allDocs.length; i++) {
-        if (allDocs[i].ibpSubcats && Object.keys(allDocs[i].ibpSubcats).length) {
-          d = allDocs[i]; break;
-        }
-      }
-      if (!d) d = allDocs[0]; // fallback
-
-      var subcats = d.ibpSubcats || {};
-      var nResp   = d.totalRespostas || 1;
+      // Pega ciclo com mais respostas
+      var cicloAlvo = allDocs[0];
+      var cicloId   = cicloAlvo._id;
+      var nResp     = cicloAlvo.totalRespostas || 1;
 
       if(semDados) semDados.style.display = 'none';
       if(comDados) comDados.style.display = 'block';
       if(!tbody) return;
 
-      if (!Object.keys(subcats).length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados de subcategoria disponiveis apos o proximo diagnostico.</td></tr>';
+      // Se cicloDoc já tem ibpSubcats, usa direto; senão busca das respostas individuais
+      var subcatsDoc = cicloAlvo.ibpSubcats || {};
+      if (Object.keys(subcatsDoc).length) {
+        _renderMapaSubcats(subcatsDoc, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml);
+        window._mapaRiscoSubcats = subcatsDoc;
+        window._mapaRiscoNResp = nResp;
         return;
       }
 
+      // Busca respostas individuais e agrega subcats
+      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').doc(cicloId)
+        .collection('respostas').get()
+        .then(function(resSnap) {
+          var subcatsAgr = {};
+          resSnap.forEach(function(rdoc) {
+            var rd = rdoc.data();
+            var sc_map = rd.ibpSubcats || {};
+            Object.keys(sc_map).forEach(function(sc_id) {
+              var val = sc_map[sc_id];
+              var ibpV = typeof val === 'object' ? parseFloat(val.ibp || 0) : parseFloat(val || 0);
+              var modId = typeof val === 'object' ? (val.modId || ('M' + sc_id.split('.')[0])) : ('M' + sc_id.split('.')[0]);
+              var nome  = typeof val === 'object' ? (val.nome || sc_id) : sc_id;
+              if (!subcatsAgr[sc_id]) subcatsAgr[sc_id] = { soma: 0, n: 0, modId: modId, nome: nome };
+              subcatsAgr[sc_id].soma += ibpV;
+              subcatsAgr[sc_id].n   += 1;
+            });
+          });
+          // Calcular media de cada subcat
+          var subcatsFinal = {};
+          Object.keys(subcatsAgr).forEach(function(sc_id) {
+            var ag = subcatsAgr[sc_id];
+            subcatsFinal[sc_id] = { ibp: ag.n > 0 ? Math.round((ag.soma/ag.n)*100)/100 : 0, n: ag.n, modId: ag.modId, nome: ag.nome };
+          });
+          if (!Object.keys(subcatsFinal).length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados de subcategoria disponiveis apos o proximo diagnostico.</td></tr>';
+            return;
+          }
+          window._mapaRiscoSubcats = subcatsFinal;
+          window._mapaRiscoNResp = nResp;
+          _renderMapaSubcats(subcatsFinal, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml);
+        }).catch(function(e) { console.log('mapa respostas err:', e.message); });
+      return; // aguarda Promise acima
+    }).catch(function(e){ console.log('mapa err:', e.message); });
+}
+
+function _renderMapaSubcats(subcats, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml) {
       tbody.innerHTML = '';
       Object.keys(subcats).forEach(function(sc) {
         var s   = subcats[sc];
@@ -6425,11 +6460,9 @@ function carregarMapaRisco(empresaId) {
         tbody.appendChild(tr);
       });
 
-      // Salvar subcats no cache global para o Plano de Acao usar
+      // Cache global para Plano de Acao
       window._mapaRiscoSubcats = subcats;
       window._mapaRiscoNResp   = nResp;
-
-    }).catch(function(e) { console.log('mapa err:', e.message); });
 }
 
 function carregarRelatorioAnual(empresaId) {
