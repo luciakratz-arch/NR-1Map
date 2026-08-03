@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-NR-1 Map — Gerador do RELATÓRIO FINAL CONSOLIDADO (Laudo Técnico Psicossocial)
-5º e último documento — reúne, por período, um resumo dos 4 instrumentos do fluxo GRO:
-Inventário de Riscos + Avaliação do Risco + Plano de Ação 5W2H + Acompanhamento.
-
-Este é o documento de capa, o que vai para o PGR como referência principal — os outros 4
-continuam existindo como anexos técnicos detalhados. Aqui entra: fundamentação teórica,
-metodologia, resumo executivo de cada instrumento, conclusão técnica e assinatura.
+NR-1 Map -- Gerador do LAUDO TECNICO PSICOSSOCIAL (Relatorio Final Consolidado)
+Conformidade: NR-1 / Portaria MTE n. 1.419/2024
+Metodologia: Psicodinamica do Trabalho (Dejours) + Herzberg + Maslow
+Dados: lidos dinamicamente do Firestore pela Cloud Function (main.py)
 """
 
 import uuid
@@ -15,329 +12,710 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    PageBreak, HRFlowable
+)
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
-# ───────────────────────────── CORES (mesma identidade NR-1 Map) ─────────────────────────────
-VERDE_NR1 = colors.HexColor('#0A6E4F')
-ROXO_NR1 = colors.HexColor('#7B00C4')
-AZUL_ESCURO = colors.HexColor('#1F2937')
-CINZA_TEXTO = colors.HexColor('#374151')
-CINZA_CLARO = colors.HexColor('#F3F4F6')
-LINHA = colors.HexColor('#D1D5DB')
-VERDE_OK = colors.HexColor('#16A34A')
-ZONA_COR_FUNDO = {
-    "Sofrimento Patogênico": colors.HexColor('#FBD5D5'),
-    "Defesa Oculta": colors.HexColor('#FFF1B8'),
-    "Terreno Fértil": colors.HexColor('#D2F2E2'),
+# ──────────────────────────── CORES IDENTIDADE NR-1 Map ────────────────────────────
+VERDE      = colors.HexColor('#0A6E4F')
+VERDE_CLR  = colors.HexColor('#12A073')
+ROXO       = colors.HexColor('#7B00C4')
+AZUL_ESC   = colors.HexColor('#1F2937')
+CINZA      = colors.HexColor('#374151')
+CINZA_CLR  = colors.HexColor('#F3F4F6')
+LINHA      = colors.HexColor('#D1D5DB')
+VERDE_OK   = colors.HexColor('#16A34A')
+LARANJA    = colors.HexColor('#D97706')
+
+ZONA_COR = {
+    "Sofrimento Patogenico": colors.HexColor('#FBD5D5'),
+    "Defesa Oculta":         colors.HexColor('#FFF1B8'),
+    "Terreno Fertil":        colors.HexColor('#D2F2E2'),
 }
 GRO_COR = {
-    "TRIVIAL": colors.HexColor('#BFE6FB'),
-    "TOLERÁVEL": colors.HexColor('#C8EAB8'),
-    "MODERADO": colors.HexColor('#FCE98A'),
-    "SUBSTANCIAL": colors.HexColor('#F8B25A'),
-    "INTOLERÁVEL": colors.HexColor('#F08A8A'),
+    "TRIVIAL":      colors.HexColor('#BFE6FB'),
+    "TOLERAVEL":    colors.HexColor('#C8EAB8'),
+    "MODERADO":     colors.HexColor('#FCE98A'),
+    "SUBSTANCIAL":  colors.HexColor('#F8B25A'),
+    "INTOLERAVEL":  colors.HexColor('#F08A8A'),
 }
 
-# ───────────────────────────── MATRIZ E ZONAS (idênticas aos instrumentos 2 e 3) ─────────────────────────────
+# ──────────────────────────── MATRIZ GRO (Severidade x Probabilidade) ────────────────────────────
 MATRIZ_GRO = {
-    ("E", 1): "MODERADO",     ("E", 2): "SUBSTANCIAL", ("E", 3): "SUBSTANCIAL", ("E", 4): "INTOLERÁVEL", ("E", 5): "INTOLERÁVEL",
-    ("D", 1): "TOLERÁVEL",    ("D", 2): "MODERADO",     ("D", 3): "MODERADO",     ("D", 4): "SUBSTANCIAL", ("D", 5): "INTOLERÁVEL",
-    ("C", 1): "TRIVIAL",      ("C", 2): "TOLERÁVEL",    ("C", 3): "MODERADO",     ("C", 4): "SUBSTANCIAL", ("C", 5): "INTOLERÁVEL",
-    ("B", 1): "TRIVIAL",      ("B", 2): "TOLERÁVEL",    ("B", 3): "TOLERÁVEL",    ("B", 4): "MODERADO",     ("B", 5): "SUBSTANCIAL",
-    ("A", 1): "TRIVIAL",      ("A", 2): "TRIVIAL",      ("A", 3): "TOLERÁVEL",    ("A", 4): "TOLERÁVEL",    ("A", 5): "MODERADO",
+    ("E",1):"MODERADO",    ("E",2):"SUBSTANCIAL", ("E",3):"SUBSTANCIAL", ("E",4):"INTOLERAVEL", ("E",5):"INTOLERAVEL",
+    ("D",1):"TOLERAVEL",   ("D",2):"MODERADO",    ("D",3):"MODERADO",    ("D",4):"SUBSTANCIAL", ("D",5):"INTOLERAVEL",
+    ("C",1):"TRIVIAL",     ("C",2):"TOLERAVEL",   ("C",3):"MODERADO",    ("C",4):"SUBSTANCIAL", ("C",5):"INTOLERAVEL",
+    ("B",1):"TRIVIAL",     ("B",2):"TOLERAVEL",   ("B",3):"TOLERAVEL",   ("B",4):"MODERADO",    ("B",5):"SUBSTANCIAL",
+    ("A",1):"TRIVIAL",     ("A",2):"TRIVIAL",     ("A",3):"TOLERAVEL",   ("A",4):"TOLERAVEL",   ("A",5):"MODERADO",
 }
-PROB_LETRA_POR_NUM = {1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
-ZONAS_IBP = [
-    {"zona_dejours": "Sofrimento Patogênico", "faixa_ibp": "−5,0 a −1,5", "severidade": 4},
-    {"zona_dejours": "Defesa Oculta", "faixa_ibp": "−1,4 a +1,4", "severidade": 3},
-    {"zona_dejours": "Terreno Fértil", "faixa_ibp": "+1,5 a +5,0", "severidade": 1},
-]
+PROB_LETRA = {1:"A", 2:"B", 3:"C", 4:"D", 5:"E"}
 
+MODULOS_NOME = {
+    "M1": "Fatores Fisiologicos / Corpo e Mente",
+    "M2": "Fatores de Seguranca / Previsibilidade",
+    "M3": "Fatores Sociais / Relacionamentos",
+    "M4": "Fatores Motivacionais / Proposito",
+}
+SUBCATS_NOME = {
+    "1.1":"Ergonomia e Conforto Fisico",
+    "1.2":"Pausas e Ritmo de Trabalho",
+    "1.3":"Saude Mental e Ansiedade",
+    "1.4":"Carga Cognitiva Digital",
+    "2.1":"Clareza de Papeis",
+    "2.2":"Metas e Pressao por Resultados",
+    "2.3":"Estabilidade e Seguranca no Emprego",
+    "2.4":"Treinamento e Capacitacao",
+    "3.1":"Lideranca e Gestao Direta",
+    "3.2":"Relacionamento com Pares",
+    "3.3":"Cultura e Valores Organizacionais",
+    "3.4":"Comunicacao Interna",
+    "3.5":"Assedio e Violencia no Trabalho",
+    "4.1":"Proposito e Missao",
+    "4.2":"Reconhecimento e Valorizacao",
+    "4.3":"Crescimento e Desenvolvimento",
+    "4.4":"Autonomia e Pertencimento",
+    "4.5":"Remuneracao e Beneficios",
+}
 
-def zona_de(ibp):
-    if ibp <= -1.5: return ZONAS_IBP[0]
-    if ibp <= 1.4: return ZONAS_IBP[1]
-    return ZONAS_IBP[2]
-
-
-def probabilidade_de(qtd): return min(qtd + 1, 5)
-
-
-def classificar(ibp, qtd):
-    zona = zona_de(ibp)
-    sev = zona["severidade"]
-    letra = PROB_LETRA_POR_NUM[probabilidade_de(qtd)]
-    return zona, sev, letra, MATRIZ_GRO[(letra, sev)]
-
-
-def nome_arquivo_padrao(tipo_documento: str, empresa: str = None, ano: int = None) -> str:
-    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
-    import unicodedata, re
-    empresa = empresa or EMPRESA
-    ano = ano or datetime.datetime.now().year
-    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
-    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
-    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
-
-
-# ───────────────────────────── DADOS (mesma base — empresa, setores, CBOs, ações, acompanhamento) ─────────────────────────────
-EMPRESA = "Clínica Vida S.A."
-REFERENCIA = "Junho de 2026"
-COLABORADORES_ATIVOS = 142
-RESPONDENTES_VALIDOS = 118
-
-SETORES_CBO = [
-    {"setor": "Operações / Linha A", "cbo": "7170", "cargo": "Operador de Linha de Produção", "n": 18, "ibp": -3.6, "qtd_perigos": 3},
-    {"setor": "Operações / Linha A", "cbo": "8324", "cargo": "Auxiliar de Produção", "n": 7, "ibp": -2.8, "qtd_perigos": 2},
-    {"setor": "Operações / Linha A", "cbo": "9412", "cargo": "Inspetor de Qualidade", "n": 3, "ibp": -3.0, "qtd_perigos": 2},
-    {"setor": "Comercial / Vendas", "cbo": "3541", "cargo": "Representante Comercial", "n": 11, "ibp": -0.2, "qtd_perigos": 2},
-    {"setor": "Comercial / Vendas", "cbo": "3542", "cargo": "Vendedor Interno", "n": 4, "ibp": 0.4, "qtd_perigos": 1},
-    {"setor": "TI / Engenharia", "cbo": "2124", "cargo": "Analista de Sistemas", "n": 6, "ibp": 2.7, "qtd_perigos": 0},
-    {"setor": "TI / Engenharia", "cbo": "3171", "cargo": "Técnico de Suporte", "n": 3, "ibp": 2.1, "qtd_perigos": 0},
-    {"setor": "RH / Gestão de Pessoas", "cbo": "2524", "cargo": "Analista de RH", "n": 4, "ibp": -1.0, "qtd_perigos": 2},
-    {"setor": "RH / Gestão de Pessoas", "cbo": "3514", "cargo": "Assistente de RH", "n": 2, "ibp": -1.6, "qtd_perigos": 3},
-    {"setor": "Administrativo / Recepção", "cbo": "4110", "cargo": "Auxiliar Administrativo", "n": 8, "ibp": 1.0, "qtd_perigos": 0},
-    {"setor": "Administrativo / Recepção", "cbo": "4221", "cargo": "Recepcionista", "n": 3, "ibp": 1.3, "qtd_perigos": 0},
-    {"setor": "Manutenção", "cbo": "9517", "cargo": "Técnico de Manutenção", "n": 1, "ibp": -2.0, "qtd_perigos": 1},
-]
 MIN_RESPONDENTES = 3
 
-ACOES_RESUMO = [
-    {"nivel": "Operações/Linha A — Operador (CBO 7170)", "classif": "Intolerável", "status": "Em andamento", "ibp_antes": -3.6, "ibp_depois": -2.1},
-    {"nivel": "RH/Gestão de Pessoas — Assistente (CBO 3514)", "classif": "Substancial", "status": "Pendente", "ibp_antes": -1.6, "ibp_depois": None},
-    {"nivel": "Comercial/Vendas — Representante (CBO 3541)", "classif": "Substancial", "status": "Concluída", "ibp_antes": -0.2, "ibp_depois": 0.9},
+
+# ──────────────────────────── HELPERS ────────────────────────────
+def zona_de(ibp):
+    if ibp <= -1.5: return "Sofrimento Patogenico"
+    if ibp <= 1.4:  return "Defesa Oculta"
+    return "Terreno Fertil"
+
+
+def sev_de(zona):
+    return {"Sofrimento Patogenico": 4, "Defesa Oculta": 3, "Terreno Fertil": 1}[zona]
+
+
+def classificar_gro(ibp, n_respostas):
+    zona = zona_de(ibp)
+    sev  = sev_de(zona)
+    prob = min(n_respostas + 1, 5)
+    letra = PROB_LETRA[prob]
+    return zona, MATRIZ_GRO[(letra, sev)]
+
+
+def nome_arquivo_padrao(empresa, ano=None):
+    import unicodedata, re
+    ano = ano or datetime.datetime.now().year
+    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
+    slug = re.sub(r'[^a-zA-Z0-9]+', '_', slug).strip('_')
+    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_LaudoTecnico.pdf"
+
+
+# ──────────────────────────── ESTILOS ────────────────────────────
+styles = getSampleStyleSheet()
+S = {
+    "h1":    ParagraphStyle('h1',    parent=styles['Normal'], fontSize=14, textColor=VERDE,   fontName='Helvetica-Bold', spaceAfter=3, spaceBefore=0),
+    "h2":    ParagraphStyle('h2',    parent=styles['Normal'], fontSize=11, textColor=ROXO,    fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=5),
+    "h3":    ParagraphStyle('h3',    parent=styles['Normal'], fontSize=9.5, textColor=AZUL_ESC, fontName='Helvetica-Bold', spaceBefore=6, spaceAfter=3),
+    "sub":   ParagraphStyle('sub',   parent=styles['Normal'], fontSize=8.5, textColor=CINZA,  spaceAfter=8),
+    "body":  ParagraphStyle('body',  parent=styles['Normal'], fontSize=8.8, textColor=CINZA,  leading=13.5, spaceAfter=4, alignment=TA_JUSTIFY),
+    "cell":  ParagraphStyle('cell',  parent=styles['Normal'], fontSize=7.8, textColor=CINZA,  leading=10.5),
+    "cellb": ParagraphStyle('cellb', parent=styles['Normal'], fontSize=7.8, textColor=CINZA,  leading=10.5, fontName='Helvetica-Bold'),
+    "ctr":   ParagraphStyle('ctr',   parent=styles['Normal'], fontSize=7.8, textColor=CINZA,  leading=10.5, alignment=TA_CENTER),
+    "ok":    ParagraphStyle('ok',    parent=styles['Normal'], fontSize=9.5, textColor=VERDE_OK, fontName='Helvetica-Bold'),
+}
+
+TS_BASE = [
+    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+    ('FONTSIZE', (0,0), (-1,0), 8),
+    ('BACKGROUND', (0,0), (-1,0), VERDE),
+    ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+    ('GRID', (0,0), (-1,-1), 0.4, LINHA),
+    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ('TOPPADDING', (0,0), (-1,-1), 4),
+    ('BOTTOMPADDING', (0,0), (-1,-1), 4),
 ]
 
-# ───────────────────────────── ESTILOS ─────────────────────────────
-styles = getSampleStyleSheet()
-s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1, spaceAfter=4, fontName='Helvetica-Bold')
-s_sub = ParagraphStyle('sub', parent=styles['Normal'], fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1, spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
-s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
-s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.2, textColor=CINZA_TEXTO, leading=11)
-s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
-s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', textColor=colors.black, alignment=TA_CENTER)
 
-
-def desenhar_cabecalho_rodape(canvas_obj, doc):
+# ──────────────────────────── CABECALHO / RODAPE ────────────────────────────
+def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico):
     canvas_obj.saveState()
     w, h = A4
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, h - 14 * mm, "[ LOGO PARCEIRO ]")
-    canvas_obj.drawRightString(w - 20 * mm, h - 14 * mm, "[ LOGO DA EMPRESA ]")
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, EMPRESA)
-    canvas_obj.setFont('Helvetica', 8.5)
-    canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
-    canvas_obj.setFont('Helvetica-Bold', 10)
-    canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "RELATÓRIO FINAL CONSOLIDADO — LAUDO TÉCNICO PSICOSSOCIAL")
-    canvas_obj.setStrokeColor(VERDE_NR1)
-    canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+    # Logo
+    canvas_obj.setFont('Helvetica-Bold', 9)
+    canvas_obj.setFillColor(VERDE)
+    canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
     canvas_obj.setFont('Helvetica', 7.5)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
+    canvas_obj.setFillColor(ROXO)
+    canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
+    # Linha
+    canvas_obj.setStrokeColor(VERDE)
+    canvas_obj.setLineWidth(1.0)
+    canvas_obj.line(20*mm, h-16*mm, w-20*mm, h-16*mm)
+    # Titulo
+    canvas_obj.setFont('Helvetica-Bold', 9.5)
+    canvas_obj.setFillColor(AZUL_ESC)
+    canvas_obj.drawCentredString(w/2, h-22*mm, "LAUDO TECNICO PSICOSSOCIAL")
+    canvas_obj.setFont('Helvetica', 8)
+    canvas_obj.setFillColor(CINZA)
+    canvas_obj.drawCentredString(w/2, h-27*mm, empresa)
+    # Rodape
+    canvas_obj.setFont('Helvetica', 6.5)
+    canvas_obj.setFillColor(CINZA)
+    canvas_obj.drawString(20*mm, 10*mm, "NR-1 Map | Portaria MTE n. 1.419/2024 | Documento Confidencial")
+    canvas_obj.drawRightString(w-20*mm, 10*mm, f"Pagina {doc.page}")
+    # Assinante no rodape das paginas internas
+    if doc.page > 1 and resp_tecnico:
+        nome = resp_tecnico.get('nome', '')
+        crp  = resp_tecnico.get('crp', '')
+        if nome:
+            canvas_obj.setFont('Helvetica', 6.5)
+            canvas_obj.drawCentredString(w/2, 10*mm, f"Resp. Tecnico: {nome}" + (f" | {crp}" if crp else ""))
     canvas_obj.restoreState()
 
 
-def gerar_relatorio_final(output_path=None):
-    output_path = output_path or nome_arquivo_padrao("LaudoTecnicoFinal")
-    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
-                             leftMargin=18 * mm, rightMargin=18 * mm)
+# ──────────────────────────── FUNCAO PRINCIPAL ────────────────────────────
+def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
+    """
+    dados = {
+      "empresa":            str,
+      "cnpj":               str,
+      "responsavel":        str,
+      "responsavelTecnico": {"nome": str, "crp": str, "email": str},
+      "referencia":         str,   # ex: "Junho de 2026"
+      "colaboradoresAtivos": int,
+      "respondentes":       int,
+      "ibpGeral":           float,
+      "ibpModulos":         {"M1": float, "M2": float, "M3": float, "M4": float},
+      "ibpSubcats":         {"1.1": {"ibp": float, "n": int, "nome": str, "modId": str}, ...},
+      "porUnidade":         [{"unidade": str, "n": int, "ibp": float}, ...],
+      "porCargo":           [{"cargo": str, "cbo": str, "unidade": str, "n": int, "ibp": float}, ...],
+      "acoes":              [{"descricao": str, "status": str, "classif": str}, ...],
+    }
+    """
+    empresa       = dados.get("empresa", "Empresa")
+    cnpj          = dados.get("cnpj", "")
+    responsavel   = dados.get("responsavel", "")
+    resp_tec      = dados.get("responsavelTecnico") or {}
+    referencia    = dados.get("referencia", datetime.datetime.now().strftime("%B de %Y"))
+    col_ativos    = dados.get("colaboradoresAtivos", 0)
+    respondentes  = dados.get("respondentes", 0)
+    ibp_geral     = dados.get("ibpGeral")
+    ibp_modulos   = dados.get("ibpModulos") or {}
+    ibp_subcats   = dados.get("ibpSubcats") or {}
+    por_unidade   = dados.get("porUnidade") or []
+    por_cargo     = dados.get("porCargo") or []
+    acoes         = dados.get("acoes") or []
+
+    output_path = output_path or nome_arquivo_padrao(empresa)
+
+    taxa = round(100 * respondentes / col_ativos) if col_ativos > 0 else 0
+    zona_geral = zona_de(ibp_geral) if ibp_geral is not None else "Sem dados"
+    gro_geral  = classificar_gro(ibp_geral, respondentes)[1] if ibp_geral is not None else "—"
+
+    agora     = datetime.datetime.now(datetime.timezone.utc)
+    agora_str = agora.strftime("%d/%m/%Y as %H:%M UTC")
+    hash_doc  = str(uuid.uuid4()).upper()
+
+    doc = SimpleDocTemplate(
+        output_path, pagesize=A4,
+        topMargin=36*mm, bottomMargin=20*mm,
+        leftMargin=18*mm, rightMargin=18*mm
+    )
+
+    def _cb(c, d): _cabecalho_rodape(c, d, empresa, resp_tec)
+
     story = []
 
-    story.append(Paragraph("Relatório Final Consolidado — Laudo Técnico Psicossocial", s_h1))
+    # ════════════════════════════════════════════════════════
+    # CAPA
+    # ════════════════════════════════════════════════════════
+    story.append(Spacer(1, 4*mm))
+    story.append(Paragraph("LAUDO TECNICO PSICOSSOCIAL", S["h1"]))
     story.append(Paragraph(
-        f"{EMPRESA} · Referência: {REFERENCIA} · Documento de capa para o PGR (NR-1) — "
-        f"consolida os 4 instrumentos do fluxo GRO (Inventário, Avaliação, Plano de Ação e "
-        f"Acompanhamento), anexados na íntegra como documentos técnicos detalhados.",
-        s_sub
+        f"Relatorio Final Consolidado | {empresa} | {referencia} | "
+        f"Conformidade NR-1 / Portaria MTE n. 1.419/2024",
+        S["sub"]
     ))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=LINHA, spaceAfter=5))
 
-    # ── Ficha resumo ──
+    # Ficha de identificacao
     ficha = [
-        ["Empresa", EMPRESA],
-        ["Período de referência", REFERENCIA],
-        ["Colaboradores ativos", str(COLABORADORES_ATIVOS)],
-        ["Respondentes válidos", f"{RESPONDENTES_VALIDOS} ({round(100*RESPONDENTES_VALIDOS/COLABORADORES_ATIVOS)}%)"],
-        ["Metodologia", "Dejours (Psicodinâmica) · Herzberg (Fatores Higiênicos) · Maslow (Base da Pirâmide)"],
+        ["Empresa",                empresa],
+        ["CNPJ",                   cnpj or "—"],
+        ["Responsavel pela empresa", responsavel or "—"],
+        ["Responsavel Tecnico",    resp_tec.get("nome","—") + (" | " + resp_tec.get("crp","") if resp_tec.get("crp") else "")],
+        ["Periodo de referencia",  referencia],
+        ["Colaboradores ativos",   str(col_ativos)],
+        ["Respondentes validos",   f"{respondentes} ({taxa}% de adesao)"],
+        ["IBP Geral da organizacao", f"{ibp_geral:+.2f}" if ibp_geral is not None else "—"],
+        ["Zona Dejours / Classif. GRO", f"{zona_geral} / {gro_geral}"],
+        ["Metodologia",            "Psicodinamica do Trabalho (Dejours) | Herzberg | Maslow"],
+        ["Gerado em",              agora_str],
+        ["Hash de validacao",      hash_doc],
     ]
-    t_ficha = Table(ficha, colWidths=[45 * mm, 124 * mm])
-    t_ficha.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-        ('TEXTCOLOR', (0, 0), (-1, -1), CINZA_TEXTO),
-        ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
-        ('BACKGROUND', (0, 0), (0, -1), CINZA_CLARO),
-        ('TOPPADDING', (0, 0), (-1, -1), 4), ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+    t = Table(ficha, colWidths=[52*mm, 117*mm])
+    t.setStyle(TableStyle([
+        ('FONTNAME',  (0,0), (0,-1), 'Helvetica-Bold'),
+        ('FONTSIZE',  (0,0), (-1,-1), 8),
+        ('TEXTCOLOR', (0,0), (-1,-1), CINZA),
+        ('GRID',      (0,0), (-1,-1), 0.4, LINHA),
+        ('BACKGROUND',(0,0), (0,-1), CINZA_CLR),
+        ('TOPPADDING',(0,0), (-1,-1), 3),
+        ('BOTTOMPADDING',(0,0),(-1,-1),3),
     ]))
-    story.append(t_ficha)
-    story.append(Spacer(1, 5 * mm))
+    story.append(t)
+    story.append(PageBreak())
 
-    # ── 1. Fundamentação ──
-    story.append(Paragraph("1. Fundamentação Teórica", s_h2))
+    # ════════════════════════════════════════════════════════
+    # 1. FUNDAMENTACAO TEORICA E METODOLOGICA
+    # ════════════════════════════════════════════════════════
+    story.append(Paragraph("1. Fundamentacao Teorica e Metodologica", S["h2"]))
+
+    story.append(Paragraph("1.1 Psicodinamica do Trabalho — Christophe Dejours", S["h3"]))
     story.append(Paragraph(
-        "O presente laudo fundamenta-se em três correntes teóricas consolidadas: a Psicodinâmica do "
-        "Trabalho de Christophe Dejours, que mede o equilíbrio entre Prazer e Sofrimento através do "
-        "Índice de Balança Psicodinâmica (IBP); a Teoria dos Dois Fatores de Frederick Herzberg; e a "
-        "Hierarquia de Necessidades de Maslow, aplicada à base da pirâmide. Esta abordagem está em "
-        "conformidade com a NR-1, atualizada pela Portaria MTE nº 1.419/2024.",
-        s_body
+        "A Psicodinamica do Trabalho, desenvolvida pelo medico e psicanalista frances Christophe Dejours, "
+        "investiga a relacao entre organizacao do trabalho e o sofrimento psiquico dos trabalhadores. "
+        "O conceito central e a Balanca Psicodinamica: quando as estrategias de defesa coletiva conseguem "
+        "transformar o sofrimento em prazer, o equilibrio se mantem; quando falham, instala-se o "
+        "<b>Sofrimento Patogenico</b>, precursor de adoecimento psiquico e fisico.",
+        S["body"]
     ))
     story.append(Paragraph(
-        "IBP = (Média_Likert − 3) × 2,5 — escala de −5 (Sofrimento Patogênico) a +5 (Terreno Fértil). "
-        "A classificação oficial GRO (Trivial/Tolerável/Moderado/Substancial/Intolerável) é obtida pelo "
-        "cruzamento Severidade × Probabilidade (metodologia AIHA/Fundacentro), sempre apresentada lado "
-        "a lado com a zona Dejours.",
-        s_body
+        "O <b>Indice de Balanca Psicodinamica (IBP)</b> quantifica esse equilibrio em escala de "
+        "<b>-5,0 (Sofrimento Patogenico maximo) a +5,0 (Terreno Fertil pleno)</b>, calculado pela "
+        "conversao direta das frequencias de resposta: Sempre=+5 | Na maioria=+2,5 | Na metade=0 | "
+        "Poucas vezes=-2,5 | Raramente=-5. Tres zonas resultantes:",
+        S["body"]
     ))
-    story.append(Spacer(1, 4 * mm))
+    zonas_tab = [
+        ["Zona Dejours",          "Faixa IBP",      "Significado Clinico",                      "Severidade GRO"],
+        ["Sofrimento Patogenico", "-5,0 a -1,5",    "Risco ativo de adoecimento psiquico",      "Alta (4)"],
+        ["Defesa Oculta",         "-1,4 a +1,4",    "Sofrimento mascarado por defesas coletivas","Media (3)"],
+        ["Terreno Fertil",        "+1,5 a +5,0",    "Equilibrio Prazer-Sofrimento preservado",  "Baixa (1)"],
+    ]
+    tz = Table(zonas_tab, colWidths=[42*mm, 26*mm, 72*mm, 29*mm], repeatRows=1)
+    bg_zonas = [
+        ('BACKGROUND',(0,1),(-1,1), ZONA_COR["Sofrimento Patogenico"]),
+        ('BACKGROUND',(0,2),(-1,2), ZONA_COR["Defesa Oculta"]),
+        ('BACKGROUND',(0,3),(-1,3), ZONA_COR["Terreno Fertil"]),
+    ]
+    tz.setStyle(TableStyle(TS_BASE + bg_zonas))
+    story.append(tz)
+    story.append(Spacer(1, 3*mm))
 
-    # ── 2. Resumo do Instrumento 1 (Inventário) ──
-    story.append(Paragraph("2. Instrumento 1 — Inventário de Riscos (resumo)", s_h2))
-    n_perigos = sum(min(c["qtd_perigos"], 1) and c["qtd_perigos"] for c in SETORES_CBO if c["n"] >= MIN_RESPONDENTES)
-    total_perigos = sum(c["qtd_perigos"] for c in SETORES_CBO)
+    story.append(Paragraph("1.2 Teoria dos Dois Fatores — Frederick Herzberg", S["h3"]))
     story.append(Paragraph(
-        f"Foram identificados <b>{total_perigos} perigos psicossociais</b> distribuídos entre os setores "
-        f"avaliados, registrados no documento técnico anexo (Inventário de Riscos). Detalhamento completo "
-        f"por perigo, subcategoria de origem e origem (pesquisa/manual) no anexo correspondente.",
-        s_body
+        "Herzberg distingue <b>fatores higienicos</b> (salario, condicoes fisicas, politicas da empresa — "
+        "cuja ausencia causa insatisfacao mas cuja presenca nao gera motivacao) dos <b>fatores motivadores</b> "
+        "(reconhecimento, responsabilidade, crescimento — que produzem satisfacao genuina). "
+        "Os Modulos 1 e 2 do IBP mapeiam predominantemente fatores higienicos; "
+        "os Modulos 3 e 4 mapeiam fatores motivadores.",
+        S["body"]
     ))
-    story.append(Spacer(1, 4 * mm))
 
-    # ── 3. Resumo do Instrumento 2 (Avaliação) — tabela por setor agregado ──
-    story.append(Paragraph("3. Instrumento 2 — Avaliação do Risco (resumo por setor)", s_h2))
-    setores_unicos = list(dict.fromkeys(c["setor"] for c in SETORES_CBO))
-    header = ["Setor", "N", "Zona (IBP)", "Classificação Oficial (GRO)"]
-    rows = [header]
-    row_bg = []
-    for i, setor_nome in enumerate(setores_unicos, start=1):
-        itens = [c for c in SETORES_CBO if c["setor"] == setor_nome]
-        n_total = sum(c["n"] for c in itens)
-        ibp_medio = sum(c["ibp"] * c["n"] for c in itens) / n_total
-        qtd_max = max(c["qtd_perigos"] for c in itens)
-        zona, sev, letra, classif = classificar(ibp_medio, qtd_max)
-        rows.append([
-            Paragraph(setor_nome, s_cell_bold),
-            Paragraph(str(n_total), s_cell),
-            Paragraph(f"{zona['zona_dejours']} ({ibp_medio:+.1f})", s_badge),
-            Paragraph(classif, s_badge),
-        ])
-        row_bg.append(('BACKGROUND', (2, i), (2, i), ZONA_COR_FUNDO[zona["zona_dejours"]]))
-        row_bg.append(('BACKGROUND', (3, i), (3, i), GRO_COR[classif]))
-    t_av = Table(rows, colWidths=[55 * mm, 18 * mm, 48 * mm, 48 * mm], repeatRows=1)
-    t_av.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), VERDE_NR1), ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, LINHA), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        *row_bg,
-    ]))
-    story.append(t_av)
+    story.append(Paragraph("1.3 Hierarquia de Necessidades — Abraham Maslow", S["h3"]))
     story.append(Paragraph(
-        "Resultado individual por CBO (cargo), com trava de anonimato de mínimo 3 respondentes, no "
-        "documento técnico anexo (Avaliação do Risco).", s_body
+        "A piramide de Maslow organiza as necessidades humanas em cinco niveis (fisiologicas, seguranca, "
+        "sociais, estima e autorrealizacao). Este laudo foca nos tres primeiros niveis — base da piramide "
+        "— cujas falhas sao as principais precursoras de risco psicossocial no ambiente laboral, "
+        "mapeadas respectivamente pelos Modulos 1, 2 e 3 do questionario.",
+        S["body"]
     ))
-    story.append(Spacer(1, 4 * mm))
 
-    # ── 4. Resumo do Instrumento 3 (Plano de Ação) ──
-    story.append(Paragraph("4. Instrumento 3 — Plano de Ação 5W2H (resumo)", s_h2))
-    header3 = ["Ação", "Classificação", "Status"]
-    rows3 = [header3]
-    for a in ACOES_RESUMO:
-        rows3.append([
-            Paragraph(a["nivel"], s_cell),
-            Paragraph(a["classif"], s_badge),
-            Paragraph(a["status"], s_cell_bold),
-        ])
-    t_acoes = Table(rows3, colWidths=[90 * mm, 35 * mm, 44 * mm], repeatRows=1)
-    t_acoes.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), VERDE_NR1), ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, LINHA), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    story.append(t_acoes)
-    story.append(Spacer(1, 4 * mm))
+    story.append(Paragraph("1.4 Base Legal e Normativa", S["h3"]))
+    story.append(Paragraph(
+        "Este laudo cumpre integralmente os requisitos da <b>NR-1 (Norma Regulamentadora n. 1)</b>, "
+        "atualizada pela <b>Portaria MTE n. 1.419/2024</b>, que estabelece obrigacao de identificacao, "
+        "avaliacao e controle dos riscos psicossociais como parte do Gerenciamento de Riscos "
+        "Ocupacionais (GRO) e do Programa de Gerenciamento de Riscos (PGR). "
+        "A classificacao de risco utiliza a <b>Matriz Severidade x Probabilidade</b> (metodologia "
+        "AIHA/Fundacentro), com cinco niveis: Trivial, Toleravel, Moderado, Substancial e Intoleravel.",
+        S["body"]
+    ))
+    story.append(PageBreak())
 
-    # ── 5. Resumo do Instrumento 4 (Acompanhamento) ──
-    story.append(Paragraph("5. Instrumento 4 — Acompanhamento (eficácia das ações)", s_h2))
-    for a in ACOES_RESUMO:
-        if a["ibp_depois"] is not None:
-            delta = round(a["ibp_depois"] - a["ibp_antes"], 1)
-            msg = "melhora comprovada" if delta > 0.3 else ("piora — revisar ação" if delta < -0.3 else "estável")
-            story.append(Paragraph(
-                f"• <b>{a['nivel']}</b>: IBP {a['ibp_antes']:+.1f} → {a['ibp_depois']:+.1f} "
-                f"(Δ {delta:+.1f} — {msg})", s_body
-            ))
+    # ════════════════════════════════════════════════════════
+    # 2. RESULTADOS POR MODULO E SUBCATEGORIA
+    # ════════════════════════════════════════════════════════
+    story.append(Paragraph("2. Resultados por Modulo e Subcategoria (IBP)", S["h2"]))
+    story.append(Paragraph(
+        "Apresenta-se a media IBP de cada subcategoria avaliada, com a zona Dejours correspondente "
+        "e a classificacao oficial GRO. Subcategorias com menos de "
+        f"{MIN_RESPONDENTES} respondentes sao suprimidas por trava de anonimato estatistico.",
+        S["body"]
+    ))
+
+    # Agrupa subcats por modulo
+    subcats_por_mod = {}
+    for sc_id, sc_data in ibp_subcats.items():
+        mod = sc_data.get("modId", "M1")
+        if mod not in subcats_por_mod:
+            subcats_por_mod[mod] = []
+        subcats_por_mod[mod].append((sc_id, sc_data))
+
+    for mod_id in ["M1","M2","M3","M4"]:
+        mod_nome = MODULOS_NOME.get(mod_id, mod_id)
+        ibp_mod  = ibp_modulos.get(mod_id)
+        ibp_mod_str = f"{ibp_mod:+.2f}" if ibp_mod is not None else "—"
+        zona_mod = zona_de(ibp_mod) if ibp_mod is not None else "—"
+        gro_mod  = classificar_gro(ibp_mod, respondentes)[1] if ibp_mod is not None else "—"
+        cor_mod  = ZONA_COR.get(zona_mod, CINZA_CLR)
+
+        story.append(Paragraph(f"2.{['M1','M2','M3','M4'].index(mod_id)+1}  {mod_nome}", S["h3"]))
+
+        # Linha de resumo do modulo
+        resumo_mod = [[
+            Paragraph(f"IBP do Modulo: {ibp_mod_str}", S["cellb"]),
+            Paragraph(f"Zona Dejours: {zona_mod}", S["cellb"]),
+            Paragraph(f"Classificacao GRO: {gro_mod}", S["cellb"]),
+        ]]
+        tm = Table(resumo_mod, colWidths=[55*mm, 62*mm, 52*mm])
+        tm.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), cor_mod),
+            ('GRID', (0,0), (-1,-1), 0.4, LINHA),
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ]))
+        story.append(tm)
+        story.append(Spacer(1, 2*mm))
+
+        # Tabela de subcategorias
+        scs = subcats_por_mod.get(mod_id, [])
+        if scs:
+            hdr_sc = ["Subcategoria", "N", "IBP Medio", "Zona Dejours", "Classif. GRO", "Risco"]
+            rows_sc = [hdr_sc]
+            bgs_sc  = []
+            for idx, (sc_id, sc) in enumerate(sorted(scs, key=lambda x: x[0]), start=1):
+                n_sc  = sc.get("n", 0)
+                ibp_sc = sc.get("ibp", 0.0)
+                nome_sc = SUBCATS_NOME.get(sc_id, sc.get("nome", sc_id))
+                if n_sc < MIN_RESPONDENTES:
+                    rows_sc.append([
+                        Paragraph(nome_sc, S["cell"]),
+                        Paragraph(f"< {MIN_RESPONDENTES}", S["ctr"]),
+                        Paragraph("—", S["ctr"]),
+                        Paragraph("Suprimido (anonimato)", S["ctr"]),
+                        Paragraph("—", S["ctr"]),
+                        Paragraph("—", S["ctr"]),
+                    ])
+                    bgs_sc.append(('BACKGROUND',(0,idx),(-1,idx), CINZA_CLR))
+                    continue
+                zona_sc = zona_de(ibp_sc)
+                gro_sc  = classificar_gro(ibp_sc, n_sc)[1]
+                cor_sc  = ZONA_COR.get(zona_sc, CINZA_CLR)
+                rows_sc.append([
+                    Paragraph(nome_sc,        S["cell"]),
+                    Paragraph(str(n_sc),       S["ctr"]),
+                    Paragraph(f"{ibp_sc:+.2f}", S["ctr"]),
+                    Paragraph(zona_sc,         S["ctr"]),
+                    Paragraph(gro_sc,          S["ctr"]),
+                    Paragraph("⚠" if gro_sc in ("SUBSTANCIAL","INTOLERAVEL") else "✓", S["ctr"]),
+                ])
+                bgs_sc.append(('BACKGROUND',(3,idx),(4,idx), cor_sc))
+                if gro_sc == "INTOLERAVEL":
+                    bgs_sc.append(('BACKGROUND',(5,idx),(5,idx), GRO_COR["INTOLERAVEL"]))
+                elif gro_sc == "SUBSTANCIAL":
+                    bgs_sc.append(('BACKGROUND',(5,idx),(5,idx), GRO_COR["SUBSTANCIAL"]))
+                else:
+                    bgs_sc.append(('BACKGROUND',(5,idx),(5,idx), GRO_COR.get(gro_sc, CINZA_CLR)))
+            tsc = Table(rows_sc, colWidths=[57*mm, 12*mm, 20*mm, 38*mm, 28*mm, 14*mm], repeatRows=1)
+            tsc.setStyle(TableStyle(TS_BASE + bgs_sc))
+            story.append(tsc)
         else:
-            story.append(Paragraph(f"• <b>{a['nivel']}</b>: aguardando nova medição de IBP.", s_body))
-    story.append(Spacer(1, 4 * mm))
+            story.append(Paragraph("Sem dados suficientes para este modulo.", S["body"]))
+        story.append(Spacer(1, 4*mm))
 
     story.append(PageBreak())
 
-    # ── 6. Conclusão ──
-    story.append(Paragraph("6. Conclusão Técnica", s_h2))
-    piores = sorted(setores_unicos, key=lambda s: sum(
-        c["ibp"] * c["n"] for c in SETORES_CBO if c["setor"] == s
-    ) / sum(c["n"] for c in SETORES_CBO if c["setor"] == s))
-    pior_setor = piores[0]
+    # ════════════════════════════════════════════════════════
+    # 3. SEGMENTACAO POR UNIDADE E CARGO/CBO
+    # ════════════════════════════════════════════════════════
+    story.append(Paragraph("3. Segmentacao por Unidade e Cargo/CBO", S["h2"]))
     story.append(Paragraph(
-        f"Diante dos dados consolidados nos 4 instrumentos do fluxo GRO, identifica-se a presença de "
-        f"riscos psicossociais ocupacionais conforme previsto na NR-1, com destaque para o setor "
-        f"<b>{pior_setor}</b>, que concentra a maior criticidade do período e já possui ação corretiva "
-        f"em andamento (instrumentos 3 e 4 anexos). Recomenda-se a manutenção do ciclo de monitoramento "
-        f"contínuo via Pesquisas Pulso semanais, em conformidade com o item 1.5.4.4.6 da norma, e a "
-        f"reavaliação completa deste Relatório Final no próximo período de referência.",
-        s_body
+        f"Trava de anonimato estatistico aplicada: grupos com menos de <b>{MIN_RESPONDENTES} respondentes</b> "
+        "nao sao individualizados, sendo apresentados de forma agregada para proteger a identidade "
+        "dos colaboradores, conforme diretrizes de compliance da plataforma.",
+        S["body"]
     ))
-    story.append(Spacer(1, 4 * mm))
-    story.append(Paragraph(
-        "<b>Documentos anexos a este Relatório Final:</b> (1) Inventário de Riscos Psicossociais, "
-        "(2) Avaliação do Risco — Mapa de Risco Psicossocial, (3) Plano de Ação 5W2H, "
-        "(4) Acompanhamento — Evidências de Gestão Contínua.",
-        s_body
-    ))
+
+    # 3.1 Por Unidade
+    story.append(Paragraph("3.1 Resultado por Unidade", S["h3"]))
+    if por_unidade:
+        hdr_un = ["Unidade", "Respondentes", "IBP Medio", "Zona Dejours", "Classif. GRO"]
+        rows_un = [hdr_un]
+        bgs_un  = []
+        agregados_un = []
+
+        for idx, u in enumerate(sorted(por_unidade, key=lambda x: x.get("ibp",0)), start=1):
+            n_u   = u.get("n", 0)
+            ibp_u = u.get("ibp", 0.0)
+            nome_u = u.get("unidade", "—")
+            if n_u < MIN_RESPONDENTES:
+                agregados_un.append(u)
+                continue
+            zona_u = zona_de(ibp_u)
+            gro_u  = classificar_gro(ibp_u, n_u)[1]
+            rows_un.append([
+                Paragraph(nome_u,          S["cellb"]),
+                Paragraph(str(n_u),         S["ctr"]),
+                Paragraph(f"{ibp_u:+.2f}", S["ctr"]),
+                Paragraph(zona_u,           S["ctr"]),
+                Paragraph(gro_u,            S["ctr"]),
+            ])
+            i = len(rows_un) - 1
+            bgs_un.append(('BACKGROUND',(3,i),(3,i), ZONA_COR.get(zona_u, CINZA_CLR)))
+            bgs_un.append(('BACKGROUND',(4,i),(4,i), GRO_COR.get(gro_u, CINZA_CLR)))
+
+        # Agrupa unidades com menos de MIN respondentes
+        if agregados_un:
+            n_ag   = sum(a.get("n",0) for a in agregados_un)
+            ibp_ag = (sum(a.get("ibp",0)*a.get("n",0) for a in agregados_un) / n_ag) if n_ag else 0
+            zona_ag = zona_de(ibp_ag)
+            gro_ag  = classificar_gro(ibp_ag, n_ag)[1]
+            nomes_ag = ", ".join(a.get("unidade","") for a in agregados_un)
+            rows_un.append([
+                Paragraph(f"Demais unidades agrupadas ({nomes_ag})", S["cell"]),
+                Paragraph(str(n_ag),         S["ctr"]),
+                Paragraph(f"{ibp_ag:+.2f}", S["ctr"]),
+                Paragraph(zona_ag,           S["ctr"]),
+                Paragraph(gro_ag,            S["ctr"]),
+            ])
+            i = len(rows_un) - 1
+            bgs_un.append(('BACKGROUND',(3,i),(3,i), ZONA_COR.get(zona_ag, CINZA_CLR)))
+            bgs_un.append(('BACKGROUND',(4,i),(4,i), GRO_COR.get(gro_ag, CINZA_CLR)))
+
+        tun = Table(rows_un, colWidths=[60*mm, 28*mm, 24*mm, 38*mm, 19*mm], repeatRows=1)
+        tun.setStyle(TableStyle(TS_BASE + bgs_un))
+        story.append(tun)
+    else:
+        story.append(Paragraph("Sem dados de unidade disponíveis para este ciclo.", S["body"]))
+
+    story.append(Spacer(1, 5*mm))
+
+    # 3.2 Por Cargo/CBO
+    story.append(Paragraph("3.2 Resultado por Cargo / CBO", S["h3"]))
+    if por_cargo:
+        hdr_cg = ["Cargo", "CBO", "Unidade", "N", "IBP", "Zona", "GRO"]
+        rows_cg = [hdr_cg]
+        bgs_cg  = []
+        agregados_cg = []
+
+        for c in sorted(por_cargo, key=lambda x: x.get("ibp", 0)):
+            n_c   = c.get("n", 0)
+            ibp_c = c.get("ibp", 0.0)
+            if n_c < MIN_RESPONDENTES:
+                agregados_cg.append(c)
+                continue
+            zona_c = zona_de(ibp_c)
+            gro_c  = classificar_gro(ibp_c, n_c)[1]
+            rows_cg.append([
+                Paragraph(c.get("cargo","—"),   S["cell"]),
+                Paragraph(c.get("cbo","—"),     S["ctr"]),
+                Paragraph(c.get("unidade","—"), S["cell"]),
+                Paragraph(str(n_c),              S["ctr"]),
+                Paragraph(f"{ibp_c:+.2f}",      S["ctr"]),
+                Paragraph(zona_c,                S["ctr"]),
+                Paragraph(gro_c,                 S["ctr"]),
+            ])
+            i = len(rows_cg) - 1
+            bgs_cg.append(('BACKGROUND',(5,i),(5,i), ZONA_COR.get(zona_c, CINZA_CLR)))
+            bgs_cg.append(('BACKGROUND',(6,i),(6,i), GRO_COR.get(gro_c, CINZA_CLR)))
+
+        if agregados_cg:
+            n_ag2  = sum(a.get("n",0) for a in agregados_cg)
+            ibp_ag2 = (sum(a.get("ibp",0)*a.get("n",0) for a in agregados_cg) / n_ag2) if n_ag2 else 0
+            zona_ag2 = zona_de(ibp_ag2)
+            gro_ag2  = classificar_gro(ibp_ag2, n_ag2)[1]
+            rows_cg.append([
+                Paragraph(f"CBOs agrupados (< {MIN_RESPONDENTES} resp.)", S["cell"]),
+                Paragraph("—", S["ctr"]),
+                Paragraph("—", S["ctr"]),
+                Paragraph(str(n_ag2),             S["ctr"]),
+                Paragraph(f"{ibp_ag2:+.2f}",     S["ctr"]),
+                Paragraph(zona_ag2,               S["ctr"]),
+                Paragraph(gro_ag2,                S["ctr"]),
+            ])
+            i = len(rows_cg) - 1
+            bgs_cg.append(('BACKGROUND',(5,i),(5,i), ZONA_COR.get(zona_ag2, CINZA_CLR)))
+            bgs_cg.append(('BACKGROUND',(6,i),(6,i), GRO_COR.get(gro_ag2, CINZA_CLR)))
+
+        tcg = Table(rows_cg, colWidths=[48*mm, 14*mm, 34*mm, 10*mm, 14*mm, 30*mm, 19*mm], repeatRows=1)
+        tcg.setStyle(TableStyle(TS_BASE + bgs_cg))
+        story.append(tcg)
+    else:
+        story.append(Paragraph("Sem dados de cargo/CBO disponíveis para este ciclo.", S["body"]))
 
     story.append(PageBreak())
 
-    # ── Assinatura ──
-    story.append(Paragraph("Assinatura e Validação", s_h2))
-    story.append(Paragraph("✓ DOCUMENTO ASSINADO ELETRONICAMENTE", ParagraphStyle(
-        'assinado', parent=s_body, textColor=VERDE_OK, fontName='Helvetica-Bold', fontSize=10)))
-    story.append(Spacer(1, 3 * mm))
-    agora = datetime.datetime.now(datetime.timezone.utc).strftime("%d/%m/%Y %H:%M:%S UTC")
-    hash_uuid = str(uuid.uuid4()).upper()
-    sig_rows = [
-        ["Aprovador:", "Dra. Lucia Kratz"],
-        ["Registro Profissional:", "CRP 09/20590"],
-        ["Data e Hora (UTC):", agora],
-        ["Endereço IP de origem:", "187.45.22.10"],
-        ["Hash UUID de Validação:", hash_uuid],
-    ]
-    t_sig = Table(sig_rows, colWidths=[45 * mm, 100 * mm])
-    t_sig.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-        ('TEXTCOLOR', (0, 0), (-1, -1), CINZA_TEXTO),
-        ('TOPPADDING', (0, 0), (-1, -1), 2), ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+    # ════════════════════════════════════════════════════════
+    # 4. CONCLUSAO TECNICA E CONFORMIDADE GRO
+    # ════════════════════════════════════════════════════════
+    story.append(Paragraph("4. Conclusao Tecnica e Conformidade com o PGR", S["h2"]))
+
+    # Resumo consolidado
+    cor_zona = ZONA_COR.get(zona_geral, CINZA_CLR)
+    resumo_geral = [[
+        Paragraph("IBP Geral", S["cellb"]),
+        Paragraph("Zona Dejours", S["cellb"]),
+        Paragraph("Classif. GRO", S["cellb"]),
+        Paragraph("Taxa de Adesao", S["cellb"]),
+    ],[
+        Paragraph(f"{ibp_geral:+.2f}" if ibp_geral is not None else "—", S["ctr"]),
+        Paragraph(zona_geral, S["ctr"]),
+        Paragraph(gro_geral,  S["ctr"]),
+        Paragraph(f"{taxa}% ({respondentes}/{col_ativos})", S["ctr"]),
+    ]]
+    trg = Table(resumo_geral, colWidths=[35*mm, 55*mm, 42*mm, 37*mm])
+    trg.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), AZUL_ESC),
+        ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
+        ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
+        ('BACKGROUND', (0,1), (-1,1), cor_zona),
+        ('GRID', (0,0), (-1,-1), 0.4, LINHA),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
-    story.append(t_sig)
-    story.append(Spacer(1, 3 * mm))
+    story.append(trg)
+    story.append(Spacer(1, 4*mm))
+
+    # Texto de conclusao
+    piores_mod = sorted(
+        [(m, v) for m, v in ibp_modulos.items() if v is not None],
+        key=lambda x: x[1]
+    )
+    piores_txt = ""
+    if piores_mod:
+        pm = piores_mod[0]
+        piores_txt = (
+            f" O modulo de maior criticidade e <b>{MODULOS_NOME.get(pm[0], pm[0])}</b> "
+            f"(IBP {pm[1]:+.2f}), que requer atencao prioritaria."
+        )
+
     story.append(Paragraph(
-        "Este registro é imutável e serve como homologação oficial para fiscalização trabalhista (NR-1).",
-        s_body
+        f"Diante dos dados consolidados neste ciclo de avaliacao psicossocial, a organizacao "
+        f"<b>{empresa}</b> apresenta IBP Geral de <b>{(f'{ibp_geral:+.2f}' if ibp_geral is not None else '—')}</b>, "
+        f"correspondendo a zona <b>{zona_geral}</b> na escala Dejours e classificacao <b>{gro_geral}</b> "
+        f"na Matriz GRO (Portaria MTE 1.419/2024).{piores_txt} "
+        f"Recomenda-se a implementacao ou manutencao do Plano de Acao 5W2H para os grupos criticos "
+        f"identificados, monitoramento continuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) "
+        f"e reavaliacao completa deste laudo no proximo periodo de referencia.",
+        S["body"]
+    ))
+    story.append(Spacer(1, 3*mm))
+
+    # Acoes em andamento
+    if acoes:
+        story.append(Paragraph("4.1 Plano de Acao — Status Resumido", S["h3"]))
+        hdr_ac = ["Acao / Grupo", "Classif. GRO", "Status"]
+        rows_ac = [hdr_ac]
+        for a in acoes:
+            gro_a = a.get("classif","—").upper()
+            rows_ac.append([
+                Paragraph(a.get("descricao","—"), S["cell"]),
+                Paragraph(gro_a,                   S["ctr"]),
+                Paragraph(a.get("status","—"),     S["cellb"]),
+            ])
+        tac = Table(rows_ac, colWidths=[97*mm, 35*mm, 37*mm], repeatRows=1)
+        tac.setStyle(TableStyle(TS_BASE))
+        story.append(tac)
+        story.append(Spacer(1, 4*mm))
+
+    # Conformidade com PGR
+    story.append(Paragraph("4.2 Declaracao de Conformidade com o PGR", S["h3"]))
+    itens_pgr = [
+        "Identificacao dos perigos psicossociais (NR-1, item 1.5.3)",
+        "Avaliacao dos riscos com Matriz Severidade x Probabilidade (NR-1, item 1.5.4)",
+        "Plano de Acao corretiva e preventiva documentado (NR-1, item 1.5.4.4)",
+        "Monitoramento continuo via Pesquisa Pulso periodica (NR-1, item 1.5.4.4.6)",
+        "Trava de anonimato estatistico (minimo 3 respondentes por grupo)",
+        "Responsavel Tecnico com registro ativo no CRP",
+        "Documento gerado eletronicamente com hash de validacao unico",
+    ]
+    for item in itens_pgr:
+        story.append(Paragraph(f"[✓]  {item}", S["body"]))
+
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════
+    # 5. ASSINATURA TECNICA
+    # ════════════════════════════════════════════════════════
+    story.append(Paragraph("5. Assinatura e Validacao Tecnica", S["h2"]))
+    story.append(Paragraph("DOCUMENTO ASSINADO ELETRONICAMENTE", S["ok"]))
+    story.append(Spacer(1, 3*mm))
+
+    nome_tec  = resp_tec.get("nome", "Dra. Lucia Kratz")
+    crp_tec   = resp_tec.get("crp",  "CRP 09/20590")
+    email_tec = resp_tec.get("email", "luciakratz@gmail.com")
+
+    sig = [
+        ["Responsavel Tecnico:",       nome_tec],
+        ["Registro Profissional:",      crp_tec],
+        ["E-mail:",                     email_tec],
+        ["Empresa avaliada:",           empresa],
+        ["Periodo de referencia:",      referencia],
+        ["Data e Hora da emissao:",     agora_str],
+        ["Hash UUID de validacao:",     hash_doc],
+        ["Plataforma:",                 "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
+    ]
+    tsig = Table(sig, colWidths=[50*mm, 119*mm])
+    tsig.setStyle(TableStyle([
+        ('FONTNAME',  (0,0), (0,-1), 'Helvetica-Bold'),
+        ('FONTSIZE',  (0,0), (-1,-1), 8.2),
+        ('TEXTCOLOR', (0,0), (-1,-1), CINZA),
+        ('TOPPADDING',(0,0), (-1,-1), 3),
+        ('BOTTOMPADDING',(0,0),(-1,-1),3),
+        ('LINEBELOW', (0,-1), (-1,-1), 0.5, LINHA),
+    ]))
+    story.append(tsig)
+    story.append(Spacer(1, 6*mm))
+    story.append(HRFlowable(width="100%", thickness=1, color=VERDE, spaceAfter=4))
+    story.append(Paragraph(
+        "Este laudo e imutavel apos emissao e serve como documento tecnico oficial para "
+        "fiscalizacao trabalhista, audiencias e processos administrativos (NR-1 / Portaria MTE 1.419/2024). "
+        "O hash UUID garante unicidade e rastreabilidade do documento.",
+        S["body"]
     ))
 
-    doc.build(story, onFirstPage=desenhar_cabecalho_rodape, onLaterPages=desenhar_cabecalho_rodape)
-    print(f"Gerado: {output_path}")
+    doc.build(story, onFirstPage=_cb, onLaterPages=_cb)
+    return output_path
 
 
+# ──────────────────────────── EXECUCAO STANDALONE (teste) ────────────────────────────
 if __name__ == "__main__":
-    gerar_relatorio_final()
+    dados_teste = {
+        "empresa": "A!Equipe Desenvolvimento Humano e Cultural",
+        "cnpj": "12.345.678/0001-99",
+        "responsavel": "Lucia Kratz",
+        "responsavelTecnico": {"nome": "Dra. Lucia Kratz", "crp": "CRP 09/20590", "email": "luciakratz@gmail.com"},
+        "referencia": "Julho de 2026",
+        "colaboradoresAtivos": 11,
+        "respondentes": 3,
+        "ibpGeral": -0.8,
+        "ibpModulos": {"M1": -1.2, "M2": -2.1, "M3": 1.8, "M4": 0.6},
+        "ibpSubcats": {
+            "1.1": {"ibp": -1.5, "n": 3, "nome": "Ergonomia", "modId": "M1"},
+            "1.2": {"ibp": -0.8, "n": 3, "nome": "Pausas",    "modId": "M1"},
+            "2.1": {"ibp": -2.5, "n": 3, "nome": "Clareza",   "modId": "M2"},
+            "2.2": {"ibp": -1.8, "n": 3, "nome": "Metas",     "modId": "M2"},
+            "3.1": {"ibp":  2.0, "n": 3, "nome": "Lideranca", "modId": "M3"},
+            "3.3": {"ibp":  1.5, "n": 3, "nome": "Cultura",   "modId": "M3"},
+            "4.2": {"ibp":  0.5, "n": 3, "nome": "Reconhecimento", "modId": "M4"},
+            "4.3": {"ibp":  0.7, "n": 2, "nome": "Crescimento", "modId": "M4"},  # < MIN — suprimido
+        },
+        "porUnidade": [
+            {"unidade": "Sede SP", "n": 2, "ibp": -0.5},   # < MIN — agrupado
+            {"unidade": "Filial RJ", "n": 3, "ibp": -1.1},
+        ],
+        "porCargo": [
+            {"cargo": "Analista", "cbo": "2521", "unidade": "Sede SP",   "n": 3, "ibp": -0.8},
+            {"cargo": "Assistente", "cbo": "4110", "unidade": "Filial RJ", "n": 2, "ibp": -1.2},  # < MIN
+        ],
+        "acoes": [
+            {"descricao": "Revisao da politica de metas — Comercial", "classif": "SUBSTANCIAL", "status": "Em andamento"},
+            {"descricao": "Treinamento de lideranca — Todos os gestores", "classif": "MODERADO", "status": "Pendente"},
+        ],
+    }
+    caminho = gerar_relatorio_final(dados_teste)
+    print(f"PDF gerado: {caminho}")
