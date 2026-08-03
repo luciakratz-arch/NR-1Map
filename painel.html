@@ -361,6 +361,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-item" onclick="sv('mapa-risco')"><span class="ic">🗺</span>Mapa de Risco</div>
     <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
     <div class="nav-item" onclick="sv('relatorio-anual')"><span class="ic">📊</span>Relatório Anual</div>
+    <div class="nav-item" onclick="sv('relatorios-ciclo')"><span class="ic">🗂</span>Relatórios por Ciclo</div>
   </nav>
   <div class="sidebar-bottom">
     <div class="s-user">
@@ -584,15 +585,26 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico</div>
     <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar / Atualizar Laudo</button>
       <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('laudo_tecnico')">⬇ Exportar PDF</button>
     </div>
   </div>
   <div class="content" id="laudo-tecnico-content">
+    <!-- Seletor de ciclos históricos -->
+    <div id="laudo-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Laudos</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <select id="laudo-ciclo-select" onchange="selecionarCicloLaudo(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;">
+          <option value="">Selecione um ciclo...</option>
+        </select>
+        <span id="laudo-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
+      </div>
+    </div>
     <div id="laudo-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">📋</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
       <p style="font-size:13px;">Dispare um Diagnóstico Geral para gerar o laudo automaticamente.</p>
-      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
     </div>
     <div id="laudo-dados" style="display:none;">
       <div class="card" style="margin-bottom:16px;">
@@ -695,6 +707,21 @@ textarea.form-control{resize:vertical;min-height:70px;}
 </div>
 
 
+
+<!-- ===== RELATORIOS POR CICLO ===== -->
+<div id="view-relatorios-ciclo" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🗂 Relatórios por Ciclo</div>
+  </div>
+  <div class="content">
+    <div id="rc-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">🗂</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum ciclo encontrado</div>
+      <p style="font-size:13px;">Os ciclos aparecem aqui após o primeiro diagnóstico.</p>
+    </div>
+    <div id="rc-lista" style="display:none;"></div>
+  </div>
+</div>
 
 <!-- ===== CARGOS / ORGANOGRAMA ===== -->
 <div id="view-cargos" class="view">
@@ -2631,6 +2658,7 @@ function sv(id){
   if(id==='relatorios' && window.nr1mapEmpresa) carregarRelatorios(window.nr1mapEmpresa.id);
   if(id==='planejamento') carregarAgenda();
   if(id==='historico' && window.nr1mapEmpresa) carregarHistoricoUnificado(window.nr1mapEmpresa.id);
+  if(id==='relatorios-ciclo' && window.nr1mapEmpresa) carregarRelatoriosPorCiclo(window.nr1mapEmpresa.id);
 }
 function swTab(tab,targetId){
   var container = tab.closest('.card') || document;
@@ -5661,21 +5689,298 @@ function _renderLaudoDados(d) {
 }
 
 
+// ===== RELATORIOS POR CICLO =====
+var _rcCiclosCache = [];
+
+function carregarRelatoriosPorCiclo(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('rc-sem-dados');
+  var lista    = document.getElementById('rc-lista');
+  if (!lista) return;
+
+  lista.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);font-size:13px;">Carregando ciclos...</div>';
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+      _rcCiclosCache = ciclos;
+
+      if (!ciclos.length) {
+        if (semDados) semDados.style.display = 'block';
+        lista.style.display = 'none';
+        return;
+      }
+      if (semDados) semDados.style.display = 'none';
+      lista.style.display = 'block';
+      lista.innerHTML = '';
+
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var zonaFn = function(ibp) {
+        return ibp >= 1.5 ? 'Terreno Fertil' : ibp <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+      };
+      var corFn = function(ibp) {
+        return ibp >= 1.5 ? '#16a34a' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+      };
+
+      ciclos.forEach(function(c) {
+        var d    = c.data;
+        var dt   = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : '—';
+        var resp  = d.totalRespostas || 0;
+        var ibp   = d.ibpGeral !== undefined && d.ibpGeral !== null ? parseFloat(d.ibpGeral) : null;
+        var ibpStr = ibp !== null ? (ibp >= 0 ? '+' : '') + ibp.toFixed(1) : '—';
+        var zona  = ibp !== null ? zonaFn(ibp) : '—';
+        var cor   = ibp !== null ? corFn(ibp) : '#6b7280';
+        var tipo  = d.tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnostico Geral';
+        var temLaudo = !!d.laudoUrl;
+
+        // Documentos disponiveis
+        var docs = [];
+        if (d.laudoUrl)     docs.push({ label: '📋 Laudo Tecnico', url: d.laudoUrl });
+        if (d.mapaUrl)      docs.push({ label: '🗺 Mapa de Risco',  url: d.mapaUrl });
+        if (d.planoUrl)     docs.push({ label: '✅ Plano 5W2H',     url: d.planoUrl });
+        if (d.inventarioUrl) docs.push({ label: '📄 Inventario',    url: d.inventarioUrl });
+
+        var card = document.createElement('div');
+        card.style.cssText = 'border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden;background:#fff;';
+
+        // Header do card
+        var hdr = document.createElement('div');
+        hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb;';
+        hdr.innerHTML =
+          '<div>' +
+            '<div style="font-size:13px;font-weight:600;color:#111827;">' + tipo + ' — ' + dtStr + '</div>' +
+            '<div style="font-size:11px;color:#6b7280;margin-top:2px;">' + resp + ' respondentes</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            (ibp !== null ? '<span style="font-family:monospace;font-size:15px;font-weight:700;color:' + cor + ';">' + ibpStr + '</span>' +
+            '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + cor + '22;color:' + cor + ';">' + zona + '</span>' : '') +
+          '</div>';
+        card.appendChild(hdr);
+
+        // Body do card — documentos + botoes de gerar
+        var body = document.createElement('div');
+        body.style.cssText = 'padding:12px 16px;';
+
+        if (docs.length) {
+          var docsHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">';
+          docs.forEach(function(doc) {
+            docsHtml += '<a href="' + doc.url + '" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:500;color:#374151;text-decoration:none;background:#f9fafb;">' + doc.label + ' ↗</a>';
+          });
+          docsHtml += '</div>';
+          body.innerHTML = docsHtml;
+        }
+
+        // Botoes de gerar documentos
+        var btns = document.createElement('div');
+        btns.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+
+        var tiposGerar = [
+          { tipo: 'laudo_tecnico', label: temLaudo ? '↻ Atualizar Laudo' : '📋 Gerar Laudo', urlField: 'laudoUrl' },
+          { tipo: 'mapa_risco',    label: d.mapaUrl ? '↻ Atualizar Mapa' : '🗺 Gerar Mapa de Risco', urlField: 'mapaUrl' },
+          { tipo: 'plano_5w2h',   label: d.planoUrl ? '↻ Atualizar Plano' : '✅ Gerar Plano 5W2H', urlField: 'planoUrl' },
+          { tipo: 'inventario',   label: d.inventarioUrl ? '↻ Atualizar Inventario' : '📄 Gerar Inventario', urlField: 'inventarioUrl' },
+        ];
+        tiposGerar.forEach(function(tg) {
+          var btn = document.createElement('button');
+          btn.className = 'btn btn-ghost btn-sm';
+          btn.style.fontSize = '11px';
+          btn.textContent = tg.label;
+          btn.onclick = (function(cicloId, tipo, urlField, btnRef, cardRef) {
+            return function() {
+              var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+              if (!empId) return;
+              btnRef.textContent = '⏳ Gerando...';
+              btnRef.disabled = true;
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                  btnRef.disabled = false;
+                  if (res.url) {
+                    // Salva URL no cicloDoc
+                    var upd = {};
+                    upd[urlField] = res.url;
+                    upd[urlField + 'GeradoEm'] = new Date().toISOString();
+                    window.nr1mapDb.collection('nr1map_respostas').doc(empId)
+                      .collection('ciclos').doc(cicloId)
+                      .update(upd).catch(function(){});
+                    // Atualiza card sem recarregar tudo
+                    window.open(res.url, '_blank');
+                    btnRef.textContent = '↻ Atualizar ' + btnRef.textContent.replace(/^[^\s]+\s/, '');
+                    // Adicionar link ao bloco de docs
+                    var tiposLabel = { laudo_tecnico:'📋 Laudo Tecnico', mapa_risco:'🗺 Mapa de Risco', plano_5w2h:'✅ Plano 5W2H', inventario:'📄 Inventario' };
+                    var novoLink = document.createElement('a');
+                    novoLink.href = res.url;
+                    novoLink.target = '_blank';
+                    novoLink.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:500;color:#374151;text-decoration:none;background:#f9fafb;';
+                    novoLink.textContent = (tiposLabel[tipo] || tipo) + ' ↗';
+                    cardRef.querySelector('div[style*="flex-wrap:wrap;margin-bottom"]') && cardRef.querySelector('div[style*="flex-wrap:wrap;margin-bottom"]').appendChild(novoLink);
+                  } else {
+                    btnRef.textContent = tg.label;
+                    alert('Erro: ' + (res.error || 'tente novamente'));
+                  }
+                })
+                .catch(function(e) {
+                  btnRef.disabled = false;
+                  btnRef.textContent = tg.label;
+                  alert('Erro de conexao: ' + e.message);
+                });
+            };
+          })(c.id, tg.tipo, tg.urlField, btn, card);
+          btns.appendChild(btn);
+        });
+
+        body.appendChild(btns);
+        card.appendChild(body);
+        lista.appendChild(card);
+      });
+    })
+    .catch(function(e) {
+      console.log('rc err:', e);
+      lista.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;font-size:13px;">Erro ao carregar ciclos.</div>';
+    });
+}
+
+// Ciclo atualmente selecionado no laudo
+var _laudoCicloAtual = null;
+var _laudoCiclosCache = []; // [{id, data, ibp, laudoUrl, totalRespostas}]
+
 function carregarLaudoTecnico(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var semDados = document.getElementById('laudo-sem-dados');
   var comDados = document.getElementById('laudo-dados');
-  // Busca sem orderBy para evitar exigência de índice
+  var seletor  = document.getElementById('laudo-seletor-ciclos');
+  var select   = document.getElementById('laudo-ciclo-select');
+
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
     .then(function(snap) {
-      if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
-      // Pegar o mais recente no cliente
-      var docs = [];
-      snap.forEach(function(d){ docs.push(d.data()); });
-      docs.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
-      _renderLaudoDados(docs[0]);
-    }).catch(function(e){ console.log('laudo err:',e); });
+      if (snap.empty) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        if(seletor)  seletor.style.display  = 'none';
+        return;
+      }
+      // Ordenar por criadoEm desc no cliente
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+      if (!ciclos.length) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        return;
+      }
+      _laudoCiclosCache = ciclos;
+
+      // Popular seletor
+      if (select) {
+        select.innerHTML = '';
+        var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        ciclos.forEach(function(c, idx) {
+          var dt   = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+          var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
+          var resp  = c.data.totalRespostas || 0;
+          var ibp   = c.data.ibpGeral !== undefined ? ' · IBP ' + (c.data.ibpGeral >= 0 ? '+' : '') + parseFloat(c.data.ibpGeral).toFixed(1) : '';
+          var temPdf = c.data.laudoUrl ? ' ✓ PDF' : '';
+          var opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = dtStr + ' — ' + resp + ' respondentes' + ibp + temPdf;
+          if (idx === 0) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+      if (seletor) seletor.style.display = 'block';
+
+      // Carregar o ciclo mais recente
+      _laudoCicloAtual = ciclos[0].id;
+      _renderLaudoDadosComCiclo(ciclos[0].id, ciclos[0].data);
+    }).catch(function(e) { console.log('laudo err:', e); });
+}
+
+function selecionarCicloLaudo(cicloId) {
+  if (!cicloId) return;
+  _laudoCicloAtual = cicloId;
+  var ciclo = _laudoCiclosCache.find(function(c) { return c.id === cicloId; });
+  if (ciclo) {
+    _renderLaudoDadosComCiclo(cicloId, ciclo.data);
+  } else {
+    // Buscar do Firestore se nao estiver em cache
+    var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+    if (!empresaId) return;
+    window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+      .collection('ciclos').doc(cicloId).get()
+      .then(function(doc) {
+        if (doc.exists) _renderLaudoDadosComCiclo(cicloId, doc.data());
+      });
+  }
+}
+
+function _renderLaudoDadosComCiclo(cicloId, d) {
+  // Atualiza status
+  var statusEl = document.getElementById('laudo-ciclo-status');
+  if (statusEl) {
+    statusEl.textContent = d.laudoUrl ? 'PDF disponivel' : 'PDF nao gerado ainda';
+    statusEl.style.color = d.laudoUrl ? '#16a34a' : '#f59e0b';
+  }
+  _renderLaudoDados(d);
+}
+
+function gerarAtualizarLaudo() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  var btn = document.getElementById('btn-gerar-atualizar-laudo');
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = '📄 Gerar / Atualizar Laudo'; btn.disabled = false; }
+      if (d.url) {
+        // Salva laudoUrl no ciclo atual
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual);
+        // Atualiza cache e seletor
+        if (_laudoCicloAtual) {
+          var ciclo = _laudoCiclosCache.find(function(c) { return c.id === _laudoCicloAtual; });
+          if (ciclo) {
+            ciclo.data.laudoUrl = d.url;
+            // Atualizar label no select
+            var select = document.getElementById('laudo-ciclo-select');
+            if (select) {
+              var opt = select.querySelector('option[value="' + _laudoCicloAtual + '"]');
+              if (opt && opt.textContent.indexOf('PDF') === -1) {
+                opt.textContent = opt.textContent + ' ✓ PDF';
+              }
+            }
+          }
+          var statusEl = document.getElementById('laudo-ciclo-status');
+          if (statusEl) { statusEl.textContent = 'PDF disponivel'; statusEl.style.color = '#16a34a'; }
+        }
+        window.open(d.url, '_blank');
+      } else {
+        alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = '📄 Gerar / Atualizar Laudo'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
 }
 
 function carregarMapaRisco(empresaId) {
