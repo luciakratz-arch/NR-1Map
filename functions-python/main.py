@@ -246,7 +246,10 @@ def buscar_dados_empresa(empresa_id):
             sc: {'soma': v['ibp'] * v['n'], 'n': v['n'], 'modId': v['modId']}
             for sc, v in ibp_subcats_final.items()
         },
-        'referencia': datetime.datetime.now().strftime('%B de %Y'),
+        'referencia': (lambda d: [
+            'Janeiro','Fevereiro','Marco','Abril','Maio','Junho',
+            'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
+        ][d.month - 1] + ' de ' + str(d.year))(datetime.datetime.now()),
         # campos novos para gerar_relatorio_final
         'empresa_cnpj':         empresa.get('cnpj', ''),
         'responsavel':          empresa.get('responsavel', ''),
