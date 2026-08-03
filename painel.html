@@ -651,21 +651,30 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Mapa de Risco Psicossocial">🗺 Mapa de Risco</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('mapa_risco')">⬇ Exportar PDF</button>
+      <button class="btn btn-ghost btn-sm" id="btn-gerar-mapa-pdf" onclick="gerarAtualizarDoc('mapa_risco','btn-gerar-mapa-pdf','mapaUrl')">📄 Gerar Mapa PDF</button>
     </div>
   </div>
   <div class="content">
+    <!-- Seletor de ciclos -->
+    <div id="mapa-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Ciclos</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <select id="mapa-ciclo-select" onchange="selecionarCicloMapa(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;"></select>
+        <span id="mapa-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
+        <button id="btn-baixar-mapa-ciclo" onclick="baixarDocCiclo('mapaUrl')" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
+      </div>
+    </div>
     <div id="mapa-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">🗺</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
-      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
     </div>
     <div id="mapa-dados" style="display:none;">
       <div class="card">
         <div class="card-header"><div class="title">Matriz de Risco — GRO/NR-1 (Severidade × Probabilidade)</div></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Cargo / CBO</th><th>Fator de Risco</th><th>Severidade</th><th>Probabilidade</th><th>Nível GRO</th><th>IBP</th><th>Zona Dejours</th></tr></thead>
+            <thead><tr><th>Subcategoria</th><th>Módulo</th><th>Severidade</th><th>Probabilidade</th><th>Nível GRO</th><th>IBP</th><th>Zona Dejours</th></tr></thead>
             <tbody id="mapa-tbody"></tbody>
           </table>
         </div>
@@ -679,14 +688,15 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Relatório Comparativo Anual">📊 Relatório Anual</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('relatorio_anual')">⬇ Exportar PDF</button>
+      <select id="anual-ano-select" onchange="filtrarAnual(this.value)" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;background:#fff;"></select>
+      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('relatorio_anual')">📄 Gerar Consolidado PDF</button>
     </div>
   </div>
   <div class="content">
     <div id="anual-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">📊</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum dado histórico disponível ainda</div>
-      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnóstico Geral →</button>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
     </div>
     <div id="anual-dados" style="display:none;">
       <div class="card" style="margin-bottom:16px;">
@@ -1154,10 +1164,19 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
   </div>
   <div class="content">
+    <!-- Seletor de ciclos -->
+    <div id="plano-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Plano do Ciclo</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <select id="plano-ciclo-select" onchange="selecionarCicloPlano(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;"></select>
+        <span id="plano-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
+        <button id="btn-baixar-plano-ciclo" onclick="baixarDocCiclo('planoUrl')" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
+      </div>
+    </div>
     <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
-      Ações geradas automaticamente a partir dos setores/cargos (CBO) classificados como
-      <b>Substancial</b> ou <b>Intolerável</b> na Avaliação do Risco. Edite o texto, responsável,
-      prazo e status à vontade — toda alteração fica registrada como evidência de gestão contínua
+      Acoes geradas automaticamente a partir dos setores/cargos (CBO) classificados como
+      <b>Substancial</b> ou <b>Intoleravel</b> na Avaliacao do Risco. Edite o texto, responsavel,
+      prazo e status a vontade — toda alteracao fica registrada como evidencia de gestao continua
       (item 1.5.4.4.6 da NR-1).
     </p>
 
@@ -2835,11 +2854,20 @@ function sv(id){
   fecharSidebar();
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
-  if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
+  if(id==='plano-acao' && window.nr1mapEmpresa){
+    carregarPlanoAcao(window.nr1mapEmpresa.id);
+    _carregarCiclosParaSeletor('plano-ciclo-select','plano-ciclo-status','btn-baixar-plano-ciclo','planoUrl', function(cicloId, d){});
+  }
   if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); _carregarContextoEmpresa(); }
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
-  if(id==='mapa-risco' && window.nr1mapEmpresa) carregarMapaRisco(window.nr1mapEmpresa.id);
-  if(id==='relatorio-anual' && window.nr1mapEmpresa) carregarRelatorioAnual(window.nr1mapEmpresa.id);
+  if(id==='mapa-risco' && window.nr1mapEmpresa) {
+    carregarMapaRisco(window.nr1mapEmpresa.id);
+    _carregarCiclosParaSeletor('mapa-ciclo-select','mapa-ciclo-status','btn-baixar-mapa-ciclo','mapaUrl', function(cicloId, d){});
+  }
+  if(id==='relatorio-anual' && window.nr1mapEmpresa) {
+    carregarRelatorioAnual(window.nr1mapEmpresa.id);
+    _popularFiltroAnos();
+  }
   if(id==='relatorios' && window.nr1mapEmpresa) carregarRelatorios(window.nr1mapEmpresa.id);
   if(id==='planejamento') carregarAgenda();
   if(id==='historico' && window.nr1mapEmpresa) carregarHistoricoUnificado(window.nr1mapEmpresa.id);
@@ -6117,6 +6145,132 @@ function _renderLaudoDados(d) {
 // ===== RELATORIOS POR CICLO =====
 var _rcCiclosCache = [];
 
+// ===== FUNÇÕES COMPARTILHADAS DE SELETOR DE CICLOS =====
+var _ciclosCache = null; // cache global de todos os ciclos
+
+function _carregarCiclosParaSeletor(selectId, statusId, baixarBtnId, urlField, onSelect) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+
+  var carregarSeletor = function(ciclos) {
+    var select = document.getElementById(selectId);
+    var seletor = select && select.closest('[id$="-seletor-ciclos"]');
+    if (!select) return;
+    var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    select.innerHTML = '';
+    ciclos.forEach(function(c, idx) {
+      var dt   = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+      var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
+      var resp  = c.data.totalRespostas || 0;
+      var temPdf = c.data[urlField] ? ' ✓ PDF' : '';
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = dtStr + ' — ' + resp + ' respondentes' + temPdf;
+      if (idx === 0) opt.selected = true;
+      select.appendChild(opt);
+    });
+    if (seletor) seletor.style.display = 'block';
+    if (ciclos.length) {
+      _atualizarStatusSeletor(statusId, baixarBtnId, ciclos[0].data[urlField]);
+      onSelect(ciclos[0].id, ciclos[0].data);
+    }
+  };
+
+  if (_ciclosCache) { carregarSeletor(_ciclosCache); return; }
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a,b) { return (b.data.criadoEm||'') > (a.data.criadoEm||'') ? 1 : -1; });
+      _ciclosCache = ciclos;
+      carregarSeletor(ciclos);
+    }).catch(function(e){ console.log('ciclos err:', e); });
+}
+
+function _atualizarStatusSeletor(statusId, baixarBtnId, url) {
+  var statusEl = document.getElementById(statusId);
+  var btnEl    = document.getElementById(baixarBtnId);
+  if (statusEl) {
+    statusEl.textContent = url ? 'PDF disponivel' : 'PDF nao gerado ainda';
+    statusEl.style.color = url ? '#16a34a' : '#f59e0b';
+  }
+  if (btnEl) {
+    btnEl.style.display = url ? 'inline-block' : 'none';
+    if (url) btnEl.dataset.url = url;
+  }
+}
+
+function baixarDocCiclo(urlField) {
+  // Descobre o btn que foi clicado e pega a URL
+  var btn = event && event.target;
+  var url = btn && btn.dataset && btn.dataset.url;
+  if (!url) return;
+  var urlFresh = url + (url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+  window.open(urlFresh, '_blank');
+}
+
+function gerarAtualizarDoc(tipo, btnId, urlField) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  var btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  var tipoLabel = {laudo_tecnico:'Laudo', mapa_risco:'Mapa', plano_5w2h:'Plano', inventario:'Inventario', acompanhamento:'Acompanhamento'}[tipo] || tipo;
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=' + tipo)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
+      if (d.url) {
+        // Salva URL no cicloDoc atual
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, urlField);
+        // Cache bust e abre
+        var urlFresh = d.url + '?bust=' + Date.now();
+        window.open(urlFresh, '_blank');
+        // Invalida cache de ciclos para recarregar com novo PDF
+        _ciclosCache = null;
+      } else {
+        alert('Erro: ' + (d.error || 'tente novamente'));
+      }
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+// Seletores específicos por tela
+function selecionarCicloMapa(cicloId) {
+  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
+  if (!ciclo) return;
+  _atualizarStatusSeletor('mapa-ciclo-status', 'btn-baixar-mapa-ciclo', ciclo.data.mapaUrl);
+  // Recarregar mapa com dados deste ciclo
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (empresaId) carregarMapaRisco(empresaId, cicloId, ciclo.data);
+}
+
+function selecionarCicloPlano(cicloId) {
+  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
+  if (!ciclo) return;
+  _atualizarStatusSeletor('plano-ciclo-status', 'btn-baixar-plano-ciclo', ciclo.data.planoUrl);
+}
+
+// Filtro de ano no Relatório Anual
+function filtrarAnual(ano) {
+  var tbody = document.getElementById('anual-tbody');
+  if (!tbody) return;
+  var rows = tbody.querySelectorAll('tr');
+  rows.forEach(function(tr) {
+    var show = !ano || tr.dataset.ano === ano;
+    tr.style.display = show ? '' : 'none';
+  });
+}
+
 function toggleGlossario() {
   var body = document.getElementById('glossario-body');
   var chev = document.getElementById('glossario-chevron');
@@ -6589,6 +6743,39 @@ function _renderMapaSubcats(subcats, nResp, tbody, zonaFn, sevFn, groFn, groBg, 
       // Cache global para Plano de Acao
       window._mapaRiscoSubcats = subcats;
       window._mapaRiscoNResp   = nResp;
+}
+
+function _popularFiltroAnos() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var select = document.getElementById('anual-ano-select');
+  if (!select) return;
+  var carregarAnos = function(ciclos) {
+    var anos = {};
+    ciclos.forEach(function(c) {
+      var dt = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+      if (dt) anos[dt.getFullYear()] = true;
+    });
+    select.innerHTML = '<option value="">Todos os anos</option>';
+    Object.keys(anos).sort().reverse().forEach(function(ano) {
+      var opt = document.createElement('option');
+      opt.value = ano;
+      opt.textContent = ano;
+      select.appendChild(opt);
+    });
+    // Selecionar ano atual por padrão
+    var anoAtual = new Date().getFullYear().toString();
+    if (anos[anoAtual]) select.value = anoAtual;
+  };
+  if (_ciclosCache) { carregarAnos(_ciclosCache); return; }
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc){ ciclos.push({ id: doc.id, data: doc.data() }); });
+      _ciclosCache = ciclos;
+      carregarAnos(ciclos);
+    }).catch(function(){});
 }
 
 function carregarRelatorioAnual(empresaId) {
