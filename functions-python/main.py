@@ -299,35 +299,14 @@ def classificacao_gro(ibp):
 # ── Gerador de PDF ────────────────────────────────────────────────
 
 def gerar_pdf_por_tipo(dados, tipo):
-    """Roteia para o gerador correto conforme tipo solicitado."""
+    """Roteia para o gerador correto. laudo_tecnico usa SEMPRE gerar_relatorio_final completo."""
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
 
     tmp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
     tmp.close()
 
-    if tipo in ('laudo_tecnico', 'relatorio_anual', 'diagnostico_geral', None, ''):
-        from gerar_relatorio_final import gerar_relatorio_final
-        payload = {
-            "empresa":             dados.get("empresa_nome", ""),
-            "cnpj":                dados.get("empresa_cnpj", ""),
-            "responsavel":         dados.get("responsavel", ""),
-            "responsavelTecnico":  dados.get("responsavelTecnico") or {},
-            "referencia":          dados.get("referencia", ""),
-            "colaboradoresAtivos": dados.get("num_colab", 0),
-            "respondentes":        dados.get("respondentes", 0),
-            "ibpGeral":            dados.get("ibp_geral"),
-            "ibpModulos":          dados.get("ibpModulos") or {},
-            "ibpSubcats":          dados.get("ibpSubcats") or {},
-            "porUnidade":          dados.get("porUnidade") or [],
-            "porCargo":            dados.get("porCargo") or [],
-            "acoes":               dados.get("acoes") or [],
-            "logoParceiroUrl":     dados.get("logoParceiroUrl", 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'),
-            "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ''),
-        }
-        gerar_relatorio_final(payload, output_path=tmp.name)
-
-    elif tipo == 'mapa_risco':
+    if tipo == 'mapa_risco':
         from gerar_mapa_risco import gerar_mapa_risco
         gerar_mapa_risco(dados=dados, output_path=tmp.name)
 
@@ -344,20 +323,26 @@ def gerar_pdf_por_tipo(dados, tipo):
         gerar_acompanhamento(dados=dados, output_path=tmp.name)
 
     else:
-        # Fallback: laudo tecnico
+        # laudo_tecnico, relatorio_anual, diagnostico_geral e qualquer outro tipo
+        # usa SEMPRE o gerador completo — sem fallback para versao resumida
+        print(f"[gerarLaudo] Chamando gerar_relatorio_final com ibpSubcats={len(dados.get('ibpSubcats') or {})} subcats, ibpModulos={list((dados.get('ibpModulos') or {}).keys())}")
         from gerar_relatorio_final import gerar_relatorio_final
         payload = {
-            "empresa": dados.get("empresa_nome", ""),
-            "responsavelTecnico": dados.get("responsavelTecnico") or {},
-            "referencia": dados.get("referencia", ""),
+            "empresa":             dados.get("empresa_nome", ""),
+            "cnpj":                dados.get("empresa_cnpj", ""),
+            "responsavel":         dados.get("responsavel", ""),
+            "responsavelTecnico":  dados.get("responsavelTecnico") or {},
+            "referencia":          dados.get("referencia", ""),
             "colaboradoresAtivos": dados.get("num_colab", 0),
-            "respondentes": dados.get("respondentes", 0),
-            "ibpGeral": dados.get("ibp_geral"),
-            "ibpModulos": dados.get("ibpModulos") or {},
-            "ibpSubcats": dados.get("ibpSubcats") or {},
-            "porUnidade": dados.get("porUnidade") or [],
-            "porCargo": dados.get("porCargo") or [],
-            "acoes": dados.get("acoes") or [],
+            "respondentes":        dados.get("respondentes", 0),
+            "ibpGeral":            dados.get("ibp_geral"),
+            "ibpModulos":          dados.get("ibpModulos") or {},
+            "ibpSubcats":          dados.get("ibpSubcats") or {},
+            "porUnidade":          dados.get("porUnidade") or [],
+            "porCargo":            dados.get("porCargo") or [],
+            "acoes":               dados.get("acoes") or [],
+            "logoParceiroUrl":     dados.get("logoParceiroUrl", "https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png"),
+            "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ""),
         }
         gerar_relatorio_final(payload, output_path=tmp.name)
 
@@ -365,7 +350,7 @@ def gerar_pdf_por_tipo(dados, tipo):
 
 
 def gerar_pdf_laudo(dados):
-    """Compatibilidade retroativa — gera laudo tecnico."""
+    """Compatibilidade retroativa."""""
     return gerar_pdf_por_tipo(dados, 'laudo_tecnico')
 
 
