@@ -2901,11 +2901,25 @@ function _carregarResponsavelTecnico() {
       // Nome empresa
       var cbNome = document.getElementById('cb-nome-empresa');
       if(cbNome) cbNome.value = d.nome || '';
-      // Logo existente
+      // Logo existente da empresa
       if (d.logo_url) {
         var prev = document.getElementById('logo-empresa-preview');
         if (prev) prev.innerHTML = '<img src="' + d.logo_url + '" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
         if (window.nr1mapEmpresa) window.nr1mapEmpresa.logo_url = d.logo_url;
+      }
+      // Preview logo parceiro no co-branding
+      var prevParc = document.getElementById('logo-parceiro-herdado-preview');
+      var logoParc = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
+      if (prevParc) {
+        if (logoParc) {
+          prevParc.innerHTML = '<img src="' + logoParc + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+        } else {
+          // Ainda carregando — aguarda 1s e tenta novamente
+          setTimeout(function() {
+            var lp2 = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
+            if (lp2) prevParc.innerHTML = '<img src="' + lp2 + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+          }, 1200);
+        }
       }
       // Responsável técnico
       var rt = d.responsavelTecnico;
@@ -5377,10 +5391,26 @@ function aplicarEmpresa(e) {
   // Carregar dados completos da empresa (logo, responsável técnico)
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_empresas').doc(e.id).get().then(function(doc){
-      if (doc.exists && window.nr1mapEmpresa) {
-        var d = doc.data();
-        if (d.responsavelTecnico) window.nr1mapEmpresa.responsavelTecnico = d.responsavelTecnico;
-        if (d.logo_url) window.nr1mapEmpresa.logo_url = d.logo_url;
+      if (!doc.exists || !window.nr1mapEmpresa) return;
+      var d = doc.data();
+      if (d.responsavelTecnico) window.nr1mapEmpresa.responsavelTecnico = d.responsavelTecnico;
+      if (d.logo_url) window.nr1mapEmpresa.logo_url = d.logo_url;
+      // Buscar logo do parceiro — se nao tiver, usa logo NR-1 Map como fallback
+      var parceiroId = d.parceiroId || null;
+      if (parceiroId && window.nr1mapDb) {
+        window.nr1mapDb.collection('nr1map_parceiros').doc(parceiroId).get()
+          .then(function(pDoc) {
+            var logoParc = (pDoc.exists && pDoc.data().logo_url) ? pDoc.data().logo_url : null;
+            window.nr1mapEmpresa.logoParceiroUrl = logoParc || 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.temParceiro = !!logoParc;
+          }).catch(function() {
+            window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.temParceiro = false;
+          });
+      } else {
+        // Sem parceiro — exibe logo NR-1 Map
+        window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+        window.nr1mapEmpresa.temParceiro = false;
       }
     }).catch(function(){});
   }
