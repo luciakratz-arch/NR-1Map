@@ -5084,117 +5084,107 @@ function carregarDashboard(empresaId) {
 }
 
 function carregarCicloRespostas(empresaId, cicloDoc) {
-      var cicloId = cicloDoc.id;
-      // Usa totalRespostas do cicloDoc como fonte primaria
-      var totalAgg = cicloDoc.data().totalRespostas || 0;
-      var ibpGeralAgg = cicloDoc.data().ibpGeral;
+  var cicloId = cicloDoc.id;
+  // Usa totalRespostas do cicloDoc como fonte primaria
+  var totalAgg = cicloDoc.data().totalRespostas || 0;
+  var ibpGeralAgg = cicloDoc.data().ibpGeral;
 
-      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
-        .collection('ciclos').doc(cicloId)
-        .collection('respostas').get()
-        .then(function(snap){
-          var total = snap.size > 0 ? snap.size : totalAgg;
-          if(total === 0) return;
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').doc(cicloId)
+    .collection('respostas').get()
+    .then(function(snap){
+    var total = snap.size > 0 ? snap.size : totalAgg;
+    if(total === 0) return;
 
-          // Se subcoleção vazia mas cicloDoc tem ibpGeral agregado, usa direto
-          if(snap.size === 0 && ibpGeralAgg !== undefined && ibpGeralAgg !== null) {
-            var elResp2 = document.getElementById('mc-respondentes');
-            var elRespSub2 = document.getElementById('mc-respondentes-sub');
-            var ativosEl2 = document.getElementById('mc-colab-ativos');
-            var ativos2 = ativosEl2 ? parseInt(ativosEl2.textContent)||0 : 0;
-            if(elResp2) elResp2.textContent = total;
-            if(elRespSub2) elRespSub2.textContent = 'de ' + ativos2 + ' colaboradores';
-            var taxa2 = ativos2 > 0 ? Math.min(Math.round((total/ativos2)*100),100) : 0;
-            var elTaxa2 = document.getElementById('mc-taxa');
-            var elTaxaSub2 = document.getElementById('mc-taxa-sub');
-            if(elTaxa2) elTaxa2.textContent = taxa2 + '%';
-            if(elTaxaSub2) elTaxaSub2.textContent = ativos2 > 0 ? (ativos2-total)+' pendentes' : '—';
-            var zona2 = ibpGeralAgg>=1.5?'Terreno Fertil':ibpGeralAgg<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
-            var cor2 = ibpGeralAgg>=1.5?'var(--verde)':ibpGeralAgg<=-1.5?'#ef4444':'var(--laranja)';
-            var elG2 = document.getElementById('mc-ibp-geral');
-            var elZ2 = document.getElementById('mc-ibp-zona');
-            if(elG2){ elG2.textContent=(ibpGeralAgg>=0?'+':'')+ibpGeralAgg.toFixed(1); elG2.style.color=cor2; }
-            if(elZ2){ elZ2.textContent=zona2; elZ2.style.color=cor2; }
-            atualizarHistoricoTimeline(empresaId);
-            return;
+    // Se subcoleção vazia mas cicloDoc tem ibpGeral agregado, usa direto
+    if(snap.size === 0 && ibpGeralAgg !== undefined && ibpGeralAgg !== null) {
+      var elResp2 = document.getElementById('mc-respondentes');
+      var elRespSub2 = document.getElementById('mc-respondentes-sub');
+      var ativosEl2 = document.getElementById('mc-colab-ativos');
+      var ativos2 = ativosEl2 ? parseInt(ativosEl2.textContent)||0 : 0;
+      if(elResp2) elResp2.textContent = total;
+      if(elRespSub2) elRespSub2.textContent = 'de ' + ativos2 + ' colaboradores';
+      var taxa2 = ativos2 > 0 ? Math.min(Math.round((total/ativos2)*100),100) : 0;
+      var elTaxa2 = document.getElementById('mc-taxa');
+      var elTaxaSub2 = document.getElementById('mc-taxa-sub');
+      if(elTaxa2) elTaxa2.textContent = taxa2 + '%';
+      if(elTaxaSub2) elTaxaSub2.textContent = ativos2 > 0 ? (ativos2-total)+' pendentes' : '—';
+      var zona2 = ibpGeralAgg>=1.5?'Terreno Fertil':ibpGeralAgg<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
+      var cor2 = ibpGeralAgg>=1.5?'var(--verde)':ibpGeralAgg<=-1.5?'#ef4444':'var(--laranja)';
+      var elG2 = document.getElementById('mc-ibp-geral');
+      var elZ2 = document.getElementById('mc-ibp-zona');
+      if(elG2){ elG2.textContent=(ibpGeralAgg>=0?'+':'')+ibpGeralAgg.toFixed(1); elG2.style.color=cor2; }
+      if(elZ2){ elZ2.textContent=zona2; elZ2.style.color=cor2; }
+      atualizarHistoricoTimeline(empresaId);
+      return;
+    }
+
+    // Agrega IBP real por modulo
+    var total = snap.size;
+    var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
+    var somaGeral=0, nGeral=0;
+
+    snap.forEach(function(doc){
+      var d = doc.data();
+      if(d.ibpSubcats){
+        Object.keys(d.ibpSubcats).forEach(function(sc){
+          var modId = d.ibpSubcats[sc].modId;
+          if(porMod[modId]){
+            porMod[modId].soma += d.ibpSubcats[sc].ibp;
+            porMod[modId].n++;
           }
-
-          // Agrega IBP real por módulo
-          var total = snap.size;
-          // Agrega IBP por módulo
-          var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
-          var somaGeral=0, nGeral=0;
-
-          snap.forEach(function(doc){
-            var d = doc.data();
-            if(d.ibpSubcats){
-              Object.keys(d.ibpSubcats).forEach(function(sc){
-                var modId = d.ibpSubcats[sc].modId;
-                if(porMod[modId]){
-                  porMod[modId].soma += d.ibpSubcats[sc].ibp;
-                  porMod[modId].n++;
-                }
-              });
-            }
-            if(d.ibpGeral !== undefined){ somaGeral+=d.ibpGeral; nGeral++; }
-          });
-
-          // Atualiza velocímetros
-          var mods = {
-            M1: { elIbp:'ibp-fis', elGauge:'gauge-fis' },
-            M2: { elIbp:'ibp-seg', elGauge:'gauge-seg' },
-            M3: { elIbp:'ibp-soc', elGauge:'gauge-soc' },
-            M4: { elIbp:'ibp-mot', elGauge:'gauge-mot' }
-          };
-          Object.keys(mods).forEach(function(m){
-            if(porMod[m].n===0) return;
-            var ibp = Math.round((porMod[m].soma/porMod[m].n)*100)/100;
-            var el = document.getElementById(mods[m].elIbp);
-            if(el){
-              el.textContent = (ibp>=0?'+':'')+ibp.toFixed(1);
-              el.style.color = ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)';
-              // Atualiza zona abaixo
-              var zona = ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta';
-              var zonaEl = el.nextElementSibling;
-              if(zonaEl) zonaEl.textContent = zona;
-            }
-            // Redesenha gauge
-            var canvas = document.getElementById(mods[m].elGauge);
-            if(canvas && typeof desenharGauge==='function') desenharGauge(canvas, ibp);
-          });
-
-          // IBP geral e métricas
-          var ibpGeral = nGeral > 0 ? Math.round((somaGeral/nGeral)*100)/100 : null;
-          var ativosEl = document.getElementById('mc-colab-ativos');
-          var ativos = ativosEl ? parseInt(ativosEl.textContent)||0 : 0;
-          var taxa = ativos > 0 ? Math.min(Math.round((total/ativos)*100), 100) : 0;
-
-          // Respondentes
-          var elResp = document.getElementById('mc-respondentes');
-          var elRespSub = document.getElementById('mc-respondentes-sub');
-          if(elResp) elResp.textContent = total;
-          if(elRespSub) elRespSub.textContent = 'de ' + ativos + ' colaboradores';
-
-          // Taxa de resposta
-          var elTaxa = document.getElementById('mc-taxa');
-          var elTaxaSub = document.getElementById('mc-taxa-sub');
-          if(elTaxa) elTaxa.textContent = taxa + '%';
-          if(elTaxaSub) elTaxaSub.textContent = ativos > 0 ? (ativos - total) + ' pendentes' : '—';
-
-          // IBP Geral
-          if(ibpGeral !== null) {
-            var zona = ibpGeral >= 1.5 ? 'Terreno Fértil' : ibpGeral <= -1.5 ? 'Sofrimento Patogênico' : 'Defesa Oculta';
-            var corIbp = ibpGeral >= 1.5 ? 'var(--verde)' : ibpGeral <= -1.5 ? '#ef4444' : 'var(--laranja)';
-            var elIbpG = document.getElementById('mc-ibp-geral');
-            var elZona = document.getElementById('mc-ibp-zona');
-            if(elIbpG){ elIbpG.textContent = (ibpGeral>=0?'+':'') + ibpGeral.toFixed(1); elIbpG.style.color = corIbp; }
-            if(elZona){ elZona.textContent = zona; elZona.style.color = corIbp; }
-          }
-
-          // Atualiza histórico recente
-          atualizarHistoricoTimeline(empresaId);
         });
-    }).catch(function(e){ console.log('respostas err:',e); });
+      }
+      if(d.ibpGeral !== undefined){ somaGeral+=d.ibpGeral; nGeral++; }
+    });
+
+    var mods = {
+      M1: { elIbp:'ibp-fis', elGauge:'gauge-fis' },
+      M2: { elIbp:'ibp-seg', elGauge:'gauge-seg' },
+      M3: { elIbp:'ibp-soc', elGauge:'gauge-soc' },
+      M4: { elIbp:'ibp-mot', elGauge:'gauge-mot' }
+    };
+    Object.keys(mods).forEach(function(m){
+      if(porMod[m].n===0) return;
+      var ibp = Math.round((porMod[m].soma/porMod[m].n)*100)/100;
+      var el = document.getElementById(mods[m].elIbp);
+      if(el){
+        el.textContent = (ibp>=0?'+':'')+ibp.toFixed(1);
+        el.style.color = ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)';
+        var zona = ibp>=1.5?'Terreno Fertil':ibp<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
+        var zonaEl = el.nextElementSibling;
+        if(zonaEl) zonaEl.textContent = zona;
+      }
+      var canvas = document.getElementById(mods[m].elGauge);
+      if(canvas && typeof desenharGauge==='function') desenharGauge(canvas, ibp);
+    });
+
+    var ibpGeral = nGeral > 0 ? Math.round((somaGeral/nGeral)*100)/100 : null;
+    var ativosEl = document.getElementById('mc-colab-ativos');
+    var ativos = ativosEl ? parseInt(ativosEl.textContent)||0 : 0;
+    var taxa = ativos > 0 ? Math.min(Math.round((total/ativos)*100), 100) : 0;
+
+    var elResp = document.getElementById('mc-respondentes');
+    var elRespSub = document.getElementById('mc-respondentes-sub');
+    if(elResp) elResp.textContent = total;
+    if(elRespSub) elRespSub.textContent = 'de ' + ativos + ' colaboradores';
+
+    var elTaxa = document.getElementById('mc-taxa');
+    var elTaxaSub = document.getElementById('mc-taxa-sub');
+    if(elTaxa) elTaxa.textContent = taxa + '%';
+    if(elTaxaSub) elTaxaSub.textContent = ativos > 0 ? (ativos - total) + ' pendentes' : '—';
+
+    if(ibpGeral !== null) {
+      var zona = ibpGeral >= 1.5 ? 'Terreno Fertil' : ibpGeral <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+      var corIbp = ibpGeral >= 1.5 ? 'var(--verde)' : ibpGeral <= -1.5 ? '#ef4444' : 'var(--laranja)';
+      var elIbpG = document.getElementById('mc-ibp-geral');
+      var elZona = document.getElementById('mc-ibp-zona');
+      if(elIbpG){ elIbpG.textContent = (ibpGeral>=0?'+':'') + ibpGeral.toFixed(1); elIbpG.style.color = corIbp; }
+      if(elZona){ elZona.textContent = zona; elZona.style.color = corIbp; }
+    }
+
+    atualizarHistoricoTimeline(empresaId);
+  }).catch(function(e){ console.log('respostas err:',e); });
 }
 
 function atualizarHistoricoTimeline(empresaId) {
