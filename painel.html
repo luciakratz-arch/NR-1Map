@@ -585,8 +585,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar / Atualizar Laudo</button>
-      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('laudo_tecnico')">⬇ Exportar PDF</button>
+      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar Laudo Completo PDF</button>
     </div>
   </div>
   <div class="content" id="laudo-tecnico-content">
@@ -3595,15 +3594,42 @@ var _ZONA_DEJOURS = function(ibp) {
 
 function gerarSugestoesAutomaticas() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!empresaId) { alert('Empresa não carregada.'); return; }
-  if (!window._histCiclos || !window._histCiclos.length) {
-    alert('Nenhum ciclo de diagnóstico encontrado. Carregue o Histórico primeiro.'); return;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+
+  // Tenta usar cache do mapa de risco primeiro, depois _histCiclos, depois busca Firestore
+  var subcats = window._mapaRiscoSubcats || null;
+  if (!subcats && window._histCiclos && window._histCiclos.length) {
+    subcats = window._histCiclos[0].ibpSubcats || null;
   }
-  // Pegar o ciclo mais recente
-  var ciclo = window._histCiclos[0];
-  var subcats = ciclo.ibpSubcats;
+
+  if (subcats && Object.keys(subcats).length) {
+    _executarSugestoes(empresaId, subcats);
+    return;
+  }
+
+  // Fallback: buscar do Firestore
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) { alert('Nenhum ciclo encontrado. Realize um Diagnostico Geral primeiro.'); return; }
+      var allDocs = [];
+      snap.forEach(function(doc) { var d = doc.data(); allDocs.push(d); });
+      allDocs.sort(function(a,b){ return (b.totalRespostas||0)-(a.totalRespostas||0); });
+      var found = null;
+      for (var i = 0; i < allDocs.length; i++) {
+        if (allDocs[i].ibpSubcats && Object.keys(allDocs[i].ibpSubcats).length) {
+          found = allDocs[i].ibpSubcats; break;
+        }
+      }
+      if (!found) { alert('Dados de subcategorias nao disponiveis. Realize um novo Diagnostico Geral.'); return; }
+      window._mapaRiscoSubcats = found;
+      _executarSugestoes(empresaId, found);
+    }).catch(function(e){ alert('Erro ao buscar dados: ' + e.message); });
+}
+
+function _executarSugestoes(empresaId, subcats) {
   if (!subcats || !Object.keys(subcats).length) {
-    alert('Dados de subcategorias não disponíveis neste ciclo. Realize um novo Diagnóstico Geral para gerar sugestões automáticas.'); return;
+    alert('Dados de subcategorias nao disponiveis neste ciclo. Realize um novo Diagnostico Geral para gerar sugestoes automaticas.'); return;
   }
   var criticas = [];
   Object.keys(subcats).forEach(function(k) {
@@ -3613,7 +3639,7 @@ function gerarSugestoesAutomaticas() {
   if (!criticas.length) {
     alert('Nenhuma subcategoria em risco identificada. Continue monitorando!'); return;
   }
-  if (!confirm('Serão geradas ' + criticas.length + ' sugestões de ação para as subcategorias com risco identificado. Continuar?')) return;
+  if (!confirm('Serao geradas ' + criticas.length + ' sugestoes de acao para as subcategorias com risco identificado. Continuar?')) return;
 
   var promises = criticas.map(function(sc) {
     var base = _SUGESTOES_BASE[sc.id];
@@ -6017,33 +6043,122 @@ function carregarMapaRisco(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
   var semDados = document.getElementById('mapa-sem-dados');
   var comDados = document.getElementById('mapa-dados');
-  var tbody = document.getElementById('mapa-tbody');
+  var tbody    = document.getElementById('mapa-tbody');
+
+  // Helpers GRO com matriz Severidade x Probabilidade real
+  var zonaFn = function(ibp) {
+    if (ibp >= 1.5)  return 'Terreno Fertil';
+    if (ibp <= -1.5) return 'Sofrimento Patogenico';
+    return 'Defesa Oculta';
+  };
+  var sevFn = function(ibp) {
+    if (ibp <= -1.5) return 4;  // Maior
+    if (ibp <= 1.4)  return 3;  // Moderada (mascarado)
+    return 1;                    // Leve
+  };
+  var groFn = function(ibp, n) {
+    var sev  = sevFn(ibp);
+    var prob = Math.min((n || 1) + 1, 5); // proxy: n respondentes -> probabilidade
+    var MATRIZ = {
+      '5-4':'INTOLERAVEL','5-3':'SUBSTANCIAL','5-2':'SUBSTANCIAL','5-1':'MODERADO',
+      '4-4':'SUBSTANCIAL','4-3':'MODERADO',   '4-2':'MODERADO',   '4-1':'TOLERAVEL',
+      '3-4':'SUBSTANCIAL','3-3':'MODERADO',   '3-2':'TOLERAVEL',  '3-1':'TRIVIAL',
+      '2-4':'MODERADO',   '2-3':'TOLERAVEL',  '2-2':'TOLERAVEL',  '2-1':'TRIVIAL',
+      '1-4':'TOLERAVEL',  '1-3':'TOLERAVEL',  '1-2':'TRIVIAL',    '1-1':'TRIVIAL'
+    };
+    return MATRIZ[prob+'-'+sev] || 'MODERADO';
+  };
+  var groBg = function(g) {
+    return {INTOLERAVEL:'#F08A8A',SUBSTANCIAL:'#F8B25A',MODERADO:'#FCE98A',TOLERAVEL:'#C8EAB8',TRIVIAL:'#BFE6FB'}[g] || '#e5e7eb';
+  };
+  var escapeHtml = function(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  };
+
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').get()
     .then(function(snap) {
-      if (snap.empty) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
-      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
-      var docs = []; snap.forEach(function(d){ docs.push(d.data()); });
-      docs.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
-      var d = docs[0];
-      var subcats = d.ibpSubcats||{};
-      var groFn = function(ibp){ return ibp<=-3?'Intolerável':ibp<=-1.5?'Substancial':ibp<=0?'Moderado':ibp<=1.5?'Tolerável':'Trivial'; };
-      var groCor = function(ibp){ return ibp<=-3?'#991b1b':ibp<=-1.5?'#c2410c':ibp<=0?'#b45309':ibp<=1.5?'#15803d':'#166534'; };
-      var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
-      if(!tbody) return;
-      if(!Object.keys(subcats).length){
-        tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados por subcategoria serão gerados no próximo diagnóstico.</td></tr>'; return;
+      if (snap.empty) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        return;
       }
-      tbody.innerHTML='';
-      Object.keys(subcats).forEach(function(sc){
-        var s=subcats[sc]; var ibp=typeof s==='object'?s.ibp:s; var sinal=ibp>=0?'+':'';
-        var sev=ibp<=-3?'Alta':ibp<=-1.5?'Média':'Baixa'; var prob=ibp<=-1.5?'Alta':'Moderada';
-        var groN=groFn(ibp); var groC=groCor(ibp);
-        var tr=document.createElement('tr');
-        tr.innerHTML='<td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.nome||sc)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.modNome||'—')+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+sev+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+prob+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;"><span style="background:'+groC+'22;color:'+groC+';padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;">'+groN+'</span></td><td style="padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;">'+sinal+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td>';
+      // Pega ciclo com mais respostas (nao apenas o mais recente por data)
+      var allDocs = [];
+      snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; allDocs.push(d); });
+      allDocs.sort(function(a,b) { return (b.totalRespostas||0) - (a.totalRespostas||0) || ((b.atualizadoEm||b.criadoEm||'') > (a.atualizadoEm||a.criadoEm||'') ? 1 : -1); });
+
+      // Encontrar primeiro ciclo com ibpSubcats preenchido
+      var d = null;
+      for (var i = 0; i < allDocs.length; i++) {
+        if (allDocs[i].ibpSubcats && Object.keys(allDocs[i].ibpSubcats).length) {
+          d = allDocs[i]; break;
+        }
+      }
+      if (!d) d = allDocs[0]; // fallback
+
+      var subcats = d.ibpSubcats || {};
+      var nResp   = d.totalRespostas || 1;
+
+      if(semDados) semDados.style.display = 'none';
+      if(comDados) comDados.style.display = 'block';
+      if(!tbody) return;
+
+      if (!Object.keys(subcats).length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados de subcategoria disponiveis apos o proximo diagnostico.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      Object.keys(subcats).forEach(function(sc) {
+        var s   = subcats[sc];
+        var ibp = typeof s === 'object' ? parseFloat(s.ibp || 0) : parseFloat(s || 0);
+        var n   = (typeof s === 'object' && s.n) ? s.n : nResp;
+        if (isNaN(ibp)) ibp = 0;
+        var sinal   = ibp >= 0 ? '+' : '';
+        var zona    = zonaFn(ibp);
+        var sev     = sevFn(ibp);
+        var groN    = groFn(ibp, n);
+        var groCorV = groBg(groN);
+        var nomeSc  = escapeHtml(typeof s === 'object' ? (s.nome || sc) : sc);
+        var modNome = escapeHtml(typeof s === 'object' ? (s.modNome || s.modId || '') : '');
+        var sevStr  = sev === 4 ? 'Alta (4)' : sev === 3 ? 'Media (3)' : 'Baixa (1)';
+        var probStr = n >= 4 ? 'Provavel (D)' : n >= 3 ? 'Possivel (C)' : 'Pouco Provavel (B)';
+
+        var tr = document.createElement('tr');
+        // Usar textContent para evitar problemas com caracteres especiais
+        var cells = [nomeSc, modNome, sevStr, probStr, groN, sinal + ibp.toFixed(1), zona];
+        var styles = [
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;'
+        ];
+        cells.forEach(function(txt, idx) {
+          var td = document.createElement('td');
+          td.style.cssText = styles[idx];
+          if (idx === 4) {
+            // Badge GRO com cor
+            var span = document.createElement('span');
+            span.style.cssText = 'background:' + groCorV + ';padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;color:#111;';
+            span.textContent = txt;
+            td.appendChild(span);
+          } else {
+            td.textContent = txt;
+          }
+          tr.appendChild(td);
+        });
         tbody.appendChild(tr);
       });
-    }).catch(function(e){ console.log('mapa err:',e); });
+
+      // Salvar subcats no cache global para o Plano de Acao usar
+      window._mapaRiscoSubcats = subcats;
+      window._mapaRiscoNResp   = nResp;
+
+    }).catch(function(e) { console.log('mapa err:', e.message); });
 }
 
 function carregarRelatorioAnual(empresaId) {
