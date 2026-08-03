@@ -32,7 +32,8 @@ def slug(texto):
 
 def nome_arquivo(tipo, empresa, ano=None):
     ano = ano or datetime.datetime.now().year
-    return f"{ano}_NR-1_Map_{slug(empresa)}_{tipo}.pdf"
+    ts = datetime.datetime.now().strftime('%m%d%H%M')
+    return f"{ano}_NR-1_Map_{slug(empresa)}_{tipo}_{ts}.pdf"
 
 def salvar_storage(caminho_local, nome_arquivo_storage, empresa_id):
     """Salva PDF no Firebase Storage e retorna URL pública."""
