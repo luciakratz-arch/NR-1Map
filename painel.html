@@ -5554,7 +5554,8 @@ function abrirLaudoDoCiclo(cicloId, tipo) {
       var d = doc.data();
       // Se ja tem PDF gerado, abre direto sem ir para a view de laudo HTML
       if (d.laudoUrl) {
-        window.open(d.laudoUrl, '_blank');
+        var urlFresh3 = d.laudoUrl + (d.laudoUrl.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+        window.open(urlFresh3, '_blank');
         return;
       }
       // Sem PDF — renderiza laudo HTML na view
@@ -5871,7 +5872,8 @@ function carregarRelatoriosPorCiclo(empresaId) {
                       .collection('ciclos').doc(cicloId)
                       .update(upd).catch(function(){});
                     // Atualiza card sem recarregar tudo
-                    window.open(res.url, '_blank');
+                    var urlFresh2 = res.url + (res.url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+                    window.open(urlFresh2, '_blank');
                     btnRef.textContent = '↻ Atualizar ' + btnRef.textContent.replace(/^[^\s]+\s/, '');
                     // Adicionar link ao bloco de docs
                     var tiposLabel = { laudo_tecnico:'📋 Laudo Tecnico', mapa_risco:'🗺 Mapa de Risco', plano_5w2h:'✅ Plano 5W2H', inventario:'📄 Inventario' };
@@ -6028,13 +6030,15 @@ function gerarAtualizarLaudo() {
           var statusEl = document.getElementById('laudo-ciclo-status');
           if (statusEl) { statusEl.textContent = 'PDF disponivel'; statusEl.style.color = '#16a34a'; }
         }
-        window.open(d.url, '_blank');
+        // Cache-bust para forcar browser a nao usar PDF antigo
+        var urlFresh = d.url + (d.url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+        window.open(urlFresh, '_blank');
       } else {
         alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
       }
     })
     .catch(function(e) {
-      if (btn) { btn.textContent = '📄 Gerar / Atualizar Laudo'; btn.disabled = false; }
+      if (btn) { btn.textContent = '📄 Gerar Laudo Completo PDF'; btn.disabled = false; }
       alert('Erro de conexao: ' + e.message);
     });
 }
