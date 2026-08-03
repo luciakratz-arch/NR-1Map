@@ -11,6 +11,7 @@ import tempfile
 import os
 import unicodedata
 import re
+import json
 
 import firebase_admin
 from firebase_admin import credentials, firestore, storage
@@ -374,13 +375,13 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             empresa_id = body.get('empresaId') or req.args.get('empresaId')
 
         if not empresa_id:
-            return https_fn.Response('{"error": "empresaId obrigatório"}',
+            return https_fn.Response(json.dumps({"error": "empresaId obrigatorio"}),
                                      status=400, mimetype='application/json')
 
         # Busca dados do Firestore
         dados = buscar_dados_empresa(empresa_id)
         if not dados:
-            return https_fn.Response('{"error": "Empresa não encontrada"}',
+            return https_fn.Response(json.dumps({"error": "Empresa nao encontrada"}),
                                      status=404, mimetype='application/json')
 
         # Tipo de documento solicitado
@@ -415,12 +416,12 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         os.unlink(pdf_path)
 
         return https_fn.Response(
-            f'{{"success": true, "url": "{url}", "tipo": "{tipo}", "empresa": "{dados["empresa_nome"]}"}}',
+            json.dumps({"success": True, "url": url, "tipo": tipo, "empresa": dados["empresa_nome"]}),
             status=200, mimetype='application/json'
         )
 
     except Exception as e:
         return https_fn.Response(
-            f'{{"error": "{str(e)}"}}',
+            json.dumps({"error": str(e)}),
             status=500, mimetype='application/json'
         )
