@@ -55,58 +55,196 @@ def salvar_firestore(empresa_id, empresa_nome, tipo, url, num_colab, ibp_geral):
     })
 
 def buscar_dados_empresa(empresa_id):
-    """Busca dados da empresa e respostas mais recentes do Firestore."""
-    # Dados da empresa
+    """Busca dados completos da empresa e ciclo mais recente do Firestore."""
+    # Empresa
     empresa_doc = db.collection('nr1map_empresas').document(empresa_id).get()
     if not empresa_doc.exists:
         return None
     empresa = empresa_doc.to_dict()
 
     # Colaboradores ativos
-    colab_snap = db.collection('nr1map_colaboradores')\
-        .where('empresaId', '==', empresa_id)\
+    colab_snap = db.collection('nr1map_colaboradores') \
+        .where('empresaId', '==', empresa_id) \
         .where('status', '==', 'ativo').get()
     num_colab = len(colab_snap)
 
-    # Último ciclo de respostas
-    ciclos = db.collection('nr1map_respostas').document(empresa_id)\
-        .collection('ciclos').order_by('criadoEm', direction=firestore.Query.DESCENDING)\
-        .limit(1).get()
+    # Monta dicionario cargo/unidade por colaborador para segmentacao
+    cargo_por_colab = {}
+    for c in colab_snap:
+        d = c.to_dict()
+        cargo_por_colab[c.id] = {
+            'cargo':   d.get('cargo', ''),
+            'cbo':     d.get('cbo', ''),
+            'unidade': d.get('unidade', '') or d.get('departamento', ''),
+        }
 
-    respostas_por_subcat = {}
-    ibp_geral = 0.0
+    # Ciclo mais recente com respostas (atualizadoEm > criadoEm como fallback)
+    ciclo_doc = None
+    try:
+        ciclos = db.collection('nr1map_respostas').document(empresa_id) \
+            .collection('ciclos') \
+            .order_by('atualizadoEm', direction=firestore.Query.DESCENDING) \
+            .limit(1).get()
+        if ciclos:
+            ciclo_doc = ciclos[0]
+    except Exception:
+        pass
 
-    if ciclos:
-        ciclo_id = ciclos[0].id
-        resps = db.collection('nr1map_respostas').document(empresa_id)\
-            .collection('ciclos').document(ciclo_id)\
+    if not ciclo_doc:
+        try:
+            ciclos = db.collection('nr1map_respostas').document(empresa_id) \
+                .collection('ciclos') \
+                .order_by('criadoEm', direction=firestore.Query.DESCENDING) \
+                .limit(1).get()
+            if ciclos:
+                ciclo_doc = ciclos[0]
+        except Exception:
+            pass
+
+    # Agregar respostas do ciclo
+    ibp_subcats   = {}   # {sc_id: {ibp, n, modId, nome}}
+    ibp_modulos   = {}   # {M1..M4: ibp_medio}
+    por_colab_id  = {}   # {colaboradorId: {ibp, cargo, cbo, unidade}}
+    soma_geral    = 0.0
+    n_geral       = 0
+
+    if ciclo_doc:
+        ciclo_id = ciclo_doc.id
+        # Prioriza totalRespostas/ibpGeral do cicloDoc se existirem
+        ciclo_data = ciclo_doc.to_dict()
+        if ciclo_data.get('totalRespostas', 0) > 0 and ciclo_data.get('ibpGeral') is not None:
+            soma_geral = ciclo_data['ibpGeral'] * ciclo_data['totalRespostas']
+            n_geral    = ciclo_data['totalRespostas']
+
+        resps = db.collection('nr1map_respostas').document(empresa_id) \
+            .collection('ciclos').document(ciclo_id) \
             .collection('respostas').get()
 
-        soma_geral = 0
-        n_geral = 0
         for r in resps:
             d = r.to_dict()
-            if d.get('ibpSubcats'):
-                for sc, val in d['ibpSubcats'].items():
-                    if sc not in respostas_por_subcat:
-                        respostas_por_subcat[sc] = {'soma': 0, 'n': 0, 'modId': val.get('modId', '')}
-                    respostas_por_subcat[sc]['soma'] += val['ibp']
-                    respostas_por_subcat[sc]['n'] += 1
-            if d.get('ibpGeral') is not None:
-                soma_geral += d['ibpGeral']
-                n_geral += 1
+            colab_id = d.get('colaboradorId', '')
+            ibp_r    = d.get('ibpGeral')
 
-        if n_geral > 0:
-            ibp_geral = round(soma_geral / n_geral, 2)
+            if ibp_r is not None and n_geral == 0:
+                soma_geral += ibp_r
+                n_geral    += 1
+
+            # Subcategorias
+            if d.get('ibpSubcats'):
+                for sc_id, val in d['ibpSubcats'].items():
+                    if sc_id not in ibp_subcats:
+                        ibp_subcats[sc_id] = {
+                            'soma':  0.0, 'n': 0,
+                            'modId': val.get('modId', 'M1'),
+                            'nome':  val.get('nome', sc_id),
+                        }
+                    ibp_subcats[sc_id]['soma'] += val.get('ibp', 0.0)
+                    ibp_subcats[sc_id]['n']    += 1
+
+            # Por colaborador (para segmentacao cargo/unidade)
+            info_c = cargo_por_colab.get(colab_id, {})
+            chave  = colab_id or r.id
+            if chave not in por_colab_id:
+                por_colab_id[chave] = {
+                    'ibp_soma': 0.0, 'n': 0,
+                    'cargo':   d.get('cargo', '')   or info_c.get('cargo', ''),
+                    'cbo':     d.get('cbo', '')     or info_c.get('cbo', ''),
+                    'unidade': d.get('setor', '')   or info_c.get('unidade', ''),
+                }
+            por_colab_id[chave]['ibp_soma'] += (ibp_r or 0.0)
+            por_colab_id[chave]['n']        += 1
+
+    # IBP geral
+    ibp_geral = round(soma_geral / n_geral, 2) if n_geral > 0 else None
+
+    # IBP medio por subcategoria
+    ibp_subcats_final = {}
+    for sc_id, sc in ibp_subcats.items():
+        ibp_subcats_final[sc_id] = {
+            'ibp':   round(sc['soma'] / sc['n'], 2) if sc['n'] > 0 else 0.0,
+            'n':     sc['n'],
+            'modId': sc['modId'],
+            'nome':  sc['nome'],
+        }
+
+    # IBP por modulo
+    mod_acum = {}
+    for sc in ibp_subcats_final.values():
+        m = sc['modId']
+        if m not in mod_acum:
+            mod_acum[m] = {'soma': 0.0, 'n': 0}
+        mod_acum[m]['soma'] += sc['ibp']
+        mod_acum[m]['n']    += 1
+    ibp_modulos = {m: round(v['soma']/v['n'], 2) for m, v in mod_acum.items() if v['n'] > 0}
+
+    # Segmentacao por unidade
+    unidade_acum = {}
+    for c in por_colab_id.values():
+        u = c.get('unidade') or 'Nao informado'
+        if u not in unidade_acum:
+            unidade_acum[u] = {'soma': 0.0, 'n': 0}
+        unidade_acum[u]['soma'] += (c['ibp_soma'] / c['n'] if c['n'] > 0 else 0.0)
+        unidade_acum[u]['n']    += 1
+    por_unidade = [
+        {'unidade': u, 'n': v['n'], 'ibp': round(v['soma']/v['n'], 2)}
+        for u, v in unidade_acum.items()
+    ]
+
+    # Segmentacao por cargo/CBO
+    cargo_acum = {}
+    for c in por_colab_id.values():
+        chave_c = (c.get('cargo') or 'Nao informado', c.get('cbo') or '', c.get('unidade') or '')
+        if chave_c not in cargo_acum:
+            cargo_acum[chave_c] = {'soma': 0.0, 'n': 0}
+        cargo_acum[chave_c]['soma'] += (c['ibp_soma'] / c['n'] if c['n'] > 0 else 0.0)
+        cargo_acum[chave_c]['n']    += 1
+    por_cargo = [
+        {'cargo': k[0], 'cbo': k[1], 'unidade': k[2], 'n': v['n'], 'ibp': round(v['soma']/v['n'], 2)}
+        for k, v in cargo_acum.items()
+    ]
+
+    # Acoes do plano (resumo)
+    acoes = []
+    try:
+        acoes_snap = db.collection('nr1map_plano_acao') \
+            .where('empresaId', '==', empresa_id).limit(20).get()
+        for a in acoes_snap:
+            d = a.to_dict()
+            acoes.append({
+                'descricao': d.get('acao', '') or d.get('descricao', ''),
+                'status':    d.get('status', ''),
+                'classif':   d.get('classif', '') or d.get('classificacao', ''),
+            })
+    except Exception:
+        pass
+
+    # Responsavel tecnico
+    resp_tec = empresa.get('responsavelTecnico') or {}
+    if not resp_tec.get('nome'):
+        resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
 
     return {
-        'empresa': empresa,
-        'empresa_id': empresa_id,
-        'empresa_nome': empresa.get('nome', ''),
-        'num_colab': num_colab,
-        'ibp_geral': ibp_geral,
-        'respostas_por_subcat': respostas_por_subcat,
-        'referencia': datetime.datetime.now().strftime('%B de %Y')
+        # campos legados (outros geradores usam esses)
+        'empresa':              empresa,
+        'empresa_id':           empresa_id,
+        'empresa_nome':         empresa.get('nome', ''),
+        'num_colab':            num_colab,
+        'ibp_geral':            ibp_geral,
+        'respostas_por_subcat': {
+            sc: {'soma': v['ibp'] * v['n'], 'n': v['n'], 'modId': v['modId']}
+            for sc, v in ibp_subcats_final.items()
+        },
+        'referencia': datetime.datetime.now().strftime('%B de %Y'),
+        # campos novos para gerar_relatorio_final
+        'empresa_cnpj':         empresa.get('cnpj', ''),
+        'responsavel':          empresa.get('responsavel', ''),
+        'responsavelTecnico':   resp_tec,
+        'respondentes':         n_geral,
+        'ibpModulos':           ibp_modulos,
+        'ibpSubcats':           ibp_subcats_final,
+        'porUnidade':           por_unidade,
+        'porCargo':             por_cargo,
+        'acoes':                acoes,
     }
 
 def zona_dejours(ibp):
@@ -130,250 +268,33 @@ def classificacao_gro(ibp):
 # ── Gerador de PDF ────────────────────────────────────────────────
 
 def gerar_pdf_laudo(dados):
-    """Gera o Laudo Técnico Psicossocial (Relatório Final) com dados reais."""
+    """Delega para gerar_relatorio_final.py com dados completos do Firestore."""
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
+    from gerar_relatorio_final import gerar_relatorio_final
 
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.units import mm
-    from reportlab.lib import colors
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
-    from reportlab.lib.enums import TA_CENTER
-
-    VERDE_NR1   = colors.HexColor('#0A6E4F')
-    ROXO_NR1    = colors.HexColor('#7B00C4')
-    AZUL_ESCURO = colors.HexColor('#1F2937')
-    CINZA_TEXTO = colors.HexColor('#374151')
-    CINZA_CLARO = colors.HexColor('#F3F4F6')
-    LINHA       = colors.HexColor('#D1D5DB')
-    VERDE_OK    = colors.HexColor('#16A34A')
-
-    ZONA_COR = {
-        'Sofrimento Patogênico': colors.HexColor('#FBD5D5'),
-        'Defesa Oculta':         colors.HexColor('#FFF1B8'),
-        'Terreno Fértil':        colors.HexColor('#D2F2E2'),
+    # Monta o dict no formato esperado pelo novo gerador
+    payload = {
+        "empresa":             dados.get("empresa_nome", ""),
+        "cnpj":                dados.get("empresa_cnpj", ""),
+        "responsavel":         dados.get("responsavel", ""),
+        "responsavelTecnico":  dados.get("responsavelTecnico") or {},
+        "referencia":          dados.get("referencia", ""),
+        "colaboradoresAtivos": dados.get("num_colab", 0),
+        "respondentes":        dados.get("respondentes", 0),
+        "ibpGeral":            dados.get("ibp_geral"),
+        "ibpModulos":          dados.get("ibpModulos") or {},
+        "ibpSubcats":          dados.get("ibpSubcats") or {},
+        "porUnidade":          dados.get("porUnidade") or [],
+        "porCargo":            dados.get("porCargo") or [],
+        "acoes":               dados.get("acoes") or [],
     }
-
-    styles = getSampleStyleSheet()
-    s_h1   = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1, spaceAfter=4, fontName='Helvetica-Bold')
-    s_sub  = ParagraphStyle('sub', parent=styles['Normal'],  fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-    s_h2   = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1, spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
-    s_h3   = ParagraphStyle('h3', parent=styles['Heading3'], fontSize=10.5, textColor=AZUL_ESCURO, spaceBefore=10, spaceAfter=4, fontName='Helvetica-Bold')
-    s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
-    s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.3, textColor=CINZA_TEXTO, leading=11)
-
-    empresa_nome = dados['empresa_nome']
-    referencia   = dados['referencia']
-    num_colab    = dados['num_colab']
-    ibp_geral    = dados['ibp_geral']
-    resp_subcat  = dados['respostas_por_subcat']
-    agora        = datetime.datetime.now(datetime.timezone.utc).strftime('%d/%m/%Y %H:%M:%S UTC')
-    hash_uuid    = str(uuid.uuid4()).upper()
-
-    # Monta setores por módulo
-    modulos = {
-        'M1': {'nome': 'Módulo Fisiológico', 'subcats': []},
-        'M2': {'nome': 'Módulo de Segurança', 'subcats': []},
-        'M3': {'nome': 'Módulo de Relacionamentos', 'subcats': []},
-        'M4': {'nome': 'Módulo Motivacional', 'subcats': []},
-    }
-    for sc, val in resp_subcat.items():
-        ibp_sc = round(val['soma'] / val['n'], 2) if val['n'] > 0 else 0.0
-        mod = val.get('modId', 'M1')
-        if mod in modulos:
-            modulos[mod]['subcats'].append({'id': sc, 'ibp': ibp_sc})
-
-    # IBP por módulo
-    ibp_mod = {}
-    for mod_id, mod in modulos.items():
-        if mod['subcats']:
-            ibp_mod[mod_id] = round(sum(s['ibp'] for s in mod['subcats']) / len(mod['subcats']), 2)
-        else:
-            ibp_mod[mod_id] = 0.0
 
     tmp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
-    output_path = tmp.name
     tmp.close()
+    gerar_relatorio_final(payload, output_path=tmp.name)
+    return tmp.name
 
-    def cabecalho_rodape(canvas_obj, doc):
-        canvas_obj.saveState()
-        w, h = A4
-        canvas_obj.setFont('Helvetica', 8)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawString(20*mm, h-14*mm, "[ LOGO PARCEIRO ]")
-        canvas_obj.drawRightString(w-20*mm, h-14*mm, "[ LOGO DA EMPRESA ]")
-        canvas_obj.setFont('Helvetica-Bold', 11)
-        canvas_obj.setFillColor(VERDE_NR1)
-        canvas_obj.drawCentredString(w/2, h-20*mm, empresa_nome)
-        canvas_obj.setFont('Helvetica', 8.5)
-        canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawCentredString(w/2, h-25*mm, "NR-1Map")
-        canvas_obj.setFont('Helvetica-Bold', 10)
-        canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w/2, h-31*mm, "LAUDO TÉCNICO PSICOSSOCIAL")
-        canvas_obj.setStrokeColor(VERDE_NR1)
-        canvas_obj.setLineWidth(1.2)
-        canvas_obj.line(20*mm, h-34*mm, w-20*mm, h-34*mm)
-        canvas_obj.setFont('Helvetica', 7.5)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawString(20*mm, 12*mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-        canvas_obj.drawRightString(w-20*mm, 12*mm, f"Página {doc.page}")
-        canvas_obj.restoreState()
-
-    doc = SimpleDocTemplate(output_path, pagesize=A4,
-                            topMargin=38*mm, bottomMargin=20*mm,
-                            leftMargin=18*mm, rightMargin=18*mm)
-    story = []
-
-    # Cabeçalho
-    story.append(Paragraph("Laudo Técnico Psicossocial", s_h1))
-    story.append(Paragraph(
-        f"{empresa_nome} · {referencia} · Documento para anexação ao PGR (NR-1)", s_sub))
-
-    # Identificação
-    story.append(Paragraph("1. Identificação da Empresa", s_h2))
-    id_rows = [
-        ["Empresa:", empresa_nome],
-        ["Período:", referencia],
-        ["Colaboradores ativos:", str(num_colab)],
-        ["Metodologia:", "Dejours (Psicodinâmica) · Herzberg (Fatores Higiênicos) · Maslow"],
-    ]
-    t_id = Table(id_rows, colWidths=[45*mm, 125*mm])
-    t_id.setStyle(TableStyle([
-        ('FONTNAME',  (0,0),(0,-1), 'Helvetica-Bold'),
-        ('FONTSIZE',  (0,0),(-1,-1), 9),
-        ('TEXTCOLOR', (0,0),(-1,-1), CINZA_TEXTO),
-        ('TOPPADDING',(0,0),(-1,-1), 3),
-        ('BOTTOMPADDING',(0,0),(-1,-1), 3),
-    ]))
-    story.append(t_id)
-    story.append(Spacer(1, 5*mm))
-
-    # Metodologia
-    story.append(Paragraph("2. Fundamentação Teórica", s_h2))
-    story.append(Paragraph(
-        "O presente laudo fundamenta-se na Psicodinâmica do Trabalho de Christophe Dejours, "
-        "medindo o equilíbrio entre Prazer e Sofrimento através do <b>Índice de Balança Psicodinâmica (IBP)</b>. "
-        "A classificação oficial GRO (Trivial/Tolerável/Moderado/Substancial/Intolerável) é obtida pelo "
-        "cruzamento Severidade × Probabilidade (metodologia AIHA/Fundacentro), sempre apresentada lado a lado "
-        "com a zona Dejours. Conformidade com a Portaria MTE nº 1.419/2024.", s_body))
-    story.append(Paragraph(
-        "<b>IBP = (Média − 3) × 2,5</b> — escala de −5 (Sofrimento Patogênico) a +5 (Terreno Fértil).", s_body))
-    story.append(Spacer(1, 5*mm))
-
-    # Resultado geral
-    story.append(Paragraph("3. Resultado Geral", s_h2))
-    zona_g   = zona_dejours(ibp_geral)
-    class_g  = classificacao_gro(ibp_geral)
-    cor_zona = ZONA_COR.get(zona_g, CINZA_CLARO)
-    sinal    = '+' if ibp_geral >= 0 else ''
-
-    res_rows = [
-        ["IBP Geral", "Zona Dejours", "Classificação GRO"],
-        [f"{sinal}{ibp_geral:.1f}", zona_g, class_g],
-    ]
-    t_res = Table(res_rows, colWidths=[56*mm]*3)
-    t_res.setStyle(TableStyle([
-        ('BACKGROUND', (0,0),(-1,0), AZUL_ESCURO),
-        ('TEXTCOLOR',  (0,0),(-1,0), colors.white),
-        ('FONTNAME',   (0,0),(-1,0), 'Helvetica-Bold'),
-        ('BACKGROUND', (0,1),(-1,1), cor_zona),
-        ('FONTNAME',   (0,1),(-1,1), 'Helvetica-Bold'),
-        ('FONTSIZE',   (0,0),(-1,-1), 10),
-        ('ALIGN',      (0,0),(-1,-1), 'CENTER'),
-        ('GRID',       (0,0),(-1,-1), 0.5, LINHA),
-        ('TOPPADDING', (0,0),(-1,-1), 8),
-        ('BOTTOMPADDING',(0,0),(-1,-1), 8),
-    ]))
-    story.append(t_res)
-    story.append(Spacer(1, 5*mm))
-
-    # Resultado por módulo
-    story.append(Paragraph("4. Resultado por Módulo", s_h2))
-    mod_rows = [["Módulo", "IBP", "Zona Dejours", "Classificação GRO"]]
-    for mod_id, mod in modulos.items():
-        ibp_m = ibp_mod[mod_id]
-        zona_m = zona_dejours(ibp_m)
-        class_m = classificacao_gro(ibp_m)
-        sinal_m = '+' if ibp_m >= 0 else ''
-        mod_rows.append([mod['nome'], f"{sinal_m}{ibp_m:.1f}", zona_m, class_m])
-
-    t_mod = Table(mod_rows, colWidths=[65*mm, 20*mm, 45*mm, 38*mm])
-    t_mod.setStyle(TableStyle([
-        ('BACKGROUND',   (0,0),(-1,0), AZUL_ESCURO),
-        ('TEXTCOLOR',    (0,0),(-1,0), colors.white),
-        ('FONTNAME',     (0,0),(-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE',     (0,0),(-1,-1), 8.5),
-        ('GRID',         (0,0),(-1,-1), 0.5, LINHA),
-        ('ROWBACKGROUNDS',(0,1),(-1,-1), [colors.white, CINZA_CLARO]),
-        ('TOPPADDING',   (0,0),(-1,-1), 5),
-        ('BOTTOMPADDING',(0,0),(-1,-1), 5),
-    ]))
-    story.append(t_mod)
-    story.append(Spacer(1, 5*mm))
-
-    # Conclusão
-    story.append(Paragraph("5. Conclusão Técnica", s_h2))
-    story.append(Paragraph(
-        f"Diante dos dados consolidados, identifica-se IBP Geral de <b>{sinal}{ibp_geral:.1f}</b> "
-        f"({zona_g}), classificado como <b>{class_g}</b> na matriz GRO/NR-1. "
-        "Recomenda-se a manutenção do ciclo de monitoramento contínuo via Pesquisas Pulso, "
-        "conforme item 1.5.4.4.6 da NR-1 (Portaria MTE 1.419/2024).", s_body))
-    story.append(Spacer(1, 3*mm))
-
-    # Nota de anonimato
-    story.append(Paragraph(
-        "<b>Nota sobre anonimato:</b> este laudo é estatístico e coletivo. "
-        "O anonimato protege a coleta de dados para garantir respostas honestas. "
-        "O RH atua no nível coletivo (setor/cargo) a partir deste documento.", s_body))
-
-    story.append(PageBreak())
-
-    # Assinatura
-    story.append(Paragraph("Assinatura e Validação", s_h2))
-    story.append(Paragraph("✓ DOCUMENTO ASSINADO ELETRONICAMENTE",
-        ParagraphStyle('ok', parent=s_body, textColor=VERDE_OK, fontName='Helvetica-Bold', fontSize=10)))
-    story.append(Spacer(1, 3*mm))
-
-    sig_rows = [
-        ["Responsável Técnica:",     "Dra. Lucia Kratz"],
-        ["Registro Profissional:",   "CRP 09/20590"],
-        ["Data e Hora (UTC):",       agora],
-        ["Hash UUID de Validação:",  hash_uuid],
-    ]
-    t_sig = Table(sig_rows, colWidths=[50*mm, 120*mm])
-    t_sig.setStyle(TableStyle([
-        ('FONTNAME',       (0,0),(0,-1), 'Helvetica-Bold'),
-        ('FONTSIZE',       (0,0),(-1,-1), 8.5),
-        ('TEXTCOLOR',      (0,0),(-1,-1), CINZA_TEXTO),
-        ('TOPPADDING',     (0,0),(-1,-1), 2),
-        ('BOTTOMPADDING',  (0,0),(-1,-1), 2),
-    ]))
-    story.append(t_sig)
-    story.append(Spacer(1, 8*mm))
-
-    # Campo assinatura empresa
-    story.append(Paragraph("Assinatura do Responsável pela Empresa", s_h3))
-    story.append(Paragraph(
-        f"<b>Nome:</b> {dados['empresa'].get('responsavel', '___________________________')}<br/>"
-        f"<b>Cargo:</b> ___________________________<br/>"
-        "<b>Data:</b> ___/___/______", s_body))
-    story.append(Spacer(1, 8*mm))
-    story.append(Paragraph("_" * 60, s_body))
-    story.append(Spacer(1, 3*mm))
-    story.append(Paragraph(
-        "📱 <b>Assine digitalmente este documento em:</b> assinador.iti.gov.br<br/>"
-        "A assinatura digital pelo gov.br tem validade jurídica conforme Lei 14.063/2020.<br/>"
-        "Ao assinar qualquer página, a assinatura vale por todo o documento.",
-        ParagraphStyle('aviso', parent=s_body, textColor=ROXO_NR1, fontSize=8.5)))
-
-    story.append(Spacer(1, 5*mm))
-    story.append(Paragraph(
-        "Este registro é imutável e serve como homologação oficial para fiscalização trabalhista (NR-1).", s_body))
-
-    doc.build(story, onFirstPage=cabecalho_rodape, onLaterPages=cabecalho_rodape)
-    return output_path
 
 # ── Cloud Functions ───────────────────────────────────────────────
 
