@@ -322,8 +322,8 @@ def gerar_pdf_por_tipo(dados, tipo):
             "porUnidade":          dados.get("porUnidade") or [],
             "porCargo":            dados.get("porCargo") or [],
             "acoes":               dados.get("acoes") or [],
-        "logoParceiroUrl":     dados.get("logoParceiroUrl", 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'),
-        "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ''),
+            "logoParceiroUrl":     dados.get("logoParceiroUrl", 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'),
+            "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ''),
         }
         gerar_relatorio_final(payload, output_path=tmp.name)
 
