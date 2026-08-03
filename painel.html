@@ -596,7 +596,11 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
     <div id="laudo-dados" style="display:none;">
       <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><div class="title">IBP por Módulo — Balança Psicodinâmica (Dejours)</div></div>
+        <div class="card-header"><div class="title">1. Fundamentacao Teorica e Base Legal</div></div>
+        <div class="card-body"><div id="laudo-fundamentacao"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">2. Resultados por Modulo e Subcategoria — IBP</div></div>
         <div class="card-body"><div id="laudo-modulos"></div></div>
       </div>
       <div class="card" style="margin-bottom:16px;">
@@ -2252,7 +2256,7 @@ function carregarHistoricoPulso(empresaId) {
             '<div class="tl-desc">'+(d.totalRespostas||0)+' responderam · '+(d.adesao||'—')+'% adesão</div>'+
             '<div class="tl-data">'+dataStr+'</div>'+
           '</div>'+
-          '<button class="btn btn-ghost btn-sm" style="margin-left:auto;">Ver laudo</button>';
+          '<button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="abrirLaudoDoCiclo(\'' + doc.id + '\',\'pulso\')">Ver laudo</button>';
         el.appendChild(div);
       });
     }).catch(function(e) {
@@ -4647,8 +4651,8 @@ function carregarEmpresa(uid, email) {
 /* ===== GERAR LAUDO PDF ===== */
 function gerarLaudoCompleto() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!empresaId) { alert('Empresa não carregada.'); return; }
-  if (!confirm('Gerar o Laudo Técnico Psicossocial completo?\n\nIsso pode levar até 30 segundos.')) return;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  if (!confirm('Gerar o Laudo Tecnico Psicossocial completo?\n\nIsso pode levar ate 30 segundos.')) return;
 
   var btn = event.target;
   btn.textContent = '⏳ Gerando laudo...';
@@ -4657,19 +4661,48 @@ function gerarLaudoCompleto() {
   fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId)
     .then(function(r){ return r.json(); })
     .then(function(d){
-      btn.textContent = '📄 Gerar Laudo Técnico PDF';
+      btn.textContent = '📄 Gerar Laudo Tecnico PDF';
       btn.disabled = false;
-      if(d.url){
+      if (d.url) {
         window.open(d.url, '_blank');
-        alert('✅ Laudo Técnico gerado e salvo com sucesso!\n\nO laudo foi registrado em "Laudos Gerados" no Admin.');
+        // Salva laudoUrl no ciclo mais recente para recuperar pelo botao "Ver laudo"
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, d.cicloId || null);
+        alert('Laudo Tecnico gerado e salvo com sucesso!');
       } else {
         alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
       }
     })
     .catch(function(e){
-      btn.textContent = '📄 Gerar Laudo Técnico PDF';
+      btn.textContent = '📄 Gerar Laudo Tecnico PDF';
       btn.disabled = false;
-      alert('Erro de conexão: ' + e.message);
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+function _salvarLaudoUrlNoCiclo(empresaId, url, cicloId) {
+  var db = window.nr1mapDb;
+  if (!db) return;
+  var geradoEm = new Date().toISOString();
+  // Se cicloId foi retornado pela Cloud Function, usa direto
+  if (cicloId) {
+    db.collection('nr1map_respostas').doc(empresaId)
+      .collection('ciclos').doc(cicloId)
+      .update({ laudoUrl: url, laudoGeradoEm: geradoEm })
+      .catch(function(){});
+    return;
+  }
+  // Fallback: pega o ciclo mais recente por atualizadoEm ou criadoEm
+  var salvar = function(snap) {
+    if (!snap || snap.empty) return;
+    snap.docs[0].ref.update({ laudoUrl: url, laudoGeradoEm: geradoEm }).catch(function(){});
+  };
+  db.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('atualizadoEm', 'desc').limit(1).get()
+    .then(salvar)
+    .catch(function() {
+      db.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').orderBy('criadoEm', 'desc').limit(1).get()
+        .then(salvar).catch(function(){});
     });
 }
 
@@ -5427,15 +5460,26 @@ function carregarCargos(empresaId) {
 })();
 
 function abrirLaudoDoCiclo(cicloId, tipo) {
-  sv('laudo-tecnico');
   if (!cicloId || !window.nr1mapEmpresa || !window.nr1mapDb) return;
   var empresaId = window.nr1mapEmpresa.id;
+
   window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').doc(cicloId).get()
     .then(function(doc) {
-      if (!doc.exists) return;
-      _renderLaudoDados(doc.data());
-    }).catch(function(e){ console.log('ciclo err:',e); });
+      if (!doc.exists) { sv('laudo-tecnico'); return; }
+      var d = doc.data();
+      // Se ja tem PDF gerado, abre direto sem ir para a view de laudo HTML
+      if (d.laudoUrl) {
+        window.open(d.laudoUrl, '_blank');
+        return;
+      }
+      // Sem PDF — renderiza laudo HTML na view
+      sv('laudo-tecnico');
+      _renderLaudoDados(d);
+    }).catch(function(e){
+      console.log('ciclo err:', e);
+      sv('laudo-tecnico');
+    });
 }
 
 function _renderLaudoDados(d) {
@@ -5443,59 +5487,179 @@ function _renderLaudoDados(d) {
   var comDados = document.getElementById('laudo-dados');
   if (semDados) semDados.style.display = 'none';
   if (comDados) comDados.style.display = 'block';
-  var zonaFn = function(ibp){ return ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta'; };
-  var corFn  = function(ibp){ return ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b'; };
-  var nomesMod = {M1:'Fatores Fisiológicos',M2:'Fatores de Segurança',M3:'Fatores Sociais',M4:'Fatores Motivacionais'};
+
+  var zonaFn = function(ibp) {
+    return ibp >= 1.5 ? 'Terreno Fertil' : ibp <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+  };
+  var corFn = function(ibp) {
+    return ibp >= 1.5 ? '#16a34a' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+  };
+  var groFn = function(ibp) {
+    if (ibp <= -3.0) return 'INTOLERAVEL';
+    if (ibp <= -1.5) return 'SUBSTANCIAL';
+    if (ibp <= 0.0)  return 'MODERADO';
+    if (ibp <= 1.5)  return 'TOLERAVEL';
+    return 'TRIVIAL';
+  };
+  var groCorFn = function(g) {
+    return {INTOLERAVEL:'#F08A8A',SUBSTANCIAL:'#F8B25A',MODERADO:'#FCE98A',TOLERAVEL:'#C8EAB8',TRIVIAL:'#BFE6FB'}[g] || '#e5e7eb';
+  };
+  var nomesMod = {
+    M1: 'Fatores Fisiologicos / Corpo e Mente',
+    M2: 'Fatores de Seguranca / Previsibilidade',
+    M3: 'Fatores Sociais / Relacionamentos',
+    M4: 'Fatores Motivacionais / Proposito'
+  };
+  var nomesSubcat = {
+    '1.1':'Ergonomia e Conforto Fisico','1.2':'Pausas e Ritmo','1.3':'Saude Mental e Ansiedade','1.4':'Carga Cognitiva Digital',
+    '2.1':'Clareza de Papeis','2.2':'Metas e Pressao','2.3':'Estabilidade no Emprego','2.4':'Treinamento e Capacitacao',
+    '3.1':'Lideranca e Gestao','3.2':'Relacionamento com Pares','3.3':'Cultura e Valores','3.4':'Comunicacao Interna','3.5':'Assedio e Violencia',
+    '4.1':'Proposito e Missao','4.2':'Reconhecimento','4.3':'Crescimento e Desenvolvimento','4.4':'Autonomia e Pertencimento','4.5':'Remuneracao e Beneficios'
+  };
+  var MIN_RESP = 3;
+
+  // ── Responsavel tecnico ──
+  var rt = (window.nr1mapEmpresa && window.nr1mapEmpresa.responsavelTecnico) || {};
+  var nomeEl  = document.getElementById('laudo-responsavel-nome');
+  var cargoEl = document.getElementById('laudo-responsavel-cargo');
+  if (nomeEl)  nomeEl.textContent  = rt.nome  || 'Dra. Lucia Kratz';
+  if (cargoEl) cargoEl.textContent = (rt.cargo || 'Psicologa') + (rt.registro || rt.crp ? ' · ' + (rt.registro || rt.crp) : ' · CRP 09/20590');
+
+  // ── IBP Geral e zona ──
+  var ibpG = (d.ibpGeral !== undefined && d.ibpGeral !== null) ? parseFloat(d.ibpGeral) : null;
+  var sg   = ibpG !== null ? (ibpG >= 0 ? '+' : '') + ibpG.toFixed(1) : '—';
+  var zonaG = ibpG !== null ? zonaFn(ibpG) : '—';
+  var groG  = ibpG !== null ? groFn(ibpG)  : '—';
+
+  // ── Fundamentacao teorica ──
+  var fundEl = document.getElementById('laudo-fundamentacao');
+  if (fundEl) {
+    fundEl.innerHTML =
+      '<div style="background:#f0fdf4;border-left:3px solid #0A6E4F;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#0A6E4F;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Psicodinamica do Trabalho — Christophe Dejours</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">A Psicodinamica do Trabalho investiga o equilibrio entre Prazer e Sofrimento no contexto laboral. ' +
+      'O <b>Indice de Balanca Psicodinamica (IBP)</b> quantifica esse equilibrio em escala de <b>-5,0 a +5,0</b>, convertendo as frequencias de resposta: ' +
+      'Sempre=+5 | Na maioria=+2,5 | Na metade=0 | Poucas vezes=-2,5 | Raramente=-5. ' +
+      'Tres zonas resultantes: <span style="color:#ef4444;font-weight:600;">Sofrimento Patogenico</span> (-5 a -1,5), ' +
+      '<span style="color:#f59e0b;font-weight:600;">Defesa Oculta</span> (-1,4 a +1,4) e ' +
+      '<span style="color:#16a34a;font-weight:600;">Terreno Fertil</span> (+1,5 a +5).</div>' +
+      '</div>' +
+      '<div style="background:#faf5ff;border-left:3px solid #7B00C4;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#7B00C4;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Teoria dos Dois Fatores — Frederick Herzberg</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">Herzberg distingue <b>fatores higienicos</b> (condicoes fisicas, salario, politicas — Modulos 1 e 2) ' +
+      'dos <b>fatores motivadores</b> (reconhecimento, crescimento, proposito — Modulos 3 e 4). ' +
+      'A ausencia dos fatores higienicos gera insatisfacao; os motivadores produzem engajamento genuino.</div>' +
+      '</div>' +
+      '<div style="background:#eff6ff;border-left:3px solid #2563EB;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Hierarquia de Maslow aplicada ao trabalho</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">A base da piramide (necessidades fisiologicas, seguranca e sociais) corresponde ' +
+      'diretamente aos Modulos 1, 2 e 3 deste diagnostico. Falhas nesses niveis sao precursoras do risco psicossocial mapeado pela NR-1.</div>' +
+      '</div>' +
+      '<div style="background:#fff7ed;border-left:3px solid #ea580c;padding:10px 14px;border-radius:6px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:4px;">Base Legal</div>' +
+      '<div style="font-size:12px;color:#374151;">Conformidade com a <b>NR-1</b> e <b>Portaria MTE n. 1.419/2024</b> — obrigacao de identificacao, ' +
+      'avaliacao e controle de riscos psicossociais no PGR. Classificacao GRO: Trivial | Toleravel | Moderado | Substancial | Intoleravel.</div>' +
+      '</div>';
+  }
+
+  // ── Modulos e Subcategorias ──
   var mods = document.getElementById('laudo-modulos');
   if (mods) {
     if (d.ibpModulos && Object.keys(d.ibpModulos).length) {
-      var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;text-align:left;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Módulo</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona Dejours</th></tr></thead><tbody>';
-      Object.keys(d.ibpModulos).forEach(function(m){
-        var ibp=d.ibpModulos[m]; var s=ibp>=0?'+':'';
-        html+='<tr><td style="padding:8px;font-size:13px;border-bottom:1px solid #E5E7EB;">'+(nomesMod[m]||m)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
+      var html = '<div style="display:flex;flex-direction:column;gap:14px;">';
+      ['M1','M2','M3','M4'].forEach(function(m) {
+        var ibpM = d.ibpModulos[m];
+        if (ibpM === undefined || ibpM === null) return;
+        var zonaM = zonaFn(ibpM); var groM = groFn(ibpM);
+        var corM  = corFn(ibpM);  var corGroM = groCorFn(groM);
+        html += '<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">';
+        html += '<div style="padding:8px 12px;background:#1F2937;display:flex;align-items:center;justify-content:space-between;">';
+        html += '<span style="font-size:12px;font-weight:600;color:#fff;">' + (nomesMod[m] || m) + '</span>';
+        html += '<div style="display:flex;gap:8px;align-items:center;">';
+        html += '<span style="font-family:monospace;font-size:14px;font-weight:700;color:' + corM + ';">' + (ibpM >= 0 ? '+' : '') + ibpM.toFixed(1) + '</span>';
+        html += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + groCorM + ';color:#111;">' + groM + '</span>';
+        html += '</div></div>';
+
+        // Subcategorias do modulo
+        var subcats = d.ibpSubcats || {};
+        var modId = m;
+        var scHtml = '';
+        var scKeys = Object.keys(subcats).filter(function(k) {
+          var sc = subcats[k];
+          return (typeof sc === 'object' && sc.modId === modId) ||
+                 (k.charAt(0) === m.charAt(1));
+        });
+        if (scKeys.length) {
+          scHtml += '<table style="width:100%;border-collapse:collapse;">';
+          scHtml += '<tr style="background:#f9fafb;">' +
+            '<th style="padding:6px 10px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">Subcategoria</th>' +
+            '<th style="padding:6px 10px;text-align:center;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">N</th>' +
+            '<th style="padding:6px 10px;text-align:center;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">IBP</th>' +
+            '<th style="padding:6px 10px;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">Zona</th>' +
+            '<th style="padding:6px 10px;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">GRO</th>' +
+            '</tr>';
+          scKeys.forEach(function(sc_id) {
+            var sc   = subcats[sc_id];
+            var nSc  = (typeof sc === 'object' && sc.n) ? sc.n : 0;
+            var ibpSc = typeof sc === 'object' ? (sc.ibp || 0) : sc;
+            var nomeSc = nomesSubcat[sc_id] || (typeof sc === 'object' && sc.nome) || sc_id;
+            if (nSc > 0 && nSc < MIN_RESP) {
+              scHtml += '<tr><td style="padding:5px 10px;font-size:11px;color:#6B7280;border-bottom:1px solid #e5e7eb;" colspan="5">' + nomeSc + ' — dados suprimidos (anonimato, n&lt;' + MIN_RESP + ')</td></tr>';
+              return;
+            }
+            var zonaS = zonaFn(ibpSc); var groS = groFn(ibpSc);
+            var corS  = corFn(ibpSc);  var corGroS = groCorFn(groS);
+            scHtml += '<tr>' +
+              '<td style="padding:5px 10px;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;">' + nomeSc + '</td>' +
+              '<td style="padding:5px 10px;text-align:center;font-size:11px;border-bottom:1px solid #e5e7eb;">' + (nSc || '—') + '</td>' +
+              '<td style="padding:5px 10px;text-align:center;font-family:monospace;font-size:12px;font-weight:700;color:' + corS + ';border-bottom:1px solid #e5e7eb;">' + (ibpSc >= 0 ? '+' : '') + ibpSc.toFixed(1) + '</td>' +
+              '<td style="padding:5px 10px;font-size:11px;color:' + corS + ';border-bottom:1px solid #e5e7eb;">' + zonaS + '</td>' +
+              '<td style="padding:5px 10px;border-bottom:1px solid #e5e7eb;"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:' + corGroS + ';color:#111;">' + groS + '</span></td>' +
+              '</tr>';
+          });
+          scHtml += '</table>';
+        } else {
+          scHtml = '<p style="padding:8px 12px;font-size:12px;color:#6B7280;margin:0;">Sem dados de subcategoria para este modulo.</p>';
+        }
+        html += scHtml + '</div>';
       });
-      html+='</tbody></table>';
+      html += '</div>';
       mods.innerHTML = html;
     } else {
-      mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por módulo gerados após o próximo diagnóstico.</p>';
+      mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por modulo serao gerados apos o proximo diagnostico.</p>';
     }
   }
-  var subcatEl = document.getElementById('laudo-subcats');
-  if (subcatEl) {
-    var subcats = d.ibpSubcats || {};
-    if (Object.keys(subcats).length) {
-      var hsc = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Subcategoria</th><th style="padding:8px;text-align:center;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">IBP</th><th style="padding:8px;font-size:11px;color:#6B7280;border-bottom:1px solid #E5E7EB;">Zona</th></tr></thead><tbody>';
-      Object.keys(subcats).forEach(function(sc){
-        var s=subcats[sc]; var ibp=typeof s==='object'?s.ibp:s; var sinal=ibp>=0?'+':'';
-        hsc+='<tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+(s.nome||sc)+'</td><td style="padding:8px;text-align:center;font-family:monospace;font-weight:700;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+sinal+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;color:'+corFn(ibp)+';border-bottom:1px solid #E5E7EB;">'+zonaFn(ibp)+'</td></tr>';
-      });
-      hsc+='</tbody></table>';
-      subcatEl.innerHTML = hsc;
-    } else {
-      subcatEl.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por subcategoria gerados após o próximo diagnóstico.</p>';
-    }
-  }
+
+  // ── Conclusao ──
   var concl = document.getElementById('laudo-conclusao');
-  var ibpG = d.ibpGeral||0; var sg=ibpG>=0?'+':'';
-  if(concl) concl.innerHTML = '<p>Com base no Diagnóstico Psicossocial realizado conforme a <strong>Portaria MTE nº 1.419/2024</strong>, o IBP geral da organização foi de <strong style="color:'+corFn(ibpG)+'">'+sg+ibpG.toFixed(1)+'</strong>, zona de <strong>'+zonaFn(ibpG)+'</strong>.</p>';
-  var nomeEl = document.getElementById('laudo-responsavel-nome');
-  var cargoEl = document.getElementById('laudo-responsavel-cargo');
-  var rt = window.nr1mapEmpresa && window.nr1mapEmpresa.responsavelTecnico;
-  if (rt && rt.nome) {
-    if(nomeEl) nomeEl.textContent = rt.nome;
-    if(cargoEl) cargoEl.textContent = rt.cargo + (rt.registro ? ' · ' + rt.registro : '');
-    // Obs auditoria no laudo
-    var obsEl = document.getElementById('laudo-obs-auditoria');
-    if (obsEl && rt.obsAuditoria) {
-      obsEl.style.display = 'block';
-      obsEl.querySelector('.obs-texto') && (obsEl.querySelector('.obs-texto').textContent = rt.obsAuditoria);
+  if (concl) {
+    var pioresHtml = '';
+    if (d.ibpModulos) {
+      var entrada = Object.keys(d.ibpModulos).map(function(m){ return {m: m, ibp: d.ibpModulos[m]}; });
+      entrada.sort(function(a,b){ return a.ibp - b.ibp; });
+      if (entrada.length) {
+        var pior = entrada[0];
+        pioresHtml = ' O modulo de maior criticidade e <strong>' + (nomesMod[pior.m]||pior.m) + '</strong> (IBP ' + (pior.ibp >= 0 ? '+' : '') + pior.ibp.toFixed(1) + ').';
+      }
     }
-  } else {
-    if(nomeEl && window.nr1mapEmpresa) nomeEl.textContent = window.nr1mapEmpresa.responsavel||window.nr1mapEmpresa.nome||'—';
+    concl.innerHTML =
+      '<p style="font-size:13px;color:#374151;line-height:1.6;">Com base no Diagnostico Psicossocial realizado em conformidade com a <strong>Portaria MTE n. 1.419/2024</strong>, ' +
+      'a organizacao apresenta IBP Geral de <strong style="color:' + (ibpG !== null ? corFn(ibpG) : '#374151') + ';">' + sg + '</strong>, ' +
+      'zona de <strong>' + zonaG + '</strong>, classificado como <strong>' + groG + '</strong> na Matriz GRO.' +
+      pioresHtml +
+      ' Recomenda-se a implementacao ou manutencao do Plano de Acao 5W2H para os grupos criticos, ' +
+      'monitoramento continuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) e reavaliacao no proximo periodo.</p>' +
+      '<div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border-radius:6px;font-size:11px;color:#374151;">' +
+      '<strong>Documentos anexos ao PGR:</strong> (1) Inventario de Riscos Psicossociais · (2) Mapa de Risco GRO · (3) Plano de Acao 5W2H · (4) Acompanhamento de Acoes' +
+      '</div>';
   }
-  // Tabela detalhada por módulo/subcategoria com risco GRO e ação sugerida
-  _renderLaudoDetalhado(d.ibpSubcats || {});
+
+  // Chama render detalhado legado se existir
+  if (typeof _renderLaudoDetalhado === 'function') {
+    _renderLaudoDetalhado(d.ibpSubcats || {});
+  }
 }
+
 
 function carregarLaudoTecnico(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
