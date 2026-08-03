@@ -14,6 +14,9 @@ NOVIDADE vs. versão anterior do 5W2H:
 
 import uuid
 import datetime
+import tempfile as _tmpmod
+import os as _os
+import urllib.request as _urllib_req
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
@@ -113,7 +116,7 @@ SETORES_CBO = [
 
 
 def gerar_acoes(SETORES_CBO_DIN=None):
-    if SETORES_CBO_DIN is None: SETORES_CBO_DIN = SETORES_CBO
+    if SETORES_CBO_DIN is None: SETORES_CBO_DIN = []
     """
     Gera a lista de ações 5W2H automaticamente:
     - Nível CBO, se N≥3 (ação focada no cargo)
@@ -123,7 +126,7 @@ def gerar_acoes(SETORES_CBO_DIN=None):
     acoes = []
 
     # Nível CBO
-    for c in SETORES_CBO:
+    for c in SETORES_CBO_DIN:
         if c["n"] < MIN_RESPONDENTES_CBO:
             continue
         zona, sev, prob_letra, classif = classificar(c["ibp"], c["qtd_perigos"])
@@ -134,8 +137,8 @@ def gerar_acoes(SETORES_CBO_DIN=None):
             })
 
     # Nível Setor agregado (cobre setores cujo CBO individual não passou no mínimo, mas o setor sim)
-    for setor_nome in dict.fromkeys(c["setor"] for c in SETORES_CBO):
-        itens = [c for c in SETORES_CBO if c["setor"] == setor_nome]
+    for setor_nome in dict.fromkeys(cc["setor"] for cc in SETORES_CBO_DIN):
+        itens = [cc for cc in SETORES_CBO_DIN if cc["setor"] == setor_nome]
         cbos_visiveis = [c for c in itens if c["n"] >= MIN_RESPONDENTES_CBO]
         if len(cbos_visiveis) == len(itens):
             continue  # já totalmente coberto no nível CBO acima
@@ -197,10 +200,22 @@ s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', text
 def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.saveState()
     w, h = A4
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, h - 14 * mm, "[ LOGO PARCEIRO ]")
-    canvas_obj.drawRightString(w - 20 * mm, h - 14 * mm, "[ LOGO DA EMPRESA ]")
+    # Logo esquerda — parceiro ou NR-1 Map como fallback
+    _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
+    _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
+    if _lp and __import__('os').path.exists(_lp):
+        try: canvas_obj.drawImage(_lp, 20*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c')
+        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    else:
+        canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    # Logo direita — empresa
+    _tem_le = False
+    if _le and __import__('os').path.exists(_le):
+        try: canvas_obj.drawImage(_le, w-48*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
+        except: pass
+    if not _tem_le:
+        canvas_obj.setFont('Helvetica',7.5); canvas_obj.setFillColor(ROXO_NR1)
+        canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
@@ -225,11 +240,27 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.restoreState()
 
 
+
+def _baixar_logo_doc(url):
+    """Baixa imagem de URL para arquivo temporario."""
+    if not url:
+        return None
+    try:
+        tmp = _tmpmod.NamedTemporaryFile(suffix='.png', delete=False)
+        tmp.close()
+        _urllib_req.urlretrieve(url, tmp.name)
+        return tmp.name
+    except Exception:
+        return None
+
 def gerar_5w2h(dados: dict = None, output_path=None):
     _dados = dados or {}
     _empresa_nome = _dados.get('empresa_nome') or _dados.get('empresa', {}).get('nome', 'Empresa')
-    _referencia   = _dados.get('referencia', __import__('datetime').datetime.now().strftime('%B de %Y'))
+    _meses = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+    _referencia   = _dados.get('referencia') or (_meses[datetime.datetime.now().month-1] + ' de ' + str(datetime.datetime.now().year))
     _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
+    _logo_parc    = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
+    _logo_emp     = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
     # Monta SETORES_CBO dinamico
     por_cargo = _dados.get('porCargo') or []
     if por_cargo:
@@ -358,7 +389,16 @@ def gerar_5w2h(dados: dict = None, output_path=None):
         s_body
     ))
 
+    # Injetar logos como atributos da funcao de cabecalho
+    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
+    _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
+    desenhar_cabecalho_rodape._logo_parc = _lp_path
+    desenhar_cabecalho_rodape._logo_emp  = _le_path
     doc.build(story, onFirstPage=desenhar_cabecalho_rodape, onLaterPages=desenhar_cabecalho_rodape)
+    for _tmp in [_lp_path, _le_path]:
+        if _tmp and __import__('os').path.exists(_tmp):
+            try: __import__('os').unlink(_tmp)
+            except: pass
     print(f"Gerado: {output_path}")
 
 
