@@ -223,6 +223,17 @@ def buscar_dados_empresa(empresa_id):
     if not resp_tec.get('nome'):
         resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
 
+    # Logo do parceiro — fallback para logo NR-1 Map se nao houver parceiro
+    logo_parceiro_url = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
+    parceiro_id = empresa.get('parceiroId')
+    if parceiro_id:
+        try:
+            parc_doc = db.collection('nr1map_parceiros').document(parceiro_id).get()
+            if parc_doc.exists and parc_doc.to_dict().get('logo_url'):
+                logo_parceiro_url = parc_doc.to_dict()['logo_url']
+        except Exception:
+            pass  # fallback NR-1 Map ja definido acima
+
     return {
         # campos legados (outros geradores usam esses)
         'empresa':              empresa,
@@ -245,6 +256,8 @@ def buscar_dados_empresa(empresa_id):
         'porUnidade':           por_unidade,
         'porCargo':             por_cargo,
         'acoes':                acoes,
+        'logoParceiroUrl':      logo_parceiro_url,
+        'logoEmpresaUrl':       empresa.get('logo_url', ''),
     }
 
 def zona_dejours(ibp):
@@ -291,6 +304,8 @@ def gerar_pdf_por_tipo(dados, tipo):
             "porUnidade":          dados.get("porUnidade") or [],
             "porCargo":            dados.get("porCargo") or [],
             "acoes":               dados.get("acoes") or [],
+        "logoParceiroUrl":     dados.get("logoParceiroUrl", 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'),
+        "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ''),
         }
         gerar_relatorio_final(payload, output_path=tmp.name)
 
