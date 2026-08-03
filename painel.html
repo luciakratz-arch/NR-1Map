@@ -714,6 +714,91 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="topbar-title">🗂 Relatórios por Ciclo</div>
   </div>
   <div class="content">
+
+    <!-- GLOSSÁRIO DOS DOCUMENTOS -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header" onclick="toggleGlossario()" style="cursor:pointer;user-select:none;">
+        <div><div class="title">📚 Guia dos Documentos GRO — NR-1 / Portaria MTE 1.419/2024</div>
+        <div class="subtitle">Clique para expandir · O que é cada documento e quando usar</div></div>
+        <span id="glossario-chevron" style="font-size:18px;color:var(--cinza-medio);">▼</span>
+      </div>
+      <div id="glossario-body" style="display:none;">
+        <div class="card-body" style="padding:0;">
+
+          <!-- Inventário -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">1º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📄 Inventário de Riscos Psicossociais</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Lista estruturada de todos os perigos psicossociais identificados por setor/CBO — agentes estressores, fatores de risco e fontes de sofrimento no trabalho.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.3 — identificação e registro dos perigos ocupacionais.<br>
+              <b>Quando gerar:</b> Após cada Diagnóstico Geral. É o ponto de partida de todo o fluxo GRO.<br>
+              <b>Diferença do Laudo:</b> O Inventário <i>lista</i> os perigos encontrados. O Laudo <i>interpreta</i> e <i>fundamenta</i> clinicamente os resultados.
+            </p>
+          </div>
+
+          <!-- Mapa de Risco -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">2º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">🗺 Mapa de Risco / Avaliação GRO</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Classifica cada risco do Inventário pela Matriz GRO (Severidade × Probabilidade), gerando os níveis: Trivial / Tolerável / Moderado / Substancial / Intolerável.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4 — avaliação dos riscos com priorização por nível de criticidade.<br>
+              <b>Quando gerar:</b> Logo após o Inventário, no mesmo ciclo.<br>
+              <b>O que aciona:</b> Riscos Substancial ou Intolerável obrigam ação no Plano 5W2H.
+            </p>
+          </div>
+
+          <!-- Plano de Ação -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">3º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">✅ Plano de Ação 5W2H</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Para cada risco Substancial ou Intolerável, define: O quê será feito, Por quê, Quem é responsável, Onde, Quando, Como e Quanto custa.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4.4.3 — medidas de controle com prazo e responsável definidos.<br>
+              <b>Quando gerar:</b> Após o Mapa de Risco, sempre que houver riscos críticos.<br>
+              <b>Validade:</b> Revisado a cada ciclo de Pesquisa Pulso semanal.
+            </p>
+          </div>
+
+          <!-- Acompanhamento -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#ede9fe;color:#5b21b6;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">4º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📊 Acompanhamento — Evidências de Gestão Contínua</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Registro histórico das mudanças de status de cada ação do Plano 5W2H, com data, responsável e remedição do IBP — comprovando que as ações foram executadas.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4.4.6 — monitoramento contínuo com evidência de eficácia.<br>
+              <b>Quando gerar:</b> Periodicamente, a cada novo ciclo de Pesquisa Pulso ou Diagnóstico Geral.<br>
+              <b>Importância fiscal:</b> É o documento que prova ao fiscal do MTE que o PGR não é só papel.
+            </p>
+          </div>
+
+          <!-- Laudo Técnico -->
+          <div style="padding:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#fce7f3;color:#9d174d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">DIFERENCIAL NR-1 Map</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📋 Laudo Técnico Psicossocial</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Documento técnico-científico que consolida todos os resultados do ciclo com fundamentação teórica completa (Psicodinâmica do Trabalho de Dejours, Teoria dos Dois Fatores de Herzberg e Hierarquia de Maslow), assinado pela Responsável Técnica com CRP e hash de validação único.<br>
+              <b>Exigência legal:</b> Não é obrigatório pela NR-1, mas é o documento mais robusto para defesa em fiscalização, audiências trabalhistas e processos administrativos.<br>
+              <b>Diferença do Inventário:</b> O Inventário <i>registra</i> os perigos. O Laudo <i>interpreta</i> clinicamente, <i>fundamenta</i> metodologicamente e <i>conclui</i> com parecer técnico assinado.<br>
+              <b>Quando gerar:</b> Após cada Diagnóstico Geral completo. Fica permanentemente arquivado neste repositório.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <div id="rc-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">🗂</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum ciclo encontrado</div>
@@ -5999,6 +6084,15 @@ function _renderLaudoDados(d) {
 
 // ===== RELATORIOS POR CICLO =====
 var _rcCiclosCache = [];
+
+function toggleGlossario() {
+  var body = document.getElementById('glossario-body');
+  var chev = document.getElementById('glossario-chevron');
+  if (!body) return;
+  var aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
+  if (chev) chev.textContent = aberto ? '▼' : '▲';
+}
 
 function carregarRelatoriosPorCiclo(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
