@@ -745,14 +745,19 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div id="pc-org" style="display:none;">
       <div class="card">
         <div class="card-body" style="padding:16px;">
-          <div style="display:flex;gap:8px;margin-bottom:16px;">
-            <span style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;margin-right:4px;align-self:center;">Layout:</span>
-            <button id="org-btn-v" class="btn btn-primary btn-sm" onclick="setOrgLayout('v')">⬇ Vertical</button>
-            <button id="org-btn-h" class="btn btn-ghost btn-sm" onclick="setOrgLayout('h')">➡ Horizontal</button>
-            <button id="org-btn-r" class="btn btn-ghost btn-sm" onclick="setOrgLayout('r')">⭕ Radial</button>
+          <!-- Organograma por imagem (salvo no Co-Branding) -->
+          <div id="org-imagem-wrap" style="display:none;text-align:center;">
+            <img id="org-imagem-view" src="" alt="Organograma" style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;"/>
+            <div style="margin-top:10px;font-size:11px;color:#6b7280;">
+              Para atualizar o organograma, acesse <a href="#" onclick="sv('cobranding');return false;" style="color:var(--verde);">Co-Branding → Organograma</a>
+            </div>
           </div>
-          <div style="overflow:auto;border:1px solid #E5E7EB;border-radius:8px;background:#FAFBFA;min-height:300px;">
-            <div id="org-chart" style="display:inline-block;padding:20px;"></div>
+          <!-- Fallback: sem imagem -->
+          <div id="org-sem-imagem" style="text-align:center;padding:40px;color:var(--cinza-medio);">
+            <div style="font-size:32px;margin-bottom:12px;">🏗</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Nenhum organograma cadastrado</div>
+            <p style="font-size:12px;margin-bottom:16px;">Suba a imagem do organograma em Co-Branding.</p>
+            <button class="btn btn-primary btn-sm" onclick="sv('cobranding')">Ir para Co-Branding →</button>
           </div>
         </div>
       </div>
@@ -3346,7 +3351,7 @@ function swCargos(aba) {
   });
   var btnNovo = document.getElementById('btn-novo-cargo');
   if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
-  if (aba === 'org') renderOrg();
+  if (aba === 'org') carregarOrgImagem();
   if (aba === 'niveis') renderNiveis();
   if (aba === 'unidepts') { renderUnidades(); renderDepartamentos(); }
 }
@@ -4002,6 +4007,45 @@ function setOrgLayout(l) {
   _orgL = l;
   ['v','h','r'].forEach(function(b){ var btn=document.getElementById('org-btn-'+b); if(btn) btn.className=b===l?'btn btn-primary btn-sm':'btn btn-ghost btn-sm'; });
   renderOrg();
+}
+
+function carregarOrgImagem() {
+  var imgWrap = document.getElementById('org-imagem-wrap');
+  var semImg  = document.getElementById('org-sem-imagem');
+  var img     = document.getElementById('org-imagem-view');
+
+  // Tenta pegar do cache global primeiro
+  var url = window.nr1mapEmpresa && window.nr1mapEmpresa.orgogramaUrl;
+  if (url) {
+    if (img)     img.src = url;
+    if (imgWrap) imgWrap.style.display = 'block';
+    if (semImg)  semImg.style.display  = 'none';
+    return;
+  }
+
+  // Busca no Firestore
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) {
+    if (imgWrap) imgWrap.style.display = 'none';
+    if (semImg)  semImg.style.display  = 'block';
+    return;
+  }
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc) {
+      var orgUrl = doc.exists && doc.data().orgogramaUrl;
+      if (orgUrl) {
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = orgUrl;
+        if (img)     img.src = orgUrl;
+        if (imgWrap) imgWrap.style.display = 'block';
+        if (semImg)  semImg.style.display  = 'none';
+      } else {
+        if (imgWrap) imgWrap.style.display = 'none';
+        if (semImg)  semImg.style.display  = 'block';
+      }
+    }).catch(function() {
+      if (imgWrap) imgWrap.style.display = 'none';
+      if (semImg)  semImg.style.display  = 'block';
+    });
 }
 
 function renderOrg() {
