@@ -4225,34 +4225,78 @@ function editarAgendamento(item) {
 
 function excluirAgendamento(docId) {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!confirm('ATENCAO\n\nExcluir este agendamento apagara permanentemente todos os dados, respostas e tokens vinculados.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
+  if (!confirm('ATENCAO\n\nExcluir este agendamento apagara permanentemente todos os dados, respostas, tokens e historico vinculados.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
   var db = window.nr1mapDb;
 
-  // 1. Apagar respostas do ciclo
   var refCiclo = db.collection('nr1map_respostas').doc(empresaId).collection('ciclos').doc(docId);
-  refCiclo.collection('respostas').get().then(function(snap) {
+
+  // 1. Apagar respostas individuais do ciclo
+  refCiclo.collection('respostas').get()
+  .then(function(snap) {
+    if (snap.empty) return Promise.resolve();
     var batch = db.batch();
     snap.forEach(function(d) { batch.delete(d.ref); });
     return batch.commit();
-  }).then(function() {
-    // 2. Apagar documento do ciclo
-    return refCiclo.delete();
-  }).then(function() {
-    // 3. Apagar tokens vinculados ao pesquisaId
-    return db.collection('nr1map_tokens').where('pesquisaId', '==', docId).get();
-  }).then(function(tokSnap) {
+  })
+  // 2. Apagar documento do ciclo agregado
+  .then(function() {
+    return refCiclo.delete().catch(function(){});
+  })
+  // 3. Apagar tokens vinculados (por pesquisaId)
+  .then(function() {
+    return db.collection('nr1map_tokens')
+      .where('pesquisaId', '==', docId).get();
+  })
+  .then(function(tokSnap) {
     if (tokSnap.empty) return Promise.resolve();
     var batch2 = db.batch();
     tokSnap.forEach(function(d) { batch2.delete(d.ref); });
     return batch2.commit();
-  }).then(function() {
-    // 4. Apagar o agendamento
+  })
+  // 4. Apagar historico pessoal dos colaboradores (nr1map_respostas_colab)
+  .then(function() {
+    return db.collection('nr1map_respostas_colab')
+      .where('pesquisaId', '==', docId).get()
+      .catch(function(){ return { empty: true, docs: [] }; });
+  })
+  .then(function(colabSnap) {
+    if (!colabSnap || colabSnap.empty) return Promise.resolve();
+    var batch3 = db.batch();
+    colabSnap.forEach(function(d) { batch3.delete(d.ref); });
+    return batch3.commit();
+  })
+  // 5. Apagar doc de historico pelo padrao empresaId_pesquisaId (forma antiga)
+  .then(function() {
+    return db.collection('nr1map_respostas_colab')
+      .doc(empresaId + '_' + docId).delete().catch(function(){});
+  })
+  // 6. Apagar streak do ciclo
+  .then(function() {
+    return db.collection('nr1map_streak')
+      .doc(empresaId + '_' + docId).delete().catch(function(){});
+  })
+  // 7. Apagar o agendamento
+  .then(function() {
     return db.collection('nr1map_agenda').doc(docId).delete();
-  }).then(function() {
+  })
+  .then(function() {
+    // Atualizar interface
     carregarAgenda();
-  }).catch(function(e) {
+    carregarHistoricoUnificado(empresaId);
+    carregarHistoricoReal(empresaId);
+    atualizarHistoricoTimeline(empresaId);
+    // Limpar cache de ciclos para evitar fantasmas
+    window._histCiclos = [];
+  })
+  .catch(function(e) {
     console.log('Erro ao excluir:', e);
-    db.collection('nr1map_agenda').doc(docId).delete().then(function(){ carregarAgenda(); });
+    // Fallback: apaga pelo menos o agendamento
+    db.collection('nr1map_agenda').doc(docId).delete()
+      .then(function(){
+        carregarAgenda();
+        window._histCiclos = [];
+        carregarHistoricoUnificado(empresaId);
+      });
   });
 }
 
