@@ -197,7 +197,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
+    _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
+    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
@@ -205,7 +206,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "AVALIAÇÃO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
@@ -506,6 +507,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         s_body
     ))
 
+    desenhar_cabecalho_rodape._empresa_nome = _empresa_nome
     _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
     _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
     desenhar_cabecalho_rodape_local._logo_parc = _lp_path
