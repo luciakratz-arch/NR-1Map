@@ -953,6 +953,69 @@ textarea.form-control{resize:vertical;min-height:70px;}
       </div>
     </div>
 
+    <!-- CONTEXTO E HISTÓRICO DA EMPRESA -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">🏛 Contexto e Histórico da Empresa</div>
+        <div class="subtitle">Texto institucional que aparece no Laudo Técnico como "Apresentação da Empresa"</div>
+      </div>
+      <div class="card-body">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:11px;color:#166534;line-height:1.6;margin-bottom:14px;">
+          💡 Escreva um breve histórico da empresa: setor de atuação, missão, quantidade de colaboradores, desafios organizacionais. Esse texto enriquece o Laudo Técnico com contexto real.
+        </div>
+        <!-- Painel com dados automáticos -->
+        <div id="ctx-panorama" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div class="form-group">
+          <div class="form-label">Setor de atuação</div>
+          <input class="form-control" id="ctx-setor" placeholder="Ex: Educação, Saúde, Tecnologia, Varejo..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fundação / Tempo de mercado</div>
+          <input class="form-control" id="ctx-fundacao" placeholder="Ex: Fundada em 2010, 14 anos de mercado"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Missão / Propósito</div>
+          <input class="form-control" id="ctx-missao" placeholder="Ex: Desenvolver pessoas e organizações para alta performance"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Histórico e contexto organizacional</div>
+          <textarea class="form-control" id="ctx-historico" rows="5" placeholder="Descreva o histórico da empresa, principais desafios, cultura organizacional, contexto atual..."></textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Contexto do diagnóstico <span style="font-size:10px;color:var(--cinza-medio);">(motivo da avaliação psicossocial)</span></div>
+          <textarea class="form-control" id="ctx-diagnostico" rows="3" placeholder="Ex: Avaliação solicitada após período de reestruturação organizacional. Identificados sinais de sobrecarga nas equipes operacionais..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="salvarContextoEmpresa()">💾 Salvar Contexto da Empresa</button>
+      </div>
+    </div>
+
+    <!-- ORGANOGRAMA POR UPLOAD -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">🏗 Organograma da Empresa</div>
+        <div class="subtitle">Suba uma imagem do organograma — aparece no Laudo Técnico e Relatório Final</div>
+      </div>
+      <div class="card-body">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:11px;color:#1e40af;line-height:1.6;margin-bottom:14px;">
+          📌 Formatos aceitos: PNG, JPG ou SVG. Recomendado: fundo branco, horizontal, até 2000px de largura.
+        </div>
+        <!-- Preview do organograma salvo -->
+        <div id="org-preview-wrap" style="display:none;margin-bottom:14px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;text-align:center;padding:12px;background:#f9fafb;">
+          <img id="org-preview-img" src="" alt="Organograma" style="max-width:100%;max-height:300px;object-fit:contain;border-radius:4px;"/>
+          <div style="margin-top:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="removerOrganograma()" style="color:#ef4444;font-size:11px;">🗑 Remover organograma</button>
+          </div>
+        </div>
+        <div id="org-upload-area" style="border:2px dashed #e5e7eb;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#fafafa;" onclick="document.getElementById('org-file-input').click()">
+          <div style="font-size:28px;margin-bottom:8px;">📁</div>
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Clique para subir o organograma</div>
+          <div style="font-size:11px;color:#9ca3af;">PNG, JPG ou SVG · Máx. 5MB</div>
+          <input type="file" id="org-file-input" style="display:none;" accept="image/*" onchange="uploadOrganograma(this)"/>
+        </div>
+        <div id="org-upload-progress" style="display:none;margin-top:10px;font-size:12px;color:#6b7280;text-align:center;">⏳ Enviando organograma...</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2650,7 +2713,7 @@ function sv(id){
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){ carregarPlanoAcao(window.nr1mapEmpresa.id); }
-  if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); }
+  if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); _carregarContextoEmpresa(); }
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
   if(id==='mapa-risco' && window.nr1mapEmpresa) carregarMapaRisco(window.nr1mapEmpresa.id);
   if(id==='relatorio-anual' && window.nr1mapEmpresa) carregarRelatorioAnual(window.nr1mapEmpresa.id);
@@ -2795,6 +2858,147 @@ function gerarPdfPlano(){
 
 
 /* ===== RESPONSÁVEL TÉCNICO ===== */
+// ===== CONTEXTO DA EMPRESA =====
+function _carregarContextoEmpresa() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+
+  // Painel com dados automáticos (colaboradores, cargos)
+  var panorama = document.getElementById('ctx-panorama');
+  if (panorama) {
+    var ativos = document.getElementById('mc-colab-ativos');
+    var nAtivos = ativos ? (ativos.textContent || '—') : '—';
+    var nCargos = window.cargos ? window.cargos.length : '—';
+    panorama.innerHTML =
+      '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:12px;color:#374151;">' +
+      '<span style="font-weight:600;">' + nAtivos + '</span> colaboradores ativos</div>' +
+      '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:12px;color:#374151;">' +
+      '<span style="font-weight:600;">' + nCargos + '</span> cargos cadastrados</div>';
+  }
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      var d = doc.data();
+      var ctx = d.contextoEmpresa || {};
+      if (document.getElementById('ctx-setor'))      document.getElementById('ctx-setor').value      = ctx.setor || '';
+      if (document.getElementById('ctx-fundacao'))   document.getElementById('ctx-fundacao').value   = ctx.fundacao || '';
+      if (document.getElementById('ctx-missao'))     document.getElementById('ctx-missao').value     = ctx.missao || '';
+      if (document.getElementById('ctx-historico'))  document.getElementById('ctx-historico').value  = ctx.historico || '';
+      if (document.getElementById('ctx-diagnostico')) document.getElementById('ctx-diagnostico').value = ctx.diagnostico || '';
+      // Organograma
+      if (d.orgogramaUrl) {
+        var wrap = document.getElementById('org-preview-wrap');
+        var img  = document.getElementById('org-preview-img');
+        var area = document.getElementById('org-upload-area');
+        if (wrap) wrap.style.display = 'block';
+        if (img)  img.src = d.orgogramaUrl;
+        if (area) area.style.display = 'none';
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = d.orgogramaUrl;
+      }
+    }).catch(function(){});
+}
+
+function salvarContextoEmpresa() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa nao carregada.'); return; }
+  var btn = document.querySelector('[onclick="salvarContextoEmpresa()"]');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  var ctx = {
+    setor:       (document.getElementById('ctx-setor')      || {}).value || '',
+    fundacao:    (document.getElementById('ctx-fundacao')   || {}).value || '',
+    missao:      (document.getElementById('ctx-missao')     || {}).value || '',
+    historico:   (document.getElementById('ctx-historico')  || {}).value || '',
+    diagnostico: (document.getElementById('ctx-diagnostico')|| {}).value || '',
+    atualizadoEm: new Date().toISOString()
+  };
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+    .update({ contextoEmpresa: ctx })
+    .then(function() {
+      if (window.nr1mapEmpresa) window.nr1mapEmpresa.contextoEmpresa = ctx;
+      if (btn) { btn.textContent = '✓ Salvo!'; btn.disabled = false; }
+      setTimeout(function(){ if(btn) btn.textContent = '💾 Salvar Contexto da Empresa'; }, 2000);
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '💾 Salvar Contexto da Empresa'; btn.disabled = false; }
+      alert('Erro: ' + e.message);
+    });
+}
+
+// ===== ORGANOGRAMA POR UPLOAD =====
+function uploadOrganograma(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) { alert('Arquivo muito grande. Maximo 5MB.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+
+  var progress = document.getElementById('org-upload-progress');
+  var area     = document.getElementById('org-upload-area');
+  if (progress) progress.style.display = 'block';
+  if (area)     area.style.display = 'none';
+
+  // Ler como base64 e salvar no Firestore (< 1MB) ou Firebase Storage (> 1MB)
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+
+    if (file.size < 800 * 1024) {
+      // Pequeno — salva como base64 no Firestore
+      window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+        .update({ orgogramaUrl: dataUrl })
+        .then(function() {
+          _mostrarOrganograma(dataUrl);
+          if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = dataUrl;
+          if (progress) progress.style.display = 'none';
+        }).catch(function(e){ if(progress) progress.style.display='none'; alert('Erro: '+e.message); });
+    } else {
+      // Grande — sobe para Firebase Storage
+      var storageRef = firebase.storage().ref('nr1map_organogramas/' + empresaId + '/organograma.' + file.name.split('.').pop());
+      storageRef.put(file).then(function(snap) {
+        return snap.ref.getDownloadURL();
+      }).then(function(url) {
+        return window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+          .update({ orgogramaUrl: url })
+          .then(function() {
+            _mostrarOrganograma(url);
+            if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = url;
+            if (progress) progress.style.display = 'none';
+          });
+      }).catch(function(e){ if(progress) progress.style.display='none'; alert('Erro no upload: '+e.message); });
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function _mostrarOrganograma(url) {
+  var wrap = document.getElementById('org-preview-wrap');
+  var img  = document.getElementById('org-preview-img');
+  var area = document.getElementById('org-upload-area');
+  if (wrap) wrap.style.display = 'block';
+  if (img)  img.src = url;
+  if (area) area.style.display = 'none';
+}
+
+function removerOrganograma() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  if (!confirm('Remover o organograma salvo?')) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+    .update({ orgogramaUrl: firebase.firestore.FieldValue.delete() })
+    .then(function() {
+      var wrap = document.getElementById('org-preview-wrap');
+      var area = document.getElementById('org-upload-area');
+      var img  = document.getElementById('org-preview-img');
+      if (wrap) wrap.style.display = 'none';
+      if (area) area.style.display = 'block';
+      if (img)  img.src = '';
+      if (window.nr1mapEmpresa) delete window.nr1mapEmpresa.orgogramaUrl;
+    }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
 function salvarOuvidoria() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId) { alert('Empresa não carregada.'); return; }
@@ -5421,6 +5625,8 @@ function aplicarEmpresa(e) {
       var d = doc.data();
       if (d.responsavelTecnico) window.nr1mapEmpresa.responsavelTecnico = d.responsavelTecnico;
       if (d.logo_url) window.nr1mapEmpresa.logo_url = d.logo_url;
+      if (d.contextoEmpresa) window.nr1mapEmpresa.contextoEmpresa = d.contextoEmpresa;
+      if (d.orgogramaUrl) window.nr1mapEmpresa.orgogramaUrl = d.orgogramaUrl;
       // Buscar logo do parceiro — se nao tiver, usa logo NR-1 Map como fallback
       var parceiroId = d.parceiroId || null;
       if (parceiroId && window.nr1mapDb) {
