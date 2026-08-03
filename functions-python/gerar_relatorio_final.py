@@ -8,6 +8,9 @@ Dados: lidos dinamicamente do Firestore pela Cloud Function (main.py)
 
 import uuid
 import datetime
+import tempfile
+import os
+import urllib.request
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
@@ -101,6 +104,19 @@ def classificar_gro(ibp, n_respostas):
     return zona, MATRIZ_GRO[(letra, sev)]
 
 
+def _baixar_logo(url):
+    """Baixa imagem de URL para arquivo temporario. Retorna path ou None."""
+    if not url:
+        return None
+    try:
+        tmp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        tmp.close()
+        urllib.request.urlretrieve(url, tmp.name)
+        return tmp.name
+    except Exception:
+        return None
+
+
 def nome_arquivo_padrao(empresa, ano=None):
     import unicodedata, re
     ano = ano or datetime.datetime.now().year
@@ -136,13 +152,32 @@ TS_BASE = [
 
 
 # ──────────────────────────── CABECALHO / RODAPE ────────────────────────────
-def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico):
+def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
+                      logo_parceiro_path=None, logo_empresa_path=None):
     canvas_obj.saveState()
     w, h = A4
-    # Logo
-    canvas_obj.setFont('Helvetica-Bold', 9)
-    canvas_obj.setFillColor(VERDE)
-    canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    # Logo esquerda — parceiro (ou NR-1 Map como fallback)
+    if logo_parceiro_path and os.path.exists(logo_parceiro_path):
+        try:
+            canvas_obj.drawImage(logo_parceiro_path, 20*mm, h-16*mm,
+                                 width=28*mm, height=10*mm,
+                                 preserveAspectRatio=True, anchor='c')
+        except Exception:
+            canvas_obj.setFont('Helvetica-Bold', 8)
+            canvas_obj.setFillColor(VERDE)
+            canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    else:
+        canvas_obj.setFont('Helvetica-Bold', 8)
+        canvas_obj.setFillColor(VERDE)
+        canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    # Logo direita — empresa
+    if logo_empresa_path and os.path.exists(logo_empresa_path):
+        try:
+            canvas_obj.drawImage(logo_empresa_path, w-48*mm, h-16*mm,
+                                 width=28*mm, height=10*mm,
+                                 preserveAspectRatio=True, anchor='c')
+        except Exception:
+            pass
     canvas_obj.setFont('Helvetica', 7.5)
     canvas_obj.setFillColor(ROXO)
     canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
@@ -205,6 +240,10 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     por_cargo     = dados.get("porCargo") or []
     acoes         = dados.get("acoes") or []
 
+    # Logos — baixar para arquivo temporario (ReportLab nao aceita URL direta)
+    _logo_parceiro_path = _baixar_logo(dados.get("logoParceiroUrl") or 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+    _logo_empresa_path  = _baixar_logo(dados.get("logoEmpresaUrl") or '')
+
     output_path = output_path or nome_arquivo_padrao(empresa)
 
     taxa = round(100 * respondentes / col_ativos) if col_ativos > 0 else 0
@@ -221,7 +260,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
         leftMargin=18*mm, rightMargin=18*mm
     )
 
-    def _cb(c, d): _cabecalho_rodape(c, d, empresa, resp_tec)
+    def _cb(c, d): _cabecalho_rodape(c, d, empresa, resp_tec, _logo_parceiro_path, _logo_empresa_path)
 
     story = []
 
@@ -679,6 +718,13 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     ))
 
     doc.build(story, onFirstPage=_cb, onLaterPages=_cb)
+
+    # Limpar temporarios de logo
+    for _tmp in [_logo_parceiro_path, _logo_empresa_path]:
+        if _tmp and os.path.exists(_tmp):
+            try: os.unlink(_tmp)
+            except Exception: pass
+
     return output_path
 
 
