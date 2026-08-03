@@ -599,14 +599,14 @@ function validarTokenAnonimo(codigo) {
       var doc = snap.docs[0];
       var data = doc.data();
       if (data.usado) {
-        mostrarErroToken('Voce ja respondeu esta pesquisa. Aguarde o proximo ciclo!');
+        mostrarErroToken('✅', 'Questionario ja respondido!', 'Voce ja respondeu esta pesquisa com sucesso. Obrigado pela sua participacao! Aguarde o proximo ciclo.');
         return;
       }
       var expira = data.expiraEm ? new Date(data.expiraEm).getTime()
                  : data.criadoEm ? new Date(data.criadoEm).getTime() + 7*24*3600*1000
                  : 0;
       if (Date.now() > expira) {
-        mostrarErroToken('Este link expirou. Solicite um novo ao seu RH.');
+        mostrarErroToken('⏰', 'Link expirado', 'Este link de acesso expirou. Solicite um novo ao seu RH.');
         return;
       }
       _tokenAnonimo = codigo;
@@ -624,12 +624,17 @@ function validarTokenAnonimo(codigo) {
     });
 }
 
-function mostrarErroToken(msg) {
+function mostrarErroToken(icone, titulo, msg) {
+  // Suporte a chamada antiga com 1 argumento
+  if (!msg) { msg = titulo || icone; icone = '⚠️'; titulo = 'Aviso'; }
   var loading = document.getElementById('screen-loading');
   if (loading) {
-    loading.innerHTML = '<div style="font-size:40px;margin-bottom:16px;">⚠️</div>'
-      + '<div style="font-size:15px;font-weight:600;color:#111827;margin-bottom:8px;">' + msg + '</div>'
-      + '<div style="font-size:12px;color:#9ca3af;">Entre em contato com o RH da sua empresa.</div>';
+    loading.innerHTML =
+      '<div style="text-align:center;padding:32px 24px;max-width:360px;">' +
+      '<div style="font-size:56px;margin-bottom:16px;">' + icone + '</div>' +
+      '<div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:10px;">' + titulo + '</div>' +
+      '<div style="font-size:14px;color:#6b7280;line-height:1.6;">' + msg + '</div>' +
+      '</div>';
   }
 }
 
