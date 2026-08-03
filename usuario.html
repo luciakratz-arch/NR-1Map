@@ -612,7 +612,7 @@ function validarTokenAnonimo(codigo) {
       _tokenAnonimo = codigo;
       _empresaId    = data.empresaId;
       _tipoPesquisa = data.tipo || 'pulso';
-      _pesquisaId   = doc.id;
+      _pesquisaId   = data.pesquisaId || doc.id;
       _empresaNome  = data.empresaNome || '';
       _cargo        = data.cargo || '';
       _cbo          = data.cbo || '';
