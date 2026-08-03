@@ -22,6 +22,9 @@ Metodologia de cálculo (assumida nesta versão, ajustável):
 
 import uuid
 import datetime
+import tempfile as _tmpmod
+import os as _os
+import urllib.request as _urllib_req
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
@@ -175,10 +178,22 @@ s_matriz_header = ParagraphStyle('matrizh', parent=s_matriz_cell, textColor=colo
 def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.saveState()
     w, h = A4
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, h - 14 * mm, "[ LOGO PARCEIRO ]")
-    canvas_obj.drawRightString(w - 20 * mm, h - 14 * mm, "[ LOGO DA EMPRESA ]")
+    # Logo esquerda — parceiro ou NR-1 Map como fallback
+    _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
+    _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
+    if _lp and __import__('os').path.exists(_lp):
+        try: canvas_obj.drawImage(_lp, 20*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c')
+        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    else:
+        canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+    # Logo direita — empresa
+    _tem_le = False
+    if _le and __import__('os').path.exists(_le):
+        try: canvas_obj.drawImage(_le, w-48*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
+        except: pass
+    if not _tem_le:
+        canvas_obj.setFont('Helvetica',7.5); canvas_obj.setFillColor(ROXO_NR1)
+        canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
@@ -202,6 +217,19 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
     canvas_obj.restoreState()
 
+
+
+def _baixar_logo_doc(url):
+    """Baixa imagem de URL para arquivo temporario."""
+    if not url:
+        return None
+    try:
+        tmp = _tmpmod.NamedTemporaryFile(suffix='.png', delete=False)
+        tmp.close()
+        _urllib_req.urlretrieve(url, tmp.name)
+        return tmp.name
+    except Exception:
+        return None
 
 def gerar_mapa_risco(dados: dict = None, output_path=None):
     # Dados dinamicos do Firestore (injetados pelo main.py)
@@ -478,7 +506,15 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         s_body
     ))
 
+    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
+    _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
+    desenhar_cabecalho_rodape_local._logo_parc = _lp_path
+    desenhar_cabecalho_rodape_local._logo_emp  = _le_path
     doc.build(story, onFirstPage=desenhar_cabecalho_rodape_local, onLaterPages=desenhar_cabecalho_rodape_local)
+    for _tmp in [_lp_path, _le_path]:
+        if _tmp and __import__('os').path.exists(_tmp):
+            try: __import__('os').unlink(_tmp)
+            except: pass
     print(f"Gerado: {output_path}")
 
 
