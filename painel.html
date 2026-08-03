@@ -597,6 +597,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <option value="">Selecione um ciclo...</option>
         </select>
         <span id="laudo-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
+        <button id="btn-baixar-laudo-ciclo" onclick="baixarLaudoCicloAtual()" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
       </div>
     </div>
     <div id="laudo-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
@@ -6241,13 +6242,29 @@ function selecionarCicloLaudo(cicloId) {
 }
 
 function _renderLaudoDadosComCiclo(cicloId, d) {
-  // Atualiza status
   var statusEl = document.getElementById('laudo-ciclo-status');
+  var btnBaixar = document.getElementById('btn-baixar-laudo-ciclo');
   if (statusEl) {
     statusEl.textContent = d.laudoUrl ? 'PDF disponivel' : 'PDF nao gerado ainda';
     statusEl.style.color = d.laudoUrl ? '#16a34a' : '#f59e0b';
   }
+  if (btnBaixar) {
+    if (d.laudoUrl) {
+      btnBaixar.style.display = 'inline-block';
+      btnBaixar.dataset.url = d.laudoUrl;
+    } else {
+      btnBaixar.style.display = 'none';
+    }
+  }
   _renderLaudoDados(d);
+}
+
+function baixarLaudoCicloAtual() {
+  var btn = document.getElementById('btn-baixar-laudo-ciclo');
+  var url = btn && btn.dataset.url;
+  if (!url) return;
+  var urlFresh = url + (url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+  window.open(urlFresh, '_blank');
 }
 
 function gerarAtualizarLaudo() {
