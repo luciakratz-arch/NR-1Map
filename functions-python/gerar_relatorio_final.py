@@ -180,10 +180,7 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
             _tem_logo_empresa = True
         except Exception:
             pass
-    if not _tem_logo_empresa:
-        canvas_obj.setFont('Helvetica', 7.5)
-        canvas_obj.setFillColor(ROXO)
-        canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
+    # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
     # Linha
     canvas_obj.setStrokeColor(VERDE)
     canvas_obj.setLineWidth(1.0)
