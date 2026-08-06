@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial — Planejamento e Disparo de Campanha · NR-1 Map</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+:root{
+  --v:#0A6E4F;--vl:#12A073;--vp:#E6F4EF;
+  --r:#7B00C4;--rp:#F3E6FF;
+  --pr:#0D1210;--bg:#F4F6F5;--bd:#D8E8E2;
+  --tx:#1C1C1C;--mu:#5A6672;
+  --wa:#25D366;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.65;}
+
+/* CAPA */
+.capa{background:linear-gradient(160deg,#0D1210 0%,#0D2A20 55%,#1A0D35 100%);color:#fff;padding:56px 40px 48px;position:relative;overflow:hidden;}
+.capa::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(123,0,196,.22) 0%,transparent 70%);}
+.capa::after{content:'';position:absolute;bottom:-50px;left:8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(10,110,79,.25) 0%,transparent 70%);}
+.capa-in{max-width:820px;margin:0 auto;position:relative;z-index:1;}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(10,110,79,.3);border:1px solid rgba(18,160,115,.5);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#7FFFD4;margin-bottom:20px;}
+.capa h1{font-family:'Syne',sans-serif;font-size:clamp(24px,4vw,40px);font-weight:800;line-height:1.1;margin-bottom:14px;}
+.capa h1 em{color:#7FFFD4;font-style:normal;}
+.capa-sub{font-size:14px;opacity:.8;max-width:560px;line-height:1.7;margin-bottom:28px;}
+.capa-meta{display:flex;flex-wrap:wrap;gap:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:20px;font-size:11px;color:rgba(255,255,255,.6);}
+.capa-meta strong{display:block;color:#fff;font-size:12px;margin-bottom:2px;}
+
+/* PROGRESSO LATERAL */
+.layout{display:flex;max-width:940px;margin:0 auto;padding:40px 20px 80px;gap:28px;}
+.sidebar-prog{width:200px;flex-shrink:0;}
+.sidebar-prog .sp-wrap{position:sticky;top:24px;}
+.sp-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:12px;}
+.sp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;text-decoration:none;transition:background .15s;margin-bottom:4px;}
+.sp-item:hover{background:#EEF2F0;}
+.sp-item.active{background:var(--vp);}
+.sp-num{width:22px;height:22px;border-radius:50%;background:var(--bd);color:var(--mu);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sp-item.active .sp-num{background:var(--v);color:#fff;}
+.sp-item.done .sp-num{background:var(--vl);color:#fff;}
+.sp-lbl{font-size:11px;color:var(--mu);font-weight:500;line-height:1.3;}
+.sp-item.active .sp-lbl{color:var(--v);font-weight:700;}
+
+/* CONTENT */
+.content{flex:1;min-width:0;}
+
+/* SECAO */
+.sec{background:#fff;border-radius:14px;margin-bottom:24px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.05);}
+.sec-hd{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:2px solid var(--vp);}
+.sec-hd.r{border-bottom-color:var(--rp);}
+.sec-hd.wa{border-bottom-color:#C3F0D4;}
+.sec-n{width:40px;height:40px;border-radius:10px;background:var(--v);color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-n.r{background:var(--r);}
+.sec-n.wa{background:var(--wa);}
+.sec-hd h2{font-family:'Syne',sans-serif;font-size:16px;color:var(--v);font-weight:700;}
+.sec-hd.r h2{color:var(--r);}
+.sec-hd.wa h2{color:#1A7A3C;}
+.sec-hd p{font-size:11px;color:var(--mu);margin-top:2px;}
+.sec-bd{padding:24px;}
+
+/* MOCKUP */
+.mk{border:1.5px solid var(--bd);border-radius:10px;overflow:hidden;margin:16px 0;background:#F9FBFA;}
+.mk-bar{background:#1E3A30;padding:7px 12px;display:flex;align-items:center;gap:7px;}
+.mk-bar .d{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.mk-bar .dr{background:#FF5F57;}
+.mk-bar .dy{background:#FEBC2E;}
+.mk-bar .dg{background:#28C840;}
+.mk-bar .url{background:rgba(255,255,255,.1);border-radius:4px;padding:2px 9px;font-size:10px;color:rgba(255,255,255,.55);margin-left:auto;font-family:monospace;}
+.mk-cap{padding:11px 15px;background:#F4F6F5;border-top:1px solid var(--bd);}
+.mk-cap strong{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--v);display:block;margin-bottom:3px;}
+.mk-cap p{font-size:12px;color:var(--mu);line-height:1.5;}
+
+/* DICA */
+.dica{display:flex;gap:11px;background:#EAF7F1;border-left:4px solid var(--vl);border-radius:0 8px 8px 0;padding:11px 14px;margin:14px 0;font-size:12.5px;}
+.dica strong{color:var(--v);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+.dica.r{background:var(--rp);border-left-color:var(--r);}
+.dica.r strong{color:var(--r);}
+.dica.wa{background:#E8F8EE;border-left-color:var(--wa);}
+.dica.wa strong{color:#1A7A3C;}
+.dica.y{background:#FFFBEA;border-left-color:#F5CC6A;}
+.dica.y strong{color:#9A7200;}
+
+/* PASSO */
+.passo{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid #EEF2F0;align-items:flex-start;}
+.passo:last-child{border:none;}
+.pn{width:26px;height:26px;border-radius:50%;background:var(--v);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.pn.r{background:var(--r);}
+.pn.wa{background:var(--wa);}
+.pt strong{display:block;font-size:13px;margin-bottom:2px;}
+.pt span{color:var(--mu);font-size:12px;line-height:1.5;}
+
+/* LEI */
+.lei{background:#FFFBEA;border:1.5px solid #F5CC6A;border-radius:8px;padding:12px 15px;margin:14px 0;font-size:12.5px;color:#7A5C00;line-height:1.65;}
+.lei .lt{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9A7200;margin-bottom:4px;display:block;}
+
+/* BADGE CANAL */
+.canal-opts{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;}
+.canal-opt{flex:1;min-width:100px;border:2px solid var(--bd);border-radius:10px;padding:14px 10px;text-align:center;font-size:12px;font-weight:600;}
+.canal-opt.sel{border-color:var(--v);background:var(--vp);}
+.canal-opt.wa{border-color:var(--wa);background:#E8F8EE;}
+.canal-opt .co-ic{font-size:22px;display:block;margin-bottom:6px;}
+.canal-opt .co-lb{color:var(--tx);}
+.canal-opt .co-rec{font-size:10px;color:var(--v);font-weight:700;margin-top:3px;}
+.canal-opt.wa .co-rec{color:#1A7A3C;}
+
+/* VERSÃO */
+.ver-opts{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.ver-opt{border:1.5px solid var(--bd);border-radius:8px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px;font-size:12px;}
+.ver-opt.sel{border-color:var(--v);background:var(--vp);}
+.ver-opt .radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--bd);flex-shrink:0;margin-top:2px;}
+.ver-opt.sel .radio{border-color:var(--v);background:var(--v);}
+.ver-opt strong{display:block;font-size:13px;margin-bottom:2px;}
+.ver-opt span{color:var(--mu);font-size:11px;}
+
+/* FLUXO WHATSAPP */
+.wa-fluxo{display:flex;flex-direction:column;gap:0;margin:16px 0;}
+.wa-step{display:flex;gap:0;position:relative;}
+.wa-step:not(:last-child)::before{content:'';position:absolute;left:19px;top:42px;width:2px;height:calc(100% - 20px);background:var(--bd);z-index:0;}
+.wa-ic{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:1;margin-top:2px;}
+.wa-ic.sys{background:var(--vp);border:2px solid var(--vl);}
+.wa-ic.col{background:#E8F8EE;border:2px solid var(--wa);}
+.wa-ic.rh{background:var(--rp);border:2px solid var(--r);}
+.wa-body{flex:1;padding:0 0 24px 14px;}
+.wa-body .wa-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.wa-body .wa-desc{font-size:12px;color:var(--mu);line-height:1.55;}
+.wa-body .wa-msg{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-top:8px;font-size:12px;color:var(--tx);line-height:1.6;position:relative;}
+.wa-msg::before{content:'';position:absolute;left:-7px;top:12px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid var(--bd);}
+.wa-msg.right{background:#DCF8C6;border-color:#B2E5A2;}
+.wa-msg.right::before{right:-7px;left:auto;border-left:7px solid #B2E5A2;border-right:none;}
+.wa-msg .wm-de{font-size:10px;color:var(--mu);margin-bottom:4px;font-weight:600;}
+.wa-msg .wm-link{display:inline-block;background:var(--v);color:#fff;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;margin-top:6px;text-decoration:none;}
+.wa-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.wa-tag{background:var(--vp);color:var(--v);border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;}
+.wa-tag.wa{background:#E8F8EE;color:#1A7A3C;}
+
+/* TELA COLABORADOR */
+.colab-screen{background:#F0F2F5;border-radius:10px;padding:16px;margin:14px 0;max-width:360px;}
+.cs-header{background:var(--v);color:#fff;border-radius:8px;padding:14px 16px;margin-bottom:12px;text-align:center;}
+.cs-header .cs-logo{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#7FFFD4;margin-bottom:4px;}
+.cs-header .cs-empresa{font-size:12px;opacity:.8;}
+.cs-anonimo{background:#fff3;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:7px 10px;font-size:10px;color:rgba(255,255,255,.9);text-align:center;margin-top:8px;}
+.cs-pergunta{background:#fff;border-radius:8px;padding:14px;margin-bottom:10px;}
+.cs-pnum{font-size:10px;font-weight:700;color:var(--mu);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.cs-ptxt{font-size:13px;color:var(--tx);font-weight:500;margin-bottom:12px;line-height:1.5;}
+.cs-escala{display:flex;flex-direction:column;gap:6px;}
+.cs-op{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:12px;cursor:pointer;}
+.cs-op.sel{border-color:var(--v);background:var(--vp);}
+.cs-op .cs-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--bd);flex-shrink:0;}
+.cs-op.sel .cs-radio{border-color:var(--v);background:var(--v);}
+.cs-footer{background:#fff;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mu);}
+.cs-btn{background:var(--v);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+
+/* TABELA */
+.tb{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px;}
+.tb th{background:var(--v);color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600;}
+.tb td{padding:8px 12px;border-bottom:1px solid var(--bd);vertical-align:top;}
+.tb tr:nth-child(even) td{background:#F9FBFA;}
+.bv{display:inline-block;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;}
+.bv.ok{background:#E6F4EF;color:var(--v);}
+.bv.w{background:#FFF8E1;color:#D4820A;}
+
+/* AUTOMAÇÕES */
+.auto-card{background:#fff;border:1.5px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;}
+.auto-ic{width:36px;height:36px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.auto-ic.v{background:var(--vp);}
+.auto-ic.r{background:var(--rp);}
+.auto-ic.y{background:#FFF8E1;}
+.auto-body .auto-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.auto-body .auto-desc{font-size:12px;color:var(--mu);line-height:1.5;}
+.toggle-sim{width:38px;height:20px;border-radius:10px;background:var(--v);margin-left:auto;flex-shrink:0;position:relative;margin-top:8px;}
+.toggle-sim::after{content:'';position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;}
+
+/* DIVISOR */
+hr{border:none;border-top:2px dashed var(--bd);margin:20px 0;}
+
+/* RODAPE */
+.rodape{background:#0D1210;color:rgba(255,255,255,.7);text-align:center;padding:28px 20px;font-size:12px;line-height:1.8;}
+.rodape strong{color:#fff;}
+.rv{color:#7FFFD4;}
+
+@media(max-width:700px){
+  .layout{flex-direction:column;}
+  .sidebar-prog{width:100%;display:none;}
+  .capa{padding:36px 18px;}
+  .sec-bd{padding:18px;}
+  .canal-opts{flex-direction:column;}
+  .colab-screen{max-width:100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="capa">
+  <div class="capa-in">
+    <div class="badge">🗓 Tutorial Operacional</div>
+    <h1>Planejamento e Disparo<br>de <em>Campanha de Pesquisa</em></h1>
+    <p class="capa-sub">Guia completo — do agendamento no painel até a experiência do colaborador respondendo pelo WhatsApp. Inclui Diagnóstico Geral, Pesquisa Pulso e automações.</p>
+    <div class="capa-meta">
+      <div><strong>Para quem</strong>Gestor de RH e responsável pela pesquisa</div>
+      <div><strong>Tempo estimado</strong>~10 min para configurar e disparar</div>
+      <div><strong>Canais disponíveis</strong>WhatsApp · E-mail · Ambos</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR NAV -->
+<div class="sidebar-prog">
+  <div class="sp-wrap">
+    <div class="sp-title">Neste tutorial</div>
+    <a class="sp-item active" href="#s1"><div class="sp-num">1</div><div class="sp-lbl">Visão geral do fluxo</div></a>
+    <a class="sp-item" href="#s2"><div class="sp-num">2</div><div class="sp-lbl">Agendar ou disparar</div></a>
+    <a class="sp-item" href="#s3"><div class="sp-num">3</div><div class="sp-lbl">Configurar o disparo</div></a>
+    <a class="sp-item" href="#s4"><div class="sp-num">4</div><div class="sp-lbl">WhatsApp e Magic Link</div></a>
+    <a class="sp-item" href="#s5"><div class="sp-num">5</div><div class="sp-lbl">Tela do colaborador</div></a>
+    <a class="sp-item" href="#s6"><div class="sp-num">6</div><div class="sp-lbl">Acompanhar respostas</div></a>
+    <a class="sp-item" href="#s7"><div class="sp-num">7</div><div class="sp-lbl">Automações</div></a>
+    <a class="sp-item" href="#s8"><div class="sp-num">8</div><div class="sp-lbl">Diferenças: Geral vs Pulso</div></a>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ── S1: VISÃO GERAL ── -->
+<div class="sec" id="s1">
+  <div class="sec-hd">
+    <div class="sec-n">1</div>
+    <div><h2>Visão Geral do Fluxo Completo</h2><p>Do painel até a resposta do colaborador</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="wa-fluxo">
+      <div class="wa-step">
+        <div class="wa-ic sys">🏗</div>
+        <div class="wa-body">
+          <div class="wa-title">1 — Pré-requisito: estrutura configurada</div>
+          <div class="wa-desc">Antes de disparar qualquer pesquisa, a empresa precisa ter: <strong>colaboradores cadastrados</strong> (com WhatsApp e/ou e-mail), <strong>cargos com CBO</strong> definidos e <strong>perguntas selecionadas</strong> nos Módulos. Sem isso o sistema não gera tokens válidos.</div>
+          <div class="wa-tags"><span class="wa-tag">Colaboradores</span><span class="wa-tag">Cargos/CBO</span><span class="wa-tag">Módulos e Perguntas</span></div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic sys">🗓</div>
+        <div class="wa-body">
+          <div class="wa-title">2 — Gestor configura e dispara no painel</div>
+          <div class="wa-desc">Via <strong>Planejamento → Agendar pesquisa</strong> ou acessando diretamente <strong>Diagnóstico Geral</strong> ou <strong>Pesquisa Pulso</strong>. Define: tipo, público-alvo, canal, prazo e versão do instrumento.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic sys">⚙️</div>
+        <div class="wa-body">
+          <div class="wa-title">3 — Sistema gera Magic Links únicos e anônimos</div>
+          <div class="wa-desc">Para cada colaborador ativo (ou filtrado), o sistema gera um <strong>token OTP único e efêmero</strong>. Esse token identifica a empresa e o cargo — nunca o nome do colaborador. Nenhuma senha é necessária.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic col">📱</div>
+        <div class="wa-body">
+          <div class="wa-title">4 — Colaborador recebe no WhatsApp (ou e-mail)</div>
+          <div class="wa-desc">Mensagem automática com o link da pesquisa, nome da empresa, prazo e garantia de anonimato. Um clique abre a pesquisa direto no navegador — sem app, sem login, sem senha.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic col">✍️</div>
+        <div class="wa-body">
+          <div class="wa-title">5 — Colaborador responde de forma 100% anônima</div>
+          <div class="wa-desc">Tela limpa e mobile-first. Perguntas embaralhadas aleatoriamente (elimina viés de contexto). Escala de frequência em 5 opções. O token expira após o envio — impossível rastrear o respondente.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic sys">📊</div>
+        <div class="wa-body">
+          <div class="wa-title">6 — Dashboard atualiza em tempo real</div>
+          <div class="wa-desc">Cada resposta computa o IBP automaticamente. O gestor acompanha a taxa de resposta e os velocímetros em tempo real no Dashboard. Resultados por cargo/CBO só aparecem quando há <strong>mínimo de 3 respondentes</strong> no grupo (trava de anonimato).</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic rh">🔁</div>
+        <div class="wa-body">
+          <div class="wa-title">7 — Lembrete automático (48h)</div>
+          <div class="wa-desc">Se ativo no Planejamento, o sistema reenvia o link para quem não respondeu após 48h. O gestor não precisa fazer nada.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lei">
+      <span class="lt">⚖️ Por que é obrigatório monitorar continuamente</span>
+      O item <strong>1.5.4.4.6 da NR-1</strong> exige "monitorar os resultados das ações implementadas por meio de indicadores, verificando sua eficácia para a melhoria das condições de trabalho". A Pesquisa Pulso semanal é a forma como o NR-1 Map cumpre esta obrigação automaticamente.
+    </div>
+  </div>
+</div>
+
+<!-- ── S2: AGENDAR ── -->
+<div class="sec" id="s2">
+  <div class="sec-hd">
+    <div class="sec-n">2</div>
+    <div><h2>Agendar ou Disparar — Qual caminho usar?</h2><p>Dois modos disponíveis no painel</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="mk">
+      <div class="mk-bar"><span class="d dr"></span><span class="d dy"></span><span class="d dg"></span><span class="url">Planejamento de pesquisas</span></div>
+      <div style="background:#fff;padding:16px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">Planejamento de pesquisas</div>
+          <div style="background:var(--r);color:#fff;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;">+ Agendar pesquisa</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="border:1px solid var(--bd);border-radius:9px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:10px;">📅 Agenda</div>
+            <div style="background:#F9FBFA;border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="width:32px;height:32px;background:var(--v);color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">02<br><span style="font-size:8px;">AGO</span></div>
+              <div><div style="font-size:11px;font-weight:600;">Diagnóstico Geral</div><div style="font-size:10px;color:var(--mu);">E-mail · todas as unidades</div></div>
+              <div style="margin-left:auto;display:flex;gap:4px;"><span style="font-size:14px;cursor:pointer;">✏️</span><span style="font-size:14px;cursor:pointer;">🗑</span></div>
+            </div>
+            <div style="font-size:10px;color:var(--mu);text-align:center;padding:6px;">+ Agendar mais pesquisas</div>
+          </div>
+          <div style="border:1px solid var(--bd);border-radius:9px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--tx);margin-bottom:10px;">⚙️ Regras de disparo automático</div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><span style="font-size:11px;font-weight:500;">Pesquisa Pulso semanal automática</span><div style="width:34px;height:18px;background:var(--v);border-radius:9px;position:relative;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div></div>
+              <div style="font-size:10px;color:var(--mu);">IA escolhe o tema com pior índice</div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><span style="font-size:11px;font-weight:500;">Lembrete automático (48h)</span><div style="width:34px;height:18px;background:var(--v);border-radius:9px;position:relative;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div></div>
+              <div style="font-size:10px;color:var(--mu);">Reenvio para quem não respondeu</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><span style="font-size:11px;font-weight:500;">Diagnóstico Geral anual obrigatório</span><div style="width:34px;height:18px;background:var(--v);border-radius:9px;position:relative;"><div style="position:absolute;right:2px;top:2px;width:14px;height:14px;background:#fff;border-radius:50%;"></div></div></div>
+              <div style="font-size:10px;color:var(--mu);">Alerta 30 dias antes do vencimento</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mk-cap">
+        <strong>Planejamento — visão geral</strong>
+        <p>Aqui você agenda pesquisas futuras e ativa as automações. Para disparar agora, acesse diretamente <strong>Diagnóstico Geral</strong> ou <strong>Pesquisa Pulso</strong> no menu lateral.</p>
+      </div>
+    </div>
+
+    <table class="tb">
+      <thead><tr><th>Situação</th><th>Caminho recomendado</th></tr></thead>
+      <tbody>
+        <tr><td>Quero disparar o Diagnóstico Geral <strong>agora</strong></td><td>Menu → <strong>Diagnóstico Geral</strong> → configurar → disparar</td></tr>
+        <tr><td>Quero agendar o Diagnóstico para uma <strong>data futura</strong></td><td>Menu → <strong>Planejamento</strong> → "+ Agendar pesquisa" → selecionar tipo "Geral"</td></tr>
+        <tr><td>Quero disparar uma Pesquisa Pulso <strong>agora</strong></td><td>Menu → <strong>Pesquisa Pulso</strong> → configurar → disparar</td></tr>
+        <tr><td>Quero que o Pulso ocorra <strong>automaticamente toda semana</strong></td><td>Menu → <strong>Planejamento</strong> → ativar "Pesquisa Pulso semanal automática"</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dica">
+      <div style="font-size:18px;flex-shrink:0;">💡</div>
+      <div><strong>Dica</strong>Para a maioria das empresas, o fluxo ideal é: disparar o Diagnóstico Geral manualmente uma vez ao ano + ativar a automação semanal do Pulso. Assim o ciclo NR-1 fica 100% automático no restante do ano.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S3: CONFIGURAR DISPARO ── -->
+<div class="sec" id="s3">
+  <div class="sec-hd">
+    <div class="sec-n">3</div>
+    <div><h2>Configurar o Disparo — Campo a Campo</h2><p>O que cada parâmetro significa e como escolher</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="mk">
+      <div class="mk-bar"><span class="d dr"></span><span class="d dy"></span><span class="d dg"></span><span class="url">Diagnóstico Geral → Configurar disparo</span></div>
+      <div style="background:#fff;padding:16px 20px;">
+        <div style="background:#EAF7F1;border:1px solid var(--vl);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:11px;color:#0A3A28;">
+          ℹ️ <strong>14 colaboradores ativos</strong> receberão o link. Respostas 100% anônimas — tabuladas por cargo CBO.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:5px;">Prazo para resposta</div>
+            <select style="width:100%;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--tx);background:#fafafa;">
+              <option>2 dias</option>
+              <option selected>7 dias</option>
+              <option>14 dias</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:5px;">Unidade(s)</div>
+            <select style="width:100%;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--tx);background:#fafafa;">
+              <option>Todas as unidades</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:5px;">Departamento</div>
+            <select style="width:100%;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--tx);background:#fafafa;">
+              <option>Todos os departamentos</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:5px;">Cargo</div>
+            <select style="width:100%;border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--tx);background:#fafafa;">
+              <option>Todos os cargos</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:8px;">Canal de envio</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+          <div style="border:2px solid var(--wa);background:#E8F8EE;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:20px;margin-bottom:4px;">📱</div>
+            <div style="font-size:11px;font-weight:700;color:#1A7A3C;">WhatsApp</div>
+            <div style="font-size:9px;color:#1A7A3C;font-weight:600;margin-top:2px;">✓ Recomendado</div>
+          </div>
+          <div style="border:2px solid var(--bd);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:20px;margin-bottom:4px;">✉️</div>
+            <div style="font-size:11px;font-weight:600;color:var(--mu);">E-mail</div>
+          </div>
+          <div style="border:2px solid var(--bd);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:20px;margin-bottom:4px;">📱✉️</div>
+            <div style="font-size:11px;font-weight:600;color:var(--mu);">Ambos</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:8px;">Versão do diagnóstico</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+          <div style="border:1.5px solid var(--bd);border-radius:7px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:11px;">
+            <input type="radio" style="margin-top:2px;accent-color:var(--v);"> <div><strong>Rápida — 21 perguntas</strong><div style="color:var(--mu);">1 por subcategoria · ~10 min · ideal para Pulso e primeira avaliação</div></div>
+          </div>
+          <div style="border:1.5px solid var(--v);background:var(--vp);border-radius:7px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:11px;">
+            <input type="radio" checked style="margin-top:2px;accent-color:var(--v);"> <div><strong style="color:var(--v);">Padrão — perguntas selecionadas ⭐</strong><div style="color:var(--mu);">Usa as perguntas configuradas em Módulos e Perguntas · recomendado para Laudo completo</div></div>
+          </div>
+        </div>
+        <div style="background:var(--v);color:#fff;border-radius:8px;padding:12px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;">📤 Disparar Diagnóstico Geral</div>
+      </div>
+      <div class="mk-cap">
+        <strong>Tela: Diagnóstico Geral → Configurar disparo</strong>
+        <p>Preencha todos os campos antes de clicar em "Disparar". O aviso em verde no topo mostra quantos colaboradores receberão o link com base nos filtros aplicados.</p>
+      </div>
+    </div>
+
+    <table class="tb">
+      <thead><tr><th>Campo</th><th>O que configura</th><th>Recomendação</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Prazo para resposta</strong></td><td>Até quando o link fica ativo. Após o prazo, o token expira.</td><td><span class="bv ok">7 dias para Diagnóstico</span><br><span class="bv w">2 dias para Pulso</span></td></tr>
+        <tr><td><strong>Unidade(s)</strong></td><td>Filtra colaboradores por filial/planta. "Todas" envia para toda a empresa.</td><td>Use filtro para campanhas segmentadas por unidade</td></tr>
+        <tr><td><strong>Departamento</strong></td><td>Filtra por área funcional. Combinável com unidade.</td><td>Deixar "Todos" para diagnóstico geral</td></tr>
+        <tr><td><strong>Cargo</strong></td><td>Filtra por cargo específico. Útil para pesquisas direcionadas.</td><td>Filtrar só se quiser avaliar um cargo específico</td></tr>
+        <tr><td><strong>Canal de envio</strong></td><td>Onde o link chegará para o colaborador.</td><td>WhatsApp tem taxa de abertura ~4x maior que e-mail</td></tr>
+        <tr><td><strong>Versão</strong></td><td>Quantidade de perguntas enviadas. Rápida (21) ou Padrão (configurada em Módulos).</td><td>Padrão para gerar Laudo válido para GRO/NR-1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dica y">
+      <div style="font-size:18px;flex-shrink:0;">⚠️</div>
+      <div><strong>Atenção antes de disparar</strong>Verifique: (1) todos os colaboradores têm WhatsApp ou e-mail cadastrado; (2) as perguntas foram salvas em Módulos e Perguntas; (3) o número de colaboradores no aviso verde está correto. Após o disparo, não é possível cancelar os links já enviados.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S4: WHATSAPP E MAGIC LINK ── -->
+<div class="sec" id="s4">
+  <div class="sec-hd wa">
+    <div class="sec-n wa">📱</div>
+    <div><h2>O que o Colaborador Recebe no WhatsApp</h2><p>Mensagem automática, Magic Link e garantia de anonimato</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <p style="margin-bottom:16px;font-size:13.5px;">Após o disparo, o sistema envia automaticamente uma mensagem personalizada para cada colaborador via WhatsApp. Veja como ela chega:</p>
+
+    <!-- SIMULAÇÃO WHATSAPP -->
+    <div style="background:#E5DDD5;border-radius:12px;padding:16px;max-width:400px;margin:16px 0;">
+      <div style="background:#075E54;color:#fff;border-radius:8px 8px 0 0;padding:10px 14px;display:flex;align-items:center;gap:10px;margin:-16px -16px 14px -16px;border-radius:12px 12px 0 0;">
+        <div style="width:32px;height:32px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🗺</div>
+        <div><div style="font-size:12px;font-weight:700;">NR-1 Map</div><div style="font-size:10px;opacity:.8;">Sistema Oficial · online</div></div>
+      </div>
+
+      <!-- Mensagem sistema -->
+      <div style="background:#fff;border-radius:0 8px 8px 8px;padding:12px 14px;margin-bottom:8px;font-size:12px;line-height:1.65;max-width:86%;box-shadow:0 1px 2px rgba(0,0,0,.1);">
+        <div style="font-size:10px;color:#25D366;font-weight:700;margin-bottom:4px;">NR-1 Map · Sistema</div>
+        Olá! 👋<br><br>
+        A <strong>A!Equipe Desenvolvimento Humano e Cultural</strong> está realizando uma pesquisa sobre o ambiente de trabalho.<br><br>
+        🔐 <strong>Suas respostas são 100% anônimas</strong> — o sistema não identifica quem respondeu. Apenas resultados agrupados por cargo são exibidos.<br><br>
+        ⏱ Tempo estimado: <strong>~25 minutos</strong><br>
+        📅 Prazo: até <strong>09/08/2026</strong><br><br>
+        Clique no link para responder:
+        <div style="background:#25D366;color:#fff;border-radius:6px;padding:8px 12px;text-align:center;font-size:11px;font-weight:700;margin-top:10px;cursor:pointer;">
+          🔗 Acessar Pesquisa →
+        </div>
+        <div style="font-size:9px;color:#999;margin-top:6px;">Link de uso único · expira após o envio ou no prazo</div>
+      </div>
+
+      <!-- Timestamp -->
+      <div style="font-size:9px;color:#667781;text-align:right;margin-bottom:10px;">08/08/2026 · 09:00 ✓✓</div>
+
+      <!-- Resposta colaborador (se o lembrete foi enviado) -->
+      <div style="background:#E8F8EE;border-radius:8px 0 8px 8px;padding:10px 12px;margin-left:auto;font-size:11px;color:var(--tx);max-width:80%;box-shadow:0 1px 2px rgba(0,0,0,.1);margin-bottom:4px;">
+        Obrigado, já respondi! ✅
+      </div>
+      <div style="font-size:9px;color:#667781;text-align:right;">10/08/2026 · 14:32 ✓✓</div>
+    </div>
+
+    <div class="dica wa">
+      <div style="font-size:18px;flex-shrink:0;">📱</div>
+      <div><strong>Por que WhatsApp tem muito mais adesão</strong>A taxa média de abertura de e-mails corporativos é 20–25%. A de mensagens WhatsApp é 90–98%. Para empresas que precisam de taxa de resposta alta (mínimo 60% para validade estatística do IBP), o WhatsApp é fundamental.</div>
+    </div>
+
+    <hr>
+
+    <h3 style="color:var(--v);font-size:14px;margin-bottom:12px;">Como funciona o Magic Link (token OTP)</h3>
+
+    <div class="wa-fluxo">
+      <div class="wa-step">
+        <div class="wa-ic sys">🔐</div>
+        <div class="wa-body">
+          <div class="wa-title">Token gerado no servidor</div>
+          <div class="wa-desc">Cada colaborador recebe um token único criptografado. O token contém: <strong>empresaId + pesquisaId + cargo/CBO</strong>. Nunca contém nome, CPF ou qualquer dado pessoal.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic col">👆</div>
+        <div class="wa-body">
+          <div class="wa-title">Colaborador clica → abre no navegador</div>
+          <div class="wa-desc">O link abre diretamente no navegador do celular. Sem app, sem login, sem senha. A pesquisa já está carregada e pronta para responder.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic col">✍️</div>
+        <div class="wa-body">
+          <div class="wa-title">Responde e envia</div>
+          <div class="wa-desc">Ao clicar em "Enviar respostas", o token é marcado como usado e expira imediatamente. Não é possível responder novamente com o mesmo link.</div>
+        </div>
+      </div>
+      <div class="wa-step">
+        <div class="wa-ic sys">📊</div>
+        <div class="wa-body">
+          <div class="wa-title">IBP calculado e agregado anonimamente</div>
+          <div class="wa-desc">As respostas são armazenadas associadas ao <strong>cargo/CBO</strong>, não ao colaborador. O dashboard atualiza em tempo real. O RH nunca consegue rastrear quem respondeu o quê.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dica r">
+      <div style="font-size:18px;flex-shrink:0;">🔒</div>
+      <div><strong>Trava de anonimato por CBO</strong>Mesmo com os dados agrupados por cargo, o sistema só exibe resultados segmentados quando há <strong>mínimo de 3 respondentes</strong> naquele cargo/CBO. Se um cargo tem apenas 1 ou 2 pessoas, o resultado aparece apenas no IBP Geral — nunca isolado. Isso garante anonimato mesmo em equipes pequenas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S5: TELA DO COLABORADOR ── -->
+<div class="sec" id="s5">
+  <div class="sec-hd wa">
+    <div class="sec-n wa">👤</div>
+    <div><h2>A Experiência do Colaborador</h2><p>O que ele vê e como responde</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <p style="margin-bottom:16px;font-size:13.5px;">Ao clicar no link, o colaborador vê uma tela limpa, mobile-first, sem nenhum login. Veja como é a experiência completa:</p>
+
+    <!-- SIMULAÇÃO TELA COLABORADOR -->
+    <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+
+      <div class="colab-screen">
+        <div class="cs-header">
+          <div class="cs-logo">NR-1 Map</div>
+          <div class="cs-empresa">A!Equipe Desenvolvimento Humano e Cultural</div>
+          <div class="cs-anonimo">🔐 Suas respostas são 100% anônimas</div>
+        </div>
+        <div class="cs-pergunta">
+          <div class="cs-pnum">Pergunta — Bem-estar no Trabalho</div>
+          <div class="cs-ptxt">Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.</div>
+          <div class="cs-escala">
+            <div class="cs-op"><div class="cs-radio"></div> Sempre</div>
+            <div class="cs-op sel"><div class="cs-radio"></div> Na maioria das vezes</div>
+            <div class="cs-op"><div class="cs-radio"></div> Metade das vezes</div>
+            <div class="cs-op"><div class="cs-radio"></div> Poucas vezes</div>
+            <div class="cs-op"><div class="cs-radio"></div> Raramente</div>
+          </div>
+        </div>
+        <div class="cs-footer">
+          <span>Anônimo · Seguro</span>
+          <button class="cs-btn">Próxima →</button>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:240px;">
+        <h4 style="font-size:13px;color:var(--v);margin-bottom:12px;">O que o colaborador vê:</h4>
+        <div class="passo"><div class="pn wa">1</div><div class="pt"><strong>Tela de boas-vindas</strong><span>Nome da empresa, garantia de anonimato em destaque, tempo estimado e prazo. Colaborador clica em "Iniciar".</span></div></div>
+        <div class="passo"><div class="pn wa">2</div><div class="pt"><strong>Perguntas embaralhadas</strong><span>As perguntas chegam em ordem aleatória — o colaborador não percebe qual módulo está sendo avaliado. Isso elimina o viés de preparar respostas.</span></div></div>
+        <div class="passo"><div class="pn wa">3</div><div class="pt"><strong>Escala de 5 opções</strong><span>Sempre / Na maioria / Metade / Poucas vezes / Raramente. Cada opção tem um valor IBP correspondente (de +5 a −5).</span></div></div>
+        <div class="passo"><div class="pn wa">4</div><div class="pt"><strong>Envio e confirmação</strong><span>Ao final, confirma o envio. Token expira imediatamente. Tela de agradecimento aparece com mensagem positiva.</span></div></div>
+        <div class="passo" style="border:none;"><div class="pn wa">5</div><div class="pt"><strong>Não precisa instalar nada</strong><span>Funciona em qualquer navegador de celular. Sem app, sem cadastro, sem senha. Tempo médio: 10 a 25 minutos.</span></div></div>
+      </div>
+    </div>
+
+    <table class="tb" style="margin-top:20px;">
+      <thead><tr><th>Opção de resposta</th><th>Valor IBP</th><th>Interpretação</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sempre</strong></td><td style="color:var(--v);font-weight:700;">+5,0</td><td>Experiência totalmente positiva — Terreno Fértil</td></tr>
+        <tr><td><strong>Na maioria das vezes</strong></td><td style="color:var(--v);font-weight:700;">+2,5</td><td>Experiência predominantemente positiva</td></tr>
+        <tr><td><strong>Metade das vezes</strong></td><td style="font-weight:700;">0,0</td><td>Neutro — Defesa Oculta central</td></tr>
+        <tr><td><strong>Poucas vezes</strong></td><td style="color:#C0392B;font-weight:700;">−2,5</td><td>Experiência predominantemente negativa</td></tr>
+        <tr><td><strong>Raramente</strong></td><td style="color:#C0392B;font-weight:700;">−5,0</td><td>Experiência totalmente negativa — Sofrimento Patogênico</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dica">
+      <div style="font-size:18px;flex-shrink:0;">💡</div>
+      <div><strong>Dica — Como comunicar para os colaboradores antes do disparo</strong>Antes de enviar, comunique internamente (via e-mail ou grupo de WhatsApp) que uma pesquisa chegará. Explique: é da empresa, é anônima, o RH não vê quem respondeu e leva menos de 25 minutos. Isso aumenta a taxa de resposta significativamente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S6: ACOMPANHAR ── -->
+<div class="sec" id="s6">
+  <div class="sec-hd">
+    <div class="sec-n">6</div>
+    <div><h2>Acompanhar as Respostas em Tempo Real</h2><p>Dashboard e taxa de resposta</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="mk">
+      <div class="mk-bar"><span class="d dr"></span><span class="d dy"></span><span class="d dg"></span><span class="url">Dashboard</span></div>
+      <div style="background:#fff;padding:14px 18px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:700;font-size:16px;">14</div><div style="font-size:10px;color:var(--mu);">Colaboradores<br>Ativos</div></div>
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:700;font-size:16px;color:#D4820A;">7</div><div style="font-size:10px;color:var(--mu);">Respondentes<br>até agora</div></div>
+          <div style="background:#FFF8E1;border:1px solid #F5CC6A;border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:800;font-size:16px;color:#D4820A;">−0,3</div><div style="font-size:10px;color:#D4820A;font-weight:600;">IBP Geral<br>Defesa Oculta</div></div>
+          <div style="background:#E6F4EF;border:1px solid var(--vl);border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:700;font-size:16px;color:var(--v);">50%</div><div style="font-size:10px;color:var(--v);font-weight:600;">Taxa de<br>Resposta</div></div>
+        </div>
+        <div style="background:#FFF8E1;border:1px solid #F5CC6A;border-radius:7px;padding:9px 12px;font-size:11px;color:#7A5C00;display:flex;gap:8px;align-items:center;">
+          <span>⚠️</span>
+          <span><strong>7 de 14 ainda não responderam.</strong> Lembrete automático enviado às 48h. Prazo encerra em 3 dias.</span>
+        </div>
+      </div>
+      <div class="mk-cap">
+        <strong>Dashboard durante a coleta</strong>
+        <p>Acompanhe a taxa de resposta em tempo real. O IBP vai sendo calculado conforme chegam as respostas. O alerta aparece automaticamente quando há colaboradores que ainda não responderam.</p>
+      </div>
+    </div>
+
+    <div class="passo"><div class="pn">A</div><div class="pt"><strong>Taxa de resposta mínima: 60%</strong><span>Abaixo disso, o IBP segmentado por cargo pode ter baixa representatividade estatística. O sistema não bloqueia o laudo, mas indica quando a amostra é insuficiente.</span></div></div>
+    <div class="passo"><div class="pn">B</div><div class="pt"><strong>Resultados parciais</strong><span>O Dashboard mostra o IBP parcial em tempo real. Os valores vão estabilizar conforme mais respostas chegam. Não tome decisões com menos de 40% de resposta.</span></div></div>
+    <div class="passo"><div class="pn">C</div><div class="pt"><strong>Reenvio manual</strong><span>Se precisar reenviar para colaboradores específicos (além do lembrete automático de 48h), acesse Colaboradores → localize o colaborador → LINK PESQUISA → "Reenviar". O token antigo expira e um novo é gerado.</span></div></div>
+    <div class="passo" style="border:none;"><div class="pn">D</div><div class="pt"><strong>Encerramento</strong><span>Ao atingir o prazo configurado, os tokens expiram automaticamente. Os resultados ficam consolidados no Histórico e os documentos GRO podem ser gerados em Relatórios por Ciclo.</span></div></div>
+  </div>
+</div>
+
+<!-- ── S7: AUTOMAÇÕES ── -->
+<div class="sec" id="s7">
+  <div class="sec-hd r">
+    <div class="sec-n r">7</div>
+    <div><h2>Automações — Piloto Automático NR-1</h2><p>Configure uma vez, o sistema cuida do resto</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <p style="margin-bottom:16px;font-size:13.5px;">Com as automações ativas, sua empresa mantém o ciclo NR-1 sem intervenção manual. Configure em <strong>Planejamento → Regras de Disparo Automático</strong>.</p>
+
+    <div class="auto-card">
+      <div class="auto-ic v">📡</div>
+      <div class="auto-body">
+        <div class="auto-title">Pesquisa Pulso semanal automática</div>
+        <div class="auto-desc">Toda semana, a IA escolhe o tema com pior IBP do período e envia 3 perguntas via WhatsApp para todos os colaboradores ativos. O gestor não precisa fazer nada — o ciclo de monitoramento contínuo da NR-1 fica 100% automático.</div>
+      </div>
+      <div class="toggle-sim"></div>
+    </div>
+
+    <div class="auto-card">
+      <div class="auto-ic y">⏰</div>
+      <div class="auto-body">
+        <div class="auto-title">Lembrete automático (48h sem resposta)</div>
+        <div class="auto-desc">Para colaboradores que não responderam em 48h, o sistema reenvia automaticamente a mensagem com o mesmo link (ou novo token, se o anterior expirou). Aumenta a taxa de resposta em média 30% sem trabalho extra do RH.</div>
+      </div>
+      <div class="toggle-sim"></div>
+    </div>
+
+    <div class="auto-card">
+      <div class="auto-ic r">📅</div>
+      <div class="auto-body">
+        <div class="auto-title">Diagnóstico Geral anual obrigatório</div>
+        <div class="auto-desc">30 dias antes do aniversário do último Diagnóstico Geral, o sistema envia um alerta ao gestor de RH lembrando que o ciclo anual está próximo do vencimento. Garante conformidade com a exigência anual da NR-1 sem depender de calendário manual.</div>
+      </div>
+      <div class="toggle-sim"></div>
+    </div>
+
+    <div class="dica">
+      <div style="font-size:18px;flex-shrink:0;">✅</div>
+      <div><strong>Configuração mínima recomendada</strong>Ative as 3 automações logo após o primeiro Diagnóstico Geral. Com isso: o Pulso semanal cumpre o item 1.5.4.4.6 da NR-1 automaticamente, o lembrete garante taxa de resposta alta e o alerta anual garante que o ciclo GRO nunca vence sem renovação.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S8: DIAGNÓSTICO vs PULSO ── -->
+<div class="sec" id="s8">
+  <div class="sec-hd">
+    <div class="sec-n">8</div>
+    <div><h2>Diagnóstico Geral vs Pesquisa Pulso</h2><p>Quando usar cada um e qual a diferença</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <table class="tb">
+      <thead><tr><th></th><th>🔬 Diagnóstico Geral</th><th>📡 Pesquisa Pulso</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Objetivo</strong></td><td>Diagnóstico completo para o GRO/PGR. Gera Laudo, Mapa de Risco e Plano 5W2H.</td><td>Monitoramento contínuo de um tema específico. Não gera laudo — gera evidência de acompanhamento.</td></tr>
+        <tr><td><strong>Frequência</strong></td><td>Mínimo 1x ao ano (exigência NR-1)</td><td>Toda semana (automático)</td></tr>
+        <tr><td><strong>Perguntas</strong></td><td>21 (Rápida) ou 54+ (Padrão) — todos os módulos</td><td>3 perguntas — apenas o tema com pior IBP</td></tr>
+        <tr><td><strong>Tempo do colaborador</strong></td><td>~10 a 25 minutos</td><td>~2 minutos</td></tr>
+        <tr><td><strong>Resultado</strong></td><td>IBP completo por módulo, subcategoria e cargo. 5 documentos GRO.</td><td>Tendência semanal do indicador monitorado. Histórico acumulado.</td></tr>
+        <tr><td><strong>Onde aparece</strong></td><td>Dashboard + Histórico + Laudo Técnico + Relatórios por Ciclo</td><td>Dashboard + Histórico (linha do tempo)</td></tr>
+        <tr><td><strong>Validade para auditoria</strong></td><td>✅ Documento oficial do GRO com valor jurídico</td><td>✅ Evidência de monitoramento contínuo (NR-1, 1.5.4.4.6)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="dica">
+      <div style="font-size:18px;flex-shrink:0;">💡</div>
+      <div><strong>Resumo prático</strong>O Diagnóstico Geral é o "exame completo" — feito 1x ao ano. A Pesquisa Pulso é o "check-up semanal" — automatizado e rápido. Os dois juntos formam o ciclo completo de conformidade com a NR-1.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<footer class="rodape">
+  <strong>NR-1 Map — Tutorial: Planejamento e Disparo de Campanha</strong><br>
+  <span class="rv">Dra. Lucia Kratz · CRP 09/20590 · Criadora do IBP e do NR-1 Map</span><br>
+  <span style="opacity:.5;font-size:11px;">Para dúvidas operacionais, acesse Tutoriais → Suporte no painel.</span>
+</footer>
+
+<script>
+// Highlight sidebar on scroll
+var secs=document.querySelectorAll('.sec');
+var items=document.querySelectorAll('.sp-item');
+window.addEventListener('scroll',function(){
+  var scrollY=window.scrollY+120;
+  secs.forEach(function(sec,i){
+    var top=sec.offsetTop;
+    var bot=top+sec.offsetHeight;
+    if(scrollY>=top&&scrollY<bot){
+      items.forEach(function(it){it.classList.remove('active');});
+      if(items[i])items[i].classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
