@@ -674,21 +674,29 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     story.append(Spacer(1, 3*mm))
 
     # Acoes em andamento
-    if acoes:
-        story.append(Paragraph("4.1 Plano de Acao — Status Resumido", S["h3"]))
-        hdr_ac = ["Acao / Grupo", "Classif. GRO", "Status"]
-        rows_ac = [hdr_ac]
-        for a in acoes:
-            gro_a = a.get("classif","—").upper()
-            rows_ac.append([
-                Paragraph(a.get("descricao","—"), S["cell"]),
-                Paragraph(gro_a,                   S["ctr"]),
-                Paragraph(a.get("status","—"),     S["cellb"]),
-            ])
-        tac = Table(rows_ac, colWidths=[97*mm, 35*mm, 37*mm], repeatRows=1)
-        tac.setStyle(TableStyle(TS_BASE))
-        story.append(tac)
-        story.append(Spacer(1, 4*mm))
+    # 4.1 — Referencia ao Plano de Acao (documento separado — Instrumento 3)
+    # O Laudo Tecnico e documento ANALITICO. O Plano de Acao 5W2H e gerado
+    # como documento operacional independente (Instrumento 3 do fluxo GRO).
+    story.append(Paragraph("4.1 Plano de Acao 5W2H — Referencia ao Instrumento 3", S["h3"]))
+    n_acoes = len(acoes)
+    acoes_sub = [a for a in acoes if a.get('classif','').upper() in ('SUBSTANCIAL','INTOLERAVEL','SUBSTANCIAL','INTOLERÁVEL')]
+    if n_acoes > 0:
+        story.append(Paragraph(
+            f"Foram identificadas <b>{n_acoes} acao(oes)</b> no Plano de Acao 5W2H, sendo "
+            f"<b>{len(acoes_sub)}</b> para setores/CBOs classificados como Substancial ou Intoleravel. "
+            "O detalhamento completo (responsavel, prazo, status e evidencias de execucao) consta no "
+            "<b>Instrumento 3 — Plano de Acao 5W2H</b>, documento operacional independente gerado pela plataforma NR-1 Map.",
+            S["body"]
+        ))
+    else:
+        story.append(Paragraph(
+            "Nenhum CBO ou setor classificado como Substancial ou Intoleravel neste ciclo. "
+            "Nao ha acoes corretivas obrigatorias — manter monitoramento de rotina via Pesquisa Pulso "
+            "conforme item 1.5.4.4.6 da NR-1. O Instrumento 3 (Plano 5W2H) registrara apenas o "
+            "compromisso de monitoramento continuo.",
+            S["body"]
+        ))
+    story.append(Spacer(1, 4*mm))
 
     # Conformidade com PGR
     story.append(Paragraph("4.2 Declaracao de Conformidade com o PGR", S["h3"]))
