@@ -358,7 +358,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
     <div class="nav-sec">Resultados</div>
     <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
-    <div class="nav-item" onclick="sv('laudo-tecnico')"><span class="ic">📋</span>Laudo Técnico</div>
+    <div class="nav-item" onclick="sv('laudo-tecnico')"><span class="ic">📋</span>Laudo Técnico Psicossocial</div>
     <div class="nav-item" onclick="sv('mapa-risco')"><span class="ic">🗺</span>Mapa de Risco</div>
     <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
     <div class="nav-item" onclick="sv('relatorio-anual')"><span class="ic">📊</span>Relatório Anual</div>
@@ -666,9 +666,9 @@ textarea.form-control{resize:vertical;min-height:70px;}
 <!-- ===== LAUDO TÉCNICO ===== -->
 <div id="view-laudo-tecnico" class="view">
   <div class="topbar">
-    <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico</div>
+    <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico Psicossocial</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar Laudo Completo PDF</button>
+      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar Laudo Técnico Psicossocial PDF</button>
     </div>
   </div>
   <div class="content" id="laudo-tecnico-content">
@@ -1989,7 +1989,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
         <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="verLinksEnviados()">Ver links ja enviados</button>
         <div style="margin-top:12px;padding:12px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;">
           <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">📄 Após receber as respostas</div>
-          <button class="btn btn-primary" style="width:100%;" onclick="gerarLaudoCompleto()">📄 Gerar Laudo Técnico PDF</button>
+          <button class="btn btn-primary" style="width:100%;" onclick="gerarLaudoCompleto()">📄 Gerar Laudo Técnico Psicossocial PDF</button>
         </div>
       </div>
     </div>
@@ -6312,9 +6312,20 @@ function gerarAtualizarDoc(tipo, btnId, urlField) {
   if (!empresaId) { alert('Empresa nao carregada.'); return; }
   var btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
-  var tipoLabel = {laudo_tecnico:'Laudo', mapa_risco:'Mapa', plano_5w2h:'Plano', inventario:'Inventario', acompanhamento:'Acompanhamento'}[tipo] || tipo;
+  var tipoLabel = {laudo_tecnico:'Laudo Tecnico Psicossocial', mapa_risco:'Mapa', plano_5w2h:'Plano', inventario:'Inventario', acompanhamento:'Acompanhamento'}[tipo] || tipo;
 
-  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=' + tipo)
+  // FIX: laudo_tecnico usa POST com logos; outros tipos usam GET simples
+  var fetchOpts = (tipo === 'laudo_tecnico')
+    ? { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          empresaId: empresaId, tipo: 'laudo_tecnico',
+          logoEmpresaUrl:  (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
+          logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                           'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
+        }) }
+    : undefined;
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=' + tipo, fetchOpts)
     .then(function(r){ return r.json(); })
     .then(function(d) {
       if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
@@ -6481,7 +6492,15 @@ function carregarRelatoriosPorCiclo(empresaId) {
               if (!empId) return;
               btnRef.textContent = '⏳ Gerando...';
               btnRef.disabled = true;
-              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo)
+              // FIX: laudo_tecnico usa POST com logos
+              var _opts4 = (tipo === 'laudo_tecnico')
+                ? { method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ empresaId: empId, tipo: 'laudo_tecnico',
+                      logoEmpresaUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
+                      logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                                       'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png' }) }
+                : undefined;
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo, _opts4)
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
                   btnRef.disabled = false;
@@ -6655,7 +6674,7 @@ function gerarAtualizarLaudo() {
   })
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (btn) { btn.textContent = '📄 Gerar / Atualizar Laudo'; btn.disabled = false; }
+      if (btn) { btn.textContent = '📄 Gerar Laudo Técnico Psicossocial PDF'; btn.disabled = false; }
       if (d.url) {
         // Salva laudoUrl no ciclo atual
         _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual);
@@ -6684,7 +6703,7 @@ function gerarAtualizarLaudo() {
       }
     })
     .catch(function(e) {
-      if (btn) { btn.textContent = '📄 Gerar Laudo Completo PDF'; btn.disabled = false; }
+      if (btn) { btn.textContent = '📄 Gerar Laudo Técnico Psicossocial PDF'; btn.disabled = false; }
       alert('Erro de conexao: ' + e.message);
     });
 }
