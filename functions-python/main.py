@@ -306,7 +306,31 @@ def gerar_pdf_por_tipo(dados, tipo):
     tmp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
     tmp.close()
 
-    if tipo == 'mapa_risco':
+    if tipo == 'laudo_tecnico':
+        # ROTA EXPLÍCITA — nunca pode cair no else ou em outro gerador
+        print(f"[gerarLaudo] ROTA laudo_tecnico → gerar_relatorio_final")
+        from gerar_relatorio_final import gerar_relatorio_final
+        payload_laudo = {
+            "empresa":             dados.get("empresa_nome", ""),
+            "cnpj":                dados.get("empresa_cnpj", ""),
+            "responsavel":         dados.get("responsavel", ""),
+            "responsavelTecnico":  dados.get("responsavelTecnico") or {},
+            "referencia":          dados.get("referencia", ""),
+            "colaboradoresAtivos": dados.get("num_colab", 0),
+            "respondentes":        dados.get("respondentes", 0),
+            "ibpGeral":            dados.get("ibp_geral"),
+            "ibpModulos":          dados.get("ibpModulos") or {},
+            "ibpSubcats":          dados.get("ibpSubcats") or {},
+            "porUnidade":          dados.get("porUnidade") or [],
+            "porCargo":            dados.get("porCargo") or [],
+            "acoes":               dados.get("acoes") or [],
+            "logoParceiroUrl":     dados.get("logoParceiroUrl") or
+                                   "https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png",
+            "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ""),
+        }
+        gerar_relatorio_final(payload_laudo, output_path=tmp.name)
+
+    elif tipo == 'mapa_risco':
         from gerar_mapa_risco import gerar_mapa_risco
         gerar_mapa_risco(dados=dados, output_path=tmp.name)
 
@@ -386,8 +410,19 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response(json.dumps({"error": "Empresa nao encontrada"}),
                                      status=404, mimetype='application/json')
 
-        # Tipo de documento solicitado
-        tipo = req.args.get('tipo') or (req.get_json(silent=True) or {}).get('tipo') or 'laudo_tecnico'
+        # Tipo de documento solicitado — POST body tem prioridade sobre query string
+        body_json = req.get_json(silent=True) or {}
+        tipo = req.args.get('tipo') or body_json.get('tipo') or 'laudo_tecnico'
+
+        # FIX: logos do body JS sobrescrevem as do Firestore (garante que chegam ao PDF)
+        if body_json.get('logoEmpresaUrl'):
+            dados['logoEmpresaUrl'] = body_json['logoEmpresaUrl']
+        if body_json.get('logoParceiroUrl'):
+            dados['logoParceiroUrl'] = body_json['logoParceiroUrl']
+
+        # Garante fallback de logo parceiro nunca vazio
+        if not dados.get('logoParceiroUrl'):
+            dados['logoParceiroUrl'] = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
 
         # Gera PDF
         pdf_path = gerar_pdf_por_tipo(dados, tipo)
