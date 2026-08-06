@@ -157,19 +157,55 @@ s_legend = ParagraphStyle('legend', parent=styles['Normal'], fontSize=8, textCol
 
 
 # ───────────────────────────── CABEÇALHO / RODAPÉ (idêntico aos outros 3 docs) ─────────────────────────────
+import urllib.request as _urllib_req
+import tempfile as _tempfile_mod
+
+def _baixar_logo_inv(url):
+    """Baixa logo para arquivo temporario; retorna path ou None."""
+    if not url:
+        return None
+    try:
+        tmp = _tempfile_mod.NamedTemporaryFile(suffix='.png', delete=False)
+        tmp.close()
+        _urllib_req.urlretrieve(url, tmp.name)
+        return tmp.name
+    except Exception:
+        return None
+
 def desenhar_cabecalho_rodape(canvas_obj, doc):
+    """Cabecalho com logos reais (atributos injetados por gerar_inventario)."""
+    from reportlab.lib.utils import ImageReader
     canvas_obj.saveState()
     w, h = A4
 
-    # Cabeçalho
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, h - 14 * mm, "[ LOGO PARCEIRO ]")
-    canvas_obj.drawRightString(w - 20 * mm, h - 14 * mm, "[ LOGO DA EMPRESA ]")
+    _en  = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
+    _lp  = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
+    _le  = getattr(desenhar_cabecalho_rodape, '_logo_emp',  None)
 
+    # Logo parceiro (esquerda)
+    if _lp:
+        try:
+            canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-32*mm,
+                                  width=28*mm, height=14*mm,
+                                  preserveAspectRatio=True, mask='auto')
+        except Exception:
+            canvas_obj.setFont('Helvetica', 7)
+            canvas_obj.setFillColor(CINZA_TEXTO)
+            canvas_obj.drawString(18*mm, h-20*mm, "NR-1 Map")
+
+    # Logo empresa (direita)
+    if _le:
+        try:
+            canvas_obj.drawImage(ImageReader(_le), w-50*mm, h-32*mm,
+                                  width=28*mm, height=14*mm,
+                                  preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
+
+    # Nome empresa (centro)
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
+    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
@@ -177,7 +213,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTÁRIO DE RISCOS PSICOSSOCIAIS")
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
@@ -188,7 +224,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.setFillColor(CINZA_TEXTO)
     canvas_obj.drawString(20 * mm, 12 * mm,
                            "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
+    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
 
     canvas_obj.restoreState()
 
@@ -221,9 +257,33 @@ def gerar_inventario(dados: dict = None, output_path=None):
 
     _inventario = _inventario_dinamico if _inventario_dinamico else INVENTARIO
 
+    # Logos reais para o cabecalho
+    _lp_path_inv = _baixar_logo_inv(_dados.get('logoParceiroUrl') or
+                   'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+    _le_path_inv = _baixar_logo_inv(_dados.get('logoEmpresaUrl') or '')
+
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
+        from reportlab.lib.utils import ImageReader
         canvas_obj.saveState()
         w, h = A4
+
+        # Logo parceiro (esquerda)
+        if _lp_path_inv:
+            try:
+                canvas_obj.drawImage(ImageReader(_lp_path_inv), 18*mm, h-32*mm,
+                                      width=28*mm, height=14*mm,
+                                      preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+        # Logo empresa (direita)
+        if _le_path_inv:
+            try:
+                canvas_obj.drawImage(ImageReader(_le_path_inv), w-50*mm, h-32*mm,
+                                      width=28*mm, height=14*mm,
+                                      preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+
         canvas_obj.setFont('Helvetica-Bold', 11)
         canvas_obj.setFillColor(VERDE_NR1)
         canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
