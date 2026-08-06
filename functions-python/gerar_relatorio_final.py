@@ -249,9 +249,14 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     output_path = output_path or nome_arquivo_padrao(empresa)
 
+    # FIX: ibp_geral NUNCA bloqueia geração do laudo.
+    # Se None (ciclo sem respostas), usa 0.0 como placeholder com nota no relatório.
+    _sem_dados_ibp = ibp_geral is None
+    if _sem_dados_ibp:
+        ibp_geral = 0.0
     taxa = round(100 * respondentes / col_ativos) if col_ativos > 0 else 0
-    zona_geral = zona_de(ibp_geral) if ibp_geral is not None else "Sem dados"
-    gro_geral  = classificar_gro(ibp_geral, respondentes)[1] if ibp_geral is not None else "—"
+    zona_geral = zona_de(ibp_geral)
+    gro_geral  = classificar_gro(ibp_geral, respondentes)[1]
 
     agora     = datetime.datetime.now(datetime.timezone.utc)
     agora_str = agora.strftime("%d/%m/%Y as %H:%M UTC")
@@ -266,6 +271,16 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     def _cb(c, d): _cabecalho_rodape(c, d, empresa, resp_tec, _logo_parceiro_path, _logo_empresa_path)
 
     story = []
+
+    # FIX: Banner de aviso quando laudo gerado sem dados de respostas
+    if _sem_dados_ibp or respondentes == 0:
+        story.append(Paragraph(
+            "AVISO: Este laudo foi gerado sem respostas computadas no ciclo atual. "
+            "Os indices IBP exibidos sao placeholders (0,00). "
+            "Dispare um Diagnostico Geral e aguarde respostas para obter o laudo analitico completo.",
+            S["body"]
+        ))
+        story.append(Spacer(1, 4*mm))
 
     # ════════════════════════════════════════════════════════
     # CAPA
@@ -381,8 +396,11 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     story.append(Paragraph("2. Resultados por Modulo e Subcategoria (IBP)", S["h2"]))
     story.append(Paragraph(
         "Apresenta-se a media IBP de cada subcategoria avaliada, com a zona Dejours correspondente "
-        "e a classificacao oficial GRO. Subcategorias com menos de "
-        f"{MIN_RESPONDENTES} respondentes sao suprimidas por trava de anonimato estatistico.",
+        "e a classificacao oficial GRO. O Resultado Geral da Organizacao e os indices por "
+        "Modulos e Subcategorias sao exibidos independentemente do numero de respondentes. "
+        "Subcategorias marcadas com (*) possuem menos de "
+        f"{MIN_RESPONDENTES} respondentes — o IBP e exibido com representatividade reduzida. "
+        "A trava de anonimato estatistico aplica-se EXCLUSIVAMENTE as quebras por Unidade e Cargo/CBO individuais.",
         S["body"]
     ))
 
@@ -431,15 +449,22 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
                 ibp_sc = sc.get("ibp", 0.0)
                 nome_sc = SUBCATS_NOME.get(sc_id, sc.get("nome", sc_id))
                 if n_sc < MIN_RESPONDENTES:
+                    # FIX: IBP de subcategoria nunca é suprimido — trava de anonimato
+                    # se aplica SOMENTE às quebras por Unidade e Cargo individuais.
+                    # Exibe o IBP com nota de representatividade reduzida.
+                    zona_sc_lim = zona_de(ibp_sc)
+                    gro_sc_lim  = classificar_gro(ibp_sc, n_sc)[1]
+                    cor_sc_lim  = ZONA_COR.get(zona_sc_lim, CINZA_CLR)
                     rows_sc.append([
-                        Paragraph(nome_sc, S["cell"]),
-                        Paragraph(f"< {MIN_RESPONDENTES}", S["ctr"]),
-                        Paragraph("—", S["ctr"]),
-                        Paragraph("Suprimido (anonimato)", S["ctr"]),
-                        Paragraph("—", S["ctr"]),
-                        Paragraph("—", S["ctr"]),
+                        Paragraph(f"{nome_sc} *", S["cell"]),
+                        Paragraph(str(n_sc),        S["ctr"]),
+                        Paragraph(f"{ibp_sc:+.2f}", S["ctr"]),
+                        Paragraph(zona_sc_lim,       S["ctr"]),
+                        Paragraph(gro_sc_lim,         S["ctr"]),
+                        Paragraph("⚠" if gro_sc_lim in ("SUBSTANCIAL","INTOLERAVEL") else "✓", S["ctr"]),
                     ])
-                    bgs_sc.append(('BACKGROUND',(0,idx),(-1,idx), CINZA_CLR))
+                    bgs_sc.append(('BACKGROUND',(3,idx),(4,idx), cor_sc_lim))
+                    bgs_sc.append(('BACKGROUND',(0,idx),(0,idx), CINZA_CLR))
                     continue
                 zona_sc = zona_de(ibp_sc)
                 gro_sc  = classificar_gro(ibp_sc, n_sc)[1]
@@ -473,7 +498,8 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     story.append(Paragraph("3. Segmentacao por Unidade e Cargo/CBO", S["h2"]))
     story.append(Paragraph(
-        f"Trava de anonimato estatistico aplicada: grupos com menos de <b>{MIN_RESPONDENTES} respondentes</b> "
+        f"Trava de anonimato estatistico: resultados Gerais, por Modulo e por Subcategoria sao SEMPRE exibidos. "
+        f"Quebras por Unidade ou Cargo com menos de <b>{MIN_RESPONDENTES} respondentes</b> "
         "nao sao individualizados, sendo apresentados de forma agregada para proteger a identidade "
         "dos colaboradores, conforme diretrizes de compliance da plataforma.",
         S["body"]
