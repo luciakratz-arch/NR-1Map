@@ -347,11 +347,11 @@ def gerar_pdf_por_tipo(dados, tipo):
         gerar_acompanhamento(dados=dados, output_path=tmp.name)
 
     else:
-        # laudo_tecnico, relatorio_anual, diagnostico_geral e qualquer outro tipo
-        # usa SEMPRE o gerador completo — sem fallback para versao resumida
-        print(f"[gerarLaudo] Chamando gerar_relatorio_final com ibpSubcats={len(dados.get('ibpSubcats') or {})} subcats, ibpModulos={list((dados.get('ibpModulos') or {}).keys())}")
+        # Tipo nao reconhecido ou relatorio_anual (futuro gerador dedicado)
+        # Por ora: gera o Laudo Tecnico completo como substituto seguro
+        print(f"[gerarLaudo] tipo='{tipo}' nao mapeado — usando gerar_relatorio_final como fallback seguro")
         from gerar_relatorio_final import gerar_relatorio_final
-        payload = {
+        payload_fallback = {
             "empresa":             dados.get("empresa_nome", ""),
             "cnpj":                dados.get("empresa_cnpj", ""),
             "responsavel":         dados.get("responsavel", ""),
@@ -365,10 +365,11 @@ def gerar_pdf_por_tipo(dados, tipo):
             "porUnidade":          dados.get("porUnidade") or [],
             "porCargo":            dados.get("porCargo") or [],
             "acoes":               dados.get("acoes") or [],
-            "logoParceiroUrl":     dados.get("logoParceiroUrl", "https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png"),
+            "logoParceiroUrl":     dados.get("logoParceiroUrl") or
+                                   "https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png",
             "logoEmpresaUrl":      dados.get("logoEmpresaUrl", ""),
         }
-        gerar_relatorio_final(payload, output_path=tmp.name)
+        gerar_relatorio_final(payload_fallback, output_path=tmp.name)
 
     return tmp.name
 
