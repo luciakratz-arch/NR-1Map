@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Operacional RH — NR-1 Map</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+:root{--v:#0A6E4F;--vl:#12A073;--vp:#E6F4EF;--r:#7B00C4;--rp:#F3E6FF;--pr:#0D1210;--bg:#F4F6F5;--bd:#D8E8E2;--tx:#1C1C1C;--mu:#5A6672;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.65;}
+
+/* CAPA */
+.capa{background:linear-gradient(160deg,#0D1210 0%,#0D2A20 55%,#1A0D35 100%);color:#fff;padding:60px 40px 52px;position:relative;overflow:hidden;}
+.capa::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(123,0,196,.22) 0%,transparent 70%);}
+.capa::after{content:'';position:absolute;bottom:-60px;left:10%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(10,110,79,.25) 0%,transparent 70%);}
+.capa-in{max-width:840px;margin:0 auto;position:relative;z-index:1;}
+.capa-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(10,110,79,.3);border:1px solid rgba(18,160,115,.5);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#7FFFD4;margin-bottom:22px;}
+.capa h1{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,44px);font-weight:800;line-height:1.1;margin-bottom:16px;}
+.capa h1 em{color:#7FFFD4;font-style:normal;}
+.capa p{font-size:15px;opacity:.8;max-width:560px;line-height:1.7;margin-bottom:32px;}
+.capa-meta{display:flex;flex-wrap:wrap;gap:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:20px;font-size:11px;color:rgba(255,255,255,.6);}
+.capa-meta strong{display:block;color:#fff;font-size:12px;margin-bottom:2px;}
+
+/* LAYOUT */
+.wrap{max-width:860px;margin:0 auto;padding:48px 20px 80px;}
+
+/* ALERTA */
+.alerta{background:#FFFBEA;border:2px solid #F5CC6A;border-radius:12px;padding:18px 22px;margin-bottom:36px;display:flex;gap:14px;align-items:flex-start;font-size:13px;color:#7A5C00;line-height:1.7;}
+.alerta strong{color:#4A3800;}
+
+/* SECAO */
+.sec{background:#fff;border-radius:16px;margin-bottom:28px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.05);}
+.sec-hd{display:flex;align-items:center;gap:14px;padding:20px 26px;border-bottom:2px solid var(--vp);}
+.sec-hd.r{border-bottom-color:var(--rp);}
+.sec-n{width:44px;height:44px;border-radius:11px;background:var(--v);color:#fff;font-family:'Syne',sans-serif;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-n.r{background:var(--r);}
+.sec-hd h2{font-family:'Syne',sans-serif;font-size:17px;color:var(--v);font-weight:700;}
+.sec-hd.r h2{color:var(--r);}
+.sec-hd p{font-size:11px;color:var(--mu);margin-top:2px;}
+.sec-bd{padding:26px;}
+
+/* MOCKUP */
+.mockup{border:1.5px solid var(--bd);border-radius:10px;overflow:hidden;margin:18px 0;background:#F9FBFA;}
+.mockup-bar{background:#1E3A30;padding:8px 14px;display:flex;align-items:center;gap:8px;}
+.mockup-bar span{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.mockup-bar .r{background:#FF5F57;}
+.mockup-bar .y{background:#FEBC2E;}
+.mockup-bar .g{background:#28C840;}
+.mockup-bar .url{background:rgba(255,255,255,.12);border-radius:4px;padding:2px 10px;font-size:10px;color:rgba(255,255,255,.6);margin-left:auto;font-family:monospace;}
+.mockup-screen{padding:0;}
+.mockup-screen img{width:100%;display:block;max-height:260px;object-fit:cover;object-position:top;}
+.mockup-caption{padding:12px 16px;background:#F4F6F5;border-top:1px solid var(--bd);}
+.mockup-caption strong{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--v);display:block;margin-bottom:4px;}
+.mockup-caption p{font-size:12px;color:var(--mu);line-height:1.55;}
+
+/* MOCKUP VISUAL GERADO */
+.mv{background:#fff;border:1px solid var(--bd);}
+.mv-sidebar{width:200px;background:#0D1F17;float:left;min-height:220px;padding:14px 0;}
+.mv-sidebar .ms-item{padding:8px 16px;font-size:11px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:8px;}
+.mv-sidebar .ms-item.active{background:rgba(18,160,115,.2);color:#7FFFD4;border-right:3px solid var(--vl);}
+.mv-sidebar .ms-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.mv-main{margin-left:200px;padding:16px;min-height:220px;}
+.mv-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px;}
+.mv-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.mv-card{background:var(--vp);border:1.5px solid var(--bd);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--v);font-weight:600;flex:1;min-width:80px;text-align:center;}
+.mv-card.r{background:var(--rp);color:var(--r);border-color:#D4A0FF;}
+.mv-card.y{background:#FFF8E1;color:#D4820A;border-color:#F5CC6A;}
+.mv-card.danger{background:#FEECEC;color:#C0392B;border-color:#E87070;}
+.mv-table{width:100%;border-collapse:collapse;font-size:11px;}
+.mv-table th{background:var(--v);color:#fff;padding:6px 10px;text-align:left;}
+.mv-table td{padding:6px 10px;border-bottom:1px solid var(--bd);}
+.mv-table tr:nth-child(even) td{background:#F9FBFA;}
+.mv-badge{display:inline-block;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}
+.mv-badge.ok{background:#D1FAE5;color:#065F46;}
+.mv-badge.sub{background:#FEECEC;color:#C0392B;}
+.mv-badge.mod{background:#FFF8E1;color:#D4820A;}
+.mv-badge.triv{background:#E6F4EF;color:var(--v);}
+.mv-gauge{display:flex;gap:12px;align-items:flex-end;margin-top:8px;}
+.mv-gauge-item{flex:1;text-align:center;}
+.mv-gauge-bar{height:60px;border-radius:8px 8px 0 0;margin-bottom:4px;}
+.mv-gauge-label{font-size:9px;color:var(--mu);font-weight:600;}
+.mv-gauge-val{font-size:13px;font-weight:800;margin-bottom:2px;}
+.mv-form-row{display:flex;gap:8px;margin-bottom:8px;}
+.mv-input{flex:1;border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--mu);background:#fafafa;}
+.mv-btn{background:var(--v);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;}
+.mv-btn.r{background:var(--r);}
+.mv-tag{display:inline-block;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;margin-right:4px;}
+.mv-tag.rh{background:#0891b2;color:#fff;}
+.mv-tag.co{background:#6d28d9;color:#fff;}
+.cf{clear:both;}
+
+/* DICA */
+.dica{display:flex;gap:11px;background:#EAF7F1;border-left:4px solid var(--vl);border-radius:0 8px 8px 0;padding:12px 15px;margin:14px 0;font-size:12.5px;}
+.dica strong{color:var(--v);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+.dica.r{background:#F0E6FF;border-left-color:var(--r);}
+.dica.r strong{color:var(--r);}
+
+/* PASSOS */
+.passos{display:flex;flex-direction:column;gap:0;margin:14px 0;}
+.passo{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #EEF2F0;align-items:flex-start;}
+.passo:last-child{border:none;}
+.pn{width:26px;height:26px;border-radius:50%;background:var(--v);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.pn.r{background:var(--r);}
+.pt strong{display:block;font-size:13px;margin-bottom:2px;}
+.pt span{color:var(--mu);font-size:12px;}
+
+/* IBP */
+.ibp-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+.ibp-c{border-radius:9px;padding:14px 12px;text-align:center;}
+.ibp-c.so{background:#FEECEC;border:1.5px solid #E87070;}
+.ibp-c.de{background:#FFF8E1;border:1.5px solid #F5CC6A;}
+.ibp-c.fe{background:#E6F4EF;border:1.5px solid var(--vl);}
+.ibp-c .ir{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:5px;}
+.so .ir{color:#C0392B;}.de .ir{color:#D4820A;}.fe .ir{color:var(--v);}
+.ibp-c .in{font-size:11px;font-weight:700;margin-bottom:5px;}
+.ibp-c .ia{font-size:10px;color:var(--mu);line-height:1.4;}
+.ibp-c .ig{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:9px;margin-top:5px;}
+.so .ig{background:#C0392B;color:#fff;}.de .ig{background:#D4820A;color:#fff;}.fe .ig{background:var(--v);color:#fff;}
+
+/* LEI */
+.lei{background:#FFFBEA;border:1.5px solid #F5CC6A;border-radius:8px;padding:13px 16px;margin:14px 0;font-size:12.5px;color:#7A5C00;line-height:1.65;}
+.lei .lt{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9A7200;margin-bottom:5px;display:block;}
+.lei.v{background:var(--vp);border-color:var(--vl);color:#0A3A28;}
+.lei.v .lt{color:var(--v);}
+
+/* DOCS */
+.docs-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin:14px 0;}
+.doc-c{border:1.5px solid var(--bd);border-radius:9px;padding:16px 12px;text-align:center;background:var(--vp);font-size:11px;font-weight:600;color:var(--v);line-height:1.4;}
+.doc-c .di{font-size:26px;display:block;margin-bottom:8px;}
+.doc-c .de{font-size:9px;color:var(--r);font-weight:700;margin-top:5px;}
+
+/* TABELA */
+.tb{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px;}
+.tb th{background:var(--v);color:#fff;padding:9px 13px;text-align:left;font-size:11px;font-weight:600;}
+.tb td{padding:9px 13px;border-bottom:1px solid var(--bd);vertical-align:top;}
+.tb tr:nth-child(even) td{background:#F9FBFA;}
+.badge{display:inline-block;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;}
+.b-ok{background:#E6F4EF;color:var(--v);}
+.b-w{background:#FFF8E1;color:#D4820A;}
+.b-d{background:#FEECEC;color:#C0392B;}
+
+/* CHECKLIST INTERATIVO */
+.chk-wrap{margin:16px 0;}
+.chk-fase{margin-bottom:20px;}
+.chk-fase-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:6px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.chk-fase-title .fase-prog{margin-left:auto;font-size:11px;background:var(--vp);color:var(--v);border-radius:10px;padding:2px 10px;font-weight:700;font-family:'Inter',sans-serif;}
+.chk-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background .15s;border:1.5px solid transparent;}
+.chk-item:hover{background:#F4F7F6;}
+.chk-item.done{background:#F0FDF4;border-color:#6EE7B7;}
+.chk-item.done .chk-box{background:var(--v);border-color:var(--v);}
+.chk-item.done .chk-box::after{content:'✓';color:#fff;font-size:12px;font-weight:700;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.chk-item.done .chk-lbl strong{color:var(--v);}
+.chk-box{width:22px;height:22px;border:2px solid var(--bd);border-radius:5px;flex-shrink:0;margin-top:1px;position:relative;transition:all .2s;}
+.chk-lbl strong{display:block;font-size:13px;margin-bottom:2px;}
+.chk-lbl span{font-size:11px;color:var(--mu);}
+.chk-link{font-size:11px;color:var(--r);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-weight:600;}
+.chk-link:hover{text-decoration:underline;}
+.prog-total{background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:18px 22px;margin-bottom:28px;}
+.prog-total h3{font-family:'Syne',sans-serif;font-size:16px;color:var(--v);margin-bottom:12px;}
+.prog-bar-wrap{background:#EEF2F0;border-radius:20px;height:14px;overflow:hidden;margin-bottom:8px;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--v),var(--vl));border-radius:20px;transition:width .4s;}
+.prog-nums{display:flex;justify-content:space-between;font-size:12px;color:var(--mu);}
+.prog-nums strong{color:var(--v);}
+
+/* OUVIDORIA */
+.ouv-card{background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%);border-radius:14px;padding:24px;color:#fff;margin:14px 0;}
+.ouv-card h4{font-family:'Syne',sans-serif;font-size:16px;color:#7FFFD4;margin-bottom:10px;}
+.ouv-card p{font-size:12px;opacity:.85;line-height:1.65;margin-bottom:10px;}
+.ouv-flow{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
+.fs{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:7px 12px;font-size:11px;font-weight:600;color:#fff;display:flex;align-items:center;gap:5px;}
+.fa{color:#7FFFD4;font-size:14px;align-self:center;}
+
+/* PRAZO */
+.prz-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:14px 0;}
+.prz-c{border-radius:9px;padding:14px;}
+.prz-c.a{border:1.5px solid #E87070;background:#FEECEC;}
+.prz-c.t{border:1.5px solid #F5CC6A;background:#FFF8E1;}
+.prz-c.s{border:1.5px solid var(--vl);background:#E6F4EF;}
+.prz-lb{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+.a .prz-lb{color:#C0392B;}.t .prz-lb{color:#D4820A;}.s .prz-lb{color:var(--v);}
+.prz-ti{font-size:13px;font-weight:700;margin-bottom:3px;}
+.prz-de{font-size:11px;color:var(--mu);line-height:1.4;}
+
+/* DIVISOR */
+hr.div{border:none;border-top:2px dashed var(--bd);margin:24px 0;}
+
+/* RODAPE */
+.rodape{background:#0D1210;color:rgba(255,255,255,.7);text-align:center;padding:32px 20px;font-size:12px;line-height:1.8;}
+.rodape strong{color:#fff;}
+.rodape .rv{color:#7FFFD4;}
+
+@media(max-width:600px){
+  .capa{padding:36px 18px 40px;}
+  .sec-bd{padding:18px;}
+  .ibp-g{grid-template-columns:1fr;}
+  .docs-g{grid-template-columns:1fr 1fr;}
+  .mv-sidebar{display:none;}
+  .mv-main{margin-left:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="capa">
+  <div class="capa-in">
+    <div class="capa-badge">📋 Portaria MTE nº 1.419/2024 — NR-1 Atualizada</div>
+    <h1>Guia de Implementação<br>e Gestão Contínua<br><em>NR-1 Map</em></h1>
+    <p>Manual operacional para gestores de RH, Diretores e profissionais de SST. Conformidade legal com a NR-1 e gestão contínua dos riscos psicossociais no trabalho.</p>
+    <div class="capa-meta">
+      <div><strong>Base Legal</strong>NR-1 · Portaria MTE nº 1.419/2024</div>
+      <div><strong>Metodologia</strong>IBP — Índice de Balança Psicodinâmica</div>
+      <div><strong>Responsável Técnica</strong>Dra. Lucia Kratz · CRP 09/20590</div>
+      <div><strong>Fundamentação</strong>Dejours · Herzberg · Maslow</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ALERTA LEGAL -->
+<div class="alerta">
+  <span style="font-size:22px;flex-shrink:0;">⚖️</span>
+  <p><strong>Obrigação Legal em vigor desde 2024:</strong> A NR-1 atualizada tornou obrigatório o Gerenciamento de Riscos Psicossociais (GRO) para <em>todos</em> os empregadores. O descumprimento sujeita a empresa a auto de infração imediato, multa mínima de <strong>R$ 15.000,00</strong> e exposição a processos trabalhistas por adoecimento com nexo causal comprovado.</p>
+</div>
+
+<!-- ── CHECKLIST DE IMPLEMENTAÇÃO ── -->
+<div class="sec">
+  <div class="sec-hd">
+    <div class="sec-n">✓</div>
+    <div>
+      <h2>Checklist de Implementação</h2>
+      <p>Acompanhe seu progresso — marque cada etapa concluída</p>
+    </div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="prog-total">
+      <h3>Seu progresso de implementação</h3>
+      <div class="prog-bar-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="progTxt">0 de 18 etapas concluídas</span><strong id="progPct">0%</strong></div>
+    </div>
+
+    <!-- FASE 1 -->
+    <div class="chk-wrap">
+      <div class="chk-fase">
+        <div class="chk-fase-title">🚀 Fase 1 — Configuração Inicial (Onboarding)<span class="fase-prog" id="f1">0/5</span></div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>A — Inserir logotipo da empresa</strong>
+            <span>Co-Branding (Logo) → botão "Salvar logo da empresa". PNG/JPG/SVG, fundo transparente, até 300×120px.</span>
+            <a class="chk-link" href="#sec-onboarding">↗ Ver passo a passo na Seção 2</a>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>B — Cadastrar Responsável Técnico</strong>
+            <span>Co-Branding → "Responsável Técnico". Preencher: nome, cargo, CRP/CRM/CREA, formação e mini currículo. Se não houver, solicitar assinatura da Dra. Lucia Kratz.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>C — Configurar Canal de Ouvidoria</strong>
+            <span>Co-Branding → "Canal de Ouvidoria". Inserir nome do responsável e e-mail institucional. Chamados chegam com protocolo OUV-ANO-XXXXXX automático.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>D — Preencher Contexto da Empresa</strong>
+            <span>Co-Branding → "Contexto e Histórico". Setor, fundação, missão e motivo do diagnóstico. Aparece como "Apresentação da Empresa" no Laudo Técnico.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>E — Subir Organograma da Empresa</strong>
+            <span>Co-Branding → "Organograma da Empresa" → botão "Clique para subir o organograma". Formatos: PNG, JPG ou SVG. Recomendado: fundo branco, horizontal, até 2000px de largura. Aparece no Laudo Técnico e Relatório Final.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="chk-fase">
+        <div class="chk-fase-title">🏢 Fase 2 — Estrutura Organizacional<span class="fase-prog" id="f2">0/4</span></div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Cadastrar Níveis Hierárquicos</strong>
+            <span>Cargos/Organograma → "Níveis Hierárquicos". Crie os níveis da sua empresa (ex: Direção, Gerência, Coordenação, Analista/Técnico, Operacional) com cores identificadoras.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Cadastrar Unidades e Departamentos</strong>
+            <span>Cargos/Organograma → "Unidades e Depts". Cadastre filiais/plantas e áreas funcionais com cidade/UF. Usados em todos os filtros e documentos GRO.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Cadastrar Cargos com CBO</strong>
+            <span>Cargos/Organograma → "Lista de Cargos" → "+ Novo cargo". Cada cargo deve ter CBO (banco com 191 entradas), nível hierárquico e subordinação ("Reporta a"). O organograma é gerado automaticamente.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Cadastrar todos os Colaboradores</strong>
+            <span>Colaboradores → "+ Novo colaborador" (individual) ou "Importar planilha" (em volume — baixar modelo Excel). Cada colaborador precisa de WhatsApp e/ou e-mail para receber o diagnóstico. O "Link autocadastro" pode ser enviado para que os próprios colaboradores preencham.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="chk-fase">
+        <div class="chk-fase-title">🔬 Fase 3 — Primeiro Diagnóstico<span class="fase-prog" id="f3">0/4</span></div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Selecionar e salvar as perguntas do instrumento</strong>
+            <span>Módulos e Perguntas → escolha a versão (Padrão — 54 perguntas recomendado para Laudo completo) → clique "Salvar seleção". Atenção: cada subcategoria precisa de número ímpar de perguntas (mínimo 3) — o sistema bloqueia automaticamente seleções inválidas.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Disparar o Diagnóstico Geral</strong>
+            <span>Diagnóstico Geral → configurar prazo (5 a 7 dias úteis), público (todos ou por unidade/cargo) e canal (WhatsApp recomendado para maior adesão) → acionar o disparo. Magic Links enviados automaticamente.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Monitorar taxa de resposta no Dashboard</strong>
+            <span>Dashboard → card "Taxa de Resposta". Meta: mínimo 60% para validade estatística. Use o lembrete automático (48h) ou acione manualmente os colaboradores faltantes via RH.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Baixar e arquivar os 5 documentos do GRO</strong>
+            <span>Relatórios por Ciclo → baixar: Inventário de Riscos, Mapa de Risco GRO, Plano 5W2H, Acompanhamento e Laudo Técnico. Guardar por no mínimo 5 anos (prescrição trabalhista).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 4 -->
+      <div class="chk-fase">
+        <div class="chk-fase-title">♻️ Fase 4 — Gestão Contínua (Ciclo Permanente)<span class="fase-prog" id="f4">0/5</span></div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Ativar as 3 automações no Planejamento</strong>
+            <span>Planejamento → "Regras de Disparo Automático" → ativar: Pesquisa Pulso semanal, Lembrete automático 48h e Diagnóstico Geral anual. Com isso, sua empresa cumpre o ciclo NR-1 sem intervenção manual.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Atualizar status do Plano de Ação 5W2H mensalmente</strong>
+            <span>Plano de Ação → para cada ação gerada, atualizar: Responsável (nome real, não genérico), Prazo e Status (Pendente → Em andamento → Concluído). Cada atualização gera evidência documental com data e hora — essencial para fiscalização.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Acompanhar os indicadores do Dashboard semanalmente</strong>
+            <span>Dashboard → verificar IBP Geral e os 4 velocímetros por módulo. Qualquer módulo em Defesa Oculta ou Sofrimento Patogênico exige atenção imediata e registro de ação no Plano 5W2H.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Divulgar o Canal de Ouvidoria para colaboradores</strong>
+            <span>Comunicar por e-mail corporativo ou WhatsApp que existe canal confidencial. Responder chamados em até 48h. Registrar ações tomadas no Plano 5W2H como evidência de diligência.</span>
+          </div>
+        </div>
+
+        <div class="chk-item" onclick="toggleChk(this)">
+          <div class="chk-box"></div>
+          <div class="chk-lbl">
+            <strong>Renovar o Diagnóstico Geral a cada 12 meses</strong>
+            <span>O sistema alerta 30 dias antes do vencimento (automação ativa). Ao renovar, baixar os novos documentos GRO e atualizar o eSocial S-2240 com os dados do novo ciclo.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 1: O QUE É ── -->
+<div class="sec">
+  <div class="sec-hd">
+    <div class="sec-n">1</div>
+    <div><h2>O que você contratou</h2><p>Entenda o que a plataforma entrega e como protege sua empresa</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <table class="tb">
+      <thead><tr><th>Teoria</th><th>Autor</th><th>O que mede na sua empresa</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Psicodinâmica do Trabalho</strong></td><td>Christophe Dejours</td><td>Equilíbrio entre Prazer e Sofrimento — esgotamento, frustração, insegurança, liberdade de expressão</td></tr>
+        <tr><td><strong>Teoria dos Dois Fatores</strong></td><td>Frederick Herzberg</td><td>Fatores Higiênicos (salário, condições físicas) vs. Fatores Motivadores (reconhecimento, crescimento, propósito)</td></tr>
+        <tr><td><strong>Hierarquia das Necessidades</strong></td><td>Abraham Maslow</td><td>Segurança laboral, saúde física, relacionamentos — precursores diretos do risco psicossocial mapeado pela NR-1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="lei v">
+      <span class="lt">✅ O que o NR-1 Map entrega para o GRO</span>
+      Diagnóstico Psicossocial com Laudo Técnico assinado · Inventário de Riscos por CBO/Cargo · Mapa de Risco GRO (Severidade × Probabilidade) · Plano de Ação 5W2H editável · Pesquisas Pulso semanais anônimas · Histórico contínuo de evidências para auditoria e eSocial.
+    </div>
+
+    <div class="prz-g">
+      <div class="prz-c a"><div class="prz-lb">🔴 Obrigatório — 1x/ano</div><div class="prz-ti">Diagnóstico Geral</div><div class="prz-de">Gera o Laudo e o Mapa GRO oficiais para o PGR.</div></div>
+      <div class="prz-c t"><div class="prz-lb">🟡 Contínuo — Semanal</div><div class="prz-ti">Pesquisa Pulso</div><div class="prz-de">Automática. Cumpre o item 1.5.4.4.6 da NR-1.</div></div>
+      <div class="prz-c s"><div class="prz-lb">🟢 Evidência Permanente</div><div class="prz-ti">Plano 5W2H</div><div class="prz-de">Cada atualização gera registro documental datado.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 2: ONBOARDING ── -->
+<div class="sec" id="sec-onboarding">
+  <div class="sec-hd">
+    <div class="sec-n">2</div>
+    <div><h2>Configuração Inicial — Onboarding</h2><p>5 passos antes do primeiro diagnóstico</p></div>
+  </div>
+  <div class="sec-bd">
+    <h3 style="color:var(--v);font-size:14px;margin-bottom:12px;">Passo 1 a 5 — Co-Branding, Responsável Técnico, Ouvidoria, Contexto e Organograma</h3>
+
+    <!-- MOCKUP CO-BRANDING -->
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">nr1map.com.br/painel → Configurações → Co-Branding</span>
+      </div>
+      <div style="display:flex;background:#fff;min-height:240px;">
+        <div class="mv-sidebar">
+          <div class="ms-item"><span class="ms-dot"></span>Dashboard</div>
+          <div class="ms-item"><span class="ms-dot"></span>Colaboradores</div>
+          <div class="ms-item"><span class="ms-dot"></span>Diagnóstico Geral</div>
+          <div class="ms-item active"><span class="ms-dot"></span>Co-Branding (Logo)</div>
+          <div class="ms-item"><span class="ms-dot"></span>Norma NR-1</div>
+        </div>
+        <div class="mv-main">
+          <div class="mv-title">🎨 Co-Branding (Logo)</div>
+          <!-- Preview cabeçalho -->
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:11px;">
+            <div style="font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:6px;">Preview do Cabeçalho — como aparece nos 4 PDFs do GRO</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:24px;background:var(--vp);border:1px solid var(--bd);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--v);font-weight:700;">LOGO</div>
+              <div style="font-size:10px;color:var(--mu);">+</div>
+              <div style="width:36px;height:24px;background:var(--rp);border:1px solid #D4A0FF;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--r);font-weight:700;">NR-1</div>
+              <div style="font-size:9px;color:var(--mu);margin-left:6px;">A logo do Parceiro é herdada automaticamente do cadastro.</div>
+            </div>
+          </div>
+          <!-- Campos -->
+          <div style="font-size:10px;font-weight:600;color:var(--mu);margin-bottom:4px;">Nome da empresa (exibido nos relatórios)</div>
+          <div class="mv-form-row">
+            <div class="mv-input">Ex: Construtora Horizonte Ltda.</div>
+            <div class="mv-btn" style="white-space:nowrap;">↑ Salvar logo</div>
+          </div>
+          <!-- Responsável Técnico -->
+          <div style="background:#FFF8E1;border:1px solid #F5CC6A;border-radius:6px;padding:8px 10px;font-size:10px;color:#7A5C00;margin-bottom:8px;">
+            ⚖️ <strong>Responsável Técnico pela Empresa</strong> — O laudo deve ser assinado por profissional habilitado (psicólogo, médico do trabalho ou engenheiro de SST).
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+            <div class="mv-input" style="font-size:10px;">Nome completo *</div>
+            <div class="mv-input" style="font-size:10px;">Cargo / Função *</div>
+            <div class="mv-input" style="font-size:10px;">Registro profissional (CRP/CRM/CREA)</div>
+            <div class="mv-input" style="font-size:10px;">Formação / Área de atuação</div>
+          </div>
+          <div class="mv-btn" style="font-size:10px;display:inline-block;margin-bottom:4px;">💾 Salvar Responsável Técnico</div>
+        </div>
+      </div>
+      <div class="mockup-caption">
+        <strong>Passos A, B, C, D — Co-Branding (Logo)</strong>
+        <p>Configure: logo da empresa (A), Responsável Técnico com CRP/CRM/CREA (B), Canal de Ouvidoria com e-mail institucional (C) e Contexto Organizacional com setor, missão e histórico (D). Todos aparecem nos PDFs do GRO.</p>
+      </div>
+    </div>
+
+    <!-- ITEM E ORGANOGRAMA -->
+    <div class="mockup" style="margin-top:14px;">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Co-Branding → Organograma da Empresa</span>
+      </div>
+      <div style="background:#fff;padding:16px 20px;">
+        <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:6px;">🏢 Organograma da Empresa</div>
+        <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">Suba uma imagem do organograma — aparece no Laudo Técnico e Relatório Final</div>
+        <div style="background:#FFF8E1;border:1px solid #F5CC6A;border-radius:6px;padding:8px 12px;font-size:10px;color:#7A5C00;margin-bottom:10px;">
+          📌 <strong>Formatos aceitos:</strong> PNG, JPG ou SVG. Recomendado: fundo branco, horizontal, até 2000px de largura.
+        </div>
+        <div style="border:2px dashed var(--bd);border-radius:8px;padding:28px;text-align:center;background:#F9FBFA;cursor:pointer;">
+          <div style="font-size:24px;margin-bottom:6px;">📁</div>
+          <div style="font-size:12px;font-weight:600;color:var(--mu);">Clique para subir o organograma</div>
+          <div style="font-size:10px;color:#9CA3AF;margin-top:3px;">PNG, JPG ou SVG · Máx. 5MB</div>
+        </div>
+      </div>
+      <div class="mockup-caption">
+        <strong>Passo E — Organograma da Empresa</strong>
+        <p>Suba a imagem do organograma hierárquico da empresa. Se não houver organograma formal, o sistema gera automaticamente a partir dos cargos cadastrados com "Reporta a" na aba de Cargos. O organograma aparece no Laudo Técnico como evidência da estrutura organizacional avaliada.</p>
+      </div>
+    </div>
+
+    <div class="dica">
+      <div style="font-size:18px;flex-shrink:0;">💡</div>
+      <div><strong>Dica do Gestor</strong>Se sua empresa não tem psicólogo, médico do trabalho ou engenheiro de SST próprio, utilize o botão <em>"Solicitar Assinatura da Dra. Lucia Kratz"</em> (disponível na seção Responsável Técnico). O laudo será assinado digitalmente via gov.br com validade jurídica plena para auditoria do MTE.</div>
+    </div>
+
+    <hr class="div">
+
+    <h3 style="color:var(--v);font-size:14px;margin-bottom:12px;">Estrutura Organizacional — Cargos, Unidades e Colaboradores</h3>
+
+    <!-- MOCKUP CARGOS -->
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Cargos / Organograma → Lista de Cargos</span>
+      </div>
+      <div style="background:#fff;">
+        <div style="display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bd);">
+          <div style="background:var(--v);color:#fff;border-radius:6px;padding:5px 12px;font-size:10px;font-weight:700;">📋 Lista de Cargos</div>
+          <div style="border:1px solid var(--bd);border-radius:6px;padding:5px 12px;font-size:10px;color:var(--mu);">🌿 Organograma</div>
+          <div style="border:1px solid var(--bd);border-radius:6px;padding:5px 12px;font-size:10px;color:var(--mu);">🎯 Níveis Hierárquicos</div>
+          <div style="border:1px solid var(--bd);border-radius:6px;padding:5px 12px;font-size:10px;color:var(--mu);">🏢 Unidades e Depts</div>
+          <div class="mv-btn" style="margin-left:auto;font-size:10px;">+ Novo cargo</div>
+        </div>
+        <div style="padding:12px 16px;font-size:10px;color:var(--mu);">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</div>
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead><tr style="background:#F9FBFA;"><th style="padding:7px 14px;text-align:left;color:var(--mu);font-weight:600;">CARGO</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">CBO</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">NÍVEL</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">REPORTA A</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--bd);"><td style="padding:8px 14px;font-weight:600;">Gerente de Tecnologia</td><td style="padding:8px 7px;">1231-30</td><td style="padding:8px 7px;"><span style="background:#10B981;color:#fff;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:700;">Gerência</span></td><td style="padding:8px 7px;">Diretor Geral</td></tr>
+            <tr style="border-bottom:1px solid var(--bd);background:#F9FBFA;"><td style="padding:8px 14px;font-weight:600;">Secretária</td><td style="padding:8px 7px;">4131-15</td><td style="padding:8px 7px;"><span style="background:#F59E0B;color:#fff;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:700;">Analista/Técnico</span></td><td style="padding:8px 7px;">Diretor Geral</td></tr>
+            <tr><td style="padding:8px 14px;font-weight:600;">Diretor Geral</td><td style="padding:8px 7px;">1111-05</td><td style="padding:8px 7px;"><span style="background:#7B00C4;color:#fff;border-radius:4px;padding:2px 8px;font-size:9px;font-weight:700;">Direção</span></td><td style="padding:8px 7px;">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mockup-caption">
+        <strong>Cargos com CBO — base do cruzamento estatístico</strong>
+        <p>O CBO (Classificação Brasileira de Ocupações) é obrigatório para cada cargo. É por ele que o sistema segmenta os riscos no Laudo — "Subcategoria X apresenta IBP −3,8 no CBO 1231-30 (Gerente de TI)". O campo "Reporta a" gera o organograma hierárquico automaticamente.</p>
+      </div>
+    </div>
+
+    <!-- MOCKUP COLABORADORES -->
+    <div class="mockup" style="margin-top:14px;">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Colaboradores → Lista</span>
+      </div>
+      <div style="background:#fff;">
+        <div style="display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bd);align-items:center;">
+          <div style="font-size:12px;font-weight:700;">Colaboradores</div>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <div style="border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;color:var(--mu);">🔗 Link autocadastro</div>
+            <div style="border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;color:var(--mu);">↓ Modelo Excel</div>
+            <div style="background:var(--vl);color:#fff;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;">↑ Importar planilha</div>
+            <div class="mv-btn" style="font-size:10px;">+ Novo colaborador</div>
+          </div>
+        </div>
+        <div style="padding:8px 16px;font-size:10px;color:var(--mu);background:#F9FBFA;border-bottom:1px solid var(--bd);">
+          Lista de colaboradores &nbsp;·&nbsp; <strong>4 ativos</strong> · 0 inativos
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead><tr style="background:#F9FBFA;"><th style="padding:7px 14px;text-align:left;color:var(--mu);font-weight:600;">NOME</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">WHATSAPP / E-MAIL</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">CARGO (CBO)</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">STATUS</th><th style="padding:7px;text-align:left;color:var(--mu);font-weight:600;">LINK PESQUISA</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--bd);"><td style="padding:8px 14px;font-weight:600;">Phillip Leão</td><td style="padding:8px 7px;">62993520510</td><td style="padding:8px 7px;">Gerente de Tecnologia</td><td style="padding:8px 7px;"><span class="mv-badge ok">● Ativo</span></td><td style="padding:8px 7px;"><span style="color:#D4820A;font-weight:600;font-size:10px;">● Pendente</span></td></tr>
+            <tr style="background:#F9FBFA;"><td style="padding:8px 14px;font-weight:600;">Jessica Marjane</td><td style="padding:8px 7px;">62983228506</td><td style="padding:8px 7px;">Secretária</td><td style="padding:8px 7px;"><span class="mv-badge ok">● Ativo</span></td><td style="padding:8px 7px;"><span style="color:#D4820A;font-weight:600;font-size:10px;">● Pendente</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mockup-caption">
+        <strong>Cadastro de Colaboradores — 3 formas disponíveis</strong>
+        <p><strong>(1) Manual</strong> — "+ Novo colaborador" (ideal para poucos); <strong>(2) Importar planilha</strong> — baixe o Modelo Excel, preencha e suba (ideal para volume); <strong>(3) Link autocadastro</strong> — envie o link para o grupo de WhatsApp e os colaboradores preenchem os próprios dados. A coluna <strong>LINK PESQUISA</strong> fica "Pendente" até o envio do diagnóstico.</p>
+      </div>
+    </div>
+
+    <div class="dica" style="margin-top:16px;">
+      <div style="font-size:18px;">⚠️</div>
+      <div><strong>Anonimato garantido por arquitetura</strong>O sistema NUNCA exibe para o gestor qual colaborador respondeu o quê. Dados são tabulados apenas por cargo/CBO. Esta garantia é o que viabiliza respostas honestas — e respostas honestas geram um diagnóstico juridicamente válido.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 3: CICLO OPERACIONAL ── -->
+<div class="sec">
+  <div class="sec-hd r">
+    <div class="sec-n r">3</div>
+    <div><h2>Ciclo Operacional de Gestão de Riscos</h2><p>Como disparar, interpretar e agir sobre os resultados</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <!-- MOCKUP DASHBOARD -->
+    <h3 style="color:var(--r);font-size:14px;margin-bottom:12px;">3.1 — Dashboard e Velocímetros IBP</h3>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Dashboard</span>
+      </div>
+      <div style="background:#fff;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;font-size:10px;"><div style="font-weight:700;font-size:18px;color:var(--tx);">4</div><div style="color:var(--mu);">Colaboradores Ativos</div></div>
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;font-size:10px;"><div style="font-weight:700;font-size:18px;color:var(--tx);">2</div><div style="color:var(--mu);">Respondentes</div></div>
+          <div style="background:#FFF8E1;border:1px solid #F5CC6A;border-radius:8px;padding:10px;text-align:center;font-size:10px;"><div style="font-weight:800;font-size:18px;color:#D4820A;">−0,3</div><div style="color:#D4820A;font-weight:600;">IBP Geral · Defesa Oculta</div></div>
+          <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;font-size:10px;"><div style="font-weight:700;font-size:18px;color:var(--v);">50%</div><div style="color:var(--mu);">Taxa de Resposta</div></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Velocímetro IBP — Balança Psicodinâmica (Dejours) × Macro-Categorias</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <div style="border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:9px;color:var(--mu);font-weight:600;margin-bottom:4px;">Fatores Fisiológicos · M1</div>
+            <div style="height:40px;background:linear-gradient(90deg,#EF4444 0%,#F5CC6A 40%,#10B981 80%);border-radius:4px;position:relative;margin-bottom:6px;"><div style="position:absolute;top:50%;left:55%;transform:translate(-50%,-50%);width:3px;height:100%;background:#0D1210;border-radius:2px;"></div></div>
+            <div style="font-size:13px;font-weight:800;color:#D4820A;">+0,9</div>
+            <div style="font-size:9px;color:#D4820A;">Defesa Oculta</div>
+          </div>
+          <div style="border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:9px;color:var(--mu);font-weight:600;margin-bottom:4px;">Fatores de Segurança · M2</div>
+            <div style="height:40px;background:linear-gradient(90deg,#EF4444 0%,#F5CC6A 40%,#10B981 80%);border-radius:4px;position:relative;margin-bottom:6px;"><div style="position:absolute;top:50%;left:42%;transform:translate(-50%,-50%);width:3px;height:100%;background:#0D1210;border-radius:2px;"></div></div>
+            <div style="font-size:13px;font-weight:800;color:#D4820A;">−0,8</div>
+            <div style="font-size:9px;color:#D4820A;">Defesa Oculta</div>
+          </div>
+          <div style="border:1px solid var(--bd);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:9px;color:var(--mu);font-weight:600;margin-bottom:4px;">Fatores Sociais · M3</div>
+            <div style="height:40px;background:linear-gradient(90deg,#EF4444 0%,#F5CC6A 40%,#10B981 80%);border-radius:4px;position:relative;margin-bottom:6px;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3px;height:100%;background:#0D1210;border-radius:2px;"></div></div>
+            <div style="font-size:13px;font-weight:800;color:#D4820A;">+0,0</div>
+            <div style="font-size:9px;color:#D4820A;">Defesa Oculta</div>
+          </div>
+          <div style="border:1px solid #E87070;border-radius:8px;padding:10px;text-align:center;background:#FEECEC;">
+            <div style="font-size:9px;color:#C0392B;font-weight:600;margin-bottom:4px;">Fatores Motivacionais · M4</div>
+            <div style="height:40px;background:linear-gradient(90deg,#EF4444 0%,#F5CC6A 40%,#10B981 80%);border-radius:4px;position:relative;margin-bottom:6px;"><div style="position:absolute;top:50%;left:30%;transform:translate(-50%,-50%);width:3px;height:100%;background:#0D1210;border-radius:2px;"></div></div>
+            <div style="font-size:13px;font-weight:800;color:#C0392B;">−1,3</div>
+            <div style="font-size:9px;color:#C0392B;font-weight:700;">⚠️ Atenção!</div>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-caption">
+        <strong>Dashboard — Velocímetros IBP em Tempo Real</strong>
+        <p>Monitore o IBP Geral e os 4 velocímetros por módulo. Qualquer módulo com IBP ≤ −1,5 (Sofrimento Patogênico) exige ação imediata no Plano 5W2H. O módulo M4 (Motivacionais) em −1,3 indica atenção urgente. Acompanhe semanalmente.</p>
+      </div>
+    </div>
+
+    <div class="ibp-g">
+      <div class="ibp-c so"><div class="ir">−5,0 a −1,5</div><div class="in">Sofrimento Patogênico</div><div class="ia">Risco imediato. Intervenção obrigatória e registro no Plano 5W2H.</div><span class="ig">GRO: SUBSTANCIAL/INTOLERÁVEL</span></div>
+      <div class="ibp-c de"><div class="ir">−1,4 a +1,4</div><div class="in">Defesa Oculta</div><div class="ia">Zona de alerta. Foco nas Pesquisas Pulso e ações preventivas.</div><span class="ig">GRO: MODERADO</span></div>
+      <div class="ibp-c fe"><div class="ir">+1,5 a +5,0</div><div class="in">Terreno Fértil</div><div class="ia">Engajamento genuíno. Mantenha as práticas que geraram este resultado.</div><span class="ig">GRO: TRIVIAL/TOLERÁVEL</span></div>
+    </div>
+
+    <!-- MOCKUP MAPA RISCO -->
+    <h3 style="color:var(--r);font-size:14px;margin:20px 0 12px;">3.2 — Mapa de Risco GRO (Severidade × Probabilidade)</h3>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Mapa de Risco</span>
+      </div>
+      <div style="background:#fff;padding:14px 16px;">
+        <div style="font-size:11px;font-weight:700;margin-bottom:8px;">Matriz de Risco — GRO/NR-1 (Severidade × Probabilidade)</div>
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead><tr style="background:var(--v);color:#fff;"><th style="padding:6px 10px;text-align:left;">Subcategoria</th><th style="padding:6px 8px;">Módulo</th><th style="padding:6px 8px;">Severidade</th><th style="padding:6px 8px;">Probabilidade</th><th style="padding:6px 8px;">Nível GRO</th><th style="padding:6px 8px;">IBP</th><th style="padding:6px 8px;">Zona Dejours</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--bd);"><td style="padding:7px 10px;">4.1</td><td style="padding:7px 8px;">M4</td><td style="padding:7px 8px;">Alta (4)</td><td style="padding:7px 8px;">Pouco Provável</td><td style="padding:7px 8px;"><span class="mv-badge sub">SUBSTANCIAL</span></td><td style="padding:7px 8px;color:#C0392B;font-weight:700;">−3,8</td><td style="padding:7px 8px;">Sofrimento Patogênico</td></tr>
+            <tr style="border-bottom:1px solid var(--bd);background:#F9FBFA;"><td style="padding:7px 10px;">3.4</td><td style="padding:7px 8px;">M3</td><td style="padding:7px 8px;">Média (3)</td><td style="padding:7px 8px;">Pouco Provável</td><td style="padding:7px 8px;"><span class="mv-badge mod">MODERADO</span></td><td style="padding:7px 8px;color:#D4820A;font-weight:700;">+1,3</td><td style="padding:7px 8px;">Defesa Oculta</td></tr>
+            <tr style="border-bottom:1px solid var(--bd);"><td style="padding:7px 10px;">2.3</td><td style="padding:7px 8px;">M2</td><td style="padding:7px 8px;">Baixa (1)</td><td style="padding:7px 8px;">Pouco Provável</td><td style="padding:7px 8px;"><span class="mv-badge triv">TRIVIAL</span></td><td style="padding:7px 8px;color:var(--v);font-weight:700;">+2,5</td><td style="padding:7px 8px;">Terreno Fértil</td></tr>
+            <tr><td style="padding:7px 10px;">2.1</td><td style="padding:7px 8px;">M2</td><td style="padding:7px 8px;">Alta (4)</td><td style="padding:7px 8px;">Pouco Provável</td><td style="padding:7px 8px;"><span class="mv-badge sub">SUBSTANCIAL</span></td><td style="padding:7px 8px;color:#C0392B;font-weight:700;">−3,8</td><td style="padding:7px 8px;">Sofrimento Patogênico</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mockup-caption">
+        <strong>Mapa de Risco GRO — Principal documento para auditoria MTE</strong>
+        <p>Subcategorias classificadas automaticamente em 5 níveis GRO. Itens <strong>SUBSTANCIAL</strong> ou <strong>INTOLERÁVEL</strong> geram ações automáticas no Plano 5W2H. A coluna Zona Dejours integra o IBP à matriz GRO para rastreabilidade científica exigida pelo CFP.</p>
+      </div>
+    </div>
+
+    <!-- MOCKUP PLANO 5W2H -->
+    <h3 style="color:var(--r);font-size:14px;margin:20px 0 12px;">3.3 — Plano de Ação 5W2H</h3>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Plano de Ação 5W2H</span>
+      </div>
+      <div style="background:#fff;padding:14px 16px;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead><tr style="background:var(--v);color:#fff;"><th style="padding:6px 10px;text-align:left;">Setor / CBO</th><th style="padding:6px 8px;">Ação (What/How)</th><th style="padding:6px 8px;">Responsável</th><th style="padding:6px 8px;">Status</th><th style="padding:6px 8px;">Prazo</th><th style="padding:6px 8px;">Sinalizador</th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--bd);"><td style="padding:7px 10px;font-weight:600;">Segurança e Riscos Físicos</td><td style="padding:7px 8px;">[IA] Realizar inspeção de segurança; atualizar fornecimento de EPIs; revisar protocolos...</td><td style="padding:7px 8px;">SESMT / RH</td><td style="padding:7px 8px;"><span class="mv-badge mod">Pendente</span></td><td style="padding:7px 8px;">18/08/2026</td><td style="padding:7px 8px;"><span style="color:var(--v);font-size:10px;font-weight:700;">● No prazo</span></td></tr>
+            <tr style="border-bottom:1px solid var(--bd);background:#F9FBFA;"><td style="padding:7px 10px;font-weight:600;">Relação com Liderança</td><td style="padding:7px 8px;">[IA] Capacitar líderes em gestão humanizada; implantar reuniões 1:1 mensais...</td><td style="padding:7px 8px;">RH / Diretoria</td><td style="padding:7px 8px;"><span class="mv-badge mod">Pendente</span></td><td style="padding:7px 8px;">02/09/2026</td><td style="padding:7px 8px;"><span style="color:var(--v);font-size:10px;font-weight:700;">● No prazo</span></td></tr>
+            <tr><td style="padding:7px 10px;font-weight:600;">Identidade e Crescimento</td><td style="padding:7px 8px;">[IA] Estruturar plano de carreira formal; oferecer cursos e certificações...</td><td style="padding:7px 8px;">RH / T&D</td><td style="padding:7px 8px;"><span class="mv-badge mod">Pendente</span></td><td style="padding:7px 8px;">17/09/2026</td><td style="padding:7px 8px;"><span style="color:var(--v);font-size:10px;font-weight:700;">● No prazo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mockup-caption">
+        <strong>Plano 5W2H — Evidência de Gestão Contínua (item 1.5.4.4.6 NR-1)</strong>
+        <p>Ações geradas automaticamente pela IA para os setores classificados como Substancial ou Intolerável. O gestor deve: definir responsável real (não "RH" genérico), ajustar o prazo e atualizar o status mensalmente. Cada alteração é registrada com data e hora — é a sua principal defesa em fiscalização.</p>
+      </div>
+    </div>
+
+    <div class="lei">
+      <span class="lt">📜 Texto da Norma — NR-1, Item 1.5.4.4.6</span>
+      "Monitorar os resultados das ações implementadas por meio de indicadores, verificando sua eficácia para a melhoria das condições de trabalho e saúde dos trabalhadores."
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 4: DOCUMENTOS ── -->
+<div class="sec">
+  <div class="sec-hd">
+    <div class="sec-n">4</div>
+    <div><h2>Central de Documentos — Evidências para Auditoria</h2><p>Como exportar, arquivar e usar os documentos do GRO</p></div>
+  </div>
+  <div class="sec-bd">
+
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span class="r"></span><span class="y"></span><span class="g"></span>
+        <span class="url">Relatórios por Ciclo</span>
+      </div>
+      <div style="background:#fff;padding:16px 20px;">
+        <div style="background:#F9FBFA;border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;">📋 Guia dos Documentos GRO — NR-1 / Portaria MTE 1.419/2024</div>
+          <div style="font-size:10px;color:var(--mu);">Clique para expandir · O que é cada documento e quando usar</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:14px 16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div><div style="font-size:12px;font-weight:700;">Diagnóstico Geral — 2/Ago/2026</div><div style="font-size:10px;color:var(--mu);">2 respondentes</div></div>
+            <span style="color:#D4820A;font-size:11px;font-weight:700;">−0,3 · Defesa Oculta</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <div style="background:var(--vp);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--v);">📋 Laudo Técnico ✓</div>
+            <div style="background:var(--vp);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--v);">🗺️ Mapa de Risco ✓</div>
+            <div style="background:var(--vp);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--v);">✅ Plano 5W2H ✓</div>
+            <div style="background:var(--vp);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--v);">📦 Inventário ✓</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="border:1px solid var(--bd);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--mu);cursor:pointer;">↺ Atualizar Laudo</div>
+            <div style="border:1px solid var(--bd);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--mu);cursor:pointer;">↺ Atualizar Mapa</div>
+            <div style="border:1px solid var(--bd);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--mu);cursor:pointer;">↺ Atualizar Plano</div>
+            <div style="background:var(--v);color:#fff;border-radius:5px;padding:4px 12px;font-size:10px;font-weight:700;margin-left:auto;cursor:pointer;">↓ Baixar PDF</div>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-caption">
+        <strong>Relatórios por Ciclo — Todos os documentos GRO em um lugar</strong>
+        <p>Use os botões "Atualizar" para regenerar os PDFs após atualizar o Plano de Ação. O botão "Baixar PDF" em verde baixa todos os documentos do ciclo. Faça download após cada atualização relevante e arquive localmente.</p>
+      </div>
+    </div>
+
+    <div class="docs-g">
+      <div class="doc-c"><span class="di">📋</span>Inventário de Riscos Psicossociais<span class="de">eSocial S-2240</span></div>
+      <div class="doc-c"><span class="di">🗺️</span>Mapa de Risco GRO<br>(Severidade × Probabilidade)</div>
+      <div class="doc-c"><span class="di">✅</span>Plano de Ação 5W2H<br>com Status e Evidências</div>
+      <div class="doc-c"><span class="di">📈</span>Acompanhamento de Ações<br>(Histórico contínuo)</div>
+      <div class="doc-c"><span class="di">📄</span>Laudo Técnico Psicossocial<br>(Assinado CRP/gov.br)</div>
+    </div>
+
+    <table class="tb">
+      <thead><tr><th>Campo eSocial S-2240</th><th>Onde encontrar no NR-1 Map</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Identificação do Agente Nocivo</strong></td><td>Inventário → coluna "Subcategoria" e "CBO"</td><td><span class="badge b-ok">✓ Gerado automaticamente</span></td></tr>
+        <tr><td><strong>Intensidade / Concentração</strong></td><td>Mapa de Risco → "Severidade" e "IBP"</td><td><span class="badge b-ok">✓ Calculado pelo IBP</span></td></tr>
+        <tr><td><strong>Medidas de Controle Implantadas</strong></td><td>Plano 5W2H → ações com Status "Concluído"</td><td><span class="badge b-w">Atualizar após ação</span></td></tr>
+        <tr><td><strong>Responsável pelo PGR</strong></td><td>Co-Branding → "Responsável Técnico" com CRP/CRM</td><td><span class="badge b-ok">✓ Configurado no onboarding</span></td></tr>
+        <tr><td><strong>Data da Avaliação</strong></td><td>Relatórios por Ciclo → data do diagnóstico</td><td><span class="badge b-ok">✓ Registrada automaticamente</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="dica r">
+      <div style="font-size:18px;">🔒</div>
+      <div><strong>Guarda dos documentos</strong>A jurisprudência trabalhista (art. 11 da CLT — prescrição de 5 anos) indica guarda mínima de <strong>5 anos</strong> de todos os documentos do GRO. O NR-1 Map mantém o histórico na nuvem — faça download periódico e arquive localmente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 5: OUVIDORIA ── -->
+<div class="sec">
+  <div class="sec-hd r">
+    <div class="sec-n r">5</div>
+    <div><h2>Canal de Ouvidoria e Acolhimento Confidencial</h2><p>Protocolo automático para chamados de saúde mental e denúncias</p></div>
+  </div>
+  <div class="sec-bd">
+    <div class="ouv-card">
+      <h4>🔒 Como o Canal de Ouvidoria funciona</h4>
+      <p>Cada chamado gera automaticamente um número de protocolo único (OUV-ANO-XXXXXX). O colaborador pode se identificar ou permanecer anônimo. O responsável pela ouvidoria recebe o chamado por e-mail com todos os dados para acompanhamento.</p>
+      <div class="ouv-flow">
+        <div class="fs">🧑‍💼 Colaborador registra</div>
+        <div class="fa">→</div>
+        <div class="fs">🔐 Protocolo OUV gerado</div>
+        <div class="fa">→</div>
+        <div class="fs">📧 E-mail para RH</div>
+        <div class="fa">→</div>
+        <div class="fs">📋 Histórico no painel</div>
+      </div>
+    </div>
+    <div class="passos">
+      <div class="passo"><div class="pn r">1</div><div class="pt"><strong>Configurar e-mail da ouvidoria</strong><span>Co-Branding → "Canal de Ouvidoria". Inserir nome do responsável e e-mail institucional.</span></div></div>
+      <div class="passo"><div class="pn r">2</div><div class="pt"><strong>Divulgar para os colaboradores</strong><span>Comunicar por e-mail ou WhatsApp corporativo que existe canal confidencial disponível.</span></div></div>
+      <div class="passo"><div class="pn r">3</div><div class="pt"><strong>Responder em até 48 horas</strong><span>Boa prática e jurisprudência indicam resposta preliminar em 48h para chamados de assédio/saúde mental.</span></div></div>
+      <div class="passo"><div class="pn r">4</div><div class="pt"><strong>Documentar no Plano 5W2H</strong><span>Cada chamado atendido deve gerar ação correspondente no Plano — evidência de diligência da empresa.</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 6: CHECKLIST AUDITORIA ── -->
+<div class="sec">
+  <div class="sec-hd">
+    <div class="sec-n">6</div>
+    <div><h2>Checklist de Conformidade — Auditoria MTE</h2><p>O que o fiscal verifica em uma visita de inspeção</p></div>
+  </div>
+  <div class="sec-bd">
+    <ul style="list-style:none;">
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Diagnóstico Psicossocial realizado (NR-1, item 1.5.3.1)</strong><div style="font-size:11px;color:var(--mu);">Laudo Técnico com data, metodologia, responsável habilitado e assinatura digital</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Inventário de Riscos Psicossociais por CBO/Cargo (eSocial S-2240)</strong><div style="font-size:11px;color:var(--mu);">Documento com todos os agentes de risco identificados por função</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Mapa de Risco GRO com Severidade × Probabilidade</strong><div style="font-size:11px;color:var(--mu);">Matriz com níveis Trivial, Tolerável, Moderado, Substancial e Intolerável por subcategoria</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Plano de Ação 5W2H com responsáveis e prazos</strong><div style="font-size:11px;color:var(--mu);">Cada risco Substancial/Intolerável com ação documentada, responsável nomeado e prazo</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Evidência de monitoramento contínuo (item 1.5.4.4.6)</strong><div style="font-size:11px;color:var(--mu);">Histórico de Pesquisas Pulso semanais demonstrando acompanhamento</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #EEF2F0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Atualizações do Plano 5W2H com status das ações</strong><div style="font-size:11px;color:var(--mu);">Registro datado de que as ações foram implementadas ou estão em andamento</div></div></li>
+      <li style="display:flex;gap:12px;padding:11px 0;font-size:13px;"><div style="width:20px;height:20px;border:2px solid var(--v);border-radius:4px;flex-shrink:0;margin-top:2px;"></div><div><strong>Canal de Ouvidoria configurado e divulgado</strong><div style="font-size:11px;color:var(--mu);">Canal anônimo disponível para colaboradores, com protocolo de atendimento</div></div></li>
+    </ul>
+    <div class="alerta" style="margin-top:20px;">
+      <span style="font-size:22px;flex-shrink:0;">🚨</span>
+      <p><strong>Penalidades:</strong> Auto de infração imediato · Multa mínima <strong>R$ 15.000,00</strong> · +40% em processos por adoecimento psíquico · 2ª maior causa de afastamento no INSS são transtornos mentais ligados ao trabalho.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer class="rodape">
+  <strong>NR-1 Map — Plataforma de Gestão de Riscos Psicossociais</strong><br>
+  Portaria MTE nº 1.419/2024 · IBP · Dejours · Herzberg · Maslow<br><br>
+  <strong>Responsabilidade Técnica: Dra. Lucia Kratz</strong><br>
+  <span class="rv">CRP 09/20590 · Doutora em Administração · Criadora do IBP e do NR-1 Map</span>
+</footer>
+
+<script>
+// CHECKLIST INTERATIVO
+function toggleChk(el){
+  el.classList.toggle('done');
+  updateProgress();
+}
+function updateProgress(){
+  var total=document.querySelectorAll('.chk-item').length;
+  var done=document.querySelectorAll('.chk-item.done').length;
+  var pct=Math.round(done/total*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=done+' de '+total+' etapas concluídas';
+  document.getElementById('progPct').textContent=pct+'%';
+  // por fase
+  var fases=[
+    {id:'f1',sel:'.chk-fase:nth-child(1) .chk-item',tot:5},
+    {id:'f2',sel:'.chk-fase:nth-child(2) .chk-item',tot:4},
+    {id:'f3',sel:'.chk-fase:nth-child(3) .chk-item',tot:4},
+    {id:'f4',sel:'.chk-fase:nth-child(4) .chk-item',tot:5}
+  ];
+  fases.forEach(function(f){
+    var d=document.querySelectorAll(f.sel+'.done').length;
+    var el=document.getElementById(f.id);
+    if(el)el.textContent=d+'/'+f.tot;
+  });
+}
+</script>
+</body>
+</html>
