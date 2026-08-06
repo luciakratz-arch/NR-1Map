@@ -342,6 +342,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <nav class="nav">
     <div class="nav-sec">Visão geral</div>
     <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="sv('tutoriais')"><span class="ic">🎓</span>Tutoriais</div>
     <div class="nav-sec">Empresa</div>
     <div class="nav-item" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
     <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg" id="bdg-colab">0</span></div>
@@ -401,6 +402,21 @@ textarea.form-control{resize:vertical;min-height:70px;}
         <span style="color:var(--roxo-claro);font-size:18px;">→</span>
       </div>
     </div>
+
+    <!-- BANNER GUIA RH -->
+    <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
+      style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #D8E8E2;border-radius:10px;padding:14px 20px;margin-bottom:20px;cursor:pointer;text-decoration:none;transition:all .2s;flex-wrap:wrap;gap:10px;"
+      onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 2px 12px rgba(10,110,79,.1)'"
+      onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none'">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:38px;height:38px;border-radius:9px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📋</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#0A6E4F;margin-bottom:2px;">Guia de Implementação e Gestão Contínua</div>
+          <div style="font-size:11px;color:#5A6672;line-height:1.4;">Manual operacional completo para RH · Checklist de implementação · Como usar cada tela · Conformidade NR-1</div>
+        </div>
+      </div>
+      <span style="font-size:11px;color:#0A6E4F;font-weight:600;background:#E6F4EF;padding:4px 12px;border-radius:100px;flex-shrink:0;">Abrir guia →</span>
+    </a>
 
     <div class="metrics">
       <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val" id="mc-colab-ativos">0</div><div class="sub" id="mc-colab-inativos">0 inativos</div></div>
@@ -468,6 +484,95 @@ textarea.form-control{resize:vertical;min-height:70px;}
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== TUTORIAIS ===== -->
+<div id="view-tutoriais" class="view">
+  <div class="topbar">
+    <div class="topbar-title">Tutoriais</div>
+  </div>
+  <div class="content">
+
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--azul-escuro);margin-bottom:6px;">Central de Tutoriais e Guias</div>
+      <div style="font-size:13px;color:var(--cinza-medio);line-height:1.6;">Acesse os guias operacionais, manuais e materiais de apoio para implementar a NR-1 Map com sua equipe.</div>
+    </div>
+
+    <!-- CARDS DE TUTORIAIS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
+
+      <!-- CARD 1 — GUIA RH -->
+      <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
+        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
+        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
+        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📋</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Guia de Implementação RH</div>
+        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Manual operacional completo para gestores de RH e diretores. Checklist interativo de implementação, mockups das telas, como exportar documentos GRO e guia eSocial S-2240.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">RH & Diretores</span>
+            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Conformidade NR-1</span>
+          </div>
+          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
+        </div>
+      </a>
+
+      <!-- CARD 2 — EM BREVE: VIDEO TUTORIAL -->
+      <div style="background:#fff;border:1.5px dashed #D8E8E2;border-radius:12px;padding:22px;opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F4F6F5;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🎬</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#4A5450;margin-bottom:6px;">Videoaulas — Passo a Passo</div>
+        <div style="font-size:12px;color:#8A9590;line-height:1.6;margin-bottom:14px;">Série de vídeos curtos explicando cada funcionalidade da plataforma: configuração, disparo, interpretação do IBP e exportação de documentos.</div>
+        <span style="background:#F4F6F5;color:#8A9590;border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;">Em breve</span>
+      </div>
+
+      <!-- CARD 3 — EM BREVE: GUIA DO COLABORADOR -->
+      <div style="background:#fff;border:1.5px dashed #D8E8E2;border-radius:12px;padding:22px;opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F4F6F5;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">👤</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#4A5450;margin-bottom:6px;">Guia do Colaborador</div>
+        <div style="font-size:12px;color:#8A9590;line-height:1.6;margin-bottom:14px;">Material de apoio para comunicar aos colaboradores sobre a pesquisa, garantias de anonimato, como responder pelo WhatsApp e o que esperar do processo.</div>
+        <span style="background:#F4F6F5;color:#8A9590;border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;">Em breve</span>
+      </div>
+
+      <!-- CARD 4 — EM BREVE: FAQ -->
+      <div style="background:#fff;border:1.5px dashed #D8E8E2;border-radius:12px;padding:22px;opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F4F6F5;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">❓</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#4A5450;margin-bottom:6px;">Perguntas Frequentes</div>
+        <div style="font-size:12px;color:#8A9590;line-height:1.6;margin-bottom:14px;">Respostas às dúvidas mais comuns sobre NR-1, GRO, eSocial S-2240, anonimato dos colaboradores, validade jurídica do Laudo e integração com o PGR.</div>
+        <span style="background:#F4F6F5;color:#8A9590;border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;">Em breve</span>
+      </div>
+
+      <!-- CARD 5 — EM BREVE: GUIA ESOCIAL -->
+      <div style="background:#fff;border:1.5px dashed #D8E8E2;border-radius:12px;padding:22px;opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F4F6F5;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🏛</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#4A5450;margin-bottom:6px;">Guia eSocial — Evento S-2240</div>
+        <div style="font-size:12px;color:#8A9590;line-height:1.6;margin-bottom:14px;">Passo a passo para declarar os riscos psicossociais no eSocial usando os dados gerados pelo NR-1 Map, cruzando campos do Inventário com o formulário S-2240.</div>
+        <span style="background:#F4F6F5;color:#8A9590;border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;">Em breve</span>
+      </div>
+
+      <!-- CARD 6 — EM BREVE: MODELO DE COMUNICAÇÃO INTERNA -->
+      <div style="background:#fff;border:1.5px dashed #D8E8E2;border-radius:12px;padding:22px;opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F4F6F5;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📢</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#4A5450;margin-bottom:6px;">Modelos de Comunicação Interna</div>
+        <div style="font-size:12px;color:#8A9590;line-height:1.6;margin-bottom:14px;">Templates prontos de e-mail e mensagem WhatsApp para comunicar o lançamento da pesquisa, reforçar o anonimato e incentivar a participação dos colaboradores.</div>
+        <span style="background:#F4F6F5;color:#8A9590;border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;">Em breve</span>
+      </div>
+
+    </div>
+
+    <!-- SUPORTE -->
+    <div style="background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%);border-radius:12px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7FFFD4;margin-bottom:4px;">Precisa de ajuda personalizada?</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.5;">Entre em contato com o suporte da NR-1 Map para orientações específicas sobre sua empresa.</div>
+      </div>
+      <a href="https://api.whatsapp.com/send?phone=5562991546757&text=Ol%C3%A1%2C%20preciso%20de%20suporte%20com%20o%20NR-1%20Map" target="_blank"
+        style="background:#25D366;color:#fff;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        💬 Falar com Suporte
+      </a>
+    </div>
+
   </div>
 </div>
 
