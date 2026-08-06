@@ -191,9 +191,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     if _le and __import__('os').path.exists(_le):
         try: canvas_obj.drawImage(_le, w-48*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
         except: pass
-    if not _tem_le:
-        canvas_obj.setFont('Helvetica',7.5); canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawRightString(w-20*mm, h-13*mm, "Plataforma de Gestao de Riscos Psicossociais")
+    # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
