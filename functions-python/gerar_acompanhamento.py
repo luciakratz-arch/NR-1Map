@@ -124,17 +124,48 @@ s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', text
                           alignment=TA_CENTER)
 
 
+import urllib.request as _urllib_req_ac
+import tempfile as _tempfile_ac
+
+def _baixar_logo_ac(url):
+    if not url:
+        return None
+    try:
+        tmp = _tempfile_ac.NamedTemporaryFile(suffix='.png', delete=False)
+        tmp.close()
+        _urllib_req_ac.urlretrieve(url, tmp.name)
+        return tmp.name
+    except Exception:
+        return None
+
 def desenhar_cabecalho_rodape(canvas_obj, doc):
+    """Cabecalho com logos reais (atributos injetados por gerar_acompanhamento)."""
+    from reportlab.lib.utils import ImageReader
     canvas_obj.saveState()
     w, h = A4
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, h - 14 * mm, "[ LOGO PARCEIRO ]")
-    canvas_obj.drawRightString(w - 20 * mm, h - 14 * mm, "[ LOGO DA EMPRESA ]")
+
+    _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
+    _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
+    _le = getattr(desenhar_cabecalho_rodape, '_logo_emp',  None)
+
+    if _lp:
+        try:
+            canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-32*mm,
+                                  width=28*mm, height=14*mm,
+                                  preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
+    if _le:
+        try:
+            canvas_obj.drawImage(ImageReader(_le), w-50*mm, h-32*mm,
+                                  width=28*mm, height=14*mm,
+                                  preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
+    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
@@ -142,7 +173,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "ACOMPANHAMENTO — EVIDÊNCIAS DE GESTÃO CONTÍNUA")
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "ACOMPANHAMENTO — EVIDENCIAS DE GESTAO CONTINUA")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
@@ -151,7 +182,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.setFont('Helvetica', 7.5)
     canvas_obj.setFillColor(CINZA_TEXTO)
     canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
+    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
     canvas_obj.restoreState()
 
 
@@ -181,9 +212,29 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
     if not _acompanhamento:
         _acompanhamento = ACOMPANHAMENTO  # fallback para dados de exemplo
 
+    # Logos para cabecalho
+    _lp_path_ac = _baixar_logo_ac(_dados.get('logoParceiroUrl') or
+                  'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+    _le_path_ac = _baixar_logo_ac(_dados.get('logoEmpresaUrl') or '')
+
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
+        from reportlab.lib.utils import ImageReader
         canvas_obj.saveState()
         w, h = A4
+        if _lp_path_ac:
+            try:
+                canvas_obj.drawImage(ImageReader(_lp_path_ac), 18*mm, h-32*mm,
+                                      width=28*mm, height=14*mm,
+                                      preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+        if _le_path_ac:
+            try:
+                canvas_obj.drawImage(ImageReader(_le_path_ac), w-50*mm, h-32*mm,
+                                      width=28*mm, height=14*mm,
+                                      preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
         canvas_obj.setFont('Helvetica-Bold', 11)
         canvas_obj.setFillColor(VERDE_NR1)
         canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
