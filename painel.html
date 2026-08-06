@@ -5203,7 +5203,15 @@ function gerarLaudoCompleto() {
   btn.textContent = '⏳ Gerando laudo...';
   btn.disabled = true;
 
-  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId)
+  // FIX: tipo=laudo_tecnico explícito + logos via POST
+  var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresa, logoParceiroUrl: logoParceiro })
+  })
     .then(function(r){ return r.json(); })
     .then(function(d){
       btn.textContent = '📄 Gerar Laudo Tecnico PDF';
@@ -6636,7 +6644,15 @@ function gerarAtualizarLaudo() {
   var btn = document.getElementById('btn-gerar-atualizar-laudo');
   if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
 
-  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico')
+  // FIX: logos via POST
+  var logoEmpresaA  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiroA = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                      'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresaA, logoParceiroUrl: logoParceiroA })
+  })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (btn) { btn.textContent = '📄 Gerar / Atualizar Laudo'; btn.disabled = false; }
