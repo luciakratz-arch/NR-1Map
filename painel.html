@@ -668,21 +668,14 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico Psicossocial</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" id="btn-gerar-atualizar-laudo" onclick="gerarAtualizarLaudo()">📄 Gerar Laudo Técnico Psicossocial PDF</button>
+      <!-- botão de gerar movido para cada card de ciclo -->
     </div>
   </div>
   <div class="content" id="laudo-tecnico-content">
     <!-- Seletor de ciclos históricos -->
-    <div id="laudo-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+    <div id="laudo-seletor-ciclos" style="display:none;margin-bottom:16px;">
       <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Laudos</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <select id="laudo-ciclo-select" onchange="selecionarCicloLaudo(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;">
-          <option value="">Selecione um ciclo...</option>
-        </select>
-        <span id="laudo-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
-        <button id="btn-gerar-laudo-ciclo" onclick="gerarLaudoDoCicloAtual()" style="padding:6px 14px;border:none;background:#7B00C4;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⟳ Gerar / Atualizar Laudo</button>
-        <button id="btn-baixar-laudo-ciclo" onclick="baixarLaudoCicloAtual()" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
-      </div>
+      <div id="laudo-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
     <div id="laudo-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">📋</div>
@@ -6641,26 +6634,113 @@ function carregarLaudoTecnico(empresaId) {
       }
       _laudoCiclosCache = ciclos;
 
-      // Popular seletor
-      if (select) {
-        select.innerHTML = '';
+      // Popular lista de cards — um por ciclo
+      var lista = document.getElementById('laudo-ciclos-lista');
+      if (lista) {
+        lista.innerHTML = '';
         var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-        ciclos.forEach(function(c, idx) {
-          var dt   = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+        ciclos.forEach(function(cl, idx) {
+          var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
           var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
-          var resp  = c.data.totalRespostas || 0;
-          var ibp   = c.data.ibpGeral !== undefined ? ' · IBP ' + (c.data.ibpGeral >= 0 ? '+' : '') + parseFloat(c.data.ibpGeral).toFixed(1) : '';
-          var temPdf = c.data.laudoUrl ? ' ✓ PDF' : '';
-          var opt = document.createElement('option');
-          opt.value = c.id;
-          opt.textContent = dtStr + ' — ' + resp + ' respondentes' + ibp + temPdf;
-          if (idx === 0) opt.selected = true;
-          select.appendChild(opt);
+          var resp  = cl.data.totalRespostas || 0;
+          var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
+          var ibpStr = ibpVal !== null ? ' · IBP ' + (ibpVal >= 0 ? '+' : '') + ibpVal : '';
+          var temPdf = !!cl.data.laudoUrl;
+
+          var card = document.createElement('div');
+          card.id = 'laudo-card-' + cl.id;
+          card.style.cssText = 'background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;';
+          if (idx === 0) card.style.borderColor = '#0A6E4F';
+
+          // Info do ciclo
+          var info = document.createElement('div');
+          info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+          info.textContent = dtStr + ' — ' + resp + ' respondentes' + ibpStr;
+          card.appendChild(info);
+
+          // Badge PDF
+          var badge = document.createElement('span');
+          badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;' +
+            (temPdf ? 'background:#D1FAE5;color:#065F46;' : 'background:#FEF3C7;color:#92400E;');
+          badge.textContent = temPdf ? '✓ PDF disponível' : 'Sem PDF';
+          card.appendChild(badge);
+
+          // Botão Baixar (só se tiver PDF)
+          if (temPdf) {
+            var btnBaixar = document.createElement('button');
+            btnBaixar.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+            btnBaixar.textContent = '⬇ Baixar PDF';
+            (function(url) {
+              btnBaixar.onclick = function(e) { e.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); };
+            })(cl.data.laudoUrl);
+            card.appendChild(btnBaixar);
+          }
+
+          // Botão Gerar/Atualizar
+          var btnGerar = document.createElement('button');
+          btnGerar.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnGerar.textContent = temPdf ? '⟳ Atualizar Laudo' : '📄 Gerar Laudo';
+          (function(cicloId, btnRef, cardRef, badgeRef) {
+            btnRef.onclick = function(e) {
+              e.stopPropagation();
+              var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+              if (!empresaId) return;
+              btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
+              var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+              var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                          'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', cicloId: cicloId, logoEmpresaUrl: logoE, logoParceiroUrl: logoP })
+              }).then(function(r){ return r.json(); }).then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  _salvarLaudoUrlNoCiclo(empresaId, d.url, cicloId, 'laudoUrl');
+                  window.open(d.url + '?bust=' + Date.now(), '_blank');
+                  btnRef.textContent = '⟳ Atualizar Laudo';
+                  badgeRef.textContent = '✓ PDF disponível';
+                  badgeRef.style.background = '#D1FAE5'; badgeRef.style.color = '#065F46';
+                  // Adiciona botão baixar se não existia
+                  if (!cardRef.querySelector('button[data-baixar]')) {
+                    var nb = document.createElement('button');
+                    nb.setAttribute('data-baixar','1');
+                    nb.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent = '⬇ Baixar PDF';
+                    nb.onclick = function(e) { e.stopPropagation(); window.open(d.url + '?bust=' + Date.now(), '_blank'); };
+                    cardRef.insertBefore(nb, btnRef);
+                  }
+                  // Recarrega dados na view
+                  _laudoCicloAtual = cicloId;
+                  var cc = _laudoCiclosCache.find(function(x){ return x.id === cicloId; });
+                  if (cc) _renderLaudoDadosComCiclo(cicloId, cc.data);
+                } else {
+                  btnRef.textContent = '📄 Gerar Laudo';
+                  alert('Erro: ' + (d.error || 'tente novamente'));
+                }
+              }).catch(function(e) {
+                btnRef.disabled = false; btnRef.textContent = '📄 Gerar Laudo';
+                alert('Erro: ' + e.message);
+              });
+            };
+          })(cl.id, btnGerar, card, badge);
+          card.appendChild(btnGerar);
+
+          // Clique no card seleciona o ciclo e renderiza dados
+          (function(cicloId, data, cardEl) {
+            card.onclick = function() {
+              document.querySelectorAll('#laudo-ciclos-lista > div').forEach(function(d){ d.style.borderColor = '#e5e7eb'; });
+              cardEl.style.borderColor = '#0A6E4F';
+              _laudoCicloAtual = cicloId;
+              _renderLaudoDadosComCiclo(cicloId, data);
+            };
+          })(cl.id, cl.data, card);
+
+          lista.appendChild(card);
         });
       }
       if (seletor) seletor.style.display = 'block';
 
-      // Carregar o ciclo mais recente
+      // Carregar o ciclo mais recente automaticamente
       _laudoCicloAtual = ciclos[0].id;
       _renderLaudoDadosComCiclo(ciclos[0].id, ciclos[0].data);
     }).catch(function(e) { console.log('laudo err:', e); });
