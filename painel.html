@@ -5220,6 +5220,9 @@ function gerarLaudoCompleto() {
         window.open(d.url, '_blank');
         // Salva laudoUrl no ciclo mais recente para recuperar pelo botao "Ver laudo"
         _salvarLaudoUrlNoCiclo(empresaId, d.url, d.cicloId || null);
+        // Recarrega a view do laudo para o seletor refletir o novo PDF
+        _laudoCiclosCache = [];
+        setTimeout(function() { carregarLaudoTecnico(empresaId); }, 800);
         alert('Laudo Tecnico gerado e salvo com sucesso!');
       } else {
         alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
@@ -6698,6 +6701,9 @@ function gerarAtualizarLaudo() {
         // Cache-bust para forcar browser a nao usar PDF antigo
         var urlFresh = d.url + (d.url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
         window.open(urlFresh, '_blank');
+        // Recarrega lista de ciclos para o seletor mostrar "✓ PDF" atualizado
+        _laudoCiclosCache = [];
+        setTimeout(function() { carregarLaudoTecnico(empresaId); }, 800);
       } else {
         alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
       }
