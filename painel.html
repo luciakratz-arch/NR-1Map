@@ -680,6 +680,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
           <option value="">Selecione um ciclo...</option>
         </select>
         <span id="laudo-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
+        <button id="btn-gerar-laudo-ciclo" onclick="gerarLaudoDoCicloAtual()" style="padding:6px 14px;border:none;background:#7B00C4;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⟳ Gerar / Atualizar Laudo</button>
         <button id="btn-baixar-laudo-ciclo" onclick="baixarLaudoCicloAtual()" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
       </div>
     </div>
@@ -5231,6 +5232,53 @@ function gerarLaudoCompleto() {
     .catch(function(e){
       btn.textContent = '📄 Gerar Laudo Tecnico PDF';
       btn.disabled = false;
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+function gerarLaudoDoCicloAtual() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  if (!_laudoCicloAtual) { alert('Selecione um ciclo primeiro.'); return; }
+
+  var btn = document.getElementById('btn-gerar-laudo-ciclo');
+  var txtOrig = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      empresaId: empresaId,
+      tipo: 'laudo_tecnico',
+      cicloId: _laudoCicloAtual,
+      logoEmpresaUrl: logoEmpresa,
+      logoParceiroUrl: logoParceiro
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = txtOrig; btn.disabled = false; }
+      if (d.url) {
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, 'laudoUrl');
+        var urlFresh = d.url + '?bust=' + Date.now();
+        window.open(urlFresh, '_blank');
+        // Atualiza botão baixar
+        var btnBaixar = document.getElementById('btn-baixar-laudo-ciclo');
+        if (btnBaixar) { btnBaixar.style.display = 'inline-block'; btnBaixar.dataset.url = urlFresh; }
+        // Atualiza texto do seletor
+        var opt = document.querySelector('#laudo-ciclo-select option[value="' + _laudoCicloAtual + '"]');
+        if (opt && opt.textContent.indexOf('✓ PDF') === -1) opt.textContent += ' ✓ PDF';
+      } else {
+        alert('Erro ao gerar: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = txtOrig; btn.disabled = false; }
       alert('Erro de conexao: ' + e.message);
     });
 }
