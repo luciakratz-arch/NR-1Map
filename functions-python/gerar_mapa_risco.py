@@ -219,15 +219,22 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
 
 def _baixar_logo_doc(url):
-    """Baixa imagem de URL para arquivo temporario."""
+    """Aceita http(s):// URLs e data:image/...;base64,... strings."""
+    import urllib.request as _ur, tempfile as _tf, os as _os, base64 as _b64
     if not url:
         return None
     try:
-        tmp = _tmpmod.NamedTemporaryFile(suffix='.png', delete=False)
-        tmp.close()
-        _urllib_req.urlretrieve(url, tmp.name)
-        return tmp.name
-    except Exception:
+        tmp = _tf.NamedTemporaryFile(suffix='.png', delete=False)
+        if url.startswith('data:'):
+            header, data = url.split(',', 1)
+            tmp.write(_b64.b64decode(data))
+            tmp.close()
+        else:
+            tmp.close()
+            _ur.urlretrieve(url, tmp.name)
+        return tmp.name if _os.path.exists(tmp.name) else None
+    except Exception as _e:
+        print(f"[logo] erro: {_e}")
         return None
 
 def gerar_mapa_risco(dados: dict = None, output_path=None):
