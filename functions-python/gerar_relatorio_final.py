@@ -159,13 +159,13 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
     # Logo esquerda — parceiro (ou NR-1 Map como fallback)
     if logo_parceiro_path and os.path.exists(logo_parceiro_path):
         try:
-            canvas_obj.drawImage(logo_parceiro_path, 20*mm, h-16*mm,
-                                 width=28*mm, height=10*mm,
+            canvas_obj.drawImage(logo_parceiro_path, 18*mm, h-24*mm,
+                                 width=42*mm, height=18*mm,
                                  preserveAspectRatio=True, anchor='c')
         except Exception:
             canvas_obj.setFont('Helvetica-Bold', 8)
             canvas_obj.setFillColor(VERDE)
-            canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+            canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
     else:
         canvas_obj.setFont('Helvetica-Bold', 8)
         canvas_obj.setFillColor(VERDE)
@@ -174,8 +174,8 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
     _tem_logo_empresa = False
     if logo_empresa_path and os.path.exists(logo_empresa_path):
         try:
-            canvas_obj.drawImage(logo_empresa_path, w-48*mm, h-16*mm,
-                                 width=28*mm, height=10*mm,
+            canvas_obj.drawImage(logo_empresa_path, w-60*mm, h-24*mm,
+                                 width=42*mm, height=18*mm,
                                  preserveAspectRatio=True, anchor='c')
             _tem_logo_empresa = True
         except Exception:
@@ -184,14 +184,14 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
     # Linha
     canvas_obj.setStrokeColor(VERDE)
     canvas_obj.setLineWidth(1.0)
-    canvas_obj.line(20*mm, h-16*mm, w-20*mm, h-16*mm)
+    canvas_obj.line(18*mm, h-26*mm, w-18*mm, h-26*mm)
     # Titulo
     canvas_obj.setFont('Helvetica-Bold', 9.5)
     canvas_obj.setFillColor(AZUL_ESC)
-    canvas_obj.drawCentredString(w/2, h-22*mm, "LAUDO TECNICO PSICOSSOCIAL")
+    canvas_obj.drawCentredString(w/2, h-31*mm, "LAUDO TECNICO PSICOSSOCIAL")
     canvas_obj.setFont('Helvetica', 8)
     canvas_obj.setFillColor(CINZA)
-    canvas_obj.drawCentredString(w/2, h-27*mm, empresa)
+    canvas_obj.drawCentredString(w/2, h-36*mm, empresa)
     # Rodape
     canvas_obj.setFont('Helvetica', 6.5)
     canvas_obj.setFillColor(CINZA)
@@ -261,7 +261,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
-        topMargin=36*mm, bottomMargin=20*mm,
+        topMargin=48*mm, bottomMargin=20*mm,
         leftMargin=18*mm, rightMargin=18*mm
     )
 
