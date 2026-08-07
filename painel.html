@@ -6668,6 +6668,7 @@ function carregarLaudoTecnico(empresaId) {
           // Botão Baixar (só se tiver PDF)
           if (temPdf) {
             var btnBaixar = document.createElement('button');
+            btnBaixar.setAttribute('data-baixar','1');
             btnBaixar.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
             btnBaixar.textContent = '⬇ Baixar PDF';
             (function(url) {
@@ -6700,8 +6701,11 @@ function carregarLaudoTecnico(empresaId) {
                   btnRef.textContent = '⟳ Atualizar Laudo';
                   badgeRef.textContent = '✓ PDF disponível';
                   badgeRef.style.background = '#D1FAE5'; badgeRef.style.color = '#065F46';
-                  // Adiciona botão baixar se não existia
-                  if (!cardRef.querySelector('button[data-baixar]')) {
+                  // Atualiza ou cria botão baixar
+                  var existBaixar = cardRef.querySelector('button[data-baixar]') || cardRef.querySelector('button[style*="0A6E4F"]');
+                  if (existBaixar) {
+                    (function(url){ existBaixar.onclick = function(e){ e.stopPropagation(); window.open(url+'?bust='+Date.now(),'_blank'); }; })(d.url);
+                  } else {
                     var nb = document.createElement('button');
                     nb.setAttribute('data-baixar','1');
                     nb.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
