@@ -105,17 +105,23 @@ def classificar_gro(ibp, n_respostas):
 
 
 def _baixar_logo(url):
-    """Baixa imagem de URL para arquivo temporario. Retorna path ou None."""
+    """Aceita http(s):// URLs e data:image/...;base64,... strings."""
+    import urllib.request as _ur, tempfile as _tf, os as _os, base64 as _b64
     if not url:
         return None
     try:
-        tmp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        tmp.close()
-        urllib.request.urlretrieve(url, tmp.name)
-        return tmp.name
-    except Exception:
+        tmp = _tf.NamedTemporaryFile(suffix='.png', delete=False)
+        if url.startswith('data:'):
+            header, data = url.split(',', 1)
+            tmp.write(_b64.b64decode(data))
+            tmp.close()
+        else:
+            tmp.close()
+            _ur.urlretrieve(url, tmp.name)
+        return tmp.name if _os.path.exists(tmp.name) else None
+    except Exception as _e:
+        print(f"[logo] erro: {_e}")
         return None
-
 
 def nome_arquivo_padrao(empresa, ano=None):
     import unicodedata, re
