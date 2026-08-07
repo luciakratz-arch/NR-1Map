@@ -182,33 +182,33 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
     _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
     if _lp and __import__('os').path.exists(_lp):
-        try: canvas_obj.drawImage(_lp, 20*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c')
-        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+        try: canvas_obj.drawImage(_lp, 18*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c')
+        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
     else:
         canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
     # Logo direita — empresa
     _tem_le = False
     if _le and __import__('os').path.exists(_le):
-        try: canvas_obj.drawImage(_le, w-48*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
+        try: canvas_obj.drawImage(_le, w-60*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
         except: pass
     # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
     _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
+    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
+    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
 
     canvas_obj.setFont('Helvetica', 7.5)
     canvas_obj.setFillColor(CINZA_TEXTO)
@@ -271,23 +271,23 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         canvas_obj.setFillColor(CINZA_TEXTO)
         canvas_obj.setFont('Helvetica-Bold', 11)
         canvas_obj.setFillColor(VERDE_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
+        canvas_obj.drawCentredString(w / 2, h - 31 * mm, _empresa_nome)
         canvas_obj.setFont('Helvetica', 8.5)
         canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
+        canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
         canvas_obj.setFont('Helvetica-Bold', 10)
         canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
+        canvas_obj.drawCentredString(w / 2, h - 41 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
         canvas_obj.setStrokeColor(VERDE_NR1)
         canvas_obj.setLineWidth(1.2)
-        canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+        canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
         canvas_obj.setFont('Helvetica', 7.5)
         canvas_obj.setFillColor(CINZA_TEXTO)
         canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
         canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
         canvas_obj.restoreState()
 
-    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
+    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=48 * mm, bottomMargin=20 * mm,
                              leftMargin=16 * mm, rightMargin=16 * mm)
     story = []
 
