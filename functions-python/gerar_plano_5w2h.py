@@ -204,33 +204,33 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
     _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
     if _lp and __import__('os').path.exists(_lp):
-        try: canvas_obj.drawImage(_lp, 20*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c')
-        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+        try: canvas_obj.drawImage(_lp, 18*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c')
+        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
     else:
         canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
     # Logo direita — empresa
     _tem_le = False
     if _le and __import__('os').path.exists(_le):
-        try: canvas_obj.drawImage(_le, w-48*mm, h-16*mm, width=28*mm, height=10*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
+        try: canvas_obj.drawImage(_le, w-60*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
         except: pass
     # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
 
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
     _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
+    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "PLANO DE AÇÃO 5W2H")
+    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "PLANO DE AÇÃO 5W2H")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
 
     canvas_obj.setFont('Helvetica', 7.5)
     canvas_obj.setFillColor(CINZA_TEXTO)
@@ -277,7 +277,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
             'n':_dados.get('respondentes',0),'ibp':_dados.get('ibp_geral',0.0) or 0.0,'qtd_perigos':1}]
 
     output_path = output_path or nome_arquivo_padrao("PlanoDeAcao5W2H")
-    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=38 * mm, bottomMargin=20 * mm,
+    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=48 * mm, bottomMargin=20 * mm,
                              leftMargin=18 * mm, rightMargin=18 * mm)
     story = []
 
