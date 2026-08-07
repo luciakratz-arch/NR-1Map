@@ -171,11 +171,11 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
         except Exception:
             canvas_obj.setFont('Helvetica-Bold', 8)
             canvas_obj.setFillColor(VERDE)
-            canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
+            canvas_obj.drawString(18*mm, h-20*mm, "NR-1Map")
     else:
         canvas_obj.setFont('Helvetica-Bold', 8)
         canvas_obj.setFillColor(VERDE)
-        canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+        canvas_obj.drawString(18*mm, h-20*mm, "NR-1Map")
     # Logo direita — empresa (se existir, nao exibe texto sobreposto)
     _tem_logo_empresa = False
     if logo_empresa_path and os.path.exists(logo_empresa_path):
