@@ -5219,7 +5219,7 @@ function gerarLaudoCompleto() {
       if (d.url) {
         window.open(d.url, '_blank');
         // Salva laudoUrl no ciclo mais recente para recuperar pelo botao "Ver laudo"
-        _salvarLaudoUrlNoCiclo(empresaId, d.url, d.cicloId || null);
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, d.cicloId || null, 'laudoUrl');
         // Recarrega a view do laudo para o seletor refletir o novo PDF
         _laudoCiclosCache = [];
         setTimeout(function() { carregarLaudoTecnico(empresaId); }, 800);
@@ -5235,22 +5235,24 @@ function gerarLaudoCompleto() {
     });
 }
 
-function _salvarLaudoUrlNoCiclo(empresaId, url, cicloId) {
+function _salvarLaudoUrlNoCiclo(empresaId, url, cicloId, urlField) {
   var db = window.nr1mapDb;
   if (!db) return;
+  var campo = urlField || 'laudoUrl';
   var geradoEm = new Date().toISOString();
+  var upd = {}; upd[campo] = url; upd['laudoGeradoEm'] = geradoEm;
   // Se cicloId foi retornado pela Cloud Function, usa direto
   if (cicloId) {
     db.collection('nr1map_respostas').doc(empresaId)
       .collection('ciclos').doc(cicloId)
-      .update({ laudoUrl: url, laudoGeradoEm: geradoEm })
+      .update(upd)
       .catch(function(){});
     return;
   }
   // Fallback: pega o ciclo mais recente por atualizadoEm ou criadoEm
   var salvar = function(snap) {
     if (!snap || snap.empty) return;
-    snap.docs[0].ref.update({ laudoUrl: url, laudoGeradoEm: geradoEm }).catch(function(){});
+    snap.docs[0].ref.update(upd).catch(function(){});
   };
   db.collection('nr1map_respostas').doc(empresaId)
     .collection('ciclos').orderBy('atualizadoEm', 'desc').limit(1).get()
@@ -6240,7 +6242,7 @@ function _renderLaudoDados(d) {
 var _rcCiclosCache = [];
 
 // ===== FUNÇÕES COMPARTILHADAS DE SELETOR DE CICLOS =====
-var _ciclosCache = null; // cache global de todos os ciclos
+var _laudoCiclosCache = []; // cache global de todos os ciclos
 
 function _carregarCiclosParaSeletor(selectId, statusId, baixarBtnId, urlField, onSelect) {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
@@ -6339,7 +6341,7 @@ function gerarAtualizarDoc(tipo, btnId, urlField) {
         var urlFresh = d.url + '?bust=' + Date.now();
         window.open(urlFresh, '_blank');
         // Invalida cache de ciclos para recarregar com novo PDF
-        _ciclosCache = null;
+        _laudoCiclosCache = [];
       } else {
         alert('Erro: ' + (d.error || 'tente novamente'));
       }
@@ -6680,7 +6682,7 @@ function gerarAtualizarLaudo() {
       if (btn) { btn.textContent = '📄 Gerar Laudo Técnico Psicossocial PDF'; btn.disabled = false; }
       if (d.url) {
         // Salva laudoUrl no ciclo atual
-        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual);
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, 'laudoUrl');
         // Atualiza cache e seletor
         if (_laudoCicloAtual) {
           var ciclo = _laudoCiclosCache.find(function(c) { return c.id === _laudoCicloAtual; });
