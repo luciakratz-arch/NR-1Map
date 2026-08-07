@@ -185,8 +185,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     # Logo parceiro (esquerda)
     if _lp:
         try:
-            canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-32*mm,
-                                  width=28*mm, height=14*mm,
+            canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-28*mm,
+                                  width=42*mm, height=18*mm,
                                   preserveAspectRatio=True, mask='auto')
         except Exception:
             canvas_obj.setFont('Helvetica', 7)
@@ -196,8 +196,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     # Logo empresa (direita)
     if _le:
         try:
-            canvas_obj.drawImage(ImageReader(_le), w-50*mm, h-32*mm,
-                                  width=28*mm, height=14*mm,
+            canvas_obj.drawImage(ImageReader(_le), w-62*mm, h-28*mm,
+                                  width=42*mm, height=18*mm,
                                   preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
@@ -209,15 +209,15 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
+    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
 
     canvas_obj.setFont('Helvetica-Bold', 10)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
+    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
 
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
 
     # Rodapé
     canvas_obj.setFont('Helvetica', 7.5)
@@ -270,32 +270,32 @@ def gerar_inventario(dados: dict = None, output_path=None):
         # Logo parceiro (esquerda)
         if _lp_path_inv:
             try:
-                canvas_obj.drawImage(ImageReader(_lp_path_inv), 18*mm, h-32*mm,
-                                      width=28*mm, height=14*mm,
+                canvas_obj.drawImage(ImageReader(_lp_path_inv), 18*mm, h-28*mm,
+                                      width=42*mm, height=18*mm,
                                       preserveAspectRatio=True, mask='auto')
             except Exception:
                 pass
         # Logo empresa (direita)
         if _le_path_inv:
             try:
-                canvas_obj.drawImage(ImageReader(_le_path_inv), w-50*mm, h-32*mm,
-                                      width=28*mm, height=14*mm,
+                canvas_obj.drawImage(ImageReader(_le_path_inv), w-62*mm, h-28*mm,
+                                      width=42*mm, height=18*mm,
                                       preserveAspectRatio=True, mask='auto')
             except Exception:
                 pass
 
         canvas_obj.setFont('Helvetica-Bold', 11)
         canvas_obj.setFillColor(VERDE_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 20 * mm, _empresa_nome)
+        canvas_obj.drawCentredString(w / 2, h - 31 * mm, _empresa_nome)
         canvas_obj.setFont('Helvetica', 8.5)
         canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 25 * mm, "NR-1Map")
+        canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
         canvas_obj.setFont('Helvetica-Bold', 10)
         canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
+        canvas_obj.drawCentredString(w / 2, h - 41 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
         canvas_obj.setStrokeColor(VERDE_NR1)
         canvas_obj.setLineWidth(1.2)
-        canvas_obj.line(20 * mm, h - 34 * mm, w - 20 * mm, h - 34 * mm)
+        canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
         canvas_obj.setFont('Helvetica', 7.5)
         canvas_obj.setFillColor(CINZA_TEXTO)
         canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
@@ -305,7 +305,7 @@ def gerar_inventario(dados: dict = None, output_path=None):
     output_path = output_path or nome_arquivo_padrao("InventarioDeRiscos", _empresa_nome)
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
-        topMargin=38 * mm, bottomMargin=20 * mm,
+        topMargin=48 * mm, bottomMargin=20 * mm,
         leftMargin=20 * mm, rightMargin=20 * mm,
     )
     story = []
