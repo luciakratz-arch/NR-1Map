@@ -140,51 +140,22 @@ def _baixar_logo_ac(url):
 
 def desenhar_cabecalho_rodape(canvas_obj, doc):
     """Cabecalho com logos reais (atributos injetados por gerar_acompanhamento)."""
-    from reportlab.lib.utils import ImageReader
-    canvas_obj.saveState()
-    w, h = A4
-
-    _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
-    _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
-    _le = getattr(desenhar_cabecalho_rodape, '_logo_emp',  None)
-
-    if _lp:
-        try:
-            canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-28*mm,
-                                  width=42*mm, height=18*mm,
-                                  preserveAspectRatio=True, mask='auto')
-        except Exception:
-            pass
-    if _le:
-        try:
-            canvas_obj.drawImage(ImageReader(_le), w-62*mm, h-28*mm,
-                                  width=42*mm, height=18*mm,
-                                  preserveAspectRatio=True, mask='auto')
-        except Exception:
-            pass
-
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
-
-    canvas_obj.setFont('Helvetica', 8.5)
-    canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
-
-    canvas_obj.setFont('Helvetica-Bold', 10)
-    canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "ACOMPANHAMENTO — EVIDENCIAS DE GESTAO CONTINUA")
-
-    canvas_obj.setStrokeColor(VERDE_NR1)
-    canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
-
-    canvas_obj.setFont('Helvetica', 7.5)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
-    canvas_obj.restoreState()
-
+    import urllib.request as _ur, tempfile as _tf, os as _os, base64 as _b64
+    if not url:
+        return None
+    try:
+        tmp = _tf.NamedTemporaryFile(suffix='.png', delete=False)
+        if url.startswith('data:'):
+            header, data = url.split(',', 1)
+            tmp.write(_b64.b64decode(data))
+            tmp.close()
+        else:
+            tmp.close()
+            _ur.urlretrieve(url, tmp.name)
+        return tmp.name if _os.path.exists(tmp.name) else None
+    except Exception as _e:
+        print(f"[logo] erro: {_e}")
+        return None
 
 def gerar_acompanhamento(dados: dict = None, output_path=None):
     _dados = dados or {}
