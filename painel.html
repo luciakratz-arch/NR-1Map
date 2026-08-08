@@ -728,18 +728,14 @@ textarea.form-control{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="topbar-title" title="Mapa de Risco Psicossocial">🗺 Mapa de Risco</div>
     <div class="topbar-actions">
-      <button class="btn btn-ghost btn-sm" id="btn-gerar-mapa-pdf" onclick="gerarAtualizarDoc('mapa_risco','btn-gerar-mapa-pdf','mapaUrl')">📄 Gerar Mapa PDF</button>
+      <!-- botão de gerar movido para cada card de ciclo -->
     </div>
   </div>
   <div class="content">
     <!-- Seletor de ciclos -->
-    <div id="mapa-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+    <div id="mapa-seletor-ciclos" style="display:none;margin-bottom:16px;">
       <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Ciclos</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <select id="mapa-ciclo-select" onchange="selecionarCicloMapa(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;"></select>
-        <span id="mapa-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
-        <button id="btn-baixar-mapa-ciclo" onclick="baixarDocCiclo('mapaUrl')" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
-      </div>
+      <div id="mapa-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
     <div id="mapa-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
       <div style="font-size:32px;margin-bottom:12px;">🗺</div>
@@ -2939,7 +2935,7 @@ function sv(id){
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
   if(id==='mapa-risco' && window.nr1mapEmpresa) {
     carregarMapaRisco(window.nr1mapEmpresa.id);
-    _carregarCiclosParaSeletor('mapa-ciclo-select','mapa-ciclo-status','btn-baixar-mapa-ciclo','mapaUrl', function(cicloId, d){});
+    _carregarCiclosMapaCards(window.nr1mapEmpresa.id);
   }
   if(id==='relatorio-anual' && window.nr1mapEmpresa) {
     carregarRelatorioAnual(window.nr1mapEmpresa.id);
@@ -6392,6 +6388,119 @@ function gerarAtualizarDoc(tipo, btnId, urlField) {
     });
 }
 
+// Carrega ciclos do Mapa de Risco como cards individuais
+function _carregarCiclosMapaCards(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var seletor = document.getElementById('mapa-seletor-ciclos');
+  var lista   = document.getElementById('mapa-ciclos-lista');
+  var semDados = document.getElementById('mapa-sem-dados');
+  if (!lista) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) return;
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a,b){ return (b.data.criadoEm||'') > (a.data.criadoEm||'') ? 1 : -1; });
+      if (!ciclos.length) return;
+
+      lista.innerHTML = '';
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      ciclos.forEach(function(cl, idx) {
+        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dtStr = dt ? dt.getDate()+'/'+meses[dt.getMonth()]+'/'+dt.getFullYear() : 'Ciclo '+(idx+1);
+        var resp  = cl.data.totalRespostas || 0;
+        var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
+        var ibpStr = ibpVal !== null ? ' · IBP '+(ibpVal>=0?'+':'')+ibpVal : '';
+        var temPdf = !!cl.data.mapaUrl;
+
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#f9fafb;border:1px solid '+(idx===0?'#0A6E4F':'#e5e7eb')+';border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;';
+
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+        info.textContent = dtStr+' — '+resp+' respondentes'+ibpStr;
+        card.appendChild(info);
+
+        var badge = document.createElement('span');
+        badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;'+(temPdf?'background:#D1FAE5;color:#065F46;':'background:#FEF3C7;color:#92400E;');
+        badge.textContent = temPdf ? '✓ PDF disponível' : 'Sem PDF';
+        card.appendChild(badge);
+
+        if (temPdf) {
+          var btnB = document.createElement('button');
+          btnB.setAttribute('data-baixar','1');
+          btnB.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnB.textContent = '⬇ Baixar PDF';
+          (function(url){ btnB.onclick = function(e){ e.stopPropagation(); window.open(url+'?bust='+Date.now(),'_blank'); }; })(cl.data.mapaUrl);
+          card.appendChild(btnB);
+        }
+
+        var btnG = document.createElement('button');
+        btnG.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnG.textContent = temPdf ? '⟳ Atualizar Mapa' : '🗺 Gerar Mapa';
+        (function(cicloId, btnRef, cardRef, badgeRef) {
+          btnRef.onclick = function(e) {
+            e.stopPropagation();
+            var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (!empId) return;
+            btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
+            var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+            var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                        'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            var fetchOpts = { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ empresaId:empId, tipo:'mapa_risco', cicloId:cicloId, logoEmpresaUrl:logoE, logoParceiroUrl:logoP }) };
+            fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empId+'&tipo=mapa_risco', fetchOpts)
+              .then(function(r){ return r.json(); })
+              .then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  var upd = { mapaUrl: d.url, mapaGeradoEm: new Date().toISOString() };
+                  window.nr1mapDb.collection('nr1map_respostas').doc(empId).collection('ciclos').doc(cicloId).update(upd).catch(function(){});
+                  window.open(d.url+'?bust='+Date.now(),'_blank');
+                  btnRef.textContent = '⟳ Atualizar Mapa';
+                  badgeRef.textContent = '✓ PDF disponível'; badgeRef.style.background='#D1FAE5'; badgeRef.style.color='#065F46';
+                  var existB = cardRef.querySelector('button[data-baixar]');
+                  if (existB) { (function(url){ existB.onclick=function(e){e.stopPropagation();window.open(url+'?bust='+Date.now(),'_blank');}; })(d.url); }
+                  else {
+                    var nb=document.createElement('button'); nb.setAttribute('data-baixar','1');
+                    nb.style.cssText='padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent='⬇ Baixar PDF';
+                    nb.onclick=function(e){e.stopPropagation();window.open(d.url+'?bust='+Date.now(),'_blank');};
+                    cardRef.insertBefore(nb,btnRef);
+                  }
+                } else { btnRef.textContent='🗺 Gerar Mapa'; alert('Erro: '+(d.error||'tente novamente')); }
+              }).catch(function(e){ btnRef.disabled=false; btnRef.textContent='🗺 Gerar Mapa'; alert('Erro: '+e.message); });
+          };
+        })(cl.id, btnG, card, badge);
+        card.appendChild(btnG);
+
+        (function(cicloId, data, cardEl) {
+          card.onclick = function() {
+            document.querySelectorAll('#mapa-ciclos-lista > div').forEach(function(d){ d.style.borderColor='#e5e7eb'; });
+            cardEl.style.borderColor='#0A6E4F';
+            var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (empId) carregarMapaRisco(empId, cicloId, data);
+          };
+        })(cl.id, cl.data, card);
+
+        lista.appendChild(card);
+      });
+
+      if (seletor) seletor.style.display = 'block';
+      if (semDados) semDados.style.display = 'none';
+      // Carrega o mais recente automaticamente
+      var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+      if (empId) carregarMapaRisco(empId, ciclos[0].id, ciclos[0].data);
+    }).catch(function(e){ console.log('mapa cards err:', e); });
+}
+
 // Seletores específicos por tela
 function selecionarCicloMapa(cicloId) {
   var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
@@ -6848,7 +6957,7 @@ function gerarAtualizarLaudo() {
     });
 }
 
-function carregarMapaRisco(empresaId) {
+function carregarMapaRisco(empresaId, cicloIdFiltro, dadosCicloFiltro) {
   if (!empresaId || !window.nr1mapDb) return;
   var semDados = document.getElementById('mapa-sem-dados');
   var comDados = document.getElementById('mapa-dados');
