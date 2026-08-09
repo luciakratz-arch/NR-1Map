@@ -2324,14 +2324,15 @@ var _rhSel = new Set();
 var _rhProprias = [];        // [{id, subcatId, modId, texto}]
 var _rhHistorico = new Set(); // pids que já foram usados em diagnósticos anteriores
 
-function carregarPlanoAcao(empresaId) {
+function carregarPlanoAcao(empresaId, cicloId) {
   if (!empresaId || !window.nr1mapDb) return;
   var tbody = document.getElementById('tbody-plano');
   if (!tbody) return;
-  window.nr1mapDb.collection('nr1map_plano_acao')
-    .where('empresaId','==',empresaId)
-    .orderBy('criadoEm','asc')
-    .get()
+  var cicloFiltro = cicloId || _planoCicloAtual || null;
+  var query = window.nr1mapDb.collection('nr1map_plano_acao')
+    .where('empresaId','==',empresaId);
+  if (cicloFiltro) query = query.where('cicloId','==',cicloFiltro);
+  query.orderBy('criadoEm','asc').get()
     .then(function(snap) {
       tbody.innerHTML = '';
       if (snap.empty) {
@@ -2928,8 +2929,15 @@ function sv(id){
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){
-    carregarPlanoAcao(window.nr1mapEmpresa.id);
-    _carregarCiclosParaSeletor('plano-ciclo-select','plano-ciclo-status','btn-baixar-plano-ciclo','planoUrl', function(cicloId, d){});
+    _carregarCiclosParaSeletor('plano-ciclo-select','plano-ciclo-status','btn-baixar-plano-ciclo','planoUrl', function(cicloId, d){
+      // Ao carregar seletor, definir ciclo mais recente como ativo no plano
+      if (!_planoCicloAtual && cicloId) {
+        _planoCicloAtual = cicloId;
+        carregarPlanoAcao(window.nr1mapEmpresa.id, cicloId);
+      }
+    });
+    // Carregar com ciclo ja selecionado (se houver) ou sem filtro
+    carregarPlanoAcao(window.nr1mapEmpresa.id, _planoCicloAtual || null);
   }
   if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); _carregarContextoEmpresa(); }
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
@@ -3047,15 +3055,17 @@ function adicionarAcao(){
   if (!empresaId || !window.nr1mapDb) return;
   var hoje=new Date(); hoje.setDate(hoje.getDate()+7);
   var dataPadrao=hoje.toISOString().slice(0,10);
+  var cicloAtualPlano = _planoCicloAtual || null;
   window.nr1mapDb.collection('nr1map_plano_acao').add({
     empresaId: empresaId,
+    cicloId: cicloAtualPlano,
     setor: 'Novo setor / CBO',
-    acao: 'Descreva a ação (What / How)...',
-    responsavel: 'Responsável',
+    acao: 'Descreva a acao (What / How)...',
+    responsavel: 'Responsavel',
     status: 'Pendente',
     prazo: dataPadrao,
     criadoEm: new Date().toISOString()
-  }).then(function(){ carregarPlanoAcao(empresaId); })
+  }).then(function(){ carregarPlanoAcao(empresaId, cicloAtualPlano); })
   .catch(function(e){ alert('Erro: '+e.message); });
 }
 function gerarPdfPlano(){
@@ -4023,6 +4033,8 @@ var _ZONA_DEJOURS = function(ibp) {
 function gerarSugestoesAutomaticas() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  // Garantir que _planoCicloAtual esta definido (usa _laudoCicloAtual como fallback)
+  if (!_planoCicloAtual && _laudoCicloAtual) _planoCicloAtual = _laudoCicloAtual;
 
   // Tenta usar cache do mapa de risco primeiro, depois _histCiclos, depois busca Firestore
   var subcats = window._mapaRiscoSubcats || null;
@@ -4075,8 +4087,10 @@ function _executarSugestoes(empresaId, subcats) {
     var risco = _RISCO_GRO(sc.ibp);
     var prazoDate = new Date(); prazoDate.setDate(prazoDate.getDate() + (base.prazo || 30));
     var prazoStr = prazoDate.toISOString().split('T')[0];
+    var cicloSugestao = _planoCicloAtual || null;
     return window.nr1mapDb.collection('nr1map_plano_acao').add({
       empresaId: empresaId,
+      cicloId: cicloSugestao,
       setor: base.nome,
       acao: '[IA] ' + base.acao,
       responsavel: base.responsavel,
@@ -4092,8 +4106,9 @@ function _executarSugestoes(empresaId, subcats) {
   });
 
   Promise.all(promises).then(function() {
-    alert('✅ ' + criticas.length + ' ações geradas no Plano de Ação!');
+    alert('Acoes geradas com sucesso: ' + criticas.length + ' itens adicionados ao Plano de Acao!');
     sv('plano-acao');
+    carregarPlanoAcao(empresaId, _planoCicloAtual || null);
   }).catch(function(e) { alert('Erro: ' + e.message); });
 }
 
@@ -5187,11 +5202,10 @@ function carregarEmpresa(uid, email) {
 function gerarLaudoCompleto() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  // Capturar botao ANTES do confirm (event.target perde referencia apos dialogo em alguns browsers)
+  var btn = (event && event.target) ? event.target : document.querySelector('[onclick="gerarLaudoCompleto()"]');
   if (!confirm('Gerar o Laudo Tecnico Psicossocial completo?\n\nIsso pode levar ate 30 segundos.')) return;
-
-  var btn = event.target;
-  btn.textContent = '⏳ Gerando laudo...';
-  btn.disabled = true;
+  if (btn) { btn.textContent = '⏳ Gerando laudo...'; btn.disabled = true; }
 
   // FIX: tipo=laudo_tecnico explícito + logos via POST
   var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
@@ -5204,8 +5218,7 @@ function gerarLaudoCompleto() {
   })
     .then(function(r){ return r.json(); })
     .then(function(d){
-      btn.textContent = '📄 Gerar Laudo Tecnico PDF';
-      btn.disabled = false;
+      if (btn) { btn.textContent = '📄 Gerar Laudo Tecnico PDF'; btn.disabled = false; }
       if (d.url) {
         window.open(d.url, '_blank');
         // Salva laudoUrl no ciclo selecionado
@@ -5219,8 +5232,7 @@ function gerarLaudoCompleto() {
       }
     })
     .catch(function(e){
-      btn.textContent = '📄 Gerar Laudo Tecnico PDF';
-      btn.disabled = false;
+      if (btn) { btn.textContent = '📄 Gerar Laudo Tecnico PDF'; btn.disabled = false; }
       alert('Erro de conexao: ' + e.message);
     });
 }
@@ -6514,7 +6526,10 @@ function selecionarCicloMapa(cicloId) {
 function selecionarCicloPlano(cicloId) {
   var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
   if (!ciclo) return;
+  _planoCicloAtual = cicloId;
   _atualizarStatusSeletor('plano-ciclo-status', 'btn-baixar-plano-ciclo', ciclo.data.planoUrl);
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (empresaId) carregarPlanoAcao(empresaId, cicloId);
 }
 
 // Filtro de ano no Relatório Anual
@@ -6707,6 +6722,8 @@ function carregarRelatoriosPorCiclo(empresaId) {
 
 // Ciclo atualmente selecionado no laudo
 var _laudoCicloAtual = null;
+// Ciclo atualmente selecionado no Plano de Acao
+var _planoCicloAtual = null;
 var _laudoCiclosCache = []; // [{id, data, ibp, laudoUrl, totalRespostas}]
 
 function carregarLaudoTecnico(empresaId) {
