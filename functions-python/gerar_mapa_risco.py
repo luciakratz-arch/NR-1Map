@@ -250,8 +250,11 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     if por_cargo:
         _setores_cbo = []
         for c in por_cargo:
+            _setor_nome = (c.get('unidade') or c.get('cargo') or '').strip()
+            if not _setor_nome or _setor_nome.lower() in ('nao informado', 'não informado', '', '-', 'geral', 'todos'):
+                _setor_nome = c.get('cargo', '').strip() or 'Empresa (Geral)'
             _setores_cbo.append({
-                'setor':       c.get('unidade') or c.get('cargo') or 'Geral',
+                'setor':       _setor_nome,
                 'cbo':         c.get('cbo', ''),
                 'cargo':       c.get('cargo', ''),
                 'n':           c.get('n', 0),
@@ -269,7 +272,10 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         ] or [{'setor':'Empresa (Geral)','cbo':'','cargo':'Todos','n':_num_resp,
                 'ibp':_dados.get('ibp_geral',0.0) or 0.0,'qtd_perigos':1}]
 
-    output_path = output_path or nome_arquivo_padrao("MapaDeRisco", _empresa_nome)
+    # Nome com periodo para diferenciar ciclos
+    import re as _re2, unicodedata as _ud2
+    _slug_ref = _re2.sub(r'[^a-zA-Z0-9]+', '', _ud2.normalize('NFKD', _referencia).encode('ascii','ignore').decode())
+    output_path = output_path or nome_arquivo_padrao(f"MapaDeRisco_{_slug_ref}", _empresa_nome)
 
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
         canvas_obj.saveState()
@@ -422,7 +428,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     ))
     story.append(Spacer(1, 2 * mm))
 
-    header_cbo = ["Setor", "CBO / Cargo", "N", "Zona (IBP)", "Severidade", "Probabilidade", "Classificação (GRO)"]
+    header_cbo = ["Setor", "CBO / Cargo", "N", "IBP", "Zona (IBP)", "Severidade", "Prob.", "GRO"]
     rows_cbo = [header_cbo]
     row_bg_cbo = []
     span_cbo = []
@@ -440,24 +446,26 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
             prob_num = probabilidade_de(c["qtd_perigos"])
             prob_letra = PROB_LETRA_POR_NUM[prob_num]
             classif = MATRIZ_GRO[(prob_letra, sev)]
+            _ibp_str = f"{c['ibp']:+.2f}" if c['ibp'] is not None else "—"
             rows_cbo.append([
                 Paragraph(setor_nome, s_cell_bold),
-                Paragraph(f"{c['cbo']} — {c['cargo']}", s_cell),
+                Paragraph(f"{c['cbo']} — {c['cargo']}" if c['cbo'] else c['cargo'], s_cell),
                 Paragraph(str(c["n"]), s_cell_center),
+                Paragraph(_ibp_str, s_cell_center),
                 Paragraph(zona["zona_dejours"], s_badge),
                 Paragraph(str(sev), s_cell_center),
                 Paragraph(prob_letra, s_cell_center),
                 Paragraph(classif, s_badge),
             ])
             row_idx = len(rows_cbo) - 1
-            row_bg_cbo.append(('BACKGROUND', (3, row_idx), (3, row_idx), ZONA_COR_FUNDO[zona["zona_dejours"]]))
-            row_bg_cbo.append(('BACKGROUND', (6, row_idx), (6, row_idx), GRO_COR[classif]))
+            row_bg_cbo.append(('BACKGROUND', (4, row_idx), (4, row_idx), ZONA_COR_FUNDO[zona["zona_dejours"]]))
+            row_bg_cbo.append(('BACKGROUND', (7, row_idx), (7, row_idx), GRO_COR[classif]))
             current_row += 1
         row_end = current_row - 1
         if row_end > row_start:
             span_cbo.append(('SPAN', (0, row_start), (0, row_end)))
 
-    t_cbo = Table(rows_cbo, colWidths=[26 * mm, 44 * mm, 9 * mm, 23 * mm, 16 * mm, 20 * mm, 26 * mm], repeatRows=1)
+    t_cbo = Table(rows_cbo, colWidths=[25*mm, 38*mm, 8*mm, 14*mm, 22*mm, 13*mm, 13*mm, 22*mm], repeatRows=1)
     t_cbo.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), ROXO_NR1),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -513,8 +521,19 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     ))
 
     desenhar_cabecalho_rodape._empresa_nome = _empresa_nome
-    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
-    _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
+    def _dl_logo(url):
+        import urllib.request as _ur2, tempfile as _tf2, os as _os3, base64 as _b642
+        if not url: return None
+        try:
+            tmp = _tf2.NamedTemporaryFile(suffix='.png', delete=False)
+            if url.startswith('data:'):
+                tmp.write(_b642.b64decode(url.split(',',1)[1])); tmp.close()
+            else:
+                tmp.close(); _ur2.urlretrieve(url, tmp.name)
+            return tmp.name if _os3.path.exists(tmp.name) else None
+        except: return None
+    _lp_path = _dl_logo(_dados.get('logoParceiroUrl') or 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+    _le_path  = _dl_logo(_dados.get('logoEmpresaUrl') or '')
     desenhar_cabecalho_rodape_local._logo_parc = _lp_path
     desenhar_cabecalho_rodape_local._logo_emp  = _le_path
     doc.build(story, onFirstPage=desenhar_cabecalho_rodape_local, onLaterPages=desenhar_cabecalho_rodape_local)
