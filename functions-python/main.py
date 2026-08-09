@@ -233,10 +233,10 @@ def buscar_dados_empresa(empresa_id):
     except Exception:
         pass
 
-    # Responsavel tecnico
-    resp_tec = empresa.get('responsavelTecnico') or {}
-    if not resp_tec.get('nome'):
-        resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
+    # Responsavel tecnico da metodologia — sempre fixo como Dra. Lucia Kratz
+    # O campo responsavelTecnico do Firestore refere-se ao responsavel da empresa (campo separado)
+    # Os PDFs sempre exibem DUAS assinaturas: (1) responsavel da empresa e (2) Dra. Lucia Kratz
+    resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
 
     # Logo do parceiro — fallback para logo NR-1 Map se nao houver parceiro
     logo_parceiro_url = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
