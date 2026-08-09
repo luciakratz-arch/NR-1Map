@@ -749,6 +749,28 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     ]))
     story.append(tsig)
     story.append(Spacer(1, 6*mm))
+    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", S["h3"]))
+    story.append(Paragraph("DOCUMENTO VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", S["ok"]))
+    story.append(Spacer(1, 3*mm))
+    sig_lucia = [
+        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
+        ["Registro Profissional:",         "CRP 09/20590"],
+        ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
+        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
+        ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
+    ]
+    tsig_lucia = Table(sig_lucia, colWidths=[50*mm, 119*mm])
+    tsig_lucia.setStyle(TableStyle([
+        ('FONTNAME',  (0,0), (0,-1), 'Helvetica-Bold'),
+        ('FONTSIZE',  (0,0), (-1,-1), 8.2),
+        ('TEXTCOLOR', (0,0), (-1,-1), CINZA),
+        ('TOPPADDING',(0,0), (-1,-1), 3),
+        ('BOTTOMPADDING',(0,0),(-1,-1),3),
+        ('LINEBELOW', (0,-1), (-1,-1), 0.5, LINHA),
+    ]))
+    story.append(tsig_lucia)
+    story.append(Spacer(1, 4*mm))
+
     story.append(HRFlowable(width="100%", thickness=1, color=VERDE, spaceAfter=4))
     story.append(Paragraph(
         "Este laudo e imutavel apos emissao e serve como documento tecnico oficial para "
