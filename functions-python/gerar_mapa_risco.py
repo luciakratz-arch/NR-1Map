@@ -515,6 +515,30 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     ]))
     story.append(t_sig)
     story.append(Spacer(1, 3 * mm))
+    story.append(Spacer(1, 6*mm))
+    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
+    story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
+        'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
+    story.append(Spacer(1, 3*mm))
+    sig_lucia = [
+        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
+        ["Registro Profissional:",         "CRP 09/20590"],
+        ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
+        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
+        ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
+    ]
+    t_sig_lucia = Table(sig_lucia, colWidths=[45*mm, 100*mm])
+    t_sig_lucia.setStyle(TableStyle([
+        ('FONTNAME',  (0,0), (0,-1), 'Helvetica-Bold'),
+        ('FONTSIZE',  (0,0), (-1,-1), 7.8),
+        ('TEXTCOLOR', (0,0), (-1,-1), CINZA_TEXTO),
+        ('TOPPADDING',(0,0), (-1,-1), 3),
+        ('BOTTOMPADDING',(0,0),(-1,-1),3),
+        ('LINEBELOW', (0,-1), (-1,-1), 0.5, LINHA),
+    ]))
+    story.append(t_sig_lucia)
+    story.append(Spacer(1, 4*mm))
+
     story.append(Paragraph(
         "Este registro é imutável e serve como homologação oficial para fiscalização trabalhista (NR-1).",
         s_body
