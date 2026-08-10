@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NR-1 Map -- Proposta e Contrato</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6f5;color:#1a1a1a;min-height:100vh;}
+  :root{
+    --verde:#0A6E4F;--verde-cl:#12A073;--verde-xp:#f0fdf4;
+    --roxo:#7B00C4;--roxo-xp:#f5f0ff;
+    --linha:#e2e8e5;--cinza:#6b7280;--cinza-med:#9ca3af;
+    --branco:#fff;--preto:#111827;
+  }
+  .topo{background:var(--verde);padding:18px 24px;display:flex;align-items:center;gap:14px;}
+  .topo img{height:36px;}
+  .topo-txt{color:#fff;}
+  .topo-txt .t1{font-size:16px;font-weight:700;}
+  .topo-txt .t2{font-size:11px;opacity:.75;}
+  .container{max-width:720px;margin:32px auto;padding:0 16px 60px;}
+  .card{background:var(--branco);border-radius:14px;border:1px solid var(--linha);margin-bottom:20px;overflow:hidden;}
+  .card-header{padding:16px 20px;border-bottom:1px solid var(--linha);display:flex;align-items:center;gap:10px;}
+  .card-header .ic{font-size:18px;}
+  .card-header .titulo{font-size:14px;font-weight:700;color:var(--preto);}
+  .card-header .sub{font-size:11px;color:var(--cinza);margin-top:2px;}
+  .card-body{padding:20px;}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;}
+  .badge-verde{background:#d1fae5;color:#065f46;}
+  .badge-roxo{background:#ede9fe;color:#6d28d9;}
+  .badge-amarelo{background:#fef3c7;color:#92400e;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:540px){.grid-2{grid-template-columns:1fr;}}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-label{font-size:11px;font-weight:600;color:var(--cinza);text-transform:uppercase;letter-spacing:.05em;}
+  .form-control{padding:10px 12px;border:1px solid var(--linha);border-radius:8px;font-size:13px;outline:none;transition:border .15s;width:100%;}
+  .form-control:focus{border-color:var(--verde-cl);}
+  .form-control[readonly]{background:#f9fafb;color:var(--cinza);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 22px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--verde);color:#fff;}
+  .btn-primary:hover{background:#085c42;}
+  .btn-primary:disabled{background:#9ca3af;cursor:not-allowed;}
+  .btn-roxo{background:var(--roxo);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--cinza);border:1px solid var(--linha);}
+  .btn-full{width:100%;}
+  .info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--linha);font-size:13px;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .label{color:var(--cinza);font-size:12px;min-width:160px;}
+  .info-row .valor{font-weight:600;text-align:right;}
+  .contrato-box{background:#f8fafc;border:1px solid var(--linha);border-radius:10px;padding:20px;font-size:12px;line-height:1.8;color:#374151;max-height:320px;overflow-y:auto;margin-bottom:16px;}
+  .contrato-box h4{font-size:13px;font-weight:700;color:var(--preto);margin:14px 0 6px;}
+  .contrato-box h4:first-child{margin-top:0;}
+  .aceite-check{display:flex;align-items:flex-start;gap:10px;padding:14px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:10px;margin-bottom:14px;cursor:pointer;}
+  .aceite-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--verde);flex-shrink:0;margin-top:1px;cursor:pointer;}
+  .aceite-check label{font-size:12px;color:var(--preto);cursor:pointer;line-height:1.5;}
+  .assinatura-box{border:2px dashed var(--linha);border-radius:10px;padding:20px;text-align:center;margin-bottom:14px;}
+  .assinatura-nome{font-size:20px;font-family:Georgia,serif;color:var(--preto);padding:10px 0;border-bottom:1px solid var(--preto);display:inline-block;min-width:260px;margin-bottom:4px;}
+  .assinatura-label{font-size:10px;color:var(--cinza-med);text-transform:uppercase;letter-spacing:.1em;}
+  .step{display:none;}
+  .step.active{display:block;}
+  .steps-nav{display:flex;gap:0;margin-bottom:28px;background:var(--branco);border:1px solid var(--linha);border-radius:12px;overflow:hidden;}
+  .step-item{flex:1;padding:12px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--cinza-med);border-right:1px solid var(--linha);position:relative;}
+  .step-item:last-child{border-right:none;}
+  .step-item.active{color:var(--verde);background:var(--verde-xp);}
+  .step-item.done{color:var(--verde-cl);}
+  .step-item .num{display:block;font-size:16px;margin-bottom:2px;}
+  .erro{color:#dc2626;font-size:12px;margin-top:4px;display:none;}
+  .sucesso-box{text-align:center;padding:40px 20px;}
+  .sucesso-box .ic{font-size:56px;margin-bottom:16px;}
+  .sucesso-box h2{font-size:20px;font-weight:800;color:var(--verde);margin-bottom:8px;}
+  .sucesso-box p{font-size:13px;color:var(--cinza);max-width:400px;margin:0 auto 20px;}
+  .hash-box{background:#f1f5f9;border-radius:8px;padding:10px 14px;font-size:11px;color:var(--cinza);font-family:monospace;word-break:break-all;margin-top:8px;}
+  .loading{text-align:center;padding:60px 20px;color:var(--cinza);}
+  .loading .spin{font-size:32px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .erro-fatal{text-align:center;padding:60px 20px;}
+  .erro-fatal .ic{font-size:48px;margin-bottom:12px;}
+  .erro-fatal h2{font-size:18px;font-weight:700;color:#dc2626;margin-bottom:8px;}
+  .erro-fatal p{font-size:13px;color:var(--cinza);}
+  .valor-destaque{font-size:28px;font-weight:900;color:var(--verde);}
+  .valor-sub{font-size:12px;color:var(--cinza);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <img src="https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png" alt="NR-1 Map" onerror="this.style.display='none'"/>
+  <div class="topo-txt">
+    <div class="t1">NR-1 Map -- Proposta Comercial</div>
+    <div class="t2">Gestao de Riscos Psicossociais | Portaria MTE 1.419/2024</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOADING -->
+  <div id="tela-loading" class="loading">
+    <div class="spin">⏳</div>
+    <div>Carregando proposta...</div>
+  </div>
+
+  <!-- ERRO FATAL -->
+  <div id="tela-erro" style="display:none;" class="erro-fatal">
+    <div class="ic">❌</div>
+    <h2>Link invalido ou expirado</h2>
+    <p>Este link de proposta nao foi encontrado ou ja foi utilizado.<br/>Entre em contato com a Dra. Lucia Kratz para obter um novo link.</p>
+    <p style="margin-top:12px;"><a href="https://wa.me/556291954675" target="_blank" style="color:var(--verde);font-weight:600;">📱 Falar pelo WhatsApp</a></p>
+  </div>
+
+  <!-- JA ASSINADO -->
+  <div id="tela-assinado" style="display:none;" class="sucesso-box">
+    <div class="ic">✅</div>
+    <h2>Contrato ja assinado!</h2>
+    <p>Esta proposta ja foi aceita e registrada. Guarde o hash de validacao abaixo.</p>
+    <div class="hash-box" id="hash-ja-assinado"></div>
+  </div>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <div id="tela-principal" style="display:none;">
+
+    <!-- Steps nav -->
+    <div class="steps-nav">
+      <div class="step-item active" id="sn-1"><span class="num">1</span>Seus Dados</div>
+      <div class="step-item" id="sn-2"><span class="num">2</span>Proposta</div>
+      <div class="step-item" id="sn-3"><span class="num">3</span>Contrato</div>
+      <div class="step-item" id="sn-4"><span class="num">4</span>Assinatura</div>
+    </div>
+
+    <!-- STEP 1: Dados do cliente -->
+    <div id="step-1" class="step active">
+      <div class="card">
+        <div class="card-header">
+          <span class="ic">🏢</span>
+          <div><div class="titulo">Dados da Empresa</div><div class="sub">Preencha as informacoes da sua empresa para gerar o contrato</div></div>
+        </div>
+        <div class="card-body">
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Razao Social / Nome *</label>
+              <input class="form-control" id="cli-nome" placeholder="Nome completo da empresa"/>
+              <span class="erro" id="err-cli-nome">Campo obrigatorio</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CNPJ *</label>
+              <input class="form-control" id="cli-cnpj" placeholder="00.000.000/0001-00" oninput="mascaraCNPJ(this)"/>
+              <span class="erro" id="err-cli-cnpj">Campo obrigatorio</span>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Setor / Ramo de Atividade</label>
+              <input class="form-control" id="cli-setor" placeholder="Ex: Saude, Industria, Servicos..."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cidade / Estado</label>
+              <input class="form-control" id="cli-cidade" placeholder="Ex: Goiania - GO"/>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Endereco</label>
+              <input class="form-control" id="cli-endereco" placeholder="Rua, numero, complemento"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CEP</label>
+              <input class="form-control" id="cli-cep" placeholder="00000-000"/>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--linha);margin:16px 0;padding-top:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Responsavel pelo Contrato</div>
+          </div>
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Nome do Responsavel *</label>
+              <input class="form-control" id="cli-responsavel" placeholder="Nome completo"/>
+              <span class="erro" id="err-cli-responsavel">Campo obrigatorio</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo / Funcao</label>
+              <input class="form-control" id="cli-cargo" placeholder="Ex: Diretor de RH, CEO..."/>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">E-mail *</label>
+              <input class="form-control" id="cli-email" type="email" placeholder="contato@empresa.com.br"/>
+              <span class="erro" id="err-cli-email">E-mail invalido</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">WhatsApp *</label>
+              <input class="form-control" id="cli-whatsapp" placeholder="(62) 9 9999-9999"/>
+              <span class="erro" id="err-cli-whatsapp">Campo obrigatorio</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            <button class="btn btn-primary" onclick="irParaStep2()">Continuar → Ver Proposta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Resumo da proposta -->
+    <div id="step-2" class="step">
+      <div class="card">
+        <div class="card-header">
+          <span class="ic">💰</span>
+          <div><div class="titulo">Resumo da Proposta</div><div class="sub">Valores e condicoes negociadas</div></div>
+        </div>
+        <div class="card-body">
+          <div style="text-align:center;padding:20px 0 24px;">
+            <div style="font-size:12px;color:var(--cinza);margin-bottom:6px;" id="prop-faixa"></div>
+            <div class="valor-destaque" id="prop-total"></div>
+            <div class="valor-sub" id="prop-unit"></div>
+          </div>
+          <div id="prop-detalhes"></div>
+          <div style="margin-top:20px;padding:14px;background:var(--verde-xp);border-radius:10px;font-size:12px;color:var(--verde);">
+            <strong>O que esta incluso:</strong><br/>
+            <span id="prop-incluso"></span>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:space-between;margin-top:20px;">
+            <button class="btn btn-ghost" onclick="irParaStep(1)">← Voltar</button>
+            <button class="btn btn-primary" onclick="irParaStep3()">Continuar → Ver Contrato</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Texto do contrato -->
+    <div id="step-3" class="step">
+      <div class="card">
+        <div class="card-header">
+          <span class="ic">📄</span>
+          <div><div class="titulo">Contrato de Prestacao de Servicos</div><div class="sub">Leia com atencao antes de assinar</div></div>
+        </div>
+        <div class="card-body">
+          <div class="contrato-box" id="contrato-texto"></div>
+          <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px;">
+            <button class="btn btn-ghost" onclick="irParaStep(2)">← Voltar</button>
+            <button class="btn btn-primary" onclick="irParaStep4()">Li e quero assinar →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Aceite e assinatura -->
+    <div id="step-4" class="step">
+      <div class="card">
+        <div class="card-header">
+          <span class="ic">✍️</span>
+          <div><div class="titulo">Assinatura Eletronica</div><div class="sub">Confirme seu aceite para concluir o contrato</div></div>
+        </div>
+        <div class="card-body">
+          <!-- Resumo compacto -->
+          <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;">
+            <div style="font-weight:700;color:var(--preto);margin-bottom:6px;" id="ace-empresa-nome"></div>
+            <div style="color:var(--cinza);" id="ace-empresa-info"></div>
+          </div>
+
+          <!-- Checkbox aceite -->
+          <div class="aceite-check" onclick="toggleAceite()">
+            <input type="checkbox" id="chk-aceite" onclick="event.stopPropagation();atualizarBtnAssinar()"/>
+            <label for="chk-aceite">Declaro que li e aceito integralmente os termos do <strong>Contrato de Prestacao de Servicos NR-1 Map</strong>, e que tenho poderes para assinar este contrato em nome da empresa representada.</label>
+          </div>
+
+          <!-- Assinatura visual -->
+          <div class="assinatura-box">
+            <div style="font-size:11px;color:var(--cinza-med);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;">Assinatura do responsavel</div>
+            <div class="assinatura-nome" id="assinatura-nome-display">--</div>
+            <div class="assinatura-label">Assinatura eletronica -- valida juridicamente pela LGPD e MP 2.200-2/2001</div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px;">
+            <button class="btn btn-ghost" onclick="irParaStep(3)">← Voltar</button>
+            <button class="btn btn-primary" id="btn-assinar" disabled onclick="assinar()">✅ Confirmar Aceite e Assinar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tela-principal -->
+
+  <!-- SUCESSO -->
+  <div id="tela-sucesso" style="display:none;" class="card">
+    <div class="sucesso-box">
+      <div class="ic">🎉</div>
+      <h2>Contrato assinado com sucesso!</h2>
+      <p>O aceite foi registrado e nossa equipe entrara em contato em breve para dar inicio aos trabalhos.</p>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;color:var(--cinza);margin-bottom:6px;">Hash de validacao do contrato:</div>
+        <div class="hash-box" id="hash-sucesso"></div>
+      </div>
+      <a href="https://wa.me/556291954675" target="_blank" class="btn btn-primary">📱 Falar com a Dra. Lucia Kratz</a>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+var _firebaseConfig = {
+  apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+  authDomain: "entrevista-inicial.firebaseapp.com",
+  projectId: "entrevista-inicial",
+  storageBucket: "entrevista-inicial.firebasestorage.app",
+  messagingSenderId: "437375609844",
+  appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+};
+if (!firebase.apps.length || !firebase.apps.find(function(a){ return a.name === 'nr1map'; })) {
+  firebase.initializeApp(_firebaseConfig, 'nr1map');
+}
+var _db = firebase.firestore(firebase.app('nr1map'));
+
+// -- Estado global --
+var _contrato = null;   // dados do Firestore
+var _token    = null;
+var _contratoId = null;
+var _stepAtual = 1;
+
+// -- Inicializar --
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  _token = params.get('token');
+  if (!_token) { mostrarErro(); return; }
+
+  _db.collection('nr1map_contratos').where('tokenAceite','==',_token).limit(1).get()
+    .then(function(snap) {
+      if (snap.empty) { mostrarErro(); return; }
+      var doc = snap.docs[0];
+      _contratoId = doc.id;
+      _contrato   = doc.data();
+
+      if (_contrato.status === 'assinado') {
+        document.getElementById('tela-loading').style.display = 'none';
+        document.getElementById('tela-assinado').style.display = 'block';
+        document.getElementById('hash-ja-assinado').textContent = _contrato.hashAceite || _token;
+        return;
+      }
+      document.getElementById('tela-loading').style.display = 'none';
+      document.getElementById('tela-principal').style.display = 'block';
+    })
+    .catch(function(e) { mostrarErro(); });
+})();
+
+function mostrarErro() {
+  document.getElementById('tela-loading').style.display = 'none';
+  document.getElementById('tela-erro').style.display = 'block';
+}
+
+// -- Navegacao steps --
+function irParaStep(n) {
+  document.getElementById('step-' + _stepAtual).classList.remove('active');
+  document.getElementById('sn-' + _stepAtual).classList.remove('active');
+  document.getElementById('sn-' + _stepAtual).classList.add('done');
+  _stepAtual = n;
+  document.getElementById('step-' + n).classList.add('active');
+  document.getElementById('sn-' + n).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function irParaStep2() {
+  // Validar campos obrigatorios
+  var nome      = document.getElementById('cli-nome').value.trim();
+  var cnpj      = document.getElementById('cli-cnpj').value.trim();
+  var resp      = document.getElementById('cli-responsavel').value.trim();
+  var email     = document.getElementById('cli-email').value.trim();
+  var whatsapp  = document.getElementById('cli-whatsapp').value.trim();
+  var ok = true;
+
+  function validar(id, errId, condicao) {
+    var el = document.getElementById(errId);
+    if (!condicao) { el.style.display = 'block'; ok = false; }
+    else           { el.style.display = 'none'; }
+  }
+  validar('cli-nome',        'err-cli-nome',        nome.length > 1);
+  validar('cli-cnpj',        'err-cli-cnpj',        cnpj.length > 10);
+  validar('cli-responsavel', 'err-cli-responsavel', resp.length > 1);
+  validar('cli-email',       'err-cli-email',        /^[^@]+@[^@]+\.[^@]+$/.test(email));
+  validar('cli-whatsapp',    'err-cli-whatsapp',    whatsapp.length > 7);
+  if (!ok) return;
+
+  // Preencher step 2
+  var c = _contrato.comercial || {};
+  var modal = c.modalidade === 'mensal' ? 'Assinatura Mensal' : 'Uso Unico';
+  var totalFmt = formatBRL(c.valorTotal || 0);
+  var unitFmt  = formatBRL(c.valorUnit || 0);
+
+  document.getElementById('prop-faixa').textContent  = (c.faixaLabel || '') + ' -- ' + modal;
+  document.getElementById('prop-total').textContent  = totalFmt + (c.modalidade==='mensal' ? '/mes' : '');
+  document.getElementById('prop-unit').textContent   = unitFmt + ' por colaborador' + (c.modalidade==='mensal' ? '/mes' : ' -- pagamento unico');
+
+  var detalhes = [
+    {l:'Empresa', v: nome},
+    {l:'CNPJ', v: cnpj},
+    {l:'Colaboradores', v: (c.nColab || '--') + ' colaboradores'},
+    {l:'Modalidade', v: modal},
+    {l:'Vigencia', v: c.vigencia && c.vigencia !== '0' ? c.vigencia + ' meses' : 'Indeterminado'},
+    {l:'Pagamento', v: c.pagamento || 'A combinar'},
+  ];
+  var html = '';
+  detalhes.forEach(function(d){ html += '<div class="info-row"><span class="label">' + d.l + '</span><span class="valor">' + d.v + '</span></div>'; });
+  if (c.obs) html += '<div class="info-row"><span class="label">Observacoes</span><span class="valor" style="font-weight:400;font-size:12px;">' + c.obs + '</span></div>';
+  document.getElementById('prop-detalhes').innerHTML = html;
+
+  var incluso = c.modalidade === 'mensal'
+    ? 'Diagnostico Inicial + Painel Dinamico de Prazer/Sofrimento + Pesquisas Pulso semanais via WhatsApp + Atualizacoes de IA + Laudo Tecnico + Mapa de Risco + Plano de Acao'
+    : 'Diagnostico Geral (Dejours, Herzberg, Maslow) + Laudo Tecnico + Mapa de Risco + Plano de Acao. Validade 30 dias.';
+  document.getElementById('prop-incluso').textContent = incluso;
+
+  irParaStep(2);
+}
+
+function irParaStep3() {
+  // Gerar texto do contrato
+  var c = _contrato.comercial || {};
+  var nome      = document.getElementById('cli-nome').value.trim();
+  var cnpj      = document.getElementById('cli-cnpj').value.trim();
+  var resp      = document.getElementById('cli-responsavel').value.trim();
+  var cargo     = document.getElementById('cli-cargo').value.trim();
+  var email     = document.getElementById('cli-email').value.trim();
+  var cidade    = document.getElementById('cli-cidade').value.trim() || 'nao informado';
+  var endereco  = document.getElementById('cli-endereco').value.trim() || 'nao informado';
+  var modal     = c.modalidade === 'mensal' ? 'Assinatura Mensal' : 'Uso Unico';
+  var totalFmt  = formatBRL(c.valorTotal || 0);
+  var hoje      = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+
+  var txt = '<h4>CONTRATO DE PRESTACAO DE SERVICOS DE GESTAO DE RISCOS PSICOSSOCIAIS</h4>' +
+    '<p><strong>CONTRATANTE:</strong> ' + nome + ', inscrita(o) no CNPJ sob n. ' + cnpj +
+    ', com sede em ' + cidade + ', neste ato representada(o) por ' + resp +
+    (cargo ? ', ' + cargo : '') + ', e-mail: ' + email + '.</p>' +
+    '<p style="margin-top:10px;"><strong>CONTRATADA:</strong> Dra. Lucia Kratz, Psicologa, inscrita no CRP 09/20590,' +
+    ' Doutora em Administracao, responsavel tecnica pelo sistema NR-1 Map (plataforma de gestao de riscos psicossociais,' +
+    ' Portaria MTE 1.419/2024).</p>' +
+    '<h4>OBJETO</h4>' +
+    '<p>Prestacao de servicos de avaliacao e gestao de riscos psicossociais no ambiente de trabalho,' +
+    ' por meio da plataforma NR-1 Map, conforme metodologia IBP -- Indice de Balanca Psicodinamica' +
+    ' (Dejours, Herzberg e Maslow), modalidade <strong>' + modal + '</strong>,' +
+    ' para ' + (c.nColab || '--') + ' colaboradores.</p>' +
+    '<h4>VALOR E PAGAMENTO</h4>' +
+    '<p>Valor total: <strong>' + totalFmt + (c.modalidade==='mensal'?'/mes':'') + '</strong>' +
+    ' (' + formatBRL(c.valorUnit||0) + ' por colaborador' + (c.modalidade==='mensal'?'/mes':' -- pagamento unico') + ').' +
+    (c.pagamento ? ' Condicoes de pagamento: ' + c.pagamento + '.' : '') + '</p>' +
+    '<h4>VIGENCIA</h4>' +
+    '<p>' + (c.vigencia && c.vigencia !== '0' ? 'O contrato tera vigencia de ' + c.vigencia + ' meses a partir da data de aceite.' : 'Vigencia por prazo indeterminado, podendo ser rescindido por qualquer das partes mediante aviso previo de 30 dias.') + '</p>' +
+    '<h4>OBRIGACOES DA CONTRATADA</h4>' +
+    '<p>a) Disponibilizar acesso a plataforma NR-1 Map para aplicacao das pesquisas psicossociais;<br/>' +
+    'b) Gerar laudos tecnicos, mapas de risco e planos de acao conforme a metodologia IBP;<br/>' +
+    'c) Manter sigilo absoluto sobre os dados dos colaboradores;<br/>' +
+    'd) Cumprir as exigencias da Portaria MTE 1.419/2024 e LGPD.</p>' +
+    '<h4>OBRIGACOES DA CONTRATANTE</h4>' +
+    '<p>a) Fornecer acesso aos colaboradores para resposta das pesquisas;<br/>' +
+    'b) Realizar o pagamento nos termos acordados;<br/>' +
+    'c) Manter os dados cadastrais atualizados na plataforma;<br/>' +
+    'd) Nao compartilhar credenciais de acesso com terceiros.</p>' +
+    '<h4>CONFIDENCIALIDADE</h4>' +
+    '<p>Os dados coletados sao sigilosos, tratados conforme a LGPD (Lei 13.709/2018). ' +
+    'Os laudos sao documentos tecnicos oficiais, com hash UUID para garantir autenticidade e rastreabilidade.</p>' +
+    '<h4>FORO</h4>' +
+    '<p>Fica eleito o foro da comarca de Goiania - GO para dirimir eventuais controversias.</p>' +
+    '<p style="margin-top:14px;"><em>Contrato gerado eletronicamente em ' + hoje + ', mediante aceite digital com validade juridica conforme MP 2.200-2/2001.</em></p>' +
+    (c.obs ? '<p style="margin-top:10px;"><strong>Condicoes especiais:</strong> ' + c.obs + '</p>' : '');
+
+  document.getElementById('contrato-texto').innerHTML = txt;
+  irParaStep(3);
+}
+
+function irParaStep4() {
+  var resp = document.getElementById('cli-responsavel').value.trim();
+  var nome = document.getElementById('cli-nome').value.trim();
+  document.getElementById('assinatura-nome-display').textContent = resp || nome;
+  document.getElementById('ace-empresa-nome').textContent = nome;
+  var c = _contrato.comercial || {};
+  document.getElementById('ace-empresa-info').textContent =
+    (c.nColab || '--') + ' colaboradores | ' +
+    (c.modalidade === 'mensal' ? 'Assinatura Mensal' : 'Uso Unico') + ' | ' +
+    formatBRL(c.valorTotal || 0) + (c.modalidade==='mensal'?'/mes':'');
+  irParaStep(4);
+}
+
+function toggleAceite() {
+  var chk = document.getElementById('chk-aceite');
+  chk.checked = !chk.checked;
+  atualizarBtnAssinar();
+}
+function atualizarBtnAssinar() {
+  document.getElementById('btn-assinar').disabled = !document.getElementById('chk-aceite').checked;
+}
+
+function assinar() {
+  var btn = document.getElementById('btn-assinar');
+  btn.disabled = true;
+  btn.textContent = 'Registrando...';
+
+  var hash = 'ACE-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  var agora = new Date().toISOString();
+
+  var dadosCliente = {
+    nome:       document.getElementById('cli-nome').value.trim(),
+    cnpj:       document.getElementById('cli-cnpj').value.trim(),
+    setor:      document.getElementById('cli-setor').value.trim(),
+    cidade:     document.getElementById('cli-cidade').value.trim(),
+    endereco:   document.getElementById('cli-endereco').value.trim(),
+    cep:        document.getElementById('cli-cep').value.trim(),
+    responsavel:document.getElementById('cli-responsavel').value.trim(),
+    cargo:      document.getElementById('cli-cargo').value.trim(),
+    email:      document.getElementById('cli-email').value.trim(),
+    whatsapp:   document.getElementById('cli-whatsapp').value.trim()
+  };
+
+  // Atualizar contrato no Firestore
+  _db.collection('nr1map_contratos').doc(_contratoId).update({
+    status:       'assinado',
+    assinadoEm:   agora,
+    hashAceite:   hash,
+    cliente:      dadosCliente,
+    ipAceite:     'registrado via browser'
+  }).then(function() {
+    // Cadastrar empresa automaticamente
+    return _db.collection('nr1map_empresas').add({
+      nome:        dadosCliente.nome,
+      cnpj:        dadosCliente.cnpj,
+      setor:       dadosCliente.setor,
+      cidade:      dadosCliente.cidade,
+      endereco:    dadosCliente.endereco,
+      responsavel: dadosCliente.responsavel,
+      email:       dadosCliente.email,
+      whatsapp:    dadosCliente.whatsapp,
+      numColab:    (_contrato.comercial || {}).nColab || 0,
+      tipo:        (_contrato.comercial || {}).modalidade === 'mensal' ? 'mensal' : 'uso-unico',
+      faixa:       (_contrato.comercial || {}).faixaLabel || '',
+      status:      'ativo',
+      contratoId:  _contratoId,
+      contratoTipo:'enterprise',
+      hashContrato: hash,
+      criadoEm:    agora,
+      criadoPor:   'aceite-automatico'
+    });
+  }).then(function() {
+    // Mostrar sucesso
+    document.getElementById('tela-principal').style.display = 'none';
+    document.getElementById('tela-sucesso').style.display = 'block';
+    document.getElementById('hash-sucesso').textContent = hash;
+    window.scrollTo(0,0);
+  }).catch(function(e) {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar Aceite e Assinar';
+    alert('Erro ao registrar aceite: ' + e.message);
+  });
+}
+
+// -- Utils --
+function formatBRL(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function mascaraCNPJ(el) {
+  var v = el.value.replace(/\D/g, '').substr(0, 14);
+  if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/, '$1.$2.$3/$4');
+  else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d+)$/, '$1.$2.$3');
+  else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, '$1.$2');
+  el.value = v;
+}
+</script>
+</body>
+</html>
