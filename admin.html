@@ -1095,72 +1095,27 @@ tbody tr:hover td{background:#F5F8F7;}
 
     <!-- MODAL CONTRATO ENTERPRISE (501+) -->
     <div class="modal-overlay" id="modal-contrato" onclick="if(event.target===this)fecharModalContrato()">
-      <div class="modal" style="max-width:600px;width:95%;max-height:90vh;overflow-y:auto;">
+      <div class="modal" style="max-width:460px;width:95%;">
         <div class="modal-header">
-          <h3>⚡ Novo Contrato Enterprise (501+ colaboradores)</h3>
+          <h3>⚡ Nova Proposta Enterprise (501+)</h3>
           <button class="modal-close" onclick="fecharModalContrato()">x</button>
         </div>
+        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Preencha as condicoes comerciais e gere um link para o cliente completar os dados e assinar o contrato.</p>
 
-        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Dados da Empresa</p>
-        <div class="grid-2" style="margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label">Razao Social / Nome *</label>
-            <input class="form-control" id="ent-nome" placeholder="Ex: Industria XYZ S.A."/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">CNPJ *</label>
-            <input class="form-control" id="ent-cnpj" placeholder="00.000.000/0001-00"/>
-          </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Identificacao da proposta (ex: nome da empresa ou referencia)</label>
+          <input class="form-control" id="ent-ref" placeholder="Ex: Industria XYZ ou Proposta #001"/>
         </div>
         <div class="grid-2" style="margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label">Setor / Ramo de Atividade</label>
-            <input class="form-control" id="ent-setor" placeholder="Ex: Industria, Saude..."/>
-          </div>
           <div class="form-group">
             <label class="form-label">Numero de Colaboradores *</label>
             <input class="form-control" id="ent-colab" type="number" placeholder="Min. 501" oninput="calcularEnterprise()"/>
           </div>
-        </div>
-
-        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Responsavel pelo Contrato</p>
-        <div class="grid-2" style="margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label">Nome do Responsavel *</label>
-            <input class="form-control" id="ent-responsavel" placeholder="Nome completo"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Cargo / Funcao</label>
-            <input class="form-control" id="ent-cargo" placeholder="Ex: Diretor de RH"/>
-          </div>
-        </div>
-        <div class="grid-2" style="margin-bottom:12px;">
-          <div class="form-group">
-            <label class="form-label">E-mail *</label>
-            <input class="form-control" id="ent-email" type="email" placeholder="contato@empresa.com.br"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">WhatsApp *</label>
-            <input class="form-control" id="ent-whatsapp" placeholder="(62) 9 9999-9999"/>
-          </div>
-        </div>
-
-        <p style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 12px;">Condicoes Comerciais</p>
-        <div class="grid-2" style="margin-bottom:12px;">
           <div class="form-group">
             <label class="form-label">Modalidade *</label>
             <select class="form-control" id="ent-modalidade" onchange="calcularEnterprise()">
               <option value="unico">Uso Unico</option>
               <option value="mensal">Assinatura Mensal</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Vigencia (meses)</label>
-            <select class="form-control" id="ent-vigencia">
-              <option value="12">12 meses</option>
-              <option value="24">24 meses</option>
-              <option value="36">36 meses</option>
-              <option value="0">Indeterminado</option>
             </select>
           </div>
         </div>
@@ -1174,25 +1129,35 @@ tbody tr:hover td{background:#F5F8F7;}
             <input class="form-control" id="ent-valor-total" readonly style="background:var(--verde-xp);font-weight:700;color:var(--verde);"/>
           </div>
         </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label">Condicoes de Pagamento</label>
-          <input class="form-control" id="ent-pagamento" placeholder="Ex: Boleto mensal, PIX antecipado, parcelado em X vezes..."/>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Vigencia</label>
+            <select class="form-control" id="ent-vigencia">
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+              <option value="36">36 meses</option>
+              <option value="0">Indeterminado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condicoes de Pagamento</label>
+            <input class="form-control" id="ent-pagamento" placeholder="Ex: PIX, boleto mensal..."/>
+          </div>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label class="form-label">Observacoes / Clausulas especiais</label>
-          <textarea class="form-control" id="ent-obs" rows="3" placeholder="Condicoes especiais negociadas, SLA, desconto..."></textarea>
+          <textarea class="form-control" id="ent-obs" rows="2" placeholder="Descontos negociados, SLA, condicoes especiais..."></textarea>
         </div>
 
-        <!-- Preview valor calculado -->
-        <div id="ent-preview" style="display:none;padding:14px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:10px;margin-bottom:16px;">
-          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:4px;" id="ent-preview-faixa"></div>
+        <div id="ent-preview" style="display:none;padding:12px 14px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:10px;margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--cinza-medio);margin-bottom:2px;" id="ent-preview-faixa"></div>
           <div style="font-size:18px;font-weight:800;color:var(--verde);" id="ent-preview-total"></div>
-          <div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;" id="ent-preview-unit"></div>
+          <div style="font-size:11px;color:var(--cinza-medio);" id="ent-preview-unit"></div>
         </div>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;">
           <button class="btn btn-ghost" onclick="fecharModalContrato()">Cancelar</button>
-          <button class="btn btn-primary" onclick="salvarContratoEnterprise()">Salvar e Gerar Link de Aceite</button>
+          <button class="btn btn-primary" onclick="salvarContratoEnterprise()">🔗 Gerar Link da Proposta</button>
         </div>
       </div>
     </div>
@@ -3864,26 +3829,16 @@ function fecharModalContrato() {
 }
 
 function salvarContratoEnterprise() {
-  var nome       = document.getElementById('ent-nome').value.trim();
-  var cnpj       = document.getElementById('ent-cnpj').value.trim();
-  var setor      = document.getElementById('ent-setor').value.trim();
-  var nColab     = parseInt(document.getElementById('ent-colab').value, 10);
-  var responsavel= document.getElementById('ent-responsavel').value.trim();
-  var cargo      = document.getElementById('ent-cargo').value.trim();
-  var email      = document.getElementById('ent-email').value.trim();
-  var whatsapp   = document.getElementById('ent-whatsapp').value.trim();
-  var modalidade = document.getElementById('ent-modalidade').value;
-  var vigencia   = document.getElementById('ent-vigencia').value;
-  var valorUnit  = parseFloat(document.getElementById('ent-valor-unit').value);
-  var pagamento  = document.getElementById('ent-pagamento').value.trim();
-  var obs        = document.getElementById('ent-obs').value.trim();
+  var ref       = document.getElementById('ent-ref').value.trim();
+  var nColab    = parseInt(document.getElementById('ent-colab').value, 10);
+  var modalidade= document.getElementById('ent-modalidade').value;
+  var vigencia  = document.getElementById('ent-vigencia').value;
+  var valorUnit = parseFloat(document.getElementById('ent-valor-unit').value);
+  var pagamento = document.getElementById('ent-pagamento').value.trim();
+  var obs       = document.getElementById('ent-obs').value.trim();
 
-  if (!nome || !email || !nColab || nColab < 1) {
-    alert('Preencha os campos obrigatorios: nome, e-mail e numero de colaboradores.');
-    return;
-  }
-  if (nColab < 501) {
-    alert('Contratos Enterprise sao para 501 ou mais colaboradores. Para menores, use o cadastro de clientes padrao.');
+  if (!nColab || nColab < 501) {
+    alert('Informe o numero de colaboradores (minimo 501 para Enterprise).');
     return;
   }
 
@@ -3891,16 +3846,16 @@ function salvarContratoEnterprise() {
   var unit = (!isNaN(valorUnit) && valorUnit > 0) ? valorUnit : (faixa ? faixa.unit : 0);
   var total = nColab * unit;
 
-  // Gerar token de aceite
-  var tokenAceite = 'ACE-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+  // Token unico para esta proposta
+  var tokenAceite = 'ENT-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
   var urlAceite = 'https://luciakratz-arch.github.io/NR-1Map/aceite.html?token=' + tokenAceite;
 
   var contrato = {
     tipo: 'enterprise',
-    empresa: { nome: nome, cnpj: cnpj, setor: setor, nColab: nColab },
-    responsavel: { nome: responsavel, cargo: cargo, email: email, whatsapp: whatsapp },
+    ref: ref || ('Proposta Enterprise ' + new Date().toLocaleDateString('pt-BR')),
     comercial: {
       modalidade: modalidade,
+      nColab: nColab,
       faixaLabel: _faixaLabel(nColab),
       valorUnit: unit,
       valorTotal: total,
@@ -3917,32 +3872,15 @@ function salvarContratoEnterprise() {
 
   if (!window.nr1mapDb) { alert('Firebase nao inicializado.'); return; }
   window.nr1mapDb.collection('nr1map_contratos').add(contrato)
-    .then(function(docRef) {
-      // Cadastrar empresa no sistema
-      return window.nr1mapDb.collection('nr1map_empresas').add({
-        nome: nome, cnpj: cnpj, setor: setor,
-        responsavel: responsavel, email: email, whatsapp: whatsapp,
-        tipo: modalidade === 'mensal' ? 'mensal' : 'uso-unico',
-        faixa: _faixaLabel(nColab),
-        numColab: nColab,
-        status: 'pendente',
-        contratoId: docRef.id,
-        contratoTipo: 'enterprise',
-        criadoEm: new Date().toISOString(),
-        criadoPor: 'admin'
-      }).then(function(empRef) {
-        // Atualizar contrato com empresaId
-        return window.nr1mapDb.collection('nr1map_contratos').doc(docRef.id)
-          .update({ empresaId: empRef.id });
-      }).then(function() {
-        fecharModalContrato();
-        _mostrarLinkAceite(nome, nColab, _formatBRL(total), urlAceite, whatsapp);
-        carregarContratos();
-        atualizarBadgeContratos();
-      });
+    .then(function() {
+      fecharModalContrato();
+      _mostrarLinkAceite(ref || 'Proposta Enterprise', nColab, _formatBRL(total), urlAceite, '');
+      carregarContratos();
+      atualizarBadgeContratos();
     })
-    .catch(function(e) { alert('Erro ao salvar contrato: ' + e.message); });
+    .catch(function(e) { alert('Erro ao salvar proposta: ' + e.message); });
 }
+
 
 function _mostrarLinkAceite(nome, nColab, valorTotal, url, whatsapp) {
   document.getElementById('link-empresa-nome').textContent = nome;
