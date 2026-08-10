@@ -2325,19 +2325,37 @@ function carregarPlanoAcao(empresaId, cicloId) {
   var tbody = document.getElementById('tbody-plano');
   if (!tbody) return;
   var cicloFiltro = cicloId || _planoCicloAtual || null;
-  var query = window.nr1mapDb.collection('nr1map_plano_acao')
-    .where('empresaId','==',empresaId);
-  if (cicloFiltro) query = query.where('cicloId','==',cicloFiltro);
-  query.orderBy('criadoEm','asc').get()
+
+  // Busca todas as acoes da empresa e filtra no cliente
+  // (documentos antigos sem cicloId aparecem no ciclo mais recente)
+  window.nr1mapDb.collection('nr1map_plano_acao')
+    .where('empresaId','==',empresaId)
+    .get()
     .then(function(snap) {
+      var docs = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if (cicloFiltro) {
+          var ehMaisRecente = (_laudoCiclosCache && _laudoCiclosCache.length > 0 && _laudoCiclosCache[0].id === cicloFiltro);
+          if (d.cicloId === cicloFiltro || (!d.cicloId && ehMaisRecente)) {
+            docs.push({ id: doc.id, d: d });
+          }
+        } else {
+          docs.push({ id: doc.id, d: d });
+        }
+      });
+      docs.sort(function(a, b) { return (a.d.criadoEm || '') > (b.d.criadoEm || '') ? 1 : -1; });
+
       tbody.innerHTML = '';
-      if (snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma ação cadastrada. Use "+ Nova ação" para começar.</td></tr>';
+      if (!docs.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma acao cadastrada para este ciclo. Clique em &quot;+ Nova acao&quot; ou use &quot;Sugestoes automaticas&quot;.</td></tr>';
         atualizarBadgePendentes();
         return;
       }
-      snap.forEach(function(doc) {
-        var d = doc.data();
+      docs.forEach(function(item) {
+        var doc = { id: item.id, data: function(){ return item.d; } };
+        var d = item.d;
+
         var tr = document.createElement('tr');
         tr.dataset.prazo = d.prazo || '';
         tr.dataset.docId = doc.id;
