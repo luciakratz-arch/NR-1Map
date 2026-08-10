@@ -441,6 +441,33 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
         </div>
       </div>
 
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header" style="background:linear-gradient(135deg,#1A0A2E,#2A1A3E);"><div class="title" style="color:#fff;">Opcao 3 — Pacotes com Desconto (Assinatura Comprometida)</div><div class="subtitle" style="color:rgba(255,255,255,.7);">Cliente paga antecipado e ganha desconto · Sua comissao e sobre o valor com desconto</div></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Os pacotes aplicam desconto sobre o valor mensal base. Sua comissao de 30% incide sobre o valor <strong>com desconto</strong>.</p>
+          <table><thead><tr><th>Pacote</th><th>Desconto</th><th>Exemplo (30 colab. Faixa 3)</th><th style="color:var(--roxo);">Sua comissao</th><th>Impacto</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:#F59E0B;">6 Meses</strong></td>
+              <td style="font-weight:700;color:#F59E0B;">5% OFF</td>
+              <td style="font-size:11px;color:var(--cinza-medio);">30 x R$19,00/mes x 6 = R$3.420 total</td>
+              <td style="color:var(--roxo);font-weight:600;">R$1.026 total (R$171/mes)</td>
+              <td style="font-size:11px;color:var(--cinza-medio);">vs R$180/mes sem pacote</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#C084FC;">12 Meses</strong></td>
+              <td style="font-weight:700;color:#C084FC;">8% OFF</td>
+              <td style="font-size:11px;color:var(--cinza-medio);">30 x R$18,40/mes x 12 = R$6.624 total</td>
+              <td style="color:var(--roxo);font-weight:600;">R$1.987 total (R$165,60/mes)</td>
+              <td style="font-size:11px;color:var(--cinza-medio);">vs R$180/mes sem pacote</td>
+            </tr>
+          </tbody></table>
+          <div style="margin-top:12px;padding:10px 14px;background:var(--verde-xp);border-radius:8px;font-size:12px;color:var(--verde);">
+            <strong>Argumento de venda:</strong> O cliente economiza, paga em parcelas fixas e voce garante comissao recorrente por 6 ou 12 meses de uma vez. Oferte o pacote 12 meses para clientes ja convictos.
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header"><div class="title">🧮 Calculadora de Proposta</div><div class="subtitle">Simule o valor e a sua comissão para um cliente</div></div>
         <div class="card-body">
@@ -448,7 +475,9 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinz
             <div><label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Modalidade</label>
               <select id="calc-mod" style="width:100%;padding:8px;border:1px solid var(--linha);border-radius:7px;font-size:12px;" onchange="calcular()">
                 <option value="assinatura">Assinatura Mensal</option>
-                <option value="unico">Uso Único</option>
+                <option value="pacote6">Pacote 6 Meses (5% desc.)</option>
+                <option value="pacote12">Pacote 12 Meses (8% desc.)</option>
+                <option value="unico">Uso Unico</option>
               </select></div>
             <div><label style="font-size:11px;color:var(--cinza-medio);display:block;margin-bottom:4px;">Nº de colaboradores</label>
               <input type="number" id="calc-n" value="30" min="1" max="100" style="width:100%;padding:8px;border:1px solid var(--linha);border-radius:7px;font-size:12px;" oninput="calcular()"/></div>
@@ -962,18 +991,29 @@ function toggleParSubcat(hdr){
   body.style.display = aberto ? 'none' : 'block';
 }
 
-var TCALC={unico:[{max:5,val:97},{max:20,val:79},{max:50,val:59},{max:100,val:49}],assinatura:[{max:5,val:35},{max:20,val:25},{max:50,val:20},{max:100,val:16.5}]};
-var FNOMES=['Faixa 1 (até 5)','Faixa 2 (6–20)','Faixa 3 (21–50)','Faixa 4 (51–100)'];
+var TCALC={
+  unico:      [{max:5,val:97},{max:20,val:79},{max:50,val:59},{max:100,val:49},{max:200,val:39},{max:500,val:29}],
+  assinatura: [{max:5,val:35},{max:20,val:25},{max:50,val:20},{max:100,val:16.5},{max:200,val:13},{max:500,val:10}],
+  pacote6:    [{max:5,val:33.25},{max:20,val:23.75},{max:50,val:19.00},{max:100,val:15.68},{max:200,val:12.35},{max:500,val:9.50}],
+  pacote12:   [{max:5,val:32.20},{max:20,val:23.00},{max:50,val:18.40},{max:100,val:15.18},{max:200,val:11.96},{max:500,val:9.20}]
+};
+var FNOMES=['Faixa 1 (ate 5)','Faixa 2 (6 a 20)','Faixa 3 (21 a 50)','Faixa 4 (51 a 100)','Faixa 5 (101 a 200)','Faixa 6 (201 a 500)'];
 function calcular(){
-  var mod=document.getElementById('calc-mod').value;
-  var n=parseInt(document.getElementById('calc-n').value)||0;
-  var t=TCALC[mod]; var idx=t.length-1;
-  for(var i=0;i<t.length;i++){if(n<=t[i].max){idx=i;break;}}
-  var total=n*t[idx].val; var com=total*0.3;
-  var suf=mod==='assinatura'?'/mês':'';
-  document.getElementById('res-total').textContent='R$ '+total.toFixed(2).replace('.',',')+suf;
-  document.getElementById('res-comissao').textContent='R$ '+com.toFixed(2).replace('.',',')+suf;
-  document.getElementById('res-faixa').textContent=FNOMES[idx];
+  var mod = document.getElementById('calc-mod').value;
+  var n   = parseInt(document.getElementById('calc-n').value) || 0;
+  var t   = TCALC[mod]; if (!t) t = TCALC['assinatura'];
+  var idx = t.length - 1;
+  for (var i = 0; i < t.length; i++) { if (n <= t[i].max) { idx = i; break; } }
+  var unitVal = t[idx].val;
+  var total   = n * unitVal;
+  var com     = total * 0.3;
+  var meses   = mod === 'pacote6' ? 6 : mod === 'pacote12' ? 12 : 0;
+  var suf     = (mod === 'assinatura' || meses > 0) ? '/mes' : '';
+  var totalPacote = meses > 0 ? total * meses : 0;
+  var comPacote   = meses > 0 ? com   * meses : 0;
+  document.getElementById('res-total').textContent     = 'R$ ' + total.toFixed(2).replace('.',',') + suf + (meses > 0 ? ' (R$' + totalPacote.toFixed(2).replace('.',',') + ' total)' : '');
+  document.getElementById('res-comissao').textContent  = 'R$ ' + com.toFixed(2).replace('.',',') + suf + (meses > 0 ? ' (R$' + comPacote.toFixed(2).replace('.',',') + ' total)' : '');
+  document.getElementById('res-faixa').textContent     = FNOMES[idx];
 }
 </script>
 
