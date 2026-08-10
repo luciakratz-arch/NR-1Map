@@ -2332,12 +2332,21 @@ function carregarPlanoAcao(empresaId, cicloId) {
     .where('empresaId','==',empresaId)
     .get()
     .then(function(snap) {
+      // Verificar se o ciclo selecionado tem acoes proprias (com cicloId)
+      var temAcoesProprias = false;
+      snap.forEach(function(doc) {
+        if (doc.data().cicloId === cicloFiltro) temAcoesProprias = true;
+      });
+
       var docs = [];
       snap.forEach(function(doc) {
         var d = doc.data();
         if (cicloFiltro) {
-          var ehMaisRecente = (_laudoCiclosCache && _laudoCiclosCache.length > 0 && _laudoCiclosCache[0].id === cicloFiltro);
-          if (d.cicloId === cicloFiltro || (!d.cicloId && ehMaisRecente)) {
+          if (d.cicloId === cicloFiltro) {
+            // Acao propria deste ciclo — sempre inclui
+            docs.push({ id: doc.id, d: d });
+          } else if (!d.cicloId && !temAcoesProprias) {
+            // Acao legada (sem cicloId) — inclui em qualquer ciclo sem acoes proprias
             docs.push({ id: doc.id, d: d });
           }
         } else {
@@ -6807,6 +6816,24 @@ function carregarHistoricoPlano(empresaId) {
           card.appendChild(btnBaixar);
         }
 
+        // Botao Ver Acoes — seleciona ciclo e carrega plano filtrado
+        var btnVer = document.createElement('button');
+        btnVer.style.cssText = 'padding:5px 14px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnVer.textContent = 'Ver Acoes';
+        (function(cicloId, cardEl) {
+          btnVer.onclick = function(e) {
+            e.stopPropagation();
+            var todos = lista.querySelectorAll('[id^="plano-card-"]');
+            todos.forEach(function(c) { c.style.borderColor = '#e5e7eb'; });
+            cardEl.style.borderColor = '#0A6E4F';
+            _planoCicloAtual = cicloId;
+            carregarPlanoAcao(empresaId, cicloId);
+            var tbl = document.getElementById('tbl-plano');
+            if (tbl) setTimeout(function(){ tbl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+          };
+        })(cl.id, card);
+        card.appendChild(btnVer);
+
         // Botao Gerar PDF do plano
         var btnGerar = document.createElement('button');
         btnGerar.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
@@ -7390,4 +7417,4 @@ window.NR1MAP_DISPARO_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT
 // verLinksEnviados definida acima
 </script>
 </body>
-</html>
+</html>+
