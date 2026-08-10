@@ -208,6 +208,28 @@
           <div><div class="titulo">Resumo da Proposta</div><div class="sub">Valores e condicoes negociadas</div></div>
         </div>
         <div class="card-body">
+          <!-- Seletor de pacote (so para assinatura mensal) -->
+          <div id="bloco-pacote" style="display:none;background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Escolha seu plano de pagamento</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--linha);border-radius:9px;cursor:pointer;" id="lbl-pac-mensal">
+                <input type="radio" name="pacote" value="mensal" checked onchange="selecionarPacote('mensal')"/> 
+                <span style="flex:1;font-size:13px;font-weight:600;">Mensal</span>
+                <span style="font-size:12px;color:var(--cinza);">Sem desconto · Cancele quando quiser</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--linha);border-radius:9px;cursor:pointer;" id="lbl-pac-6m">
+                <input type="radio" name="pacote" value="6m" onchange="selecionarPacote('6m')"/>
+                <span style="flex:1;font-size:13px;font-weight:600;">Pacote 6 Meses <span style="color:#F59E0B;font-size:11px;">5% OFF</span></span>
+                <span style="font-size:12px;color:var(--cinza);" id="lbl-pac-6m-valor"></span>
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--roxo);border-radius:9px;cursor:pointer;background:var(--roxo-xp);" id="lbl-pac-12m">
+                <input type="radio" name="pacote" value="12m" onchange="selecionarPacote('12m')"/>
+                <span style="flex:1;font-size:13px;font-weight:600;">Pacote 12 Meses <span style="color:var(--roxo);font-size:11px;">8% OFF</span></span>
+                <span style="font-size:12px;color:var(--roxo);font-weight:600;" id="lbl-pac-12m-valor"></span>
+              </label>
+            </div>
+          </div>
+
           <div style="text-align:center;padding:20px 0 24px;">
             <div style="font-size:12px;color:var(--cinza);margin-bottom:6px;" id="prop-faixa"></div>
             <div class="valor-destaque" id="prop-total"></div>
@@ -396,7 +418,7 @@ function irParaStep2() {
     {l:'CNPJ', v: cnpj},
     {l:'Colaboradores', v: (c.nColab || '--') + ' colaboradores'},
     {l:'Modalidade', v: modal},
-    {l:'Vigencia', v: c.vigencia && c.vigencia !== '0' ? c.vigencia + ' meses' : 'Indeterminado'},
+    {l:'Vigencia', v: c.modalidade !== 'mensal' ? '30 dias (uso unico)' : (c.vigencia && c.vigencia !== '0' ? c.vigencia + ' meses' : 'Indeterminado')},
     {l:'Pagamento', v: c.pagamento || 'A combinar'},
   ];
   var html = '';
@@ -409,7 +431,47 @@ function irParaStep2() {
     : 'Diagnostico Geral (Dejours, Herzberg, Maslow) + Laudo Tecnico + Mapa de Risco + Plano de Acao. Validade 30 dias.';
   document.getElementById('prop-incluso').textContent = incluso;
 
+  // Mostrar seletor de pacote apenas para assinatura mensal
+  var blocoPacote = document.getElementById('bloco-pacote');
+  if (blocoPacote) {
+    blocoPacote.style.display = (c.modalidade === 'mensal') ? 'block' : 'none';
+  }
+  // Inicializar labels dos pacotes
+  if (c.modalidade === 'mensal') {
+    selecionarPacote('mensal');
+  }
+
   irParaStep(2);
+}
+
+// Pacote selecionado no aceite
+var _pacoteAceite = 'mensal';
+
+function selecionarPacote(p) {
+  _pacoteAceite = p;
+  var c = _contrato.comercial || {};
+  var unitBase = c.valorUnit || 0;
+  var n = c.nColab || 0;
+  var desc = p === '6m' ? 0.05 : p === '12m' ? 0.08 : 0;
+  var unitDesc = unitBase * (1 - desc);
+  var totalMes = n * unitDesc;
+  var meses = p === '6m' ? 6 : p === '12m' ? 12 : 0;
+  var totalPacote = meses > 0 ? totalMes * meses : 0;
+
+  // Atualizar labels dos radios
+  document.getElementById('lbl-pac-6m-valor').textContent  = 'R$' + (n * unitBase * 0.95).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '/mes x6';
+  document.getElementById('lbl-pac-12m-valor').textContent = 'R$' + (n * unitBase * 0.92).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '/mes x12';
+
+  // Atualizar display de total
+  if (p === 'mensal') {
+    document.getElementById('prop-faixa').textContent  = (c.faixaLabel || '') + ' -- Assinatura Mensal';
+    document.getElementById('prop-total').textContent  = formatBRL(n * unitBase) + '/mes';
+    document.getElementById('prop-unit').textContent   = formatBRL(unitBase) + ' por colaborador/mes';
+  } else {
+    document.getElementById('prop-faixa').textContent  = (c.faixaLabel || '') + ' -- Pacote ' + (meses) + ' meses (' + (desc*100).toFixed(0) + '% desc.)';
+    document.getElementById('prop-total').textContent  = formatBRL(totalMes) + '/mes';
+    document.getElementById('prop-unit').textContent   = formatBRL(unitDesc) + '/colab./mes x ' + meses + ' = ' + formatBRL(totalPacote) + ' total';
+  }
 }
 
 function irParaStep3() {
@@ -443,7 +505,7 @@ function irParaStep3() {
     ' (' + formatBRL(c.valorUnit||0) + ' por colaborador' + (c.modalidade==='mensal'?'/mes':' -- pagamento unico') + ').' +
     (c.pagamento ? ' Condicoes de pagamento: ' + c.pagamento + '.' : '') + '</p>' +
     '<h4>VIGENCIA</h4>' +
-    '<p>' + (c.vigencia && c.vigencia !== '0' ? 'O contrato tera vigencia de ' + c.vigencia + ' meses a partir da data de aceite.' : 'Vigencia por prazo indeterminado, podendo ser rescindido por qualquer das partes mediante aviso previo de 30 dias.') + '</p>' +
+    '<p>' + (c.modalidade !== 'mensal' ? 'Contrato de uso unico com validade de 30 (trinta) dias a partir da data de aceite.' : (c.vigencia && c.vigencia !== '0' ? 'O contrato tera vigencia de ' + c.vigencia + ' meses a partir da data de aceite.' : 'Vigencia por prazo indeterminado, podendo ser rescindido por qualquer das partes mediante aviso previo de 30 dias.')) + '</p>' +
     '<h4>OBRIGACOES DA CONTRATADA</h4>' +
     '<p>a) Disponibilizar acesso a plataforma NR-1 Map para aplicacao das pesquisas psicossociais;<br/>' +
     'b) Gerar laudos tecnicos, mapas de risco e planos de acao conforme a metodologia IBP;<br/>' +
@@ -510,11 +572,23 @@ function assinar() {
   };
 
   // Atualizar contrato no Firestore
+  var c = _contrato.comercial || {};
+  var unitBase = c.valorUnit || 0;
+  var nColab = c.nColab || 0;
+  var descPacote = _pacoteAceite === '6m' ? 0.05 : _pacoteAceite === '12m' ? 0.08 : 0;
+  var mesesPacote = _pacoteAceite === '6m' ? 6 : _pacoteAceite === '12m' ? 12 : 0;
+  var unitFinal = unitBase * (1 - descPacote);
+  var totalFinal = nColab * unitFinal * (mesesPacote || 1);
+
   _db.collection('nr1map_contratos').doc(_contratoId).update({
     status:       'assinado',
     assinadoEm:   agora,
     hashAceite:   hash,
     cliente:      dadosCliente,
+    pacote:       _pacoteAceite,
+    desconto:     descPacote,
+    meses:        mesesPacote,
+    valorFinal:   totalFinal,
     ipAceite:     'registrado via browser'
   }).then(function() {
     // Cadastrar empresa automaticamente
