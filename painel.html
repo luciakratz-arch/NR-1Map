@@ -1237,14 +1237,10 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
   </div>
   <div class="content">
-    <!-- Seletor de ciclos -->
-    <div id="plano-seletor-ciclos" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Plano do Ciclo</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <select id="plano-ciclo-select" onchange="selecionarCicloPlano(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;"></select>
-        <span id="plano-ciclo-status" style="font-size:11px;color:#6b7280;"></span>
-        <button id="btn-baixar-plano-ciclo" onclick="baixarDocCiclo('planoUrl')" style="display:none;padding:6px 14px;border:none;background:#0A6E4F;color:#fff;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;">⬇ Baixar PDF</button>
-      </div>
+    <!-- Historico de ciclos do plano (igual ao laudo) -->
+    <div id="plano-seletor-ciclos" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Historico de Planos de Acao</div>
+      <div id="plano-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
     <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
       Acoes geradas automaticamente a partir dos setores/cargos (CBO) classificados como
@@ -2929,15 +2925,8 @@ function sv(id){
   window.scrollTo(0,0);
   if(id==='modulos'){ renderRH(); _carregarRHSel(); }
   if(id==='plano-acao' && window.nr1mapEmpresa){
-    _carregarCiclosParaSeletor('plano-ciclo-select','plano-ciclo-status','btn-baixar-plano-ciclo','planoUrl', function(cicloId, d){
-      // Ao carregar seletor, definir ciclo mais recente como ativo no plano
-      if (!_planoCicloAtual && cicloId) {
-        _planoCicloAtual = cicloId;
-        carregarPlanoAcao(window.nr1mapEmpresa.id, cicloId);
-      }
-    });
-    // Carregar com ciclo ja selecionado (se houver) ou sem filtro
-    carregarPlanoAcao(window.nr1mapEmpresa.id, _planoCicloAtual || null);
+    _planoCicloAtual = null;
+    carregarHistoricoPlano(window.nr1mapEmpresa.id);
   }
   if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); _carregarContextoEmpresa(); }
   if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
@@ -4033,8 +4022,11 @@ var _ZONA_DEJOURS = function(ibp) {
 function gerarSugestoesAutomaticas() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId) { alert('Empresa nao carregada.'); return; }
-  // Garantir que _planoCicloAtual esta definido (usa _laudoCicloAtual como fallback)
-  if (!_planoCicloAtual && _laudoCicloAtual) _planoCicloAtual = _laudoCicloAtual;
+  // Verificar ciclo ativo — deve ter sido definido ao clicar em um card de ciclo
+  if (!_planoCicloAtual) {
+    alert('Selecione um ciclo acima antes de gerar sugestoes automaticas.');
+    return;
+  }
 
   // Tenta usar cache do mapa de risco primeiro, depois _histCiclos, depois busca Firestore
   var subcats = window._mapaRiscoSubcats || null;
@@ -5985,7 +5977,7 @@ function aplicarEmpresa(e) {
   carregarHistoricoReal(e.id);
   carregarHistoricoPulso(e.id);
   carregarEvolucaoIndicadores(e.id);
-  carregarPlanoAcao(e.id);
+  // Plano de Acao carregado apenas ao entrar na view (cicloId definido pelo seletor)
   atualizarBadgePulso();
   carregarSugestoes(e.id);
   carregarChamados(e.id);
@@ -6524,10 +6516,11 @@ function selecionarCicloMapa(cicloId) {
 }
 
 function selecionarCicloPlano(cicloId) {
-  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
-  if (!ciclo) return;
   _planoCicloAtual = cicloId;
-  _atualizarStatusSeletor('plano-ciclo-status', 'btn-baixar-plano-ciclo', ciclo.data.planoUrl);
+  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
+  if (ciclo) {
+    _atualizarStatusSeletor('plano-ciclo-status', 'btn-baixar-plano-ciclo', ciclo.data.planoUrl);
+  }
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (empresaId) carregarPlanoAcao(empresaId, cicloId);
 }
@@ -6725,6 +6718,150 @@ var _laudoCicloAtual = null;
 // Ciclo atualmente selecionado no Plano de Acao
 var _planoCicloAtual = null;
 var _laudoCiclosCache = []; // [{id, data, ibp, laudoUrl, totalRespostas}]
+
+// ===== HISTORICO DO PLANO DE ACAO (por ciclo, igual ao laudo) =====
+function carregarHistoricoPlano(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var seletor = document.getElementById('plano-seletor-ciclos');
+  var lista   = document.getElementById('plano-ciclos-lista');
+  var tbody   = document.getElementById('tbody-plano');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Selecione um ciclo acima para ver o plano.</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+
+      if (!ciclos.length) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum ciclo encontrado. Realize um diagnostico primeiro.</td></tr>';
+        return;
+      }
+
+      // Atualizar cache
+      _laudoCiclosCache = ciclos;
+      if (seletor) seletor.style.display = 'block';
+      if (!lista) return;
+      lista.innerHTML = '';
+
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      ciclos.forEach(function(cl, idx) {
+        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx + 1);
+        var resp  = cl.data.totalRespostas || 0;
+        var temPdf = !!cl.data.planoUrl;
+
+        var card = document.createElement('div');
+        card.id = 'plano-card-' + cl.id;
+        card.style.cssText = 'background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:border-color .15s;';
+        if (idx === 0) card.style.borderColor = '#0A6E4F';
+
+        // Info do ciclo
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+        info.textContent = dtStr + ' -- ' + resp + ' respondentes';
+        card.appendChild(info);
+
+        // Badge PDF
+        var badge = document.createElement('span');
+        badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;' +
+          (temPdf ? 'background:#D1FAE5;color:#065F46;' : 'background:#FEF3C7;color:#92400E;');
+        badge.textContent = temPdf ? 'PDF disponivel' : 'Sem PDF';
+        card.appendChild(badge);
+
+        // Botao Baixar PDF do plano
+        if (temPdf) {
+          var btnBaixar = document.createElement('button');
+          btnBaixar.setAttribute('data-baixar', '1');
+          btnBaixar.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnBaixar.textContent = 'Baixar PDF';
+          (function(url) {
+            btnBaixar.onclick = function(e) { e.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); };
+          })(cl.data.planoUrl);
+          card.appendChild(btnBaixar);
+        }
+
+        // Botao Gerar PDF do plano
+        var btnGerar = document.createElement('button');
+        btnGerar.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnGerar.textContent = temPdf ? 'Atualizar PDF' : 'Gerar PDF';
+        (function(cicloId, btnRef, cardRef, badgeRef) {
+          btnRef.onclick = function(e) {
+            e.stopPropagation();
+            var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (!eid) return;
+            btnRef.textContent = 'Gerando...'; btnRef.disabled = true;
+            fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + eid + '&tipo=plano_5w2h&cicloId=' + cicloId)
+              .then(function(r) { return r.json(); })
+              .then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  _salvarLaudoUrlNoCiclo(eid, d.url, cicloId, 'planoUrl');
+                  window.open(d.url + '?bust=' + Date.now(), '_blank');
+                  btnRef.textContent = 'Atualizar PDF';
+                  badgeRef.textContent = 'PDF disponivel';
+                  badgeRef.style.background = '#D1FAE5'; badgeRef.style.color = '#065F46';
+                  var existBaixar = cardRef.querySelector('button[data-baixar]');
+                  if (existBaixar) {
+                    (function(url) { existBaixar.onclick = function(ev) { ev.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); }; })(d.url);
+                  } else {
+                    var nb = document.createElement('button');
+                    nb.setAttribute('data-baixar', '1');
+                    nb.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent = 'Baixar PDF';
+                    nb.onclick = function(ev) { ev.stopPropagation(); window.open(d.url + '?bust=' + Date.now(), '_blank'); };
+                    cardRef.insertBefore(nb, btnRef);
+                  }
+                } else {
+                  btnRef.textContent = 'Gerar PDF';
+                  alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+                }
+              }).catch(function(e) {
+                btnRef.disabled = false; btnRef.textContent = 'Gerar PDF';
+                alert('Erro: ' + e.message);
+              });
+          };
+        })(cl.id, btnGerar, card, badge);
+        card.appendChild(btnGerar);
+
+        // Clique no card seleciona ciclo e carrega plano filtrado
+        (function(cicloId, cardEl) {
+          card.onclick = function(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            // Destacar card ativo
+            var todos = lista.querySelectorAll('[id^="plano-card-"]');
+            todos.forEach(function(c) { c.style.borderColor = '#e5e7eb'; });
+            cardEl.style.borderColor = '#0A6E4F';
+            // Selecionar ciclo e carregar
+            _planoCicloAtual = cicloId;
+            carregarPlanoAcao(empresaId, cicloId);
+            // Rolar para a tabela
+            var tbl = document.getElementById('tbl-plano');
+            if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+        })(cl.id, card);
+
+        lista.appendChild(card);
+
+        // Selecionar automaticamente o primeiro ciclo
+        if (idx === 0) {
+          _planoCicloAtual = cl.id;
+          carregarPlanoAcao(empresaId, cl.id);
+        }
+      });
+    }).catch(function(e) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:red;">Erro ao carregar ciclos: ' + e.message + '</td></tr>';
+    });
+}
+
 
 function carregarLaudoTecnico(empresaId) {
   if (!empresaId || !window.nr1mapDb) return;
