@@ -1,437 +1,7411 @@
-# -*- coding: utf-8 -*-
-"""
-NR-1 Map — Gerador do PLANO DE AÇÃO 5W2H
-Instrumento 3 de 4 do fluxo GRO (Inventário > Avaliação > Plano de Ação > Acompanhamento)
-
-NOVIDADE vs. versão anterior do 5W2H:
-- As ações NÃO são mais escritas à mão por setor — elas são GERADAS AUTOMATICAMENTE a partir de
-  quem deu SUBSTANCIAL ou INTOLERÁVEL na Avaliação do Risco (instrumento 2), no nível de CBO
-  (cargo) quando visível, ou de Setor quando o CBO foi diluído por anonimato.
-- O prazo (When) é definido pela gravidade: Intolerável = Imediato; Substancial = 7 dias.
-- Mantém a mesma base de dados do Mapa de Risco (SETORES_CBO) para os 3 documentos conversarem
-  entre si — mudou um número lá, muda a ação gerada aqui.
-"""
-
-import uuid
-import datetime
-import tempfile as _tmpmod
-import os as _os
-import urllib.request as _urllib_req
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.lib.enums import TA_CENTER
-
-# ───────────────────────────── CORES (mesma identidade NR-1 Map) ─────────────────────────────
-VERDE_NR1 = colors.HexColor('#0A6E4F')
-ROXO_NR1 = colors.HexColor('#7B00C4')
-AZUL_ESCURO = colors.HexColor('#1F2937')
-CINZA_TEXTO = colors.HexColor('#374151')
-CINZA_CLARO = colors.HexColor('#F3F4F6')
-LINHA = colors.HexColor('#D1D5DB')
-VERDE_OK = colors.HexColor('#16A34A')
-ZONA_COR_FUNDO = {
-    "Sofrimento Patogênico": colors.HexColor('#FBD5D5'),
-    "Defesa Oculta": colors.HexColor('#FFF1B8'),
-    "Terreno Fértil": colors.HexColor('#D2F2E2'),
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NR-1 Map — Painel do Gestor</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --roxo:#7B00C4;--roxo-claro:#9B30E0;--roxo-xp:#F3E8FC;
+  --verde:#0A6E4F;--verde-claro:#12A073;--verde-xp:#E4F5EF;
+  --laranja:#D45E2A;--laranja-xp:#FAEEE7;
+  --preto:#0D1210;--cinza-escuro:#2A2E2C;--cinza-medio:#6B7370;
+  --cinza-claro:#EEF1F0;--branco:#FAFCFB;--linha:#D8E2DF;
+  --sidebar:220px;
 }
-GRO_COR = {
-    "TRIVIAL": colors.HexColor('#BFE6FB'),
-    "TOLERÁVEL": colors.HexColor('#C8EAB8'),
-    "MODERADO": colors.HexColor('#FCE98A'),
-    "SUBSTANCIAL": colors.HexColor('#F8B25A'),
-    "INTOLERÁVEL": colors.HexColor('#F08A8A'),
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cinza-claro);color:var(--preto);-webkit-font-smoothing:antialiased;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--preto);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 18px 14px;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.5px;border-bottom:1px solid #1E2A28;}
+.sidebar-logo span{color:var(--verde-claro);}
+.sidebar-empresa{padding:12px 18px;border-bottom:1px solid #1E2A28;}
+.sidebar-empresa .lbl{font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.sidebar-empresa .nome{font-size:12px;color:#C8D4D0;font-weight:500;}
+.sidebar-empresa .plano{font-size:11px;color:var(--verde-claro);margin-top:1px;}
+.nav{padding:10px 0;flex:1;}
+.nav-sec{padding:8px 18px 3px;font-size:10px;color:#4A5450;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;color:#8A9590;cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:#C8D4D0;background:rgba(255,255,255,.04);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--verde-claro);}
+.nav-item .ic{width:15px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-item .bdg{margin-left:auto;background:var(--roxo);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:100px;}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid #1E2A28;}
+.s-user{display:flex;align-items:center;gap:9px;}
+.s-avatar{width:30px;height:30px;border-radius:7px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.s-user .nm{font-size:11px;color:#C8D4D0;font-weight:500;}
+.s-user .cg{font-size:10px;color:#4A5450;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--branco);border-bottom:1px solid var(--linha);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--verde);color:#fff;}.btn-primary:hover{background:var(--verde-claro);}
+.btn-roxo{background:var(--roxo);color:#fff;}.btn-roxo:hover{background:var(--roxo-claro);}
+.btn-ghost{background:transparent;color:var(--cinza-medio);border:1px solid var(--linha);}.btn-ghost:hover{border-color:var(--cinza-medio);color:var(--preto);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-danger{background:#C53030;color:#fff;}
+.content{padding:20px 24px;flex:1;}
+
+/* MÉTRICAS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.mc{background:var(--branco);border-radius:9px;padding:16px 18px;border:1px solid var(--linha);}
+.mc .lbl{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.mc .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.mc .sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+.mc .delta{font-size:11px;margin-top:3px;font-weight:500;}
+.up{color:var(--verde-claro);}.down{color:var(--laranja);}
+
+/* FILTROS */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.filter-bar input,.filter-bar select{padding:7px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.filter-bar input{min-width:180px;}
+.filter-bar select{min-width:140px;}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--verde-claro);}
+.filter-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--verde-xp);color:var(--verde);border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;}
+.filter-tag .x{font-size:13px;opacity:.6;}
+
+/* CARD */
+.card{background:var(--branco);border-radius:9px;border:1px solid var(--linha);overflow:hidden;margin-bottom:16px;}
+.cobranding-preview{display:flex;align-items:center;gap:16px;background:var(--cinza-claro);border-radius:8px;padding:14px;margin-bottom:12px;}
+.logo-box{width:80px;height:48px;border-radius:6px;border:1.5px dashed var(--linha);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cinza-medio);cursor:pointer;background:#fff;flex-shrink:0;}
+.logo-box:hover{border-color:var(--roxo-claro);}
+.cobranding-plus{font-size:20px;color:var(--cinza-medio);}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between;}
+.card-header .title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-header .subtitle{font-size:11px;color:var(--cinza-medio);margin-top:1px;}
+.card-body{padding:16px 18px;}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--linha);background:var(--cinza-claro);white-space:nowrap;cursor:pointer;}
+thead th:hover{color:var(--preto);}
+thead th .sort{opacity:.4;margin-left:3px;}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--linha);color:var(--cinza-escuro);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#F5F8F7;}
+tbody tr.inativo td{opacity:.5;}
+
+/* BADGES */
+.bdg-s{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;white-space:nowrap;}
+.s-ok{background:var(--verde-xp);color:var(--verde);}
+.s-pend{background:#FFF8E6;color:#92610A;}
+.s-erro{background:#FEEFEF;color:#C53030;}
+.s-inativo{background:var(--cinza-claro);color:var(--cinza-medio);}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3c{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+
+/* FORM */
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--cinza-medio);margin-bottom:4px;display:block;}
+.form-control{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--linha);border-radius:7px;background:var(--branco);color:var(--preto);font-family:'Inter',sans-serif;}
+.form-control:focus{outline:none;border-color:var(--verde-claro);}
+textarea.form-control{resize:vertical;min-height:70px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* MODULOS */
+.modulo-card{border:1.5px solid var(--linha);border-radius:9px;margin-bottom:12px;overflow:hidden;}
+.btn-aba{padding:8px 16px;border-radius:8px;border:1.5px solid var(--linha);background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:var(--cinza-medio);transition:all .15s;}
+.btn-aba:hover{border-color:var(--roxo);color:var(--roxo);}
+.btn-aba.aba-ativa{background:var(--roxo);color:#fff;border-color:var(--roxo);}
+.subcat-bloco{margin-bottom:10px;border:1px solid var(--linha);border-radius:7px;overflow:hidden;}
+.subcat-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--cinza-claro);cursor:pointer;}
+.subcat-hdr:hover{background:#eee;}
+.subcat-titulo{font-size:11.5px;font-weight:600;color:var(--roxo);}
+.subcat-counter{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.c-ok{background:#D2F2E2;color:#0A6E4F;}
+.c-warn{background:#FBD5D5;color:#C53030;}
+.modulo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--branco);}
+.modulo-header:hover{background:var(--cinza-claro);}
+.modulo-header .m-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.modulo-header .m-sub{font-size:11px;color:var(--cinza-medio);margin-top:2px;}
+.modulo-header .m-right{display:flex;align-items:center;gap:10px;}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--cinza-claro);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--verde-claro);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;}
+.toggle.on::after{left:19px;}
+.modulo-body{padding:14px 16px;border-top:1px solid var(--linha);background:var(--cinza-claro);display:none;}
+.modulo-body.open{display:block;}
+.pergunta-item{background:var(--branco);border:1px solid var(--linha);border-radius:7px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+.perg-check{width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--verde);}
+.perg-text{font-size:12px;color:var(--cinza-escuro);flex:1;line-height:1.4;}
+.perg-tag{font-size:10px;padding:2px 7px;border-radius:100px;background:var(--roxo-xp);color:var(--roxo);margin-left:auto;white-space:nowrap;}
+.add-perg{display:flex;gap:8px;margin-top:10px;}
+
+/* PLANEJAMENTO */
+.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--linha);}
+.agenda-item:last-child{border-bottom:none;}
+.agenda-data{min-width:50px;text-align:center;background:var(--cinza-claro);border-radius:7px;padding:6px;}
+.agenda-data .dia{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;line-height:1;}
+.agenda-data .mes{font-size:10px;color:var(--cinza-medio);text-transform:uppercase;}
+.agenda-info{flex:1;}
+.agenda-info h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.agenda-info p{font-size:11px;color:var(--cinza-medio);}
+.agenda-tipo{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;}
+.tipo-geral{background:var(--roxo-xp);color:var(--roxo);}
+.tipo-pulso{background:var(--verde-xp);color:var(--verde);}
+
+/* IA BOX */
+.ia-box{background:var(--roxo-xp);border:1px solid rgba(123,0,196,.2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.ia-box .ia-lbl{font-size:10px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.ia-box .ia-txt{font-size:12px;color:var(--preto);line-height:1.5;}
+.ia-box .ia-sub{font-size:11px;color:var(--cinza-medio);margin-top:3px;}
+
+/* ALERTA */
+.alerta{display:flex;gap:9px;align-items:flex-start;background:#FFF8E6;border:1px solid #F6C544;border-radius:7px;padding:10px 12px;margin-bottom:14px;}
+.alerta p{font-size:12px;color:#92610A;line-height:1.5;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--linha);margin-bottom:16px;}
+.tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--cinza-medio);border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.tab:hover{color:var(--preto);}
+.tab.active{color:var(--verde);border-bottom-color:var(--verde);font-weight:600;}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--linha);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cinza-claro);}
+.upload-zone:hover{border-color:var(--verde-claro);background:var(--verde-xp);}
+.upload-zone p{font-size:12px;color:var(--cinza-medio);line-height:1.5;}
+
+/* TIMELINE */
+.timeline-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--linha);}
+.timeline-item:last-child{border-bottom:none;}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.tl-geral{background:var(--roxo);}
+.tl-pulso{background:var(--verde-claro);}
+.btn-qtd{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--linha);background:var(--branco);font-size:12px;font-weight:600;cursor:pointer;color:var(--cinza-medio);transition:all .15s;font-family:'Inter',sans-serif;}
+.btn-qtd:hover{border-color:var(--roxo);color:var(--roxo);}
+.btn-qtd.active{background:var(--roxo);color:#fff;border-color:var(--roxo);}
+.tl-body{flex:1;}
+.tl-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.tl-tipo.g{color:var(--roxo);}
+.tl-tipo.p{color:var(--verde);}
+.tl-desc{font-size:12px;color:var(--cinza-escuro);margin-bottom:3px;}
+.tl-data{font-size:10px;color:var(--cinza-medio);}
+.score-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:var(--cinza-claro);color:var(--cinza-escuro);margin-right:4px;margin-top:4px;}
+.score-alto{background:#FEEFEF;color:#C53030;}
+.score-medio{background:#FFF8E6;color:#92610A;}
+.score-baixo{background:var(--verde-xp);color:var(--verde);}
+
+/* PROGRESS */
+.progress-bar{height:4px;background:var(--cinza-claro);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;background:var(--verde-claro);transition:width .3s;}
+
+/* LINK AUTOCADASTRO */
+.link-box{background:var(--cinza-claro);border:1px solid var(--linha);border-radius:7px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cinza-escuro);margin-top:12px;}
+.link-box .link-url{flex:1;font-family:monospace;font-size:11px;color:var(--verde);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* DISPARO OPTS */
+.disparo-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.d-opt{border:2px solid var(--linha);border-radius:8px;padding:14px;cursor:pointer;transition:all .15s;text-align:center;}
+.d-opt:hover{border-color:var(--verde-claro);background:var(--verde-xp);}
+.d-opt.sel{border-color:var(--verde);background:var(--verde-xp);}
+.d-opt .d-ic{font-size:22px;margin-bottom:4px;}
+.d-opt .d-lb{font-size:12px;font-weight:500;}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;min-height:100%;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--branco);border-radius:12px;padding:24px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;}
+.modal.open{position:fixed;top:0;left:var(--sidebar);right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:200;background:rgba(0,0,0,.5);}
+.modal-box{background:var(--branco);border-radius:12px;padding:24px;width:90%;max-width:460px;max-height:80vh;overflow-y:auto;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.modal-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-medio);}
+
+/* ===== MOBILE RESPONSIVO ===== */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:7px;flex-direction:column;gap:5px;align-items:center;justify-content:center;}
+.hamburger span{display:block;width:20px;height:2px;background:var(--preto);border-radius:2px;transition:all .2s;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;}
+.sidebar-overlay.open{display:block;}
+
+@media(max-width:768px){
+  :root{--sidebar:260px;}
+
+  /* ---- Hamburger ---- */
+  .hamburger{display:flex;}
+
+  /* ---- Sidebar drawer ---- */
+  .sidebar{
+    position:fixed;top:0;left:0;height:100%;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:300;
+    width:var(--sidebar);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .main{width:100%;overflow-x:hidden;}
+
+  /* ---- Topbar ---- */
+  .topbar{
+    padding:0 10px;
+    height:auto;
+    min-height:52px;
+    flex-wrap:wrap;
+    gap:6px;
+    padding-top:8px;
+    padding-bottom:8px;
+  }
+  .topbar-title{
+    font-size:13px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:160px;
+  }
+  /* Wrapper com botão Voltar + título longo */
+  .topbar-title-wrapper{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    flex:1;
+  }
+  .topbar-title-wrapper .topbar-title{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:12px;
+    max-width:120px;
+  }
+  .topbar-actions{gap:5px;flex-shrink:0;}
+  .topbar-actions .btn{font-size:11px;padding:5px 8px;}
+
+  /* ---- Grids nomeados ---- */
+  .metrics{grid-template-columns:1fr 1fr !important;}
+  .grid-2{grid-template-columns:1fr !important;}
+  .grid-3c{grid-template-columns:1fr !important;}
+  .form-row{grid-template-columns:1fr !important;}
+  .form-row-3{grid-template-columns:1fr !important;}
+  .disparo-opts{grid-template-columns:1fr !important;}
+  .dash-grid{grid-template-columns:1fr !important;}
+  .kpi-row{grid-template-columns:1fr 1fr !important;gap:8px !important;}
+
+  /* ---- Grids inline ---- */
+  [style*="grid-template-columns"]{grid-template-columns:1fr !important;}
+
+  /* ---- Tabelas ---- */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:480px;}
+
+  /* ---- Modais ---- */
+  .modal{width:96vw !important;max-width:96vw !important;max-height:88vh;overflow-y:auto;}
+  .modal-overlay{padding:8px;align-items:flex-end;}
+
+  /* ---- Conteúdo ---- */
+  .view{padding:10px !important;}
+  .sec-header{flex-direction:column;align-items:flex-start !important;gap:8px;}
+  .card{padding:12px !important;}
+  .btn-row{flex-wrap:wrap;}
 }
 
-# ───────────────────────────── MATRIZ OFICIAL (idêntica ao Mapa de Risco) ─────────────────────────────
-MATRIZ_GRO = {
-    ("E", 1): "MODERADO",     ("E", 2): "SUBSTANCIAL", ("E", 3): "SUBSTANCIAL", ("E", 4): "INTOLERÁVEL", ("E", 5): "INTOLERÁVEL",
-    ("D", 1): "TOLERÁVEL",    ("D", 2): "MODERADO",     ("D", 3): "MODERADO",     ("D", 4): "SUBSTANCIAL", ("D", 5): "INTOLERÁVEL",
-    ("C", 1): "TRIVIAL",      ("C", 2): "TOLERÁVEL",    ("C", 3): "MODERADO",     ("C", 4): "SUBSTANCIAL", ("C", 5): "INTOLERÁVEL",
-    ("B", 1): "TRIVIAL",      ("B", 2): "TOLERÁVEL",    ("B", 3): "TOLERÁVEL",    ("B", 4): "MODERADO",     ("B", 5): "SUBSTANCIAL",
-    ("A", 1): "TRIVIAL",      ("A", 2): "TRIVIAL",      ("A", 3): "TOLERÁVEL",    ("A", 4): "TOLERÁVEL",    ("A", 5): "MODERADO",
+@media(max-width:400px){
+  .metrics{grid-template-columns:1fr !important;}
+  .kpi-row{grid-template-columns:1fr !important;}
+  .topbar-title{max-width:100px;font-size:11px;}
+  .topbar-title-wrapper .topbar-title{max-width:80px;font-size:11px;}
 }
-PROB_LABEL = {"A": "Rara", "B": "Pouco Provável", "C": "Possível", "D": "Provável", "E": "Muito Provável"}
-PROB_LETRA_POR_NUM = {1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
-ZONAS_IBP = [
-    {"zona_dejours": "Sofrimento Patogênico", "faixa_ibp": "−5,0 a −1,5", "severidade": 4},
-    {"zona_dejours": "Defesa Oculta", "faixa_ibp": "−1,4 a +1,4", "severidade": 3},
-    {"zona_dejours": "Terreno Fértil", "faixa_ibp": "+1,5 a +5,0", "severidade": 1},
-]
-AÇÕES_QUE_EXIGEM_PLANO = {"SUBSTANCIAL", "INTOLERÁVEL"}
+</style>
+<script src="cbo-database.js"></script>
+</head>
+<body>
+<div class="app">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="fecharSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">NR-1<span>Map</span></div>
+  <div class="sidebar-empresa">
+    <div class="lbl">Empresa</div>
+    <div class="nome">—</div>
+    <div class="plano">Assinatura · Faixa 2</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">Visão geral</div>
+    <div class="nav-item active" onclick="sv('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="sv('tutoriais')"><span class="ic">🎓</span>Tutoriais</div>
+    <div class="nav-sec">Empresa</div>
+    <div class="nav-item" onclick="sv('cargos')"><span class="ic">🏗</span>Cargos / Organograma</div>
+    <div class="nav-item" onclick="sv('colaboradores')"><span class="ic">👥</span>Colaboradores<span class="bdg" id="bdg-colab">0</span></div>
+    <div class="nav-sec">Pesquisas</div>
+    <div class="nav-item" onclick="sv('planejamento')"><span class="ic">🗓</span>Planejamento</div>
+    <div class="nav-item" onclick="sv('metodologia')"><span class="ic">🔬</span>Metodologia Científica</div>
+    <div class="nav-item" onclick="sv('modulos')"><span class="ic">🧩</span>Módulos e perguntas</div>
+    <div class="nav-item" onclick="sv('diagnostico')"><span class="ic">🔍</span>Diagnóstico Geral</div>
+    <div class="nav-item" onclick="sv('pulso')"><span class="ic">📡</span>Pesquisa Pulso<span class="bdg" id="bdg-pulso" style="display:none;">0</span></div>
+    <div class="nav-sec">Configurações</div>
+    <div class="nav-item" onclick="sv('cobranding')"><span class="ic">🎨</span>Co-Branding (Logo)</div>
+    <div class="nav-sec">Referência</div>
+    <div class="nav-item" onclick="sv('nr1')"><span class="ic">📑</span>Norma NR-1</div>
+    <div class="nav-sec">Resultados</div>
+    <div class="nav-item" onclick="sv('historico')"><span class="ic">📅</span>Histórico</div>
+    <div class="nav-item" onclick="sv('laudo-tecnico')"><span class="ic">📋</span>Laudo Técnico Psicossocial</div>
+    <div class="nav-item" onclick="sv('mapa-risco')"><span class="ic">🗺</span>Mapa de Risco</div>
+    <div class="nav-item" onclick="sv('plano-acao')"><span class="ic">✅</span>Plano de Ação<span class="bdg" id="bdg-plano-pendentes">0</span></div>
+    <div class="nav-item" onclick="sv('relatorio-anual')"><span class="ic">📊</span>Relatório Anual</div>
+    <div class="nav-item" onclick="sv('relatorios-ciclo')"><span class="ic">🗂</span>Relatórios por Ciclo</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="s-user">
+      <div class="s-avatar">LK</div>
+      <div><div class="nm">Dra. Lucia Kratz</div><div class="cg">Gestora RH</div></div>
+    </div>
+    <button onclick="window.location.href='index.html'" style="width:100%;margin-top:8px;padding:7px;background:rgba(10,110,79,.15);border:1px solid rgba(18,160,115,.3);border-radius:7px;color:#12A073;font-size:11px;cursor:pointer;">🌐 Voltar ao Site</button>
+    <button onclick="window.location.href='admin.html'" style="width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid #2A2E2C;border-radius:7px;color:#4A5450;font-size:11px;cursor:pointer;">← Voltar ao Login</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="view-dashboard" class="view active">
+  <div class="topbar">
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm">⚙ Config</button>
+      <button class="btn btn-primary btn-sm" onclick="sv('diagnostico')">+ Iniciar Diagnóstico</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- BANNER NR-1 -->
+    <div onclick="sv('nr1')" style="background:linear-gradient(135deg,#0D1210 60%,#1A0A2E 100%);border-radius:10px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:1px solid #2A1A3E;transition:all .2s;flex-wrap:wrap;gap:12px;"
+      onmouseover="this.style.borderColor='var(--roxo-claro)'" onmouseout="this.style.borderColor='#2A1A3E'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:44px;height:44px;border-radius:10px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📑</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;">Conheça a Base Legal: Veja a norma NR-1</div>
+          <div style="font-size:12px;color:#8A9590;max-width:520px;line-height:1.5;">Entenda as obrigações da sua empresa no Gerenciamento de Riscos Ocupacionais (GRO) e na proteção da saúde mental.</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span style="font-size:11px;color:var(--roxo-claro);font-weight:600;background:rgba(123,0,196,.15);padding:4px 12px;border-radius:100px;">Base legal do app</span>
+        <span style="color:var(--roxo-claro);font-size:18px;">→</span>
+      </div>
+    </div>
+
+    <!-- BANNER GUIA RH -->
+    <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
+      style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #D8E8E2;border-radius:10px;padding:14px 20px;margin-bottom:20px;cursor:pointer;text-decoration:none;transition:all .2s;flex-wrap:wrap;gap:10px;"
+      onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 2px 12px rgba(10,110,79,.1)'"
+      onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none'">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:38px;height:38px;border-radius:9px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📋</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#0A6E4F;margin-bottom:2px;">Guia de Implementação e Gestão Contínua</div>
+          <div style="font-size:11px;color:#5A6672;line-height:1.4;">Manual operacional completo para RH · Checklist de implementação · Como usar cada tela · Conformidade NR-1</div>
+        </div>
+      </div>
+      <span style="font-size:11px;color:#0A6E4F;font-weight:600;background:#E6F4EF;padding:4px 12px;border-radius:100px;flex-shrink:0;">Abrir guia →</span>
+    </a>
+
+    <div class="metrics">
+      <div class="mc"><div class="lbl">Colaboradores ativos</div><div class="val" id="mc-colab-ativos">0</div><div class="sub" id="mc-colab-inativos">0 inativos</div></div>
+      <div class="mc"><div class="lbl">Respondentes</div><div class="val" id="mc-respondentes">—</div><div class="sub" id="mc-respondentes-sub">aguardando respostas</div></div>
+      <div class="mc"><div class="lbl">IBP Geral</div><div class="val" id="mc-ibp-geral">—</div><div class="sub" id="mc-ibp-zona">aguardando respostas</div></div>
+      <div class="mc"><div class="lbl">Taxa de resposta</div><div class="val" id="mc-taxa">—</div><div class="sub" id="mc-taxa-sub">—</div></div>
+    </div>
+
+    <!-- VELOCÍMETROS IBP — Balança Psicodinâmica (Dejours) -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza-medio);margin-bottom:10px;">Velocímetro IBP — Balança Psicodinâmica (Dejours) × Macro-categorias</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Fisiológicos</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 1 · Corpo e Mente</div>
+          <canvas id="gauge-fis" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-fis" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−0.3</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores de Segurança</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 2 · Previsibilidade</div>
+          <canvas id="gauge-seg" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-seg" style="font-family:monospace;font-size:22px;font-weight:700;color:#ef4444;">−2.1</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Sofrimento Patogênico</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Sociais</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 3 · Relacionamentos</div>
+          <canvas id="gauge-soc" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-soc" style="font-family:monospace;font-size:22px;font-weight:700;color:#10b981;">+1.8</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Terreno Fértil</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:2px;">Fatores Motivacionais</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-bottom:8px;">Módulo 4 · Propósito</div>
+          <canvas id="gauge-mot" width="160" height="88" style="display:block;margin:0 auto 6px;"></canvas>
+          <div id="ibp-mot" style="font-family:monospace;font-size:22px;font-weight:700;color:#f59e0b;">+0.6</div>
+          <div style="font-size:10px;color:var(--cinza-medio);">Defesa Oculta</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--cinza-medio);">
+        <span>🔴 Sofrimento Patogênico (−5 a −1,5)</span>
+        <span>🟡 Defesa Oculta (−1,4 a +1,4)</span>
+        <span>🟢 Terreno Fértil (+1,5 a +5)</span>
+      </div>
+    </div>
+
+    <div class="grid-3c">
+      <div class="card">
+        <div class="card-header"><div><div class="title">Termômetro Prazer ↔ Sofrimento</div><div class="subtitle">Jun 2025</div></div><button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">Ver laudo</button></div>
+        <div class="card-body">
+          <div class="ia-box"><div class="ia-lbl">🤖 Sugestão IA</div><div class="ia-txt"><strong>Próxima Pulso:</strong> Esgotamento / Sobrecarga</div><div class="ia-sub">Maior deterioração: +8 pts nos últimos 30 dias</div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Realização profissional</span><span style="font-weight:600;color:var(--verde);">65</span></div><div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Reconhecimento</span><span style="font-weight:600;color:var(--verde);">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:58%"></div></div></div>
+          <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Esgotamento / Sobrecarga</span><span style="font-weight:600;color:var(--laranja);">72</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--laranja)"></div></div></div>
+          <div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--cinza-medio);margin-bottom:4px;"><span>Insegurança / Medo</span><span style="font-weight:600;color:var(--laranja);">61</span></div><div class="progress-bar"><div class="progress-fill" style="width:61%;background:var(--laranja)"></div></div></div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="dispararPesquisa('pulso')">📡 Disparar Pesquisa Pulso</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Histórico recente</div><a href="#" style="font-size:11px;color:var(--verde);text-decoration:none;" onclick="sv('historico')">Ver tudo →</a></div>
+        <div class="card-body" style="padding:8px 16px;" id="timeline-historico">
+          <div style="text-align:center;padding:20px;color:var(--cinza-medio);font-size:13px;">Nenhum ciclo registrado ainda.<br/>Dispare sua primeira pesquisa para começar.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TUTORIAIS ===== -->
+<div id="view-tutoriais" class="view">
+  <div class="topbar">
+    <div class="topbar-title">Tutoriais</div>
+  </div>
+  <div class="content">
+
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--azul-escuro);margin-bottom:6px;">Central de Tutoriais e Guias</div>
+      <div style="font-size:13px;color:var(--cinza-medio);line-height:1.6;">Acesse os guias operacionais, manuais e materiais de apoio para implementar a NR-1 Map com sua equipe.</div>
+    </div>
+
+    <!-- CARDS DE TUTORIAIS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
+
+      <!-- CARD 1 — GUIA RH -->
+      <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
+        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
+        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
+        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📋</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Guia de Implementação RH</div>
+        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Manual operacional completo para gestores de RH e diretores. Checklist interativo de implementação, mockups das telas, como exportar documentos GRO e guia eSocial S-2240.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">RH & Diretores</span>
+            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Conformidade NR-1</span>
+          </div>
+          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
+        </div>
+      </a>
+
+      <!-- CARD 2 — TUTORIAL PLANEJAMENTO -->
+      <a href="https://luciakratz-arch.github.io/NR-1Map/tutorial_planejamento.html" target="_blank"
+        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
+        onmouseover="this.style.borderColor='#7B00C4';this.style.boxShadow='0 4px 20px rgba(123,0,196,.12)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
+        <div style="width:44px;height:44px;border-radius:10px;background:#F3E6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📡</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7B00C4;margin-bottom:6px;">Planejamento e Disparo de Campanha</div>
+        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Como agendar e disparar o Diagnóstico Geral e a Pesquisa Pulso. Inclui o que o colaborador recebe no WhatsApp, Magic Link, tela de resposta e automações.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">WhatsApp</span>
+            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Magic Link</span>
+            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Automações</span>
+          </div>
+          <span style="font-size:11px;color:#7B00C4;font-weight:700;">Abrir →</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- SUPORTE -->
+    <div style="background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%);border-radius:12px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7FFFD4;margin-bottom:4px;">Precisa de ajuda personalizada?</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.5;">Entre em contato com o suporte da NR-1 Map para orientações específicas sobre sua empresa.</div>
+      </div>
+      <a href="https://api.whatsapp.com/send?phone=5562991546757&text=Ol%C3%A1%2C%20preciso%20de%20suporte%20com%20o%20NR-1%20Map" target="_blank"
+        style="background:#25D366;color:#fff;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        💬 Falar com Suporte
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== COLABORADORES ===== -->
+<div id="view-colaboradores" class="view">
+  <div class="topbar">
+    <div class="topbar-title">Colaboradores</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="sv('autocadastro')">🔗 Link autocadastro</button>
+      <button class="btn btn-ghost btn-sm">⬇ Modelo Excel</button>
+      <button class="btn btn-primary btn-sm" onclick="sv('upload')">⬆ Importar planilha</button>
+      <button class="btn btn-roxo btn-sm" onclick="abrirModal('modal-novo-colab')">+ Novo colaborador</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="filter-bar">
+      <input type="text" placeholder="🔍 Buscar nome ou contato..." oninput="filtrarTabela(this.value)"/>
+      <select onchange="filtrarStatus(this.value)">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativos</option>
+        <option value="inativo">Inativos</option>
+      </select>
+      <select>
+        <option value="">Todos os cargos</option>
+        <option>Psicólogo · 2515-10</option>
+        <option>Téc. Enfermagem · 3222-05</option>
+        <option>Médico · 2251-05</option>
+        <option>Analista RH · 2524-05</option>
+        <option>Ass. Administrativo · 4110-10</option>
+      </select>
+      <select>
+        <option value="">Todos os departamentos</option>
+        <option>Clínico</option><option>UTI</option><option>Emergência</option><option>RH</option><option>Recepção</option>
+      </select>
+      <select>
+        <option value="">Todas as unidades</option>
+        <option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="title">Lista de colaboradores</div><div class="subtitle" id="sub-colab">0 ativos · 0 inativos</div></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="ordenar('nome')">A→Z Nome</button>
+          <button class="btn btn-ghost btn-sm" onclick="ordenar('admissao')">↕ Admissão</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-colab">
+          <thead>
+            <tr>
+              <th onclick="ordenar('nome')">Nome <span class="sort">↕</span></th>
+              <th>WhatsApp / E-mail</th>
+              <th onclick="ordenar('cargo')">Cargo (CBO) <span class="sort">↕</span></th>
+              <th>Departamento</th>
+              <th>Unidade</th>
+              <th onclick="ordenar('admissao')">Admissão <span class="sort">↕</span></th>
+              <th>Demissão</th>
+              <th>Status</th>
+              <th>Acesso</th>
+              <th>Link pesquisa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-colab">
+              <!-- Colaboradores carregados do Firestore -->
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AUTOCADASTRO ===== -->
+<div id="view-historico" class="view">
+  <div class="topbar"><div class="topbar-title">Histórico de pesquisas</div><div class="topbar-actions">
+    <select class="form-control" id="hist-filtro-tipo" style="font-size:12px;padding:6px 10px;border:1px solid var(--linha);border-radius:7px;" onchange="renderHistoricoUnificado()">
+      <option value="todos">Todos os tipos</option>
+      <option value="geral">Diagnóstico Geral</option>
+      <option value="pulso">Pesquisa Pulso</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="sv('relatorios')">📄 Relatório anual</button>
+  </div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="title">Linha do tempo</div>
+          <div class="subtitle" style="display:flex;gap:14px;margin-top:4px;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0A6E4F;opacity:0.7;"></span>Diagnóstico
+            </span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7B00C4;opacity:0.6;"></span>Pulso
+            </span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:8px 16px;" id="hist-timeline-body">
+          <div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando histórico...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Evolução dos indicadores</div></div>
+        <div class="card-body" id="evolucao-indicadores-body">
+          <div style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIOS ===== -->
+<!-- ===== LAUDO TÉCNICO ===== -->
+<div id="view-laudo-tecnico" class="view">
+  <div class="topbar">
+    <div class="topbar-title" title="Laudo Técnico Psicossocial">📋 Laudo Técnico Psicossocial</div>
+    <div class="topbar-actions">
+      <!-- botão de gerar movido para cada card de ciclo -->
+    </div>
+  </div>
+  <div class="content" id="laudo-tecnico-content">
+    <!-- Seletor de ciclos históricos -->
+    <div id="laudo-seletor-ciclos" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Laudos</div>
+      <div id="laudo-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div id="laudo-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">📋</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
+      <p style="font-size:13px;">Dispare um Diagnóstico Geral para gerar o laudo automaticamente.</p>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
+    </div>
+    <div id="laudo-dados" style="display:none;">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">1. Fundamentacao Teorica e Base Legal</div></div>
+        <div class="card-body"><div id="laudo-fundamentacao"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">2. Resultados por Modulo e Subcategoria — IBP</div></div>
+        <div class="card-body"><div id="laudo-modulos"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">IBP por Subcategoria</div></div>
+        <div class="card-body"><div id="laudo-subcats"></div>
+          <div id="laudo-subcats-detail" style="margin-top:12px;"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">Conclusão e Assinaturas</div></div>
+        <div class="card-body">
+          <div id="laudo-obs-auditoria" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">📋 Observações de Auditoria</div>
+            <div class="obs-texto" style="font-size:12px;color:#15803d;line-height:1.6;"></div>
+          </div>
+          <div id="laudo-conclusao" style="font-size:13px;line-height:1.7;margin-bottom:24px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+            <div style="border-top:1px solid var(--linha);padding-top:12px;text-align:center;">
+              <div style="font-size:13px;font-weight:600;">Dra. Lucia Kratz</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Psicóloga — CRP 09/20590</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Responsável técnica pela metodologia IBP</div>
+            </div>
+            <div style="border-top:1px solid var(--linha);padding-top:12px;text-align:center;" id="laudo-assinatura-empresa">
+              <div style="font-size:13px;font-weight:600;" id="laudo-responsavel-nome">—</div>
+              <div style="font-size:11px;color:var(--cinza-medio);" id="laudo-responsavel-cargo">Responsável pela Empresa</div>
+              <div style="font-size:11px;color:var(--cinza-medio);">Assinatura via gov.br</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAPA DE RISCO ===== -->
+<div id="view-mapa-risco" class="view">
+  <div class="topbar">
+    <div class="topbar-title" title="Mapa de Risco Psicossocial">🗺 Mapa de Risco</div>
+    <div class="topbar-actions">
+      <!-- botão de gerar movido para cada card de ciclo -->
+    </div>
+  </div>
+  <div class="content">
+    <!-- Seletor de ciclos -->
+    <div id="mapa-seletor-ciclos" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Histórico de Ciclos</div>
+      <div id="mapa-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div id="mapa-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">🗺</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum diagnóstico realizado ainda</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
+    </div>
+    <div id="mapa-dados" style="display:none;">
+      <div class="card">
+        <div class="card-header"><div class="title">Matriz de Risco — GRO/NR-1 (Severidade × Probabilidade)</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Subcategoria</th><th>Módulo</th><th>Severidade</th><th>Probabilidade</th><th>Nível GRO</th><th>IBP</th><th>Zona Dejours</th></tr></thead>
+            <tbody id="mapa-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIO ANUAL ===== -->
+<div id="view-relatorio-anual" class="view">
+  <div class="topbar">
+    <div class="topbar-title" title="Relatório Comparativo Anual">📊 Relatório Anual</div>
+    <div class="topbar-actions">
+      <select id="anual-ano-select" onchange="filtrarAnual(this.value)" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;background:#fff;"></select>
+      <button class="btn btn-ghost btn-sm" onclick="gerarRelatorio('relatorio_anual')">📄 Gerar Consolidado PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="anual-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">📊</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum dado histórico disponível ainda</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="sv('diagnostico')">Ir para Diagnostico Geral</button>
+    </div>
+    <div id="anual-dados" style="display:none;">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="title">Evolução do IBP Geral por Ciclo</div></div>
+        <div class="card-body" id="anual-grafico" style="min-height:200px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Tabela Comparativa</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Período</th><th>Tipo</th><th>IBP Geral</th><th>Zona Dejours</th><th>Respondentes</th><th>Variação</th></tr></thead>
+            <tbody id="anual-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-def zona_de(ibp: float) -> dict:
-    if ibp <= -1.5:
-        return ZONAS_IBP[0]
-    if ibp <= 1.4:
-        return ZONAS_IBP[1]
-    return ZONAS_IBP[2]
+
+<!-- ===== RELATORIOS POR CICLO ===== -->
+<div id="view-relatorios-ciclo" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🗂 Relatórios por Ciclo</div>
+  </div>
+  <div class="content">
+
+    <!-- GLOSSÁRIO DOS DOCUMENTOS -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header" onclick="toggleGlossario()" style="cursor:pointer;user-select:none;">
+        <div><div class="title">📚 Guia dos Documentos GRO — NR-1 / Portaria MTE 1.419/2024</div>
+        <div class="subtitle">Clique para expandir · O que é cada documento e quando usar</div></div>
+        <span id="glossario-chevron" style="font-size:18px;color:var(--cinza-medio);">▼</span>
+      </div>
+      <div id="glossario-body" style="display:none;">
+        <div class="card-body" style="padding:0;">
+
+          <!-- Inventário -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">1º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📄 Inventário de Riscos Psicossociais</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Lista estruturada de todos os perigos psicossociais identificados por setor/CBO — agentes estressores, fatores de risco e fontes de sofrimento no trabalho.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.3 — identificação e registro dos perigos ocupacionais.<br>
+              <b>Quando gerar:</b> Após cada Diagnóstico Geral. É o ponto de partida de todo o fluxo GRO.<br>
+              <b>Diferença do Laudo:</b> O Inventário <i>lista</i> os perigos encontrados. O Laudo <i>interpreta</i> e <i>fundamenta</i> clinicamente os resultados.
+            </p>
+          </div>
+
+          <!-- Mapa de Risco -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">2º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">🗺 Mapa de Risco / Avaliação GRO</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Classifica cada risco do Inventário pela Matriz GRO (Severidade × Probabilidade), gerando os níveis: Trivial / Tolerável / Moderado / Substancial / Intolerável.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4 — avaliação dos riscos com priorização por nível de criticidade.<br>
+              <b>Quando gerar:</b> Logo após o Inventário, no mesmo ciclo.<br>
+              <b>O que aciona:</b> Riscos Substancial ou Intolerável obrigam ação no Plano 5W2H.
+            </p>
+          </div>
+
+          <!-- Plano de Ação -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">3º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">✅ Plano de Ação 5W2H</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Para cada risco Substancial ou Intolerável, define: O quê será feito, Por quê, Quem é responsável, Onde, Quando, Como e Quanto custa.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4.4.3 — medidas de controle com prazo e responsável definidos.<br>
+              <b>Quando gerar:</b> Após o Mapa de Risco, sempre que houver riscos críticos.<br>
+              <b>Validade:</b> Revisado a cada ciclo de Pesquisa Pulso semanal.
+            </p>
+          </div>
+
+          <!-- Acompanhamento -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#ede9fe;color:#5b21b6;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">4º INSTRUMENTO</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📊 Acompanhamento — Evidências de Gestão Contínua</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Registro histórico das mudanças de status de cada ação do Plano 5W2H, com data, responsável e remedição do IBP — comprovando que as ações foram executadas.<br>
+              <b>Exigência legal:</b> NR-1, item 1.5.4.4.6 — monitoramento contínuo com evidência de eficácia.<br>
+              <b>Quando gerar:</b> Periodicamente, a cada novo ciclo de Pesquisa Pulso ou Diagnóstico Geral.<br>
+              <b>Importância fiscal:</b> É o documento que prova ao fiscal do MTE que o PGR não é só papel.
+            </p>
+          </div>
+
+          <!-- Laudo Técnico -->
+          <div style="padding:16px;border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="background:#fce7f3;color:#9d174d;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">DIFERENCIAL NR-1 Map</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📋 Laudo Técnico Psicossocial</span>
+            </div>
+            <p style="font-size:12px;color:#374151;line-height:1.7;margin:0 0 6px;">
+              <b>O que é:</b> Documento técnico-científico que consolida todos os resultados do ciclo com fundamentação teórica completa (Psicodinâmica do Trabalho de Dejours, Teoria dos Dois Fatores de Herzberg e Hierarquia de Maslow), assinado pela Responsável Técnica com CRP e hash de validação único.<br>
+              <b>Exigência legal:</b> Não é obrigatório pela NR-1, mas é o documento mais robusto para defesa em fiscalização, audiências trabalhistas e processos administrativos.<br>
+              <b>Diferença do Inventário:</b> O Inventário <i>registra</i> os perigos. O Laudo <i>interpreta</i> clinicamente, <i>fundamenta</i> metodologicamente e <i>conclui</i> com parecer técnico assinado.<br>
+              <b>Quando gerar:</b> Após cada Diagnóstico Geral completo. Fica permanentemente arquivado neste repositório.
+            </p>
+          </div>
+
+          <!-- eSocial -->
+          <div style="padding:16px;background:#f0fdf4;border-radius:0 0 12px 12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="background:#0A6E4F;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">eSocial</span>
+              <span style="font-size:14px;font-weight:600;color:#111827;">📤 Como registrar no eSocial</span>
+            </div>
+            <div style="font-size:12px;color:#374151;line-height:1.8;">
+              <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+                <div style="font-weight:700;color:#065f46;margin-bottom:6px;">✅ O que é obrigatório declarar no eSocial:</div>
+                <ul style="margin:0;padding-left:18px;line-height:2;">
+                  <li><b>Evento S-2240</b> — Condições Ambientais do Trabalho (inclui riscos psicossociais desde jan/2024)</li>
+                  <li><b>Evento S-1010</b> — Tabela de Rubricas (se houver adicional de insalubridade vinculado)</li>
+                  <li>O <b>GRO/PGR</b> deve estar documentado e disponível para auditoria — não é enviado ao eSocial, mas é exigido como evidência</li>
+                </ul>
+              </div>
+              <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+                <div style="font-weight:700;color:#065f46;margin-bottom:6px;">📋 Passo a passo para o S-2240:</div>
+                <ol style="margin:0;padding-left:18px;line-height:2.2;">
+                  <li>Acesse <b>esocial.gov.br</b> com certificado digital ou conta gov.br</li>
+                  <li>Vá em <b>Tabelas → Ambiente de Trabalho → S-2240</b></li>
+                  <li>Informe os <b>fatores de risco psicossocial</b> identificados (use os resultados do Inventário e Mapa de Risco deste ciclo)</li>
+                  <li>Vincule os <b>CBOs/cargos</b> afetados por cada fator de risco</li>
+                  <li>Indique as <b>medidas de controle</b> adotadas (use o Plano de Ação 5W2H)</li>
+                  <li>Transmita o evento e guarde o <b>recibo de entrega</b></li>
+                </ol>
+              </div>
+              <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;">
+                <b>⚠️ Atenção:</b> Os documentos do GRO (Inventário, Mapa de Risco, Plano de Ação e Acompanhamento) <b>não são enviados</b> ao eSocial — ficam guardados na empresa e no NR-1 Map como evidência. O fiscal do MTE pode solicitá-los a qualquer momento. O Laudo Técnico assinado reforça ainda mais a conformidade em caso de autuação.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="rc-sem-dados" style="text-align:center;padding:48px;color:var(--cinza-medio);">
+      <div style="font-size:32px;margin-bottom:12px;">🗂</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Nenhum ciclo encontrado</div>
+      <p style="font-size:13px;">Os ciclos aparecem aqui após o primeiro diagnóstico.</p>
+    </div>
+    <div id="rc-lista" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ===== CARGOS / ORGANOGRAMA ===== -->
+<div id="view-cargos" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🏗 Cargos e Organograma</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportarOrgPDF()">⬇ Exportar PDF</button>
+      <button class="btn btn-primary btn-sm" id="btn-novo-cargo" onclick="abrirModal('modal-novo-cargo')">+ Novo cargo</button>
+    </div>
+  </div>
+  <div class="content">
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      <button class="btn-aba aba-ativa" id="aba-cl" onclick="swCargos('lista')">📋 Lista de Cargos</button>
+      <button class="btn-aba" id="aba-co" onclick="swCargos('org')">🌳 Organograma</button>
+      <button class="btn-aba" id="aba-cn" onclick="swCargos('niveis')">🎨 Níveis Hierárquicos</button>
+      <button class="btn-aba" id="aba-ud" onclick="swCargos('unidepts')">🏢 Unidades e Depts</button>
+    </div>
+    <div id="pc-lista">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Cadastre cargos com CBO e hierarquia — o organograma é gerado automaticamente.</p>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Nível</th><th>Reporta a</th><th>Colab.</th><th></th></tr></thead><tbody id="tbody-cargos"></tbody></table></div></div>
+    </div>
+    <div id="pc-org" style="display:none;">
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <!-- Organograma por imagem (salvo no Co-Branding) -->
+          <div id="org-imagem-wrap" style="display:none;text-align:center;">
+            <img id="org-imagem-view" src="" alt="Organograma" style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;"/>
+            <div style="margin-top:10px;font-size:11px;color:#6b7280;">
+              Para atualizar o organograma, acesse <a href="#" onclick="sv('cobranding');return false;" style="color:var(--verde);">Co-Branding → Organograma</a>
+            </div>
+          </div>
+          <!-- Fallback: sem imagem -->
+          <div id="org-sem-imagem" style="text-align:center;padding:40px;color:var(--cinza-medio);">
+            <div style="font-size:32px;margin-bottom:12px;">🏗</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Nenhum organograma cadastrado</div>
+            <p style="font-size:12px;margin-bottom:16px;">Suba a imagem do organograma em Co-Branding.</p>
+            <button class="btn btn-primary btn-sm" onclick="sv('cobranding')">Ir para Co-Branding →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="pc-niveis" style="display:none;">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">Defina os níveis desta empresa — cada empresa pode ter estrutura diferente.</p>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Posição</th><th>Nome do Nível</th><th>Cor</th><th>Cargos</th><th></th></tr></thead><tbody id="tbody-niveis"></tbody></table></div>
+        <div style="padding:12px 16px;border-top:1px solid var(--linha);display:flex;gap:10px;align-items:center;">
+          <input class="form-control" id="novo-nivel-nome" placeholder="Nome do nível (ex: Corpo Clínico)" style="flex:1;"/>
+          <input type="color" id="novo-nivel-cor" value="#7B00C4" style="width:40px;height:36px;border:1px solid var(--linha);border-radius:6px;cursor:pointer;padding:2px;"/>
+          <button class="btn btn-primary btn-sm" onclick="addNivel()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== UNIDADES E DEPARTAMENTOS ===== -->
+    <div id="pc-unidepts" style="display:none;">
+      <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:16px;">Cadastre as unidades (filiais/plantas) e departamentos. Eles serão usados em todo o painel.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <!-- UNIDADES -->
+        <div class="card">
+          <div class="card-header"><div class="title">🏭 Unidades / Filiais</div><div class="subtitle">Bases físicas ou regionais da empresa</div></div>
+          <div class="card-body" style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Cidade/Estado</th><th></th></tr></thead>
+              <tbody id="tbody-unidades"></tbody>
+            </table>
+            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
+              <input class="form-control" id="nova-unidade-nome" placeholder="Ex: Matriz Goiânia" style="flex:1;font-size:12px;"/>
+              <input class="form-control" id="nova-unidade-cidade" placeholder="Cidade/UF" style="width:120px;font-size:12px;"/>
+              <button class="btn btn-primary btn-sm" onclick="addUnidade()">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <!-- DEPARTAMENTOS -->
+        <div class="card">
+          <div class="card-header"><div class="title">🗂 Departamentos / Áreas</div><div class="subtitle">Divisões funcionais da organização</div></div>
+          <div class="card-body" style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr style="background:var(--cinza-claro);"><th style="padding:8px 12px;font-size:11px;text-align:left;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nome</th><th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Nível</th><th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;">Tipo</th><th></th></tr></thead>
+              <tbody id="tbody-departamentos"></tbody>
+            </table>
+            <div style="padding:12px 14px;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;">
+              <input class="form-control" id="novo-depto-nome" placeholder="Ex: Financeiro, RH, TI..." style="flex:1;font-size:12px;"/>
+              <select class="form-control" id="novo-depto-nivel" style="width:150px;font-size:12px;"><option value="">Nível hierárquico</option></select>
+              <select class="form-control" id="novo-depto-tipo" style="width:130px;font-size:12px;">
+                <option value="operacional">Operacional</option>
+                <option value="staff">Staff / Assessoria</option>
+                <option value="suporte">Suporte</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="addDepartamento()">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal novo cargo -->
+<div id="modal-novo-cargo" class="modal-overlay" onclick="if(event.target===this)fecharModal('modal-novo-cargo')">
+  <div class="modal" style="max-width:460px;width:95%;">
+    <div class="modal-header"><h3>Novo cargo</h3><button class="modal-close" onclick="fecharModal('modal-novo-cargo')">×</button></div>
+    <div class="form-group"><div class="form-label">Nome do cargo *</div><input class="form-control" id="nc-nome" placeholder="Ex: Analista de RH"/></div>
+    <div class="form-group" style="position:relative;">
+      <div class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        CBO (busca por nome ou código)
+        <a href="https://www.ocupacoes.com.br/" target="_blank" style="font-size:10px;color:var(--verde);text-decoration:none;font-weight:600;">🔍 Buscar no site MTE →</a>
+      </div>
+      <input class="form-control" id="nc-cbo-busca" placeholder="Ex: Psicólogo, Analista, 2515..." oninput="buscarCBO(this.value)" onfocus="buscarCBO(this.value)" autocomplete="off"/>
+      <div id="nc-cbo-drop" style="position:absolute;z-index:9999!important;border:1px solid var(--linha);border-radius:6px;margin-top:2px;display:none;max-height:200px;overflow-y:auto;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);width:100%;left:0;top:100%;"></div>
+      <input type="hidden" id="nc-cbo-val"/>
+      <div style="margin-top:6px;font-size:11px;color:var(--cinza-medio);">Não encontrou? Digite o código CBO manualmente abaixo:</div>
+      <input class="form-control" id="nc-cbo-manual" placeholder="Ex: 2515-10" style="margin-top:4px;font-size:12px;" oninput="document.getElementById('nc-cbo-val').value=this.value"/>
+    </div>
+    <div class="form-group"><div class="form-label">Nível hierárquico *</div>
+      <select class="form-control" id="nc-nivel"><option value="">Selecione o nível...</option></select>
+      <div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">Configure os níveis na aba "Níveis Hierárquicos".</div>
+    </div>
+    <div class="form-group"><div class="form-label">Departamento</div>
+      <select class="form-control" id="nc-depto"><option value="">— Nenhum —</option></select>
+    </div>
+    <div class="form-group"><div class="form-label">Reporta a</div>
+      <select class="form-control" id="nc-reporta"><option value="">— Nenhum (topo) —</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-cargo')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="salvarCargo()">Salvar cargo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CO-BRANDING (LOGO DA EMPRESA) ===== -->
+<div id="view-cobranding" class="view">
+  <div class="topbar"><div class="topbar-title" title="Co-Branding — Logo da Empresa">🎨 Co-Branding</div></div>
+  <div class="content" style="max-width:640px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Preview do cabeçalho co-branded</div><div class="subtitle">Como vai aparecer nos 4 documentos PDF do GRO (Inventário, Avaliação, Plano de Ação, Acompanhamento)</div></div>
+      <div class="card-body">
+        <div class="cobranding-preview">
+          <div class="logo-box" style="cursor:default;">
+            <div style="text-align:center;" id="logo-parceiro-herdado-preview">
+              <div style="font-size:18px;">🤝</div>
+              <div style="font-size:10px;color:var(--cinza-medio);">Logo do Parceiro<br/>(herdada)</div>
+            </div>
+          </div>
+          <div class="cobranding-plus">+</div>
+          <div class="logo-box" onclick="document.getElementById('logo-empresa').click()">
+            <div id="logo-empresa-preview" style="text-align:center;">
+              <div style="font-size:18px;">🏢</div>
+              <div style="font-size:10px;color:var(--cinza-medio);">Sua logo<br/>(clique p/ subir)</div>
+            </div>
+            <input type="file" id="logo-empresa" style="display:none;" accept="image/*" onchange="previewLogoEmpresa(this,'logo-empresa-preview')"/>
+          </div>
+          <div style="flex:1;padding-left:12px;">
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.5;">A logo do Parceiro é herdada automaticamente do cadastro dele — você só precisa subir a logo da sua empresa. As duas aparecem lado a lado em todos os relatórios.</div>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Nome da empresa (exibido nos relatórios)</div><input class="form-control" id="cb-nome-empresa" value=""/></div>
+        <button class="btn btn-roxo" style="width:100%;" onclick="salvarLogoEmpresa()">Salvar logo da empresa</button>
+        <p style="font-size:11px;color:var(--cinza-medio);margin-top:8px;">Formatos aceitos: PNG, JPG ou SVG, fundo transparente recomendado. Tamanho ideal: até 300×120px.</p>
+      </div>
+    </div>
+
+    <!-- RESPONSÁVEL TÉCNICO -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">👤 Responsável Técnico pela Empresa</div>
+        <div class="subtitle">Pessoa que assina o laudo psicossocial pela empresa</div>
+      </div>
+      <div class="card-body">
+
+        <!-- Aviso legal -->
+        <div style="background:#FFF1B8;border:1px solid #F59E0B;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:6px;">⚖️ O que a lei exige — Portaria MTE 1.419/2024</div>
+          <div style="font-size:11px;color:#78350F;line-height:1.7;">
+            O laudo psicossocial deve ser assinado por <strong>profissional legalmente habilitado</strong> — psicólogo, médico do trabalho, engenheiro de segurança ou técnico de SST, conforme a complexidade do diagnóstico.<br/>
+            A <strong>Resolução CFP nº 02/2022</strong> determina que a avaliação psicossocial conduzida por psicólogo resulta em laudo psicológico, de responsabilidade técnica do profissional que a conduziu.<br/><br/>
+            <strong>Se sua empresa não possui profissional habilitado</strong>, o laudo pode ser assinado pela <strong>Dra. Lucia Kratz (CRP 09/20590)</strong> — responsável técnica pela metodologia IBP e pela plataforma NR-1 Map.
+          </div>
+        </div>
+
+        <!-- Campos do responsável -->
+        <div class="form-group"><div class="form-label">Nome completo *</div><input class="form-control" id="rt-nome" placeholder="Ex: João da Silva"/></div>
+        <div class="form-group"><div class="form-label">Cargo / Função *</div><input class="form-control" id="rt-cargo" placeholder="Ex: Gestor de RH, Médico do Trabalho, Psicólogo"/></div>
+        <div class="form-group"><div class="form-label">Registro profissional</div><input class="form-control" id="rt-registro" placeholder="Ex: CRP 09/99999, CRM 12345, CREA 67890"/></div>
+        <div class="form-group"><div class="form-label">Formação / Área de atuação</div><input class="form-control" id="rt-formacao" placeholder="Ex: Psicologia Organizacional, Medicina do Trabalho"/></div>
+        <div class="form-group">
+          <div class="form-label">Mini currículo <span style="font-size:10px;color:var(--cinza-medio);">(2-3 linhas — usado para validar habilitação)</span></div>
+          <textarea class="form-control" id="rt-curriculo" rows="3" placeholder="Ex: Psicóloga com 10 anos de experiência em saúde ocupacional, especialista em gestão de riscos psicossociais. Atuou em empresas do setor industrial e de serviços."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Observações de auditoria <span style="font-size:10px;color:var(--cinza-medio);">(aparece como nota nos documentos gerados)</span></div>
+          <textarea class="form-control" id="rt-obs-auditoria" rows="3" placeholder="Ex: Auditoria interna realizada em jan/2025. Ciclo de monitoramento trimestral. Próxima revisão prevista para abr/2025."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" onclick="salvarResponsavelTecnico()">💾 Salvar Responsável Técnico</button>
+
+        <!-- Solicitação de assinatura da Dra. Lucia -->
+        <div style="background:var(--roxo-xp);border:1px solid var(--roxo);border-radius:10px;padding:16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--roxo);margin-bottom:6px;">✍️ Prefere que a Dra. Lucia Kratz assine o laudo?</div>
+          <div style="font-size:11px;color:var(--cinza-escuro);line-height:1.7;margin-bottom:12px;">
+            Caso sua empresa não possua responsável técnico habilitado, ou prefira ter a assinatura da psicóloga responsável pela metodologia, você pode solicitar a assinatura da <strong>Dra. Lucia Kratz (CRP 09/20590)</strong>.<br/><br/>
+            <strong>Custo adicional por laudo assinado:</strong><br/>
+            · Até 20 colaboradores — <strong>R$ 97,00</strong><br/>
+            · 21 a 100 colaboradores — <strong>R$ 197,00</strong><br/>
+            · Acima de 100 colaboradores — <strong>R$ 297,00</strong><br/><br/>
+            <span style="color:var(--roxo);font-size:10px;">Válido para Uso Único e Assinatura Mensal. O laudo é revisado e assinado via gov.br em até 48h úteis.</span>
+          </div>
+          <button class="btn btn-roxo" style="width:100%;" onclick="solicitarAssinaturaLucia()">📋 Solicitar Assinatura da Dra. Lucia Kratz</button>
+        </div>
+
+        <!-- OUVIDORIA -->
+        <div style="margin-top:18px;">
+          <div class="title" style="margin-bottom:6px;">📣 Canal de Ouvidoria</div>
+          <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:14px;">
+            Configure o canal de ouvidoria da empresa. Este e-mail receberá os chamados enviados pelos colaboradores pelo Canal de Acolhimento, com número de protocolo automático para rastreamento.
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">Nome do Responsável pela Ouvidoria</div>
+            <input class="form-control" id="ouv-nome" placeholder="Ex: Maria Silva — Gestora de RH"/>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">E-mail da Ouvidoria *</div>
+            <input class="form-control" type="email" id="ouv-email" placeholder="ouvidoria@suaempresa.com.br"/>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Telefone / WhatsApp (opcional)</div>
+            <input class="form-control" id="ouv-telefone" placeholder="(62) 9 9999-0000"/>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;font-size:11px;color:#166534;line-height:1.6;margin-bottom:14px;">
+            🔒 Os chamados chegam com número de protocolo automático (ex: <strong>OUV-2026-0001</strong>), data, tipo e — se o colaborador optar — o nome dele. O anonimato é preservado quando solicitado.
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="salvarOuvidoria()">💾 Salvar Canal de Ouvidoria</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CONTEXTO E HISTÓRICO DA EMPRESA -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">🏛 Contexto e Histórico da Empresa</div>
+        <div class="subtitle">Texto institucional que aparece no Laudo Técnico como "Apresentação da Empresa"</div>
+      </div>
+      <div class="card-body">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:11px;color:#166534;line-height:1.6;margin-bottom:14px;">
+          💡 Escreva um breve histórico da empresa: setor de atuação, missão, quantidade de colaboradores, desafios organizacionais. Esse texto enriquece o Laudo Técnico com contexto real.
+        </div>
+        <!-- Painel com dados automáticos -->
+        <div id="ctx-panorama" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div class="form-group">
+          <div class="form-label">Setor de atuação</div>
+          <input class="form-control" id="ctx-setor" placeholder="Ex: Educação, Saúde, Tecnologia, Varejo..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Fundação / Tempo de mercado</div>
+          <input class="form-control" id="ctx-fundacao" placeholder="Ex: Fundada em 2010, 14 anos de mercado"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Missão / Propósito</div>
+          <input class="form-control" id="ctx-missao" placeholder="Ex: Desenvolver pessoas e organizações para alta performance"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Histórico e contexto organizacional</div>
+          <textarea class="form-control" id="ctx-historico" rows="5" placeholder="Descreva o histórico da empresa, principais desafios, cultura organizacional, contexto atual..."></textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Contexto do diagnóstico <span style="font-size:10px;color:var(--cinza-medio);">(motivo da avaliação psicossocial)</span></div>
+          <textarea class="form-control" id="ctx-diagnostico" rows="3" placeholder="Ex: Avaliação solicitada após período de reestruturação organizacional. Identificados sinais de sobrecarga nas equipes operacionais..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="salvarContextoEmpresa()">💾 Salvar Contexto da Empresa</button>
+      </div>
+    </div>
+
+    <!-- ORGANOGRAMA POR UPLOAD -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header">
+        <div class="title">🏗 Organograma da Empresa</div>
+        <div class="subtitle">Suba uma imagem do organograma — aparece no Laudo Técnico e Relatório Final</div>
+      </div>
+      <div class="card-body">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:11px;color:#1e40af;line-height:1.6;margin-bottom:14px;">
+          📌 Formatos aceitos: PNG, JPG ou SVG. Recomendado: fundo branco, horizontal, até 2000px de largura.
+        </div>
+        <!-- Preview do organograma salvo -->
+        <div id="org-preview-wrap" style="display:none;margin-bottom:14px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;text-align:center;padding:12px;background:#f9fafb;">
+          <img id="org-preview-img" src="" alt="Organograma" style="max-width:100%;max-height:300px;object-fit:contain;border-radius:4px;"/>
+          <div style="margin-top:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="removerOrganograma()" style="color:#ef4444;font-size:11px;">🗑 Remover organograma</button>
+          </div>
+        </div>
+        <div id="org-upload-area" style="border:2px dashed #e5e7eb;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#fafafa;" onclick="document.getElementById('org-file-input').click()">
+          <div style="font-size:28px;margin-bottom:8px;">📁</div>
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Clique para subir o organograma</div>
+          <div style="font-size:11px;color:#9ca3af;">PNG, JPG ou SVG · Máx. 5MB</div>
+          <input type="file" id="org-file-input" style="display:none;" accept="image/*" onchange="uploadOrganograma(this)"/>
+        </div>
+        <div id="org-upload-progress" style="display:none;margin-top:10px;font-size:12px;color:#6b7280;text-align:center;">⏳ Enviando organograma...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
-def probabilidade_de(qtd_perigos: int) -> int:
-    return min(qtd_perigos + 1, 5)
+<!-- ===== PLANO DE AÇÃO 5W2H (EDITÁVEL) ===== -->
+<div id="view-plano-acao" class="view">
+  <div class="topbar">
+    <div class="topbar-title">✅ Plano de Ação 5W2H</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="adicionarAcao()">+ Nova ação</button>
+      <button class="btn btn-roxo btn-sm" onclick="gerarSugestoesAutomaticas()">🤖 Sugestões automáticas</button>
+      <button class="btn btn-primary btn-sm" onclick="gerarPdfPlano()">⬇ Gerar PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- Historico de ciclos do plano (igual ao laudo) -->
+    <div id="plano-seletor-ciclos" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Historico de Planos de Acao</div>
+      <div id="plano-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
+      Acoes geradas automaticamente a partir dos setores/cargos (CBO) classificados como
+      <b>Substancial</b> ou <b>Intoleravel</b> na Avaliacao do Risco. Edite o texto, responsavel,
+      prazo e status a vontade — toda alteracao fica registrada como evidencia de gestao continua
+      (item 1.5.4.4.6 da NR-1).
+    </p>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="tbl-plano">
+          <thead>
+            <tr>
+              <th style="width:16%;">Setor / CBO</th>
+              <th style="width:30%;">Ação (What / How)</th>
+              <th style="width:14%;">Responsável</th>
+              <th style="width:12%;">Status</th>
+              <th style="width:13%;">Prazo</th>
+              <th style="width:10%;">Sinalizador</th>
+              <th style="width:5%;"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-plano">
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;font-size:11px;color:var(--cinza-medio);margin-top:10px;">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--verde-claro);margin-right:4px;"></span>No prazo</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A017;margin-right:4px;"></span>Vencendo em até 2 dias</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C53030;margin-right:4px;"></span>Vencido</span>
+      <span style="margin-left:auto;">Recorrência de revisão: a cada ciclo de Pesquisa Pulso (semanal)</span>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <div class="card-header">
+        <div><div class="title">📋 Linha do Tempo de Evidências (Acompanhamento)</div><div class="subtitle">Item 1.5.4.4.6 da NR-1 — registro de gestão contínua</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="gerarPdfAcompanhamento()">⬇ Gerar PDF de Acompanhamento</button>
+      </div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;">
+          Toda mudança de status nas ações acima fica registrada aqui automaticamente, com data/hora
+          e responsável — essa é a evidência que comprova ao fiscal que o Plano de Ação realmente
+          foi executado, não só planejado.
+        </p>
+        <div id="lista-historico" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-def classificar(ibp: float, qtd_perigos: int):
-    zona = zona_de(ibp)
-    sev = zona["severidade"]
-    prob_letra = PROB_LETRA_POR_NUM[probabilidade_de(qtd_perigos)]
-    classif = MATRIZ_GRO[(prob_letra, sev)]
-    return zona, sev, prob_letra, classif
+<!-- ===== NORMA NR-1 ===== -->
+<div id="view-nr1" class="view">
+  <div class="topbar">
+    <div class="topbar-title" title="Norma NR-1 — Base Legal do NR-1 Map">📑 Norma NR-1</div>
+    <div class="topbar-actions">
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/2024/portaria-mte-no-1-419-nr-01-gro-nova-redacao.pdf"
+        target="_blank" class="btn btn-roxo btn-sm">📥 Baixar PDF Original (Gov.br)</a>
+    </div>
+  </div>
+  <div class="content" style="max-width:820px;">
+
+    <!-- INTRO -->
+    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;margin-bottom:20px;border:1px solid #2A1A3E;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:var(--roxo);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚖️</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;">NR-1 — Disposições Gerais e Gerenciamento de Riscos Ocupacionais</div>
+          <div style="font-size:11px;color:#8A9590;margin-top:2px;">Atualizada 2024 · Ministério do Trabalho e Emprego · Portaria MTE nº 1.419/2024</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#C8D4D0;line-height:1.7;">A NR-1 é a norma regulamentadora mais abrangente do Brasil. Ela estabelece as disposições gerais de Segurança e Saúde no Trabalho (SST) e, desde sua atualização em 2024, tornou obrigatório o <strong style="color:#fff;">Gerenciamento de Riscos Ocupacionais (GRO)</strong> — incluindo, pela primeira vez de forma explícita, os <strong style="color:var(--roxo-claro);">riscos psicossociais e organizacionais</strong> como perigos a serem identificados, avaliados e controlados.</p>
+    </div>
+
+    <!-- BLOCO 1: GRO -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.1</span>
+            <div class="title">O que é o GRO — Gerenciamento de Riscos Ocupacionais</div>
+          </div>
+          <div class="subtitle">A obrigação central que fundamenta o NR-1 Map</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">O GRO determina que <strong style="color:var(--preto);">todo empregador é obrigado a mapear, avaliar e gerenciar continuamente TODOS os perigos presentes no ambiente de trabalho</strong> — físicos, químicos, biológicos, ergonômicos e, agora de forma expressa, os <strong style="color:var(--preto);">riscos psicossociais e organizacionais</strong>.</p>
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--roxo);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.1</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"O empregador deve implementar o Gerenciamento de Riscos Ocupacionais — GRO por meio do Programa de Gerenciamento de Riscos — PGR, que deve contemplar a identificação de perigos, avaliação de riscos, implementação de medidas de prevenção e monitoramento."</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--verde-xp);border-radius:7px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">O que o NR-1 Map entrega</div>
+            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✓ Identificação automática de perigos psicossociais por cargo CBO<br/>✓ Laudo Técnico como evidência do GRO<br/>✓ Mapa de Risco para o PGR</div>
+          </div>
+          <div style="background:var(--laranja-xp);border-radius:7px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--laranja);margin-bottom:4px;">Risco sem o app</div>
+            <div style="font-size:12px;color:var(--cinza-escuro);line-height:1.5;">✗ GRO incompleto sem avaliação psicossocial<br/>✗ Auto de infração imediato na fiscalização<br/>✗ Multa mínima de R$ 15.000,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 2: RISCOS PSICOSSOCIAIS -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--roxo-xp);color:var(--roxo);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">INOVAÇÃO 2024</span>
+            <div class="title">Riscos Psicossociais e Organizacionais como Perigos de Lei</div>
+          </div>
+          <div class="subtitle">Dejours, Herzberg e Maslow agora têm respaldo normativo expresso</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:16px;">A atualização de 2024 tornou inequívoco: <strong style="color:var(--preto);">sobrecarga mental, pressões abusivas, falta de reconhecimento, esgotamento e insegurança no trabalho são perigos ocupacionais previstos em lei</strong> — e devem ser identificados, avaliados e controlados pelo empregador.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🧠 Dejours</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Psicodinâmica do Trabalho — equilíbrio entre Prazer e Sofrimento</div>
+            <div style="font-size:11px;color:var(--roxo);font-weight:500;">Mensura: esgotamento, frustração, insegurança, realização, reconhecimento e liberdade de expressão</div>
+          </div>
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">⚙️ Herzberg</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Fatores Higiênicos — condições do ambiente de trabalho</div>
+            <div style="font-size:11px;color:var(--verde);font-weight:500;">Avalia: condições físicas, políticas da empresa e relações interpessoais</div>
+          </div>
+          <div style="border:1px solid var(--linha);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">🔺 Maslow</div>
+            <div style="font-size:11px;color:var(--cinza-medio);line-height:1.5;margin-bottom:8px;">Base da pirâmide — necessidades fisiológicas e de segurança</div>
+            <div style="font-size:11px;color:var(--laranja);font-weight:500;">Verifica: remuneração adequada, segurança física e estabilidade no trabalho</div>
+          </div>
+        </div>
+
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">IMPACTO PRÁTICO</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;">Um colaborador sobrecarregado, sem reconhecimento ou com medo constante de demissão está exposto a um <strong>perigo ocupacional legalmente reconhecido</strong>. A empresa que não identificar, documentar e controlar esses riscos está em <strong>descumprimento da NR-1</strong> — independente do porte.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 3: MELHORIA CONTÍNUA -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--verde-xp);color:var(--verde);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.06em;">ITEM 1.5.4.4.6</span>
+            <div class="title">Monitoramento e Melhoria Contínua</div>
+          </div>
+          <div class="subtitle">A exigência que torna a assinatura mensal uma necessidade legal</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--cinza-medio);line-height:1.75;margin-bottom:14px;">A norma não permite diagnóstico único e estático. O item 1.5.4.4.6 exige que o empregador <strong style="color:var(--preto);">monitore continuamente a eficácia das medidas implementadas e reavalie os riscos periodicamente</strong> — criando um ciclo permanente de melhoria.</p>
+        <div style="background:var(--cinza-claro);border-left:3px solid var(--verde-claro);border-radius:0 7px 7px 0;padding:12px 16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">TEXTO DA NORMA — Item 1.5.4.4.6</div>
+          <p style="font-size:12px;color:var(--cinza-escuro);line-height:1.6;font-style:italic;">"Monitorar os resultados das ações implementadas por meio de indicadores, verificando sua eficácia para a melhoria das condições de trabalho e saúde dos trabalhadores."</p>
+        </div>
+        <div style="background:var(--verde-xp);border-radius:7px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">Como o NR-1 Map cumpre este item</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--cinza-escuro);">
+            <span>✓ Pesquisas Pulso semanais automatizadas</span>
+            <span>✓ Painel dinâmico de Prazer/Sofrimento</span>
+            <span>✓ Histórico comparativo de todos os ciclos</span>
+            <span>✓ Relatório de eficácia das ações (5W2H)</span>
+            <span>✓ IA sugere novo foco a cada semana</span>
+            <span>✓ Evidência documental contínua do GRO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 4: PENALIDADES -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="title">⚠️ Penalidades por Descumprimento</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="text-align:center;background:#FEEFEF;border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#C53030;">R$15k+</div>
+            <div style="font-size:11px;color:#9B2C2C;margin-top:4px;">multa mínima por auto de infração da NR-1</div>
+          </div>
+          <div style="text-align:center;background:#FFF8E6;border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#92610A;">+40%</div>
+            <div style="font-size:11px;color:#92610A;margin-top:4px;">de aumento em processos trabalhistas por adoecimento psíquico desde 2022</div>
+          </div>
+          <div style="text-align:center;background:var(--cinza-claro);border-radius:8px;padding:16px;">
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cinza-escuro);">2ª</div>
+            <div style="font-size:11px;color:var(--cinza-medio);margin-top:4px;">maior causa de afastamento no INSS são transtornos mentais ligados ao trabalho</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA DOWNLOAD -->
+    <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:12px;padding:28px 32px;border:1px solid #2A1A3E;text-align:center;">
+      <div style="font-size:18px;margin-bottom:10px;">📥</div>
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;">Texto Oficial da NR-1 na Íntegra</div>
+      <div style="font-size:12px;color:#8A9590;margin-bottom:20px;">Portaria MTE nº 1.419/2024 — Ministério do Trabalho e Emprego — Fonte: Gov.br</div>
+      <a href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/sst-portarias/2024/portaria-mte-no-1-419-nr-01-gro-nova-redacao.pdf"
+        target="_blank"
+        style="display:inline-flex;align-items:center;gap:10px;background:var(--roxo);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:background .2s;"
+        onmouseover="this.style.background='var(--roxo-claro)'" onmouseout="this.style.background='var(--roxo)'">
+        📥 Baixar PDF Original da NR-1 (Fonte: Gov.br)
+      </a>
+      <div style="font-size:11px;color:#4A5450;margin-top:12px;">Abre em nova aba · PDF oficial do Governo Federal</div>
+    </div>
+
+  </div>
+</div>
+<div id="view-autocadastro" class="view">
+  <div class="topbar"><div class="topbar-title">Link de autocadastro</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Como funciona o autocadastro</div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);line-height:1.6;margin-bottom:16px;">Você envia o link abaixo para o colaborador. Ele preenche seus dados (WhatsApp/e-mail, cargo e departamento) e o sistema o cadastra automaticamente. O RH pré-cadastra os cargos e CBO disponíveis — o colaborador só seleciona.</p>
+        <div class="alerta"><span style="font-size:14px;">🔒</span><p>Nenhum dado pessoal é vinculado às respostas das pesquisas. O autocadastro serve apenas para disparar o link correto para o cargo certo.</p></div>
+        <div class="form-group"><div class="form-label">Unidade / Filial para este link</div>
+          <select class="form-control"><option>Goiânia</option><option>Brasília</option><option>Belo Horizonte</option></select>
+        </div>
+        <div class="link-box">
+          <span>🔗</span>
+          <span class="link-url">https://nr1map.com.br/cadastro/clinicavida/goiania/abc123</span>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Link copiado!')">Copiar</button>
+          <button class="btn btn-ghost btn-sm">Compartilhar WhatsApp</button>
+        </div>
+        <div style="margin-top:20px;">
+          <div class="form-label" style="margin-bottom:8px;">Cargos/CBO pré-cadastrados para seleção</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+            <span class="filter-tag">Psicólogo · 2515-10 <span class="x">×</span></span>
+            <span class="filter-tag">Téc. Enfermagem · 3222-05 <span class="x">×</span></span>
+            <span class="filter-tag">Médico · 2251-05 <span class="x">×</span></span>
+            <span class="filter-tag">Analista RH · 2524-05 <span class="x">×</span></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-control" placeholder="Buscar cargo na base CBO..." style="flex:1;"/>
+            <button class="btn btn-primary btn-sm">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== UPLOAD ===== -->
+<div id="view-upload" class="view">
+  <div class="topbar"><div class="topbar-title">Importar colaboradores</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('colaboradores')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">1. Baixe o modelo</div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">Preencha e salve como .xlsx ou .csv. Colunas obrigatórias marcadas com *</p>
+        <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:12px;"><strong style="color:var(--preto);">Colunas:</strong> nome · whatsapp_ou_email* · cargo_cbo* · departamento · unidade · data_admissao · data_demissao</div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="baixarModeloCSV()">⬇ CSV</button><button class="btn btn-ghost btn-sm" onclick="baixarModeloExcel()">⬇ Excel (.xlsx)</button></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">2. Envie a planilha</div></div>
+      <div class="card-body">
+        <div class="upload-zone" onclick="document.getElementById('fi').click()">
+          <div style="font-size:26px;margin-bottom:6px;">📂</div>
+          <p><strong>Clique para selecionar</strong> ou arraste aqui</p>
+          <p>.xlsx ou .csv · máx 5 MB</p>
+          <input type="file" id="fi" style="display:none;" accept=".xlsx,.csv" onchange="handleUpload(this)"/>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="uploadPreview" style="display:none;">
+      <div class="card-header"><div class="title">3. Validação</div></div>
+      <div class="card-body">
+        <div style="display:flex;gap:12px;margin-bottom:14px;">
+          <div style="flex:1;background:var(--verde-xp);border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--verde);">11</div><div style="font-size:10px;color:var(--verde);margin-top:2px;">Válidos</div></div>
+          <div style="flex:1;background:#FFF8E6;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#92610A;">2</div><div style="font-size:10px;color:#92610A;margin-top:2px;">Alertas</div></div>
+          <div style="flex:1;background:#FEEFEF;border-radius:7px;padding:10px;text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#C53030;">1</div><div style="font-size:10px;color:#C53030;margin-top:2px;">Erros</div></div>
+        </div>
+        <div style="font-size:11px;color:#C53030;background:#FEEFEF;border-radius:6px;padding:8px 10px;margin-bottom:8px;">⚠ Linha 4: WhatsApp/e-mail em branco.</div>
+        <div style="font-size:11px;color:#92610A;background:#FFF8E6;border-radius:6px;padding:8px 10px;margin-bottom:14px;">ℹ Linhas 7 e 9: cargo ajustado automaticamente pela base CBO. Confirme.</div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('uploadPreview').style.display='none'">Cancelar</button><button class="btn btn-primary btn-sm" onclick="confirmUpload()">✓ Confirmar 11 colaboradores</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLANEJAMENTO ===== -->
+<div id="view-planejamento" class="view">
+  <div class="topbar"><div class="topbar-title">Planejamento de pesquisas</div><div class="topbar-actions"><button class="btn btn-roxo btn-sm" onclick="document.getElementById('btn-disparar-agora-wrap').style.display='none';window._editAgendaId=null;var mh=document.querySelector('#modal-agendar .modal-header h3');if(mh)mh.textContent='Agendar pesquisa';abrirModal('modal-agendar');_popularModalAgenda()">+ Agendar pesquisa</button></div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="title" id="agenda-titulo">Agenda</div></div>
+        <div class="card-body" style="padding:8px 16px;" id="agenda-lista">
+          <div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa agendada ainda.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title">Regras de disparo automático</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Pesquisa Pulso semanal automática</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">IA escolhe o tema com pior índice semana a semana</div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Lembrete automático (48h sem resposta)</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Reenvio automático para quem não respondeu</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">Diagnóstico Geral anual obrigatório</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div style="font-size:11px;color:var(--cinza-medio);">Alerta 30 dias antes do vencimento do ciclo anual</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== METODOLOGIA CIENTÍFICA ===== -->
+<div id="view-metodologia" class="view">
+  <div class="topbar">
+    <div class="topbar-title">🔬 Metodologia Científica</div>
+    <div class="topbar-actions">
+      <span style="font-size:11px;color:var(--cinza-medio);background:var(--cinza-claro);padding:4px 12px;border-radius:20px;">Dra. Lucia Kratz · CRP 09/20590</span>
+    </div>
+  </div>
+  <div class="content" style="max-width:900px;">
+
+    <!-- SEÇÃO 1: INFOGRÁFICO INTEGRADO -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">1. Fundação Teórica Integrada</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Maslow · Herzberg · Dejours — as três correntes que sustentam as 101 perguntas</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+        <!-- PIRÂMIDE -->
+        <div>
+          <!-- TOPO DA PIRÂMIDE -->
+          <div style="background:linear-gradient(135deg,#7B00C4,#9B30E0);border-radius:12px 12px 0 0;padding:18px 20px;color:#fff;margin-bottom:2px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES MOTIVACIONAIS · Herzberg & Dejours</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Propósito</div>
+                <div style="font-size:10px;opacity:.8;">Significado do trabalho</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Identidade</div>
+                <div style="font-size:10px;opacity:.8;">Autorrealização profissional</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Autonomia</div>
+                <div style="font-size:10px;opacity:.8;">Espaço de criação (Dejours)</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Reconhecimento</div>
+                <div style="font-size:10px;opacity:.8;">Julgamento de Utilidade e Beleza</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:10px;font-weight:600;margin-bottom:2px;">Relacionamentos Sociais</div>
+              <div style="font-size:10px;opacity:.8;">Espaço de Fala · Cultura · Proteção contra Assédio</div>
+            </div>
+          </div>
+
+          <!-- SEPARADOR IBP -->
+          <div style="background:#1F2937;padding:8px 20px;display:flex;align-items:center;gap:10px;">
+            <div style="height:1px;flex:1;background:linear-gradient(90deg,#ef444400,#ef4444,#10b98100);"></div>
+            <div style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.1em;white-space:nowrap;">IBP · ÍNDICE DE BALANÇA PSICODINÂMICA · −5 ←→ +5</div>
+            <div style="height:1px;flex:1;background:linear-gradient(90deg,#10b98100,#10b981,#ef444400);"></div>
+          </div>
+
+          <!-- BASE DA PIRÂMIDE -->
+          <div style="background:linear-gradient(135deg,#0A6E4F,#12A073);border-radius:0 0 12px 12px;padding:18px 20px;color:#fff;margin-top:2px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:10px;">FATORES HIGIÊNICOS · Maslow & Herzberg</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Infraestrutura</div>
+                <div style="font-size:10px;opacity:.8;">Ergonomia · Sistemas digitais</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Proteção Física</div>
+                <div style="font-size:10px;opacity:.8;">EPI · NR-1 · Direito de Recusa</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Ritmo e Pausas</div>
+                <div style="font-size:10px;opacity:.8;">Cadência · Limitações biológicas</div>
+              </div>
+              <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;">
+                <div style="font-size:11px;font-weight:700;margin-bottom:2px;">Estabilidade</div>
+                <div style="font-size:10px;opacity:.8;">Clareza de papéis · Segurança laboral</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPLICAÇÕES LATERAIS -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Explicação topo -->
+          <div style="background:var(--roxo-xp);border-left:3px solid var(--roxo);border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--roxo);margin-bottom:6px;">Zona de Terreno Fértil (+1,5 a +5,0)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aqui opera a transformação do sofrimento em <b>Prazer e Emancipação</b> através do Reconhecimento (Julgamento de Estética e Utilidade — Dejours) e do Espaço de Fala. O colaborador encontra sentido no trabalho e mobiliza sua subjetividade de forma criativa.</div>
+          </div>
+
+          <!-- Zona IBP -->
+          <div style="background:#F3F4F6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Zona de Defesa Oculta (−1,4 a +1,4)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Aparente normalidade mantida por mecanismos de defesa coletivos: <b>cinismo viril, ativismo e banalização do sofrimento</b>. Risco de Burnout mascarado. Zona de alerta estratégico — exige Pesquisa Pulso focalizada.</div>
+          </div>
+
+          <!-- Explicação base -->
+          <div style="background:var(--verde-xp);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--verde);margin-bottom:6px;">Zona de Sofrimento Patogênico (−5,0 a −1,5)</div>
+            <div style="font-size:12px;color:var(--preto);line-height:1.6;">Se esta base falhar, o sofrimento se torna <b>patogênico e há risco imediato de adoecimento com nexo causal (NR-1)</b>. Ruptura do equilíbrio psíquico. Exige intervenção obrigatória conforme GRO e registro no Plano de Ação 5W2H.</div>
+          </div>
+
+          <!-- Fórmula IBP -->
+          <div style="background:var(--preto);border-radius:8px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--verde-claro);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Fórmula de Transposição</div>
+            <div style="font-family:monospace;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;">IBP = (Média<sub style="font-size:11px;">Likert</sub> − 3) × 2,5</div>
+            <div style="font-size:11px;color:#6B7370;">Escala Likert 1–5 → Balança Psicodinâmica −5 a +5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARADOR -->
+    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
+
+    <!-- SEÇÃO 2: ENGENHARIA DAS 101 QUESTÕES -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">2. A Engenharia das 101 Questões Regulatórias</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:18px;">Taxonomia pericial do banco de dados · Autoria: Dra. Lucia Kratz (CRP 09/20590)</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Arquitetura da Matriz Mestre</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🧠 Módulo 1 — Fisiológico</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">27 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🛡️ Módulo 2 — Segurança</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">29 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🤝 Módulo 3 — Relacionamentos</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">25 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--cinza-claro);border-radius:6px;">
+              <div style="font-size:12px;font-weight:600;">🚀 Módulo 4 — Motivacional</div>
+              <span style="font-size:11px;font-weight:700;background:var(--roxo);color:#fff;padding:2px 8px;border-radius:10px;">20 perguntas</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 10px;background:var(--preto);border-radius:6px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">TOTAL REGULATÓRIO</div>
+              <span style="font-size:13px;font-weight:800;color:var(--verde-claro);">101 perguntas</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">⚙️ Trava Algorítmica — Regra da Validação Ímpar</div>
+          <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O sistema possui uma <b style="color:var(--preto);">trava de salvamento algorítmica</b> que impede o agendamento de questionários com número <b style="color:var(--laranja);">par de perguntas por subcategoria ativa</b> (mínimo 3).</div>
+          <div style="background:var(--laranja-xp);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--laranja);margin-bottom:4px;">Por que isso importa tecnicamente?</div>
+            <div style="font-size:11px;color:var(--preto);line-height:1.6;">Em escalas Likert de 5 pontos com número <b>par</b> de itens, os respondentes tendem a se neutralizar no ponto médio (3), gerando diagnósticos "mornos" sem vetor estatístico claro. A trava ímpar <b>força a balança a apontar</b> inequivocamente para o lado do Sofrimento ou do Prazer.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:8px 10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#DC2626;">✗ PAR</div>
+              <div style="font-size:10px;color:#DC2626;">2, 4, 6 perguntas</div>
+              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Bloqueado — diagnóstico inválido</div>
+            </div>
+            <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#16A34A;">✓ ÍMPAR</div>
+              <div style="font-size:10px;color:#16A34A;">3, 5, 7+ perguntas</div>
+              <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Aprovado — vetor claro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regime de embaralhamento -->
+      <div style="background:linear-gradient(135deg,#0D1210,#1A0A2E);border-radius:10px;padding:18px 20px;display:flex;gap:20px;align-items:center;">
+        <div style="font-size:32px;flex-shrink:0;">🎲</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Regime de Embaralhamento Total</div>
+          <div style="font-size:12px;color:#8A9590;line-height:1.6;">As 101 perguntas entram num <b style="color:var(--verde-claro);">pool único</b> e são sorteadas aleatoriamente — sem respeitar módulo ou subcategoria na ordem de exibição ao colaborador. Isso <b style="color:var(--verde-claro);">elimina o viés de resposta por contexto</b>: o respondente não percebe que está sendo avaliado sobre liderança e não "prepara" as respostas. O diagnóstico capta o estado emocional real, não o desejado.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARADOR -->
+    <div style="height:1px;background:var(--linha);margin-bottom:28px;"></div>
+
+    <!-- SEÇÃO 3: DUAS VELOCIDADES DE COLETA -->
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--preto);margin-bottom:4px;">3. Agendamento e Coleta em Duas Velocidades</div>
+      <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:20px;">O gestor opera a ferramenta em 3 passos, com dois motores de escuta independentes e simultâneos</div>
+
+      <!-- STEPPER -->
+      <div style="display:flex;flex-direction:column;gap:0;">
+
+        <!-- Passo 1 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">1</div>
+            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:12px;flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Setup do Projeto</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;">O gestor ativa ou desativa subcategorias inteiras por CBO ou setor, edita os textos das perguntas para moldar a pesquisa à cultura interna da empresa (override por cliente — sem afetar o banco global), e valida a trava ímpar antes de prosseguir. A IA do sistema sugere as subcategorias com pior histórico de IBP como prioridade inicial.</div>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--roxo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">2</div>
+            <div style="width:2px;background:var(--linha);flex:1;margin:4px 0;min-height:20px;"></div>
+          </div>
+          <div style="flex:1;margin-bottom:12px;">
+            <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:10px;">Definição do Ciclo — Dois Motores Simultâneos</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="border:1.5px solid var(--roxo);border-radius:8px;padding:14px;background:var(--roxo-xp);">
+                  <div style="font-size:10px;font-weight:800;color:var(--roxo);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">⚡ Velocidade 1</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Motor Pesquisa Pulso</div>
+                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Disparos automáticos e rotativos via WhatsApp com token efêmero. Frequência e quantidade de perguntas configuráveis pelo gestor. Sistema prioriza as subcategorias com piores IBPs.</div>
+                  <div style="background:var(--roxo);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 48h</div>
+                </div>
+                <div style="border:1.5px solid var(--verde);border-radius:8px;padding:14px;background:var(--verde-xp);">
+                  <div style="font-size:10px;font-weight:800;color:var(--verde);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">🏛 Velocidade 2</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:4px;">Pesquisa Robusta</div>
+                  <div style="font-size:11px;color:var(--cinza-medio);line-height:1.6;margin-bottom:8px;">Questionário consolidado e profundo para auditoria do PGR. Ciclos bimestral, semestral ou anual. O sistema seleciona automaticamente o ciclo com base nos resultados acumulados do IBP.</div>
+                  <div style="background:var(--verde);color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;display:inline-block;">🕐 Expira em 7 dias úteis</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">3</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--linha);border-radius:10px;padding:16px 18px;flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--preto);margin-bottom:6px;">Coleta, Anonimização e Cálculo do IBP</div>
+            <div style="font-size:12px;color:var(--cinza-medio);line-height:1.7;margin-bottom:12px;">O colaborador responde de forma <b style="color:var(--preto);">100% anônima via Magic Link/OTP</b> enviado ao WhatsApp — sem cadastro de senhas. O RH nunca tem acesso ao ID do respondente. A trava de anonimato por CBO exige mínimo de 3 respondentes por agrupamento antes de exibir dados segmentados.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">📱</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Magic Link OTP</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Sem senhas · Sem cadastro</div>
+              </div>
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">🎲</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Likert → IBP</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">(Média − 3) × 2,5</div>
+              </div>
+              <div style="background:var(--cinza-claro);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:20px;margin-bottom:4px;">🛡️</div>
+                <div style="font-size:11px;font-weight:600;color:var(--preto);">Cascata de Anonimato</div>
+                <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">CBO → Setor → Empresa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RODAPÉ DE AUTORIDADE -->
+    <div style="background:var(--preto);border-radius:10px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;">Dra. Lucia Kratz</div>
+        <div style="font-size:11px;color:#8A9590;">Psicóloga e Administradora · CRP 09/20590 · PhD</div>
+        <div style="font-size:11px;color:var(--verde-claro);margin-top:4px;">Criadora do Índice de Balança Psicodinâmica (IBP) e do NR-1 Map</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Psicodinâmica do Trabalho · Dejours</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Fatores Higiênicos · Herzberg</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Hierarquia de Necessidades · Maslow</span>
+        <span style="background:rgba(255,255,255,.08);color:#C8D4D0;font-size:10px;padding:4px 10px;border-radius:20px;">Conformidade Portaria MTE 1.419/2024</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MÓDULOS ===== -->
+<div id="view-modulos" class="view">
+  <div class="topbar">
+    <div class="topbar-title-wrapper">
+      <button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button>
+      <div class="topbar-title" title="Módulos e Perguntas — Selecionar">🧩 Módulos e Perguntas</div>
+    </div>
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:10px;">
+      <span id="rh-total-sel" style="font-size:11px;background:var(--verde-xp);color:var(--cinza-medio);padding:3px 10px;border-radius:20px;">0 selecionadas</span>
+      <button class="btn btn-primary btn-sm" onclick="_salvarSelecoes();this.textContent='✅ Salvo!';var b=this;setTimeout(function(){b.textContent='💾 Salvar seleção';},2000);">💾 Salvar seleção</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- SELETOR DE VERSÃO -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--cinza-medio);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Pré-seleção por versão</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+
+        <div onclick="aplicarVersao('rapida')" style="cursor:pointer;border:1.5px solid var(--linha);border-radius:10px;padding:12px;background:#fff;transition:all .2s;" id="ver-card-rapida"
+          onmouseover="this.style.borderColor='var(--verde)'" onmouseout="if(_versaoDiag!=='rapida')this.style.borderColor='var(--linha)'">
+          <div style="font-size:18px;margin-bottom:4px;">⚡</div>
+          <div style="font-size:12px;font-weight:700;color:var(--preto);">Rápida</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">21 perguntas<br/>~10 min</div>
+        </div>
+
+        <div onclick="aplicarVersao('padrao')" style="cursor:pointer;border:1.5px solid var(--verde);border-radius:10px;padding:12px;background:var(--verde-xp);transition:all .2s;" id="ver-card-padrao">
+          <div style="font-size:18px;margin-bottom:4px;">⭐</div>
+          <div style="font-size:12px;font-weight:700;color:var(--verde);">Padrão</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">Mín. 3/subcat<br/>~25 min</div>
+        </div>
+
+        <div onclick="aplicarVersao('completa')" style="cursor:pointer;border:1.5px solid var(--linha);border-radius:10px;padding:12px;background:#fff;transition:all .2s;" id="ver-card-completa"
+          onmouseover="this.style.borderColor='var(--verde)'" onmouseout="if(_versaoDiag!=='completa')this.style.borderColor='var(--linha)'">
+          <div style="font-size:18px;margin-bottom:4px;">📋</div>
+          <div style="font-size:12px;font-weight:700;color:var(--preto);">Completa</div>
+          <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">101 perguntas<br/>~45 min</div>
+        </div>
+
+      </div>
+      <div id="ver-descricao" style="font-size:11px;color:var(--cinza-medio);margin-top:8px;padding:8px 12px;background:var(--cinza-claro);border-radius:6px;">
+        ⭐ <strong>Padrão:</strong> mínimo 3 perguntas por subcategoria pré-selecionadas. Personalize abaixo se quiser.
+      </div>
+
+      <!-- Alertas por versão -->
+      <div id="alerta-rapida" style="display:none;margin-top:8px;padding:10px 14px;background:var(--roxo-xp);border:1px solid var(--roxo);border-radius:8px;font-size:11px;color:var(--roxo);line-height:1.6;">
+        ⚡ <strong>Versão Rápida — 21 perguntas (1/subcategoria)</strong><br/>
+        Gera IBP por módulo mas <strong>não por subcategoria individual</strong>. Ideal para Pesquisa Pulso e monitoramento de tendência.<br/>
+        ⚠️ Não recomendado para laudo técnico GRO/PGR — use a versão Padrão ou Completa para documentação oficial.
+      </div>
+      <div id="alerta-padrao" style="display:block;margin-top:8px;padding:10px 14px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;font-size:11px;color:var(--verde);line-height:1.6;">
+        ⭐ <strong>Versão Padrão — 54 perguntas (3/subcategoria)</strong><br/>
+        Mínimo estatisticamente válido. Gera IBP completo por subcategoria, módulo e geral.<br/>
+        ✅ Compatível com laudo técnico, Mapa de Risco e Plano de Ação 5W2H conforme GRO/NR-1.
+      </div>
+      <div id="alerta-completa" style="display:none;margin-top:8px;padding:10px 14px;background:var(--cinza-claro);border:1px solid var(--linha);border-radius:8px;font-size:11px;color:var(--cinza-escuro);line-height:1.6;">
+        📋 <strong>Versão Completa — 101 perguntas</strong><br/>
+        Máxima cobertura diagnóstica. Gera Relatório de Evidências completo para defesa em fiscalização MTE ou processos trabalhistas.<br/>
+        ⚠️ ~45 minutos — taxa de abandono mais alta. Recomendado para empresas com cultura de pesquisa estabelecida.
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;line-height:1.6;">
+      Você pode personalizar a seleção abaixo. <strong>★ PP</strong> = pergunta própria da sua empresa.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="abas-rh"></div>
+    <div id="container-rh"></div>
+  </div>
+</div>
+
+<!-- ===== DIAGNÓSTICO GERAL ===== -->
+<div id="view-diagnostico" class="view">
+  <div class="topbar"><div class="topbar-title">Diagnóstico Geral</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('dashboard')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+    <div class="card">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Enviado para todos os colaboradores ativos</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p><strong>14 colaboradores ativos</strong> receberão o link. Respostas 100% anônimas — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="ag-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="ag-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="ag-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
+          </div>
+        </div>
+        <!-- Seletor de versão -->
+        <div style="margin-bottom:12px;">
+          <div class="form-label" style="margin-bottom:6px;">Versão do diagnóstico</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--linha);cursor:pointer;background:#fff;" id="lbl-ver-rapida">
+              <input type="radio" name="versao-diag" value="rapida" style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('rapida')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--preto);">Rápida — 21 perguntas</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">1 por subcategoria · 3 blocos · ~10 min · ideal para Pulso e primeira avaliação</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--verde);cursor:pointer;background:var(--verde-xp);" id="lbl-ver-padrao">
+              <input type="radio" name="versao-diag" value="padrao" checked style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('padrao')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--verde);">Padrão — perguntas selecionadas ⭐</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">Usa as perguntas que você configurou na aba "Módulos e Perguntas"</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--linha);cursor:pointer;background:#fff;" id="lbl-ver-completa">
+              <input type="radio" name="versao-diag" value="completa" style="margin-top:3px;accent-color:var(--verde);" onchange="selecionarVersao('completa')"/>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--preto);">Completa — 101 perguntas</div>
+                <div style="font-size:11px;color:var(--cinza-medio);">Banco completo · 15 blocos · ~45 min · ideal para laudo técnico aprofundado</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;" id="btn-disparar-diag" onclick="dispararPesquisaVersao()">🚀 Disparar Diagnóstico Geral</button>
+        <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="verLinksEnviados()">Ver links ja enviados</button>
+        <div style="margin-top:12px;padding:12px;background:var(--verde-xp);border:1px solid var(--verde);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:6px;">📄 Após receber as respostas</div>
+          <button class="btn btn-primary" style="width:100%;" onclick="gerarLaudoCompleto()">📄 Gerar Laudo Técnico Psicossocial PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PULSO ===== -->
+<div id="view-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div></div>
+  <div class="content" style="max-width:620px;">
+
+    <!-- CARD 1: Configurar disparo -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Público-alvo e canal de envio</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p>Respostas <strong>100% anônimas</strong> — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="pulso-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="pulso-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="pulso-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Conteúdo da Pulso -->
+    <div class="card">
+      <div class="card-header"><div class="title">Conteúdo da pesquisa</div><div class="subtitle">Tema e perguntas desta semana</div></div>
+      <div class="card-body">
+        <div class="ia-box" style="margin-bottom:12px;"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
+          <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
+          <div class="tab" onclick="swTab(this,'t-pers')">Pergunta própria</div>
+        </div>
+        <div id="t-sug" class="view active">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 perguntas geradas sobre <strong>Esgotamento / Sobrecarga</strong>:</p>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Nas últimas semanas, as demandas de trabalho superaram minha capacidade?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Consigo descansar adequadamente fora do horário de trabalho?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
+        </div>
+        <div id="t-esc" class="view">
+          <div class="form-group"><div class="form-label">Indicador para a Pulso</div>
+            <select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select>
+          </div>
+        </div>
+        <div id="t-pers" class="view">
+          <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
+          <div class="form-group"><div class="form-label">Segunda pergunta (opcional)</div><textarea class="form-control" placeholder="Pergunta adicional..."></textarea></div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--linha);">
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Quantas perguntas esta semana?</div>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="btn-qtd active" id="qtd-1" onclick="selecionarQtd(1)">1 pergunta</button>
+              <button class="btn-qtd" id="qtd-2" onclick="selecionarQtd(2)">2 perguntas</button>
+              <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPulsoComCanal()">📡 Disparar Pesquisa Pulso</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== NOVA PULSO ===== -->
+<div id="view-nova-pulso" class="view">
+  <div class="topbar"><div class="topbar-title">Pesquisa Pulso</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="sv('pulso')">← Voltar</button></div></div>
+  <div class="content" style="max-width:620px;">
+
+    <!-- CARD 1: Configurar disparo (mesmo padrão do Diagnóstico) -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="title">Configurar disparo</div><div class="subtitle">Público-alvo e canal de envio</div></div>
+      <div class="card-body">
+        <div class="alerta"><span>ℹ</span><p>Respostas <strong>100% anônimas</strong> — tabuladas por cargo CBO.</p></div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Prazo para resposta</div>
+            <select class="form-control" id="ag-prazo">
+              <option value="2">2 dias</option>
+              <option value="7" selected>7 dias</option>
+              <option value="14">14 dias</option>
+              <option value="30">1 mês (30 dias)</option>
+              <option value="60">2 meses (60 dias)</option>
+              <option value="90">3 meses (90 dias)</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">Unidade(s)</div>
+            <select class="form-control" id="pulso-unidade"><option value="Todas">Todas as unidades</option></select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group"><div class="form-label">Departamento</div>
+            <select class="form-control" id="pulso-depto"><option value="Todos">Todos os departamentos</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">Cargo</div>
+            <select class="form-control" id="pulso-cargo"><option value="Todos">Todos os cargos</option></select>
+          </div>
+        </div>
+        <div class="form-group"><div class="form-label">Canal de envio</div>
+          <div class="disparo-opts">
+            <div class="d-opt sel" onclick="selOpt(this)"><div class="d-ic">📱</div><div class="d-lb">WhatsApp</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">✉️</div><div class="d-lb">E-mail</div></div>
+            <div class="d-opt" onclick="selOpt(this)"><div class="d-ic">📱✉️</div><div class="d-lb">Ambos</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Conteúdo da Pulso -->
+    <div class="card">
+      <div class="card-header"><div class="title">Conteúdo da pesquisa</div><div class="subtitle">Tema e perguntas desta semana</div></div>
+      <div class="card-body">
+        <div class="ia-box" style="margin-bottom:12px;"><div class="ia-lbl">🤖 IA sugere</div><div class="ia-txt">Esgotamento / Sobrecarga — pior indicador do período</div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="swTab(this,'t-sug')">Tema sugerido</div>
+          <div class="tab" onclick="swTab(this,'t-esc')">Outro tema</div>
+          <div class="tab" onclick="swTab(this,'t-pers')">Pergunta própria</div>
+        </div>
+        <div id="t-sug" class="view active">
+          <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">3 perguntas geradas sobre <strong>Esgotamento / Sobrecarga</strong>:</p>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Nas últimas semanas, as demandas de trabalho superaram minha capacidade?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;">"Consigo descansar adequadamente fora do horário de trabalho?"</div>
+          <div style="background:var(--cinza-claro);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:12px;">"Tenho autonomia para organizar meu próprio ritmo de trabalho?"</div>
+        </div>
+        <div id="t-esc" class="view">
+          <div class="form-group"><div class="form-label">Indicador para a Pulso</div>
+            <select class="form-control"><option>Esgotamento / Sobrecarga (sugerido)</option><option>Realização Profissional</option><option>Reconhecimento</option><option>Liberdade de Expressão</option><option>Frustração / Falta de Sentido</option><option>Insegurança / Medo</option><option>Condições físicas (Herzberg)</option><option>Relações interpessoais (Herzberg)</option></select>
+          </div>
+        </div>
+        <div id="t-pers" class="view">
+          <div class="form-group"><div class="form-label">Pergunta personalizada</div><textarea class="form-control" placeholder="Ex: Como você avalia a comunicação entre equipe e liderança?"></textarea></div>
+          <div class="form-group"><div class="form-label">Segunda pergunta (opcional)</div><textarea class="form-control" placeholder="Pergunta adicional..."></textarea></div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--linha);">
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Quantas perguntas esta semana?</div>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="btn-qtd active" id="qtd-1" onclick="selecionarQtd(1)">1 pergunta</button>
+              <button class="btn-qtd" id="qtd-2" onclick="selecionarQtd(2)">2 perguntas</button>
+              <button class="btn-qtd" id="qtd-3" onclick="selecionarQtd(3)">3 perguntas</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-roxo" style="width:100%;" id="btn-disparar-pulso" onclick="dispararPulsoComCanal()">📡 Disparar Pesquisa Pulso</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== HISTÓRICO ===== -->
 
 
-def nome_arquivo_padrao(tipo_documento: str, empresa: str = None, ano: int = None) -> str:
-    """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
-    import unicodedata, re
-    empresa = empresa or EMPRESA
-    ano = ano or datetime.datetime.now().year
-    slug = unicodedata.normalize('NFKD', empresa).encode('ascii', 'ignore').decode()
-    slug = re.sub(r'[^a-zA-Z0-9]+', '', slug)
-    return f"/mnt/user-data/outputs/{ano}_NR-1_Map_{slug}_{tipo_documento}.pdf"
 
 
-# ───────────────────────────── DADOS (mesma base do Mapa de Risco — instrumento 2) ─────────────────────────────
-# EMPRESA e REFERENCIA agora vêm do parâmetro dados (injetado pelo main.py)
-
-MIN_RESPONDENTES_CBO = 3
-MIN_RESPONDENTES_SETOR = 3
-
-SETORES_CBO = [
-    {"setor": "Operações / Linha A", "cbo": "7170", "cargo": "Operador de Linha de Produção", "n": 18, "ibp": -3.6, "qtd_perigos": 3},
-    {"setor": "Operações / Linha A", "cbo": "8324", "cargo": "Auxiliar de Produção", "n": 7, "ibp": -2.8, "qtd_perigos": 2},
-    {"setor": "Operações / Linha A", "cbo": "9412", "cargo": "Inspetor de Qualidade", "n": 3, "ibp": -3.0, "qtd_perigos": 2},
-    {"setor": "Comercial / Vendas", "cbo": "3541", "cargo": "Representante Comercial", "n": 11, "ibp": -0.2, "qtd_perigos": 2},
-    {"setor": "Comercial / Vendas", "cbo": "3542", "cargo": "Vendedor Interno", "n": 4, "ibp": 0.4, "qtd_perigos": 1},
-    {"setor": "TI / Engenharia", "cbo": "2124", "cargo": "Analista de Sistemas", "n": 6, "ibp": 2.7, "qtd_perigos": 0},
-    {"setor": "TI / Engenharia", "cbo": "3171", "cargo": "Técnico de Suporte", "n": 3, "ibp": 2.1, "qtd_perigos": 0},
-    {"setor": "RH / Gestão de Pessoas", "cbo": "2524", "cargo": "Analista de RH", "n": 4, "ibp": -1.0, "qtd_perigos": 2},
-    {"setor": "RH / Gestão de Pessoas", "cbo": "3514", "cargo": "Assistente de RH", "n": 2, "ibp": -1.6, "qtd_perigos": 3},
-    {"setor": "Administrativo / Recepção", "cbo": "4110", "cargo": "Auxiliar Administrativo", "n": 8, "ibp": 1.0, "qtd_perigos": 0},
-    {"setor": "Administrativo / Recepção", "cbo": "4221", "cargo": "Recepcionista", "n": 3, "ibp": 1.3, "qtd_perigos": 0},
-    {"setor": "Manutenção", "cbo": "9517", "cargo": "Técnico de Manutenção", "n": 1, "ibp": -2.0, "qtd_perigos": 1},
-]
 
 
-def gerar_acoes(SETORES_CBO_DIN=None):
-    if SETORES_CBO_DIN is None: SETORES_CBO_DIN = []
-    """
-    Gera a lista de ações 5W2H automaticamente:
-    - Nível CBO, se N≥3 (ação focada no cargo)
-    - Nível Setor (agregado), se o CBO individual foi diluído por anonimato mas o setor todo N≥3
-    - Só entra na lista quem deu SUBSTANCIAL ou INTOLERÁVEL
-    """
-    acoes = []
-
-    # Nível CBO
-    for c in SETORES_CBO_DIN:
-        if c["n"] < MIN_RESPONDENTES_CBO:
-            continue
-        zona, sev, prob_letra, classif = classificar(c["ibp"], c["qtd_perigos"])
-        if classif in AÇÕES_QUE_EXIGEM_PLANO:
-            acoes.append({
-                "nivel": f"{c['setor']} — {c['cargo']} (CBO {c['cbo']})",
-                "setor": c["setor"], "zona": zona, "classif": classif, "ibp": c["ibp"],
-            })
-
-    # Nível Setor agregado (cobre setores cujo CBO individual não passou no mínimo, mas o setor sim)
-    for setor_nome in dict.fromkeys(cc["setor"] for cc in SETORES_CBO_DIN):
-        itens = [cc for cc in SETORES_CBO_DIN if cc["setor"] == setor_nome]
-        cbos_visiveis = [c for c in itens if c["n"] >= MIN_RESPONDENTES_CBO]
-        if len(cbos_visiveis) == len(itens):
-            continue  # já totalmente coberto no nível CBO acima
-        n_total = sum(c["n"] for c in itens)
-        if n_total < MIN_RESPONDENTES_SETOR:
-            continue  # setor inteiro também diluído — vai para Empresa (geral), tratado à parte
-        ibp_medio = sum(c["ibp"] * c["n"] for c in itens) / n_total
-        qtd_perigos_max = max(c["qtd_perigos"] for c in itens)
-        zona, sev, prob_letra, classif = classificar(ibp_medio, qtd_perigos_max)
-        if classif in AÇÕES_QUE_EXIGEM_PLANO:
-            acoes.append({
-                "nivel": f"{setor_nome} (resultado agregado do setor)",
-                "setor": setor_nome, "zona": zona, "classif": classif, "ibp": round(ibp_medio, 1),
-            })
-
-    return acoes
 
 
-def texto_acao(item: dict) -> dict:
-    zona_nome = item["zona"]["zona_dejours"]
-    classif = item["classif"]
-    prazo = "Imediato" if classif == "INTOLERÁVEL" else "7 dias"
-    biblioteca = {
-        "Sofrimento Patogênico": "Abrir Espaço de Fala Coletivo urgente. Suspender exigências não essenciais "
-                                  "por 30 dias e revisar metas/cargas de trabalho.",
-        "Defesa Oculta": "Investigar mecanismos de defesa coletiva (ativismo, horas extras ocultas, cinismo "
-                          "viril). Aplicar Pesquisa Pulso direcionada sobre sobrecarga não reportada.",
-        "Terreno Fértil": "Manter monitoramento de rotina — sem ação corretiva necessária neste ciclo.",
+</main>
+</div>
+
+<!-- MODAL NOVO COLABORADOR -->
+<div class="modal-overlay" id="modal-novo-colab">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo colaborador</h3><button class="modal-close" onclick="fecharModal('modal-novo-colab')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Nome *</div><input class="form-control" id="colab-nome" placeholder="Nome completo"/></div>
+      <div class="form-group"><div class="form-label">E-mail *</div><input class="form-control" type="email" id="colab-email" placeholder="colaborador@empresa.com"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">WhatsApp</div><input class="form-control" id="colab-whatsapp" placeholder="62 9 9999-0000"/></div>
+      <div class="form-group"><div class="form-label">Cargo *</div>
+        <select class="form-control" id="colab-cargo-select">
+          <option value="">Selecione o cargo...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="colab-depto"><option value="">— Nenhum —</option></select></div>
+      <div class="form-group"><div class="form-label">Unidade / Filial</div><select class="form-control" id="colab-unidade"><option value="">— Nenhuma —</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Data de admissão</div><input type="date" class="form-control" id="colab-admissao"/></div>
+      <div class="form-group"><div class="form-label">Data de demissão</div><input type="date" class="form-control" id="colab-demissao"/></div>
+    </div>
+    <div style="background:var(--cinza-claro);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--cinza-medio);margin-bottom:8px;">
+      🔐 Um e-mail com link de acesso será enviado automaticamente. Se informar WhatsApp, um link também será gerado para envio via WhatsApp.
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <div class="form-label">Nível de acesso ao painel</div>
+      <select class="form-control" id="colab-nivel">
+        <option value="colaborador">👤 Colaborador — só acessa área pessoal</option>
+        <option value="gestor">👔 Gestor / Diretor — acessa painel RH (somente leitura)</option>
+        <option value="rh">🏢 RH — acesso completo ao painel</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-novo-colab')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="salvarNovoColab()">Cadastrar e enviar acesso</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGENDAR -->
+<div class="modal-overlay" id="modal-agendar">
+  <div class="modal">
+    <div class="modal-header"><h3>Agendar pesquisa</h3><button class="modal-close" onclick="fecharModal('modal-agendar')">×</button></div>
+    <div class="form-group"><div class="form-label">Tipo de pesquisa</div><select class="form-control" id="plan-tipo"><option value="pulso">Pesquisa Pulso</option><option value="geral">Diagnóstico Geral</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Data de disparo</div><input type="date" class="form-control" id="plan-data"/></div>
+      <div class="form-group"><div class="form-label">Prazo de resposta</div>
+        <select class="form-control" id="plan-prazo">
+          <option value="2">2 dias</option>
+          <option value="7" selected>7 dias</option>
+          <option value="14">14 dias</option>
+          <option value="30">1 mês (30 dias)</option>
+          <option value="60">2 meses (60 dias)</option>
+          <option value="90">3 meses (90 dias)</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--cinza-medio);text-transform:uppercase;margin-bottom:8px;margin-top:4px;">🎯 Público-alvo</div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Unidade</div><select class="form-control" id="plan-unidade"><option value="Todas">Todas as unidades</option></select></div>
+      <div class="form-group"><div class="form-label">Departamento</div><select class="form-control" id="plan-depto"><option value="Todos">Todos os departamentos</option></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Cargo</div><select class="form-control" id="plan-cargo"><option value="Todos">Todos os cargos</option></select></div>
+    <div class="form-group"><div class="form-label">Canal de envio</div><select class="form-control" id="plan-canal"><option value="WhatsApp">WhatsApp</option><option value="E-mail">E-mail</option><option value="Ambos">Ambos</option></select></div>
+    <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn btn-ghost" style="flex:1;" onclick="fecharModal('modal-agendar')">Cancelar</button><button class="btn btn-roxo" style="flex:1;" onclick="salvarAgendamento()">📅 Agendar</button></div>
+    <div id="btn-disparar-agora-wrap" style="display:none;margin-top:8px;"><button class="btn btn-primary" style="width:100%;background:#25D366;border-color:#25D366;" onclick="dispararDoAgendamento()">🚀 Salvar e Disparar agora</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px;" onclick="verLinksEnviados()">Ver links ja enviados</button></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR COLABORADOR -->
+<div class="modal-overlay" id="modal-edit-colab" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:540px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Colaborador</h3><button class="modal-close" onclick="document.getElementById('modal-edit-colab').classList.remove('open')">✕</button></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-control" id="ec-nome" placeholder="Nome completo"/></div>
+      <div class="form-group"><label class="form-label">E-mail</label><input class="form-control" type="email" id="ec-email"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-control" id="ec-whatsapp" placeholder="62 9 9999-0000"/></div>
+      <div class="form-group"><label class="form-label">Cargo</label><input class="form-control" id="ec-cargo"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">CBO</label><input class="form-control" id="ec-cbo" placeholder="Ex: 1111-05"/></div>
+      <div class="form-group"><label class="form-label">Departamento</label><input class="form-control" id="ec-depto"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Unidade</label><input class="form-control" id="ec-unidade"/></div>
+      <div class="form-group"><label class="form-label">Data Admissão</label><input class="form-control" id="ec-admissao" type="date"/></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Status</label>
+      <select class="form-control" id="ec-status">
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Nível de acesso</label>
+      <select class="form-control" id="ec-nivel">
+        <option value="colaborador">👤 Colaborador</option>
+        <option value="gestor">👔 Gestor / Diretor</option>
+        <option value="rh">🏢 RH</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-colab').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditColab()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CARGO -->
+<div class="modal-overlay" id="modal-edit-cargo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:460px;width:95%;">
+    <div class="modal-header"><h3>✏️ Editar Cargo</h3><button class="modal-close" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">✕</button></div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nome do Cargo *</label><input class="form-control" id="edit-cargo-nome"/></div>
+      <div class="form-group"><label class="form-label">CBO</label><input class="form-control" id="edit-cargo-cbo"/></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label class="form-label">Nível Hierárquico</label><select class="form-control" id="edit-cargo-nivel"></select></div>
+      <div class="form-group"><label class="form-label">Reporta a</label><select class="form-control" id="edit-cargo-reporta"></select></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-cargo').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEditCargo()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function selecionarQtd(n){
+  [1,2,3].forEach(function(i){
+    var btn=document.getElementById('qtd-'+i);
+    if(btn)btn.classList.remove('active');
+  });
+  var active=document.getElementById('qtd-'+n);
+  if(active)active.classList.add('active');
+}
+
+var abaRH='M1';
+var COR_MOD={M1:'#0A6E4F',M2:'#2563EB',M3:'#D97706',M4:'#7B00C4'};
+
+var MODULOS=[
+  {id:'M1',emoji:'🧠',titulo:'Módulo 1 — Fisiológico',sub:'Fatores Higiênicos · Corpo e Mente',subcats:[{id:'1.1',titulo:'Ritmo de Trabalho, Cadência e Pressão de Tempo',perguntas:[{id:1,texto:'Consigo executar minhas tarefas diárias em velocidade confortável, sem me sentir permanentemente sufocado pelo ritmo de trabalho.'},{id:2,texto:'Os prazos que me são concedidos para entrega dos trabalhos são realistas e possíveis de cumprir.'},{id:3,texto:'O meu dia a dia é livre de imprevistos e urgências constantes que me obriguem a acelerar o ritmo de forma desesperada.'},{id:4,texto:'O fluxo do meu trabalho é bem distribuído ao longo da semana, evitando picos de acúmulo de tarefas de última hora.'},{id:5,texto:'A quantidade total de trabalho exigida do meu cargo é perfeitamente compatível com a minha jornada diária normal.'},{id:6,texto:'Não sofro pressões agressivas ou cobranças minuto a minuto pelo término de uma tarefa imediata.'}]},{id:'1.2',titulo:'Limitações Biológicas, Pausas e Espaços de Descompressão',perguntas:[{id:7,texto:'Tenho liberdade para fazer pequenas pausas para esticar o corpo e descansar a mente sempre que sinto necessidade.'},{id:8,texto:'Posso me afastar do posto para ir ao banheiro a qualquer momento, sem pedir permissões constrangedoras.'},{id:9,texto:'Tenho facilidade e tempo garantido para beber água ao longo do expediente sem atrapalhar minhas métricas de trabalho.'},{id:10,texto:'O meu intervalo para almoço ou lanche é integralmente respeitado, permitindo que eu me alimente com calma.'},{id:11,texto:'Quando o meu corpo atinge exaustão física severa, a gerência me permite desacelerar momentaneamente para me recuperar.'},{id:12,texto:'A empresa oferece local físico confortável e silencioso projetado para relaxarmos nas pausas.'},{id:13,texto:'A empresa promove ações ou disponibiliza ferramentas práticas para nos ajudar a aliviar a tensão.'}]},{id:'1.3',titulo:'Stresse, Ansiedade e Esgotamento Psicossomático',perguntas:[{id:14,texto:'Ao encerrar o expediente, ainda sinto energia física e disposição para aproveitar minha vida pessoal e familiar.'},{id:15,texto:'Consigo dormir bem à noite, sem que preocupações do trabalho provoquem insônia ou sono agitado.'},{id:16,texto:'Meu corpo mantém-se livre de dores físicas crônicas causadas pela tensão do emprego.'},{id:17,texto:'Trabalho em ambiente tranquilo, livre de crises de ansiedade geradas pela pressão diária.'},{id:18,texto:'Consigo me desligar perfeitamente do trabalho nos momentos de folga e finais de semana.'},{id:19,texto:'As exigências emocionais do dia a dia não me deixam com sensação de estar à beira de um esgotamento nervoso.'},{id:20,texto:'Sinto que a rotina atual do meu cargo protege e preserva a minha saúde física e mental a longo prazo.'}]},{id:'1.4',titulo:'Ergonomia de Software, Velocidade de Mudanças e Sobrecarga Cognitiva',perguntas:[{id:21,texto:'As ferramentas digitais e sistemas que utilizo funcionam de forma rápida e estável, sem travamentos que causem irritação.'},{id:22,texto:'Os sistemas adotados pela empresa são intuitivos e fáceis, dispensando esforço mental exaustivo.'},{id:23,texto:'A quantidade de horas que passo olhando para telas não me causa vista cansada ou dores de cabeça.'},{id:24,texto:'O volume de e-mails, mensagens e notificações é equilibrado, permitindo que eu processe tudo sem estresse.'},{id:25,texto:'Consigo acompanhar a velocidade com que a empresa atualiza ferramentas e processos digitais.'},{id:26,texto:'Quando ocorre falha tecnológica, o suporte técnico resolve de forma ágil, evitando o meu desgaste mental.'},{id:27,texto:'Os processos e fluxos digitais são diretos e simplificados, sem burocracias desnecessárias que gerem cansaço cognitivo.'}]}]},
+  {id:'M2',emoji:'🛡️',titulo:'Módulo 2 — Segurança',sub:'Previsibilidade · Confiança · Integridade',subcats:[{id:'2.1',titulo:'Estabilidade Laboral e Empregabilidade',perguntas:[{id:28,texto:'Sinto que meu emprego está seguro e não vivo com medo diário de ser demitido repentinamente.'},{id:29,texto:'A empresa é clara e transparente sobre os motivos que levam a demissões.'},{id:30,texto:'Percebo que a gerência valoriza e tenta segurar os profissionais na equipe.'},{id:31,texto:'A empresa paga o meu salário rigorosamente em dia, garantindo minha segurança financeira.'},{id:32,texto:'Os benefícios da empresa são depositados de forma correta e sem atrasos.'},{id:33,texto:'A estabilidade que sinto no meu emprego me dá segurança para fazer planos financeiros de longo prazo.'}]},{id:'2.2',titulo:'Clareza de Papéis, Metas e Previsibilidade Organizacional',perguntas:[{id:34,texto:'As orientações sobre como devo realizar o trabalho diário são transmitidas de forma clara.'},{id:35,texto:'As exigências do dia a dia correspondem à função para a qual fui contratado, sem desvios confusos.'},{id:36,texto:'As ordens que recebo são coerentes, evitando que eu receba comandos contraditórios.'},{id:37,texto:'As metas exigidas de mim são justas e alcançáveis dentro do horário regular.'},{id:38,texto:'Os objetivos permanecem estáveis ao longo do mês, sem mudanças bruscas.'},{id:39,texto:'Quando a diretoria precisa alterar uma regra, a equipe é avisada com antecedência.'}]},{id:'2.3',titulo:'Segurança Psicológica e Direito ao Erro',perguntas:[{id:40,texto:'Quando cometo uma falha, a liderança me orienta a corrigir em vez de me culpar ou punir.'},{id:41,texto:'Os feedbacks sobre o meu desempenho são feitos de forma reservada e individual.'},{id:42,texto:'Sinto-me confortável para admitir que não sei fazer uma tarefa e pedir ajuda sem ser julgado.'},{id:43,texto:'Posso apontar problemas nos processos do setor sem medo de sofrer perseguições veladas.'},{id:44,texto:'A empresa estimula e abre espaço real para que funcionários deem sugestões de melhoria.'}]},{id:'2.4',titulo:'Treinamento Ocupacional e Capacitação',perguntas:[{id:45,texto:'Recebi treinamento suficiente para executar todas as tarefas exigidas pelo meu cargo de maneira competente.'},{id:46,texto:'A empresa oferece os treinamentos obrigatórios de segurança adequados para os riscos da minha atividade.'},{id:47,texto:'Quando um novo sistema é implementado, a empresa nos capacita antes de começarmos a usá-lo.'},{id:48,texto:'Fui instruído sobre quais são os riscos presentes no meu ambiente de trabalho.'},{id:49,texto:'Os treinamentos possuem linguagem clara e materiais de apoio adequados.'}]},{id:'2.5',titulo:'Riscos de Acidentes, Proteção Física e Perigo (NR-1)',perguntas:[{id:50,texto:'Executo minhas atividades sem sentir medo ou tensão constante de sofrer um acidente físico.'},{id:51,texto:'A empresa fornece gratuitamente todos os EPIs necessários para a realização segura da minha função.'},{id:52,texto:'Os EPIs disponibilizados estão em excelente estado de conservação.'},{id:53,texto:'As máquinas e ferramentas passam por revisões e manutenções preventivas regulares.'},{id:54,texto:'A infraestrutura do local onde trabalho é segura.'},{id:55,texto:'Recebi treinamento detalhado de segurança antes de ser colocado para operar qualquer equipamento perigoso.'},{id:56,texto:'Sinto-me seguro para exercer o Direito de Recusa caso perceba risco grave e iminente para minha vida.'}]}]},
+  {id:'M3',emoji:'🤝',titulo:'Módulo 3 — Relacionamentos e Social',sub:'Interpessoal · Cultura · Assédio',subcats:[{id:'3.1',titulo:'Relação com a Liderança Direta',perguntas:[{id:57,texto:'O meu superior direto trata-me com respeito e educação no dia a dia.'},{id:58,texto:'O meu supervisor direto mostra-se disponível e acessível quando preciso falar sobre questões de trabalho.'},{id:59,texto:'Sinto que o meu chefe direto ouve genuinamente as minhas dificuldades antes de tomar decisões.'},{id:60,texto:'Considero que o meu superior direto tem competência técnica suficiente para liderar a nossa equipe.'},{id:61,texto:'Quando enfrento um problema grave, sinto que posso contar com o apoio prático do meu supervisor.'}]},{id:'3.2',titulo:'Clima Interpessoal e Relações entre Pares',perguntas:[{id:62,texto:'Os meus colegas ajudam-se mutuamente quando alguém do setor está sobrecarregado.'},{id:63,texto:'O convívio diário com a minha equipe é saudável e livre de fofocas ou boatos maliciosos.'},{id:64,texto:'O clima entre os colaboradores é focado na cooperação, sem competições predatórias.'},{id:65,texto:'Sinto-me integrado e acolhido pelo meu grupo de trabalho, sem sofrer qualquer tipo de isolamento.'},{id:66,texto:'Confio nos colegas do meu setor para realizar as tarefas em conjunto.'}]},{id:'3.3',titulo:'Fit Cultural e Relações Intergeracionais',perguntas:[{id:67,texto:'Sinto que os valores éticos da empresa combinam com os meus princípios pessoais.'},{id:68,texto:'Compreendo e concordo com os objetivos gerais da empresa.'},{id:69,texto:'O ambiente da equipe respeita a convivência entre funcionários de diferentes idades e gerações.'},{id:70,texto:'Há equilíbrio saudável entre respeitar o conhecimento dos mais experientes e dar abertura para os mais jovens.'},{id:71,texto:'Sei exatamente se meu perfil e postura estão alinhados com o que a empresa busca.'},{id:72,texto:'Recebi retornos claros da gerência sobre minha adaptação à cultura e ao ambiente do time.'}]},{id:'3.4',titulo:'Reconhecimento e Julgamento de Valor (Dejours)',perguntas:[{id:73,texto:'O meu superior direto reconhece a importância e a utilidade do meu esforço diário.'},{id:74,texto:'Os meus colegas de trabalho respeitam e elogiam a qualidade das minhas tarefas.'},{id:75,texto:'A gerência costuma elogiar de forma clara os bons resultados das entregas.'},{id:76,texto:'Quando me dedico além do normal, essa dedicação é notada e valorizada pela empresa.'}]},{id:'3.5',titulo:'Proteção contra Assédio Moral e Sexual',perguntas:[{id:77,texto:'A liderança não pratica perseguições, piadas humilhantes ou ameaças psicológicas.'},{id:78,texto:'O ambiente de trabalho é livre de exclusões intencionais ou boicotes profissionais.'},{id:79,texto:'O meu local de trabalho é seguro contra comentários de teor sexual ou insinuações abusivas.'},{id:80,texto:'Confio que se eu denunciar um assédio, a empresa investigará com total sigilo e seriedade.'},{id:81,texto:'Sinto-me seguro para relatar qualquer desvio de conduta sem medo de punição.'}]}]},
+  {id:'M4',emoji:'🚀',titulo:'Módulo 4 — Fatores Motivacionais',sub:'Propósito · Identidade · Autonomia',subcats:[{id:'4.1',titulo:'Propósito, Alinhamento de Vida e Significado do Trabalho',perguntas:[{id:82,texto:'Sinto que as tarefas que realizo possuem valor real e fazem sentido para mim.'},{id:83,texto:'Percebo claramente o impacto positivo que o meu trabalho causa na vida dos clientes ou na sociedade.'},{id:84,texto:'Sinto orgulho em dizer para as outras pessoas qual é a minha profissão e onde eu trabalho.'},{id:85,texto:'Consigo enxergar uma conexão direta entre o crescimento da empresa e a realização dos meus objetivos de vida.'},{id:86,texto:'Sinto-me conectado com a missão e o propósito geral da empresa enquanto executo minhas atividades.'}]},{id:'4.2',titulo:'Identidade com o Trabalho e Crescimento',perguntas:[{id:87,texto:'As atividades que desempenho aproveitam muito bem as minhas principais habilidades e talentos.'},{id:88,texto:'Sinto que estou aprendendo coisas novas e evoluindo como profissional a cada mês nesta empresa.'},{id:89,texto:'Sinto que as exigências da minha função combinam com o meu jeito de ser e personalidade.'},{id:90,texto:'A realização do meu trabalho me torna uma pessoa melhor e mais madura.'},{id:91,texto:'Consigo visualizar um caminho claro de crescimento de carreira para mim dentro desta organização.'}]},{id:'4.3',titulo:'Autonomia Percebida e Espaço de Criação (Dejours)',perguntas:[{id:92,texto:'Tenho autonomia suficiente para tomar decisões sobre a execução das minhas tarefas sem precisar de autorização para tudo.'},{id:93,texto:'A empresa me dá liberdade para ajustar o método quando percebo uma forma mais eficiente.'},{id:94,texto:'Sinto-me encorajado a criar soluções próprias diante dos problemas que surgem na minha rotina.'},{id:95,texto:'A gerência confia na minha competência, dando-me espaço livre de microgerenciamento constante.'},{id:96,texto:'Consigo gerenciar e priorizar a ordem de execução das minhas entregas ao longo do dia com autonomia.'}]},{id:'4.4',titulo:'Percepção de Ações Motivadoras da Empresa',perguntas:[{id:97,texto:'As ações de incentivo promovidas pela empresa aumentam genuinamente a minha vontade de me dedicar.'},{id:98,texto:'Os incentivos que a empresa oferece me deixam mais motivado no dia a dia.'},{id:99,texto:'Os momentos de integração demonstram preocupação real com o nosso bem-estar.'},{id:100,texto:'Quando a equipe supera as expectativas, a empresa retribui com ações motivadoras.'},{id:101,texto:'As iniciativas da empresa me estimulam a dar o meu melhor.'}]}]},
+];
+
+var _rhSel = new Set();
+var _rhProprias = [];        // [{id, subcatId, modId, texto}]
+var _rhHistorico = new Set(); // pids que já foram usados em diagnósticos anteriores
+
+function carregarPlanoAcao(empresaId, cicloId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-plano');
+  if (!tbody) return;
+  var cicloFiltro = cicloId || _planoCicloAtual || null;
+
+  // Busca todas as acoes da empresa e filtra no cliente
+  // (documentos antigos sem cicloId aparecem no ciclo mais recente)
+  window.nr1mapDb.collection('nr1map_plano_acao')
+    .where('empresaId','==',empresaId)
+    .get()
+    .then(function(snap) {
+      var docs = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if (cicloFiltro) {
+          var ehMaisRecente = (_laudoCiclosCache && _laudoCiclosCache.length > 0 && _laudoCiclosCache[0].id === cicloFiltro);
+          if (d.cicloId === cicloFiltro || (!d.cicloId && ehMaisRecente)) {
+            docs.push({ id: doc.id, d: d });
+          }
+        } else {
+          docs.push({ id: doc.id, d: d });
+        }
+      });
+      docs.sort(function(a, b) { return (a.d.criadoEm || '') > (b.d.criadoEm || '') ? 1 : -1; });
+
+      tbody.innerHTML = '';
+      if (!docs.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma acao cadastrada para este ciclo. Clique em &quot;+ Nova acao&quot; ou use &quot;Sugestoes automaticas&quot;.</td></tr>';
+        atualizarBadgePendentes();
+        return;
+      }
+      docs.forEach(function(item) {
+        var doc = { id: item.id, data: function(){ return item.d; } };
+        var d = item.d;
+
+        var tr = document.createElement('tr');
+        tr.dataset.prazo = d.prazo || '';
+        tr.dataset.docId = doc.id;
+        var statusOpts = ['Pendente','Em andamento','Concluída'].map(function(s){
+          return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>';
+        }).join('');
+        // Construir linha via DOM — sem aspas aninhadas
+        var tdSetor = document.createElement('td');
+        var divSetor = document.createElement('div');
+        divSetor.contentEditable = 'true'; divSetor.style.fontWeight = '600';
+        divSetor.innerHTML = (d.setor||'Setor') + (d.cbo ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">'+d.cbo+'</span>' : '');
+        divSetor.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'setor'); }; })(doc.id));
+        tdSetor.appendChild(divSetor); tr.appendChild(tdSetor);
+
+        var tdAcao = document.createElement('td');
+        var divAcao = document.createElement('div');
+        divAcao.contentEditable = 'true'; divAcao.textContent = d.acao||'';
+        divAcao.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'acao'); }; })(doc.id));
+        tdAcao.appendChild(divAcao); tr.appendChild(tdAcao);
+
+        var tdResp = document.createElement('td');
+        var divResp = document.createElement('div');
+        divResp.contentEditable = 'true'; divResp.textContent = d.responsavel||'';
+        divResp.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'responsavel'); }; })(doc.id));
+        tdResp.appendChild(divResp); tr.appendChild(tdResp);
+
+        var tdStat = document.createElement('td');
+        var sel = document.createElement('select');
+        sel.className = 'form-control'; sel.style.cssText = 'font-size:11px;padding:5px 6px;';
+        ['Pendente','Em andamento','Concluída'].forEach(function(s){
+          var opt = document.createElement('option');
+          opt.textContent = s; if(d.status===s) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', (function(id){ return function(){ salvarStatusAcao(this,id); registrarEvento(this); atualizarBadgePendentes(); }; })(doc.id));
+        tdStat.appendChild(sel); tr.appendChild(tdStat);
+
+        var tdPrazo = document.createElement('td');
+        var inp = document.createElement('input');
+        inp.type = 'date'; inp.className = 'form-control'; inp.style.cssText = 'font-size:11px;padding:5px 6px;';
+        inp.value = d.prazo||'';
+        inp.addEventListener('change', (function(id){ return function(){ salvarCampoAcao(this,id,'prazo'); atualizarSinalizador(this); }; })(doc.id));
+        tdPrazo.appendChild(inp); tr.appendChild(tdPrazo);
+
+        var tdSin = document.createElement('td'); tdSin.className = 'sinalizador-cell'; tr.appendChild(tdSin);
+
+        var tdDel = document.createElement('td');
+        var btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-ghost btn-sm'; btnDel.style.cssText = 'padding:4px 7px;'; btnDel.textContent = '✕';
+        btnDel.addEventListener('click', (function(id){ return function(){ excluirAcao(id, this); }; })(doc.id));
+        tdDel.appendChild(btnDel); tr.appendChild(tdDel);
+
+        tbody.appendChild(tr);
+      });
+      document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
+      atualizarBadgePendentes();
+    }).catch(function(e){ console.log('plano err:',e); });
+}
+
+function salvarCampoAcao(el, docId, campo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!docId || !window.nr1mapDb) return;
+  var upd = {}; upd[campo] = el.innerText.trim();
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId).update(upd).catch(function(e){console.log(e);});
+}
+
+function salvarStatusAcao(sel, docId) {
+  if (!docId || !window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId)
+    .update({status: sel.value, atualizadoEm: new Date().toISOString()})
+    .catch(function(e){console.log(e);});
+}
+
+function excluirAcao(docId, btn) {
+  if (!confirm('Excluir esta ação?')) return;
+  window.nr1mapDb.collection('nr1map_plano_acao').doc(docId).delete()
+    .then(function(){ btn.closest('tr').remove(); atualizarBadgePendentes(); })
+    .catch(function(e){alert('Erro: '+e.message);});
+}
+
+function carregarEvolucaoIndicadores(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('evolucao-indicadores-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','asc').limit(6).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum dado disponível ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        ciclos.push({
+          mes: dt ? meses[dt.getMonth()] : '—',
+          sofrimento: d.sofrimentoGeral || null,
+          prazer: d.prazerGeral || null,
+          ibp: d.ibpGeral || null
+        });
+      });
+
+      // Se não tem sofrimento/prazer, usa IBP para mostrar algo
+      var temDados = ciclos.some(function(c){ return c.sofrimento !== null || c.ibp !== null; });
+      if (!temDados) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Aguardando diagnósticos concluídos para gerar evolução.</div>';
+        return;
+      }
+
+      function renderBars(dados, cor, label) {
+        var maxVal = Math.max.apply(null, dados.map(function(d){ return d||0; }));
+        if (maxVal === 0) maxVal = 100;
+        var html = '<div style="margin-bottom:16px;">';
+        html += '<div style="font-size:11px;color:var(--cinza-medio);margin-bottom:8px;font-weight:500;">'+label+'</div>';
+        html += '<div style="display:flex;gap:6px;align-items:flex-end;height:56px;">';
+        ciclos.forEach(function(c, i) {
+          var val = dados[i] || 0;
+          var h = maxVal > 0 ? Math.round((val/maxVal)*52) : 0;
+          var isMax = val === maxVal;
+          html += '<div style="flex:1;text-align:center;">';
+          html += '<div style="background:'+cor+';border-radius:3px 3px 0 0;height:'+h+'px;'+(isMax?'':'opacity:.7;')+'"></div>';
+          html += '<div style="font-size:9px;color:var(--cinza-medio);margin-top:3px;">'+c.mes+'</div>';
+          html += '<div style="font-size:10px;font-weight:600;'+(isMax?'color:'+cor+';':'')+'">'+(val||'—')+'</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+        return html;
+      }
+
+      var sofrimentos = ciclos.map(function(c){ return c.sofrimento; });
+      var prazeres = ciclos.map(function(c){ return c.prazer; });
+      var ibps = ciclos.map(function(c){ return c.ibp !== null ? Math.round((c.ibp+5)*10) : null; });
+
+      var html = '';
+      if (sofrimentos.some(function(v){return v!==null;})) {
+        html += renderBars(sofrimentos, 'var(--laranja)', 'Sofrimento geral');
+        html += renderBars(prazeres, 'var(--verde-claro)', 'Prazer geral');
+      } else {
+        html += renderBars(ibps, 'var(--verde-claro)', 'IBP geral (escala 0-100)');
+      }
+      el.innerHTML = html;
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum dado disponível ainda.</div>';
+      console.log('evolucao err:', e);
+    });
+}
+
+function carregarHistoricoReal(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('historico-timeline-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(10).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum ciclo registrado ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      el.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
+        var tipo = d.tipo === 'geral' ? 'Diagnóstico Geral' : 'Pesquisa Pulso';
+        var tipoCls = d.tipo === 'geral' ? 'tl-geral' : 'tl-pulso';
+        var tipoBadge = d.tipo === 'geral' ? 'g' : 'p';
+        var div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML =
+          '<div class="tl-dot '+tipoCls+'"></div>'+
+          '<div class="tl-body">'+
+            '<div class="tl-tipo '+tipoBadge+'">'+tipo+'</div>'+
+            '<div class="tl-desc">'+(d.totalRespostas||0)+' respostas · '+(d.unidade||'todas as unidades')+'</div>'+
+            (d.ibpGeral !== undefined ? '<span class="score-tag">IBP: '+(d.ibpGeral>0?'+':'')+parseFloat(d.ibpGeral).toFixed(1)+'</span>' : '')+
+            '<div class="tl-data">'+dataStr+'</div>'+
+          '</div>'+
+          '<button class="btn btn-ghost btn-sm btn-laudo" style="margin-left:auto;">Laudo →</button>';
+        var btnLaudo = div.querySelector('.btn-laudo');
+        if (btnLaudo) btnLaudo.addEventListener('click', function(){ sv('relatorios'); });
+        el.appendChild(div);
+      });
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum ciclo registrado ainda.</div>';
+      console.log('historico err:', e);
+    });
+}
+
+function carregarHistoricoPulso(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('pulso-historico-body');
+  if (!el) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').where('tipo','==','pulso').orderBy('criadoEm','desc').limit(10).get()
+    .then(function(snap) {
+      if (snap.empty) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma pesquisa pulso realizada ainda.</div>';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      el.innerHTML = '';
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
+        var div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML =
+          '<div class="tl-dot tl-pulso"></div>'+
+          '<div class="tl-body">'+
+            '<div class="tl-tipo p">Pesquisa Pulso'+(d.tema?' — '+d.tema:'')+'</div>'+
+            '<div class="tl-desc">'+(d.totalRespostas||0)+' responderam · '+(d.adesao||'—')+'% adesão</div>'+
+            '<div class="tl-data">'+dataStr+'</div>'+
+          '</div>'+
+          '<button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="abrirLaudoDoCiclo(\'' + doc.id + '\',\'pulso\')">Ver laudo</button>';
+        el.appendChild(div);
+      });
+    }).catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma pesquisa pulso realizada ainda.</div>';
+    });
+}
+
+function _carregarHistoricoUsado(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  // Busca todos os ciclos para identificar perguntas já usadas
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      snap.forEach(function(ciclo) {
+        var sel = ciclo.data().selecionadas || [];
+        sel.forEach(function(pid) { _rhHistorico.add(String(pid)); });
+      });
+    }).catch(function(){});
+}
+
+function rhToggle(pid, checked){
+  if (!checked && _rhHistorico.has(String(pid))) {
+    var ok = confirm('⚠️ Atenção: esta pergunta já foi usada em diagnósticos anteriores.\n\nDesmarcá-la afeta a comparabilidade histórica dos resultados.\n\nDeseja continuar?');
+    if (!ok) {
+      // Recheck o checkbox
+      var chks = document.querySelectorAll('[data-pid="'+pid+'"]');
+      chks.forEach(function(c){ c.checked = true; });
+      return;
     }
-    return {
-        "what": biblioteca.get(zona_nome, "Investigar e estruturar plano de mitigação."),
-        "why": f"Classificação {classif} (GRO), correspondente à Zona {zona_nome} (IBP {item['ibp']:+.1f}), "
-               f"exige intervenção conforme item 1.5.4.4.3 da NR-1.",
-        "who": "Gestor de RH + Liderança direta do setor + Consultoria responsável",
-        "where": item["nivel"],
-        "when": f"Prazo: {prazo}",
-        "how": "Reunião de Espaço de Fala Coletivo, revisão de metas e cronograma, acompanhamento via "
-               "Pesquisa Pulso semanal — registrado no instrumento de Acompanhamento (4).",
-        "howmuch": "A definir conforme escopo da intervenção (estimativa: R$ 0,00 — ação interna)",
+  }
+  if(checked) _rhSel.add(pid); else _rhSel.delete(pid);
+  _salvarSelecoes();
+  var el=document.getElementById('rh-total-sel');
+  if(el) el.textContent=_rhSel.size+' selecionada'+(_rhSel.size!==1?'s':'');
+}
+
+function _carregarRHSel(){
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(!eid||!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_selecoes').doc(eid).get()
+    .then(function(doc){
+      if(doc.exists){
+        var d = doc.data();
+        if(d.selecionadas) _rhSel = new Set(d.selecionadas.map(String));
+        if(d.proprias) _rhProprias = d.proprias;
+      }
+      renderRH();
+    }).catch(function(){ renderRH(); });
+  _carregarHistoricoUsado(eid);
+}
+
+function _salvarSelecoes(){
+  var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if(!eid||!window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_selecoes').doc(eid).set({
+    selecionadas: Array.from(_rhSel),
+    proprias: _rhProprias,
+    atualizadoEm: new Date().toISOString()
+  },{merge:true}).catch(function(e){console.log(e);});
+}
+
+function renderRH(){
+  var container=document.getElementById('container-rh');
+  var abasDiv=document.getElementById('abas-rh');
+  if(!container)return;
+  if(abasDiv&&abasDiv.children.length===0){
+    MODULOS.forEach(function(m){
+      var btn=document.createElement('button');
+      btn.className='btn-aba btn-aba-rh'+(m.id===abaRH?' aba-ativa':'');
+      btn.id='rh-aba-'+m.id;
+      btn.textContent=m.emoji+' '+m.titulo.replace(/Módulo \d+ — /,'');
+      btn.onclick=(function(id){return function(){
+        abaRH=id;
+        document.querySelectorAll('.btn-aba-rh').forEach(function(b){b.classList.remove('aba-ativa');});
+        document.getElementById('rh-aba-'+id).classList.add('aba-ativa');
+        renderRH();
+      };})(m.id);
+      abasDiv.appendChild(btn);
+    });
+  }
+  var modulo=null;
+  MODULOS.forEach(function(m){if(m.id===abaRH)modulo=m;});
+  if(!modulo){container.innerHTML='';return;}
+  var cor=COR_MOD[abaRH]||'#374151';
+  var html='';
+  var sel = _rhSel;
+  modulo.subcats.forEach(function(s){
+    var nSel = s.perguntas.filter(function(p){return sel.has(String(p.id));}).length;
+    var corCnt = nSel>=3?'var(--verde)':'var(--laranja)';
+    html+='<div style="margin-bottom:10px;border:1px solid var(--linha);border-radius:8px;overflow:hidden;">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="toggleRHSubcat(this)">';
+    html+='<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+s.id+' — '+s.titulo+'</span>';
+    html+='<span style="font-size:11px;font-weight:600;color:'+corCnt+';">'+nSel+'/'+s.perguntas.length+' ▸</span></div>';
+    html+='<div style="display:none;" id="sc-body-'+s.id+'"></div>';
+    html+='</div>';
+  });
+  container.innerHTML=html;
+
+  // Preenche cada subcategoria via DOM (evita aspas aninhadas)
+  modulo.subcats.forEach(function(s){
+    var body=document.getElementById('sc-body-'+s.id);
+    if(!body) return;
+    s.perguntas.forEach(function(p){
+      var pid=String(p.id);
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--linha);background:#fff;';
+      var chk=document.createElement('input');
+      chk.type='checkbox'; chk.checked=sel.has(pid);
+      chk.style.cssText='margin-top:3px;accent-color:var(--verde);flex-shrink:0;';
+      chk.onchange=(function(pid){return function(){rhToggle(pid,this.checked);};})(pid);
+      var num=document.createElement('span');
+      num.style.cssText='font-size:11px;font-weight:600;color:var(--cinza-medio);font-family:monospace;flex-shrink:0;min-width:30px;';
+      num.textContent='#'+String(p.id).padStart(3,'0');
+      var txt=document.createElement('span');
+      txt.style.cssText='font-size:12px;line-height:1.5;';
+      txt.textContent=p.texto;
+      row.appendChild(chk); row.appendChild(num); row.appendChild(txt);
+      body.appendChild(row);
+    });
+  });
+
+  // Perguntas próprias por subcategoria
+  modulo.subcats.forEach(function(s){
+    var body = document.getElementById('sc-body-'+s.id);
+    if (!body) return;
+    // Perguntas próprias desta subcategoria
+    var proprias = _rhProprias.filter(function(p){ return p.subcatId === s.id; });
+    proprias.forEach(function(p){
+      var row = document.createElement('div');
+      row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--linha);background:#FFFBEB;';
+      var chk = document.createElement('input');
+      chk.type='checkbox'; chk.checked=sel.has(p.id);
+      chk.dataset.pid = p.id;
+      chk.style.cssText='margin-top:3px;accent-color:var(--roxo);flex-shrink:0;';
+      chk.onchange=(function(pid){return function(){rhToggle(pid,this.checked);};})(p.id);
+      var tag = document.createElement('span');
+      tag.style.cssText='font-size:10px;font-weight:700;color:var(--roxo);flex-shrink:0;min-width:30px;padding-top:2px;';
+      tag.textContent='★ PP';
+      var txt = document.createElement('span');
+      txt.style.cssText='font-size:12px;line-height:1.5;flex:1;';
+      txt.textContent = p.texto;
+      var btnDel = document.createElement('button');
+      btnDel.textContent='🗑';
+      btnDel.title='Excluir pergunta própria';
+      btnDel.style.cssText='background:none;border:1px solid #fca5a5;border-radius:5px;padding:2px 6px;cursor:pointer;font-size:10px;color:#e53935;flex-shrink:0;';
+      btnDel.onclick=(function(pid){return function(){
+        if(!confirm('Excluir esta pergunta personalizada?')) return;
+        _rhProprias = _rhProprias.filter(function(x){return x.id!==pid;});
+        _rhSel.delete(pid);
+        _salvarSelecoes();
+        renderRH();
+      };})(p.id);
+      row.appendChild(chk); row.appendChild(tag); row.appendChild(txt); row.appendChild(btnDel);
+      body.appendChild(row);
+    });
+    // Botão + Pergunta própria
+    var addDiv = document.createElement('div');
+    addDiv.style.padding='8px 12px';
+    var btnAdd = document.createElement('button');
+    btnAdd.style.cssText='font-size:11px;color:var(--roxo);background:var(--roxo-xp);border:1px dashed var(--roxo);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600;';
+    btnAdd.textContent='+ Pergunta própria';
+    btnAdd.onclick=(function(modId,subcatId){return function(){
+      var texto = prompt('Nova pergunta personalizada para sua empresa:\n(visível apenas para você — não afeta o banco global)');
+      if(!texto||!texto.trim()) return;
+      var id = 'pp_'+Date.now();
+      _rhProprias.push({id:id,modId:modId,subcatId:subcatId,texto:texto.trim()});
+      _rhSel.add(id);
+      _salvarSelecoes();
+      renderRH();
+    };})(modulo.id, s.id);
+    addDiv.appendChild(btnAdd);
+    body.appendChild(addDiv);
+  });
+
+  var el=document.getElementById('rh-total-sel');
+  if(el) el.textContent=sel.size+' selecionada'+(sel.size!==1?'s':'');
+}
+
+function toggleRHSubcat(hdr){
+  var body=hdr.nextElementSibling;
+  var aberto=body.style.display!=='none';
+  body.style.display=aberto?'none':'block';
+  var seta=hdr.querySelector('span:last-child');
+  if(seta)seta.textContent=seta.textContent.replace(aberto?'▾':'▸',aberto?'▸':'▾');
+}
+
+function editarColab(btn) {
+  var row = btn.closest('tr');
+  if(!row) return;
+  var docId = row.dataset.docid || null;
+  window._editColabRow = row;
+  window._editColabDocId = docId;
+
+  // Limpa campos
+  ['ec-nome','ec-email','ec-whatsapp','ec-cargo','ec-cbo','ec-depto','ec-unidade'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('ec-admissao').value = '';
+  document.getElementById('ec-status').value = 'ativo';
+
+  // Busca dados reais do Firestore
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).get()
+      .then(function(doc) {
+        if (!doc.exists) return;
+        var d = doc.data();
+        document.getElementById('ec-nome').value     = d.nome || '';
+        document.getElementById('ec-email').value    = d.email || '';
+        document.getElementById('ec-whatsapp').value = d.whatsapp || '';
+        // Cargo pode vir como "Cargo · CBO" ou separado
+        var cargoNome = d.cargo || '';
+        var cboval    = d.cbo || '';
+        if (!cboval && cargoNome.includes(' · ')) {
+          var partes = cargoNome.split(' · ');
+          cargoNome = partes[0];
+          cboval    = partes[1] || '';
+        }
+        document.getElementById('ec-cargo').value    = cargoNome;
+        document.getElementById('ec-cbo').value      = cboval;
+        document.getElementById('ec-depto').value    = d.departamento || d.setor || '';
+        document.getElementById('ec-unidade').value  = d.unidade || '';
+        document.getElementById('ec-admissao').value = d.admissao || '';
+        document.getElementById('ec-status').value   = d.status || 'ativo';
+        document.getElementById('ec-nivel').value    = d.nivelAcesso || 'colaborador';
+        document.getElementById('modal-edit-colab').classList.add('open');
+      })
+      .catch(function(e) {
+        console.log(e);
+        document.getElementById('modal-edit-colab').classList.add('open');
+      });
+  } else {
+    // Fallback: lê das células da tabela
+    var cells = Array.from(row.querySelectorAll('td'));
+    document.getElementById('ec-nome').value    = cells[0] ? cells[0].innerText.trim() : '';
+    document.getElementById('ec-email').value   = cells[1] ? cells[1].innerText.trim() : '';
+    document.getElementById('ec-cargo').value   = cells[2] ? cells[2].innerText.trim() : '';
+    document.getElementById('ec-depto').value   = cells[3] ? cells[3].innerText.trim() : '';
+    document.getElementById('ec-unidade').value = cells[4] ? cells[4].innerText.trim() : '';
+    document.getElementById('ec-status').value  = row.dataset.status || 'ativo';
+    document.getElementById('modal-edit-colab').classList.add('open');
+  }
+}
+
+function salvarEditColab() {
+  var row   = window._editColabRow;
+  var docId = window._editColabDocId;
+  if(!row) return;
+
+  var nome     = document.getElementById('ec-nome').value.trim() || '—';
+  var email    = document.getElementById('ec-email').value.trim();
+  var whatsapp = document.getElementById('ec-whatsapp').value.replace(/[^0-9]/g,'');
+  var cargo    = document.getElementById('ec-cargo').value.trim();
+  var cbo      = document.getElementById('ec-cbo').value.trim();
+  var depto    = document.getElementById('ec-depto').value.trim();
+  var unidade  = document.getElementById('ec-unidade').value.trim();
+  var admissao = document.getElementById('ec-admissao').value;
+  var status      = document.getElementById('ec-status').value || 'ativo';
+  var nivelAcesso = document.getElementById('ec-nivel').value || 'colaborador';
+
+  document.getElementById('modal-edit-colab').classList.remove('open');
+
+  // Salva no Firestore
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).update({
+      nome: nome,
+      email: email,
+      whatsapp: whatsapp,
+      cargo: cargo,
+      cbo: cbo,
+      setor: depto,
+      departamento: depto,
+      unidade: unidade,
+      admissao: admissao,
+      status: status,
+      nivelAcesso: nivelAcesso,
+      atualizadoEm: new Date().toISOString()
+    }).then(function(){
+      carregarColabs(); // recarrega lista para refletir mudanças
+    }).catch(function(e){ console.log('Erro ao atualizar colaborador:', e); });
+  }
+}
+
+function editarCargo(id) {
+  var cargo = null;
+  for(var i=0; i<cargos.length; i++) { if(cargos[i].id === id) { cargo = cargos[i]; break; } }
+  if(!cargo) return;
+  document.getElementById('edit-cargo-nome').value = cargo.nome;
+  document.getElementById('edit-cargo-cbo').value = cargo.cbo;
+  // Popula select de Nível
+  var selNivel = document.getElementById('edit-cargo-nivel');
+  selNivel.innerHTML = '<option value="">— Sem nível —</option>';
+  niveisHier.forEach(function(nv){
+    var opt = document.createElement('option');
+    opt.value = nv.id; opt.textContent = nv.nome;
+    if(nv.id === cargo.nvId) opt.selected = true;
+    selNivel.appendChild(opt);
+  });
+  // Popula select de Reporta a
+  var selRep = document.getElementById('edit-cargo-reporta');
+  selRep.innerHTML = '<option value="">— Nenhum (topo) —</option>';
+  cargos.forEach(function(c){
+    if(c.id === id) return;
+    var opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.nome;
+    if(c.id === cargo.repId) opt.selected = true;
+    selRep.appendChild(opt);
+  });
+  window._editCargoId = id;
+  document.getElementById('modal-edit-cargo').classList.add('open');
+}
+
+function salvarEditCargo() {
+  var id = window._editCargoId;
+  for(var i=0; i<cargos.length; i++) {
+    if(cargos[i].id === id) {
+      cargos[i].nome = document.getElementById('edit-cargo-nome').value.trim();
+      cargos[i].cbo = document.getElementById('edit-cargo-cbo').value.trim();
+      cargos[i].nvId = document.getElementById('edit-cargo-nivel').value || null;
+      cargos[i].repId = document.getElementById('edit-cargo-reporta').value || null;
+      break;
+    }
+  }
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').doc(id).update({
+      nome: cargos[i].nome, cbo: cargos[i].cbo,
+      nvId: cargos[i].nvId, repId: cargos[i].repId
+    }).catch(function(e){ console.log(e); });
+  }
+  renderCargos();
+  document.getElementById('modal-edit-cargo').classList.remove('open');
+  alert('✅ Cargo atualizado!');
+}
+
+/* ===== MOBILE NAV ===== */
+function abrirSidebar(){
+  document.querySelector('.sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function fecharSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+/* Injeta hamburger em todas as topbars ao carregar */
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.topbar').forEach(function(tb){
+    var hb=document.createElement('button');
+    hb.className='hamburger';
+    hb.setAttribute('aria-label','Menu');
+    hb.innerHTML='<span></span><span></span><span></span>';
+    hb.onclick=abrirSidebar;
+    tb.insertBefore(hb,tb.firstChild);
+  });
+});
+
+function sv(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('view-'+id);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav)nav.classList.add('active');
+  fecharSidebar();
+  window.scrollTo(0,0);
+  if(id==='modulos'){ renderRH(); _carregarRHSel(); }
+  if(id==='plano-acao' && window.nr1mapEmpresa){
+    _planoCicloAtual = null;
+    carregarHistoricoPlano(window.nr1mapEmpresa.id);
+  }
+  if(id==='cobranding') { _carregarResponsavelTecnico(); if(window.nr1mapEmpresa) carregarOuvidoria(window.nr1mapEmpresa); _carregarContextoEmpresa(); }
+  if(id==='laudo-tecnico' && window.nr1mapEmpresa) carregarLaudoTecnico(window.nr1mapEmpresa.id);
+  if(id==='mapa-risco' && window.nr1mapEmpresa) {
+    carregarMapaRisco(window.nr1mapEmpresa.id);
+    _carregarCiclosMapaCards(window.nr1mapEmpresa.id);
+  }
+  if(id==='relatorio-anual' && window.nr1mapEmpresa) {
+    carregarRelatorioAnual(window.nr1mapEmpresa.id);
+    _popularFiltroAnos();
+  }
+  if(id==='relatorios' && window.nr1mapEmpresa) carregarRelatorios(window.nr1mapEmpresa.id);
+  if(id==='planejamento') carregarAgenda();
+  if(id==='historico' && window.nr1mapEmpresa) carregarHistoricoUnificado(window.nr1mapEmpresa.id);
+  if(id==='relatorios-ciclo' && window.nr1mapEmpresa) carregarRelatoriosPorCiclo(window.nr1mapEmpresa.id);
+}
+function swTab(tab,targetId){
+  var container = tab.closest('.card') || document;
+  container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  container.querySelectorAll('[id^="t-"]').forEach(v=>v.classList.remove('active'));
+  const t=document.getElementById(targetId);
+  if(t)t.classList.add('active');
+}
+function toggleModulo(header){
+  const body=header.nextElementSibling;
+  body.classList.toggle('open');
+}
+function selOpt(el){
+  el.closest('.disparo-opts').querySelectorAll('.d-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function baixarModeloCSV() {
+  var cabecalho = 'nome,whatsapp_ou_email,cargo_cbo,departamento,unidade,data_admissao,data_demissao';
+  var exemplo = 'João Silva,62999990000,Analista de RH · 2521-05,Recursos Humanos,Matriz Goiânia,2024-01-15,';
+  var blob = new Blob([cabecalho + '\n' + exemplo], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'modelo_colaboradores_NR1Map.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function baixarModeloExcel() {
+  // Gera XLSX mínimo via CSV com extensão xlsx (abre no Excel)
+  // Para XLSX real seria necessário biblioteca externa
+  var cabecalho = 'nome\twhatsapp_ou_email\tcargo_cbo\tdepartamento\tunidade\tdata_admissao\tdata_demissao';
+  var exemplo = 'João Silva\t62999990000\tAnalista de RH · 2521-05\tRecursos Humanos\tMatriz Goiânia\t2024-01-15\t';
+  var blob = new Blob([cabecalho + '\n' + exemplo], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'modelo_colaboradores_NR1Map.xls';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function handleUpload(input){
+  if(input.files&&input.files[0]){
+    const z=document.querySelector('.upload-zone');
+    z.innerHTML=`<div style="font-size:24px;margin-bottom:6px;">✅</div><p><strong>${input.files[0].name}</strong></p><p style="font-size:11px;margin-top:4px;">Validando...</p>`;
+    setTimeout(()=>{document.getElementById('uploadPreview').style.display='block';},600);
+  }
+}
+function confirmUpload(){alert('✅ 11 colaboradores importados com sucesso!');sv('colaboradores');}
+function filtrarTabela(q){
+  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
+    tr.style.display=tr.dataset.nome.toLowerCase().includes(q.toLowerCase())||q===''?'':'none';
+  });
+}
+function filtrarStatus(s){
+  document.querySelectorAll('#tbody-colab tr').forEach(tr=>{
+    tr.style.display=(!s||tr.dataset.status===s)?'':'none';
+  });
+}
+function ordenar(campo){alert('Ordenando por '+campo+'...');}
+function _gerarSenhaTemp() {
+  var c='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#';
+  var s=''; for(var i=0;i<10;i++) s+=c[Math.floor(Math.random()*c.length)]; return s;
+}
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ===== PLANO DE AÇÃO 5W2H — sinalizador de prazo ===== */
+function corSinalizador(dataPrazoStr){
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const prazo=new Date(dataPrazoStr+'T00:00:00');
+  const diffDias=Math.round((prazo-hoje)/86400000);
+  if(diffDias<0) return {cor:'#C53030',texto:'Vencido'};
+  if(diffDias<=2) return {cor:'#D4A017',texto:'Vencendo'};
+  return {cor:'var(--verde-claro)',texto:'No prazo'};
+}
+function atualizarSinalizador(inputOuTr){
+  const tr=inputOuTr.tagName==='TR'?inputOuTr:inputOuTr.closest('tr');
+  const input=tr.querySelector('input[type="date"]');
+  if(!input||!input.value)return;
+  const {cor,texto}=corSinalizador(input.value);
+  const cel=tr.querySelector('.sinalizador-cell');
+  cel.innerHTML=`<span class="bdg-s" style="background:${cor}22;color:${cor};"><span class="dot" style="background:${cor};"></span>${texto}</span>`;
+}
+function atualizarTodosSinalizadores(){
+  document.querySelectorAll('#tbody-plano tr').forEach(atualizarSinalizador);
+}
+function atualizarBadgePendentes(){
+  const total=document.querySelectorAll('#tbody-plano tr').length;
+  let pendentes=0;
+  document.querySelectorAll('#tbody-plano tr').forEach(tr=>{
+    const sel=tr.querySelector('select');
+    if(sel && sel.value!=='Concluída')pendentes++;
+  });
+  const bdg=document.getElementById('bdg-plano-pendentes');
+  if(bdg)bdg.textContent=pendentes;
+}
+function adicionarAcao(){
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var hoje=new Date(); hoje.setDate(hoje.getDate()+7);
+  var dataPadrao=hoje.toISOString().slice(0,10);
+  var cicloAtualPlano = _planoCicloAtual || null;
+  window.nr1mapDb.collection('nr1map_plano_acao').add({
+    empresaId: empresaId,
+    cicloId: cicloAtualPlano,
+    setor: 'Novo setor / CBO',
+    acao: 'Descreva a acao (What / How)...',
+    responsavel: 'Responsavel',
+    status: 'Pendente',
+    prazo: dataPadrao,
+    criadoEm: new Date().toISOString()
+  }).then(function(){ carregarPlanoAcao(empresaId, cicloAtualPlano); })
+  .catch(function(e){ alert('Erro: '+e.message); });
+}
+function gerarPdfPlano(){
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = document.querySelector('[onclick="gerarPdfPlano()"]');
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=plano_5w2h')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
+      if(d.url){
+        window.open(d.url, '_blank');
+        alert('✅ PDF do Plano de Ação gerado com sucesso!');
+      } else {
+        alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
+      alert('Erro de conexão: ' + e.message);
+    });
+}
+
+
+/* ===== RESPONSÁVEL TÉCNICO ===== */
+// ===== CONTEXTO DA EMPRESA =====
+function _carregarContextoEmpresa() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+
+  // Painel com dados automáticos (colaboradores, cargos)
+  var panorama = document.getElementById('ctx-panorama');
+  if (panorama) {
+    var ativos = document.getElementById('mc-colab-ativos');
+    var nAtivos = ativos ? (ativos.textContent || '—') : '—';
+    var nCargos = window.cargos ? window.cargos.length : '—';
+    panorama.innerHTML =
+      '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:12px;color:#374151;">' +
+      '<span style="font-weight:600;">' + nAtivos + '</span> colaboradores ativos</div>' +
+      '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:12px;color:#374151;">' +
+      '<span style="font-weight:600;">' + nCargos + '</span> cargos cadastrados</div>';
+  }
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc) {
+      if (!doc.exists) return;
+      var d = doc.data();
+      var ctx = d.contextoEmpresa || {};
+      if (document.getElementById('ctx-setor'))      document.getElementById('ctx-setor').value      = ctx.setor || '';
+      if (document.getElementById('ctx-fundacao'))   document.getElementById('ctx-fundacao').value   = ctx.fundacao || '';
+      if (document.getElementById('ctx-missao'))     document.getElementById('ctx-missao').value     = ctx.missao || '';
+      if (document.getElementById('ctx-historico'))  document.getElementById('ctx-historico').value  = ctx.historico || '';
+      if (document.getElementById('ctx-diagnostico')) document.getElementById('ctx-diagnostico').value = ctx.diagnostico || '';
+      // Organograma
+      if (d.orgogramaUrl) {
+        var wrap = document.getElementById('org-preview-wrap');
+        var img  = document.getElementById('org-preview-img');
+        var area = document.getElementById('org-upload-area');
+        if (wrap) wrap.style.display = 'block';
+        if (img)  img.src = d.orgogramaUrl;
+        if (area) area.style.display = 'none';
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = d.orgogramaUrl;
+      }
+    }).catch(function(){});
+}
+
+function salvarContextoEmpresa() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa nao carregada.'); return; }
+  var btn = document.querySelector('[onclick="salvarContextoEmpresa()"]');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  var ctx = {
+    setor:       (document.getElementById('ctx-setor')      || {}).value || '',
+    fundacao:    (document.getElementById('ctx-fundacao')   || {}).value || '',
+    missao:      (document.getElementById('ctx-missao')     || {}).value || '',
+    historico:   (document.getElementById('ctx-historico')  || {}).value || '',
+    diagnostico: (document.getElementById('ctx-diagnostico')|| {}).value || '',
+    atualizadoEm: new Date().toISOString()
+  };
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+    .update({ contextoEmpresa: ctx })
+    .then(function() {
+      if (window.nr1mapEmpresa) window.nr1mapEmpresa.contextoEmpresa = ctx;
+      if (btn) { btn.textContent = '✓ Salvo!'; btn.disabled = false; }
+      setTimeout(function(){ if(btn) btn.textContent = '💾 Salvar Contexto da Empresa'; }, 2000);
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '💾 Salvar Contexto da Empresa'; btn.disabled = false; }
+      alert('Erro: ' + e.message);
+    });
+}
+
+// ===== ORGANOGRAMA POR UPLOAD =====
+function uploadOrganograma(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) { alert('Arquivo muito grande. Maximo 5MB.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+
+  var progress = document.getElementById('org-upload-progress');
+  var area     = document.getElementById('org-upload-area');
+  if (progress) progress.style.display = 'block';
+  if (area)     area.style.display = 'none';
+
+  // Ler como base64 e salvar no Firestore (< 1MB) ou Firebase Storage (> 1MB)
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+
+    if (file.size < 800 * 1024) {
+      // Pequeno — salva como base64 no Firestore
+      window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+        .update({ orgogramaUrl: dataUrl })
+        .then(function() {
+          _mostrarOrganograma(dataUrl);
+          if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = dataUrl;
+          if (progress) progress.style.display = 'none';
+        }).catch(function(e){ if(progress) progress.style.display='none'; alert('Erro: '+e.message); });
+    } else {
+      // Grande — sobe para Firebase Storage
+      var storageRef = firebase.storage().ref('nr1map_organogramas/' + empresaId + '/organograma.' + file.name.split('.').pop());
+      storageRef.put(file).then(function(snap) {
+        return snap.ref.getDownloadURL();
+      }).then(function(url) {
+        return window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+          .update({ orgogramaUrl: url })
+          .then(function() {
+            _mostrarOrganograma(url);
+            if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = url;
+            if (progress) progress.style.display = 'none';
+          });
+      }).catch(function(e){ if(progress) progress.style.display='none'; alert('Erro no upload: '+e.message); });
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function _mostrarOrganograma(url) {
+  var wrap = document.getElementById('org-preview-wrap');
+  var img  = document.getElementById('org-preview-img');
+  var area = document.getElementById('org-upload-area');
+  if (wrap) wrap.style.display = 'block';
+  if (img)  img.src = url;
+  if (area) area.style.display = 'none';
+}
+
+function removerOrganograma() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  if (!confirm('Remover o organograma salvo?')) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId)
+    .update({ orgogramaUrl: firebase.firestore.FieldValue.delete() })
+    .then(function() {
+      var wrap = document.getElementById('org-preview-wrap');
+      var area = document.getElementById('org-upload-area');
+      var img  = document.getElementById('org-preview-img');
+      if (wrap) wrap.style.display = 'none';
+      if (area) area.style.display = 'block';
+      if (img)  img.src = '';
+      if (window.nr1mapEmpresa) delete window.nr1mapEmpresa.orgogramaUrl;
+    }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+
+function salvarOuvidoria() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var nome     = (document.getElementById('ouv-nome')||{}).value.trim();
+  var email    = (document.getElementById('ouv-email')||{}).value.trim();
+  var telefone = (document.getElementById('ouv-telefone')||{}).value.trim();
+  if (!email) { alert('Informe o e-mail da ouvidoria.'); return; }
+  var btn = document.querySelector('[onclick="salvarOuvidoria()"]');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update({
+    ouvidoria: { nome: nome, email: email, telefone: telefone }
+  }).then(function() {
+    if (btn) { btn.textContent = '💾 Salvar Canal de Ouvidoria'; btn.disabled = false; }
+    alert('Canal de ouvidoria salvo com sucesso!');
+  }).catch(function(e) {
+    if (btn) { btn.textContent = '💾 Salvar Canal de Ouvidoria'; btn.disabled = false; }
+    alert('Erro ao salvar: ' + e.message);
+  });
+}
+
+function carregarOuvidoria(empresa) {
+  var ouv = empresa.ouvidoria || {};
+  var n = document.getElementById('ouv-nome');
+  var e = document.getElementById('ouv-email');
+  var t = document.getElementById('ouv-telefone');
+  if (n) n.value = ouv.nome || '';
+  if (e) e.value = ouv.email || '';
+  if (t) t.value = ouv.telefone || '';
+}
+
+function salvarResponsavelTecnico() {
+  var nome         = document.getElementById('rt-nome').value.trim();
+  var cargo        = document.getElementById('rt-cargo').value.trim();
+  var registro     = document.getElementById('rt-registro').value.trim();
+  var formacao     = document.getElementById('rt-formacao').value.trim();
+  var curriculo    = document.getElementById('rt-curriculo').value.trim();
+  var obsAuditoria = document.getElementById('rt-obs-auditoria') ? document.getElementById('rt-obs-auditoria').value.trim() : '';
+
+  if (!nome || !cargo) { alert('Preencha nome e cargo do responsável técnico.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa não carregada.'); return; }
+
+  var btn = document.querySelector('[onclick="salvarResponsavelTecnico()"]');
+  if(btn){ btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update({
+    responsavelTecnico: {
+      nome: nome,
+      cargo: cargo,
+      registro: registro,
+      formacao: formacao,
+      curriculo: curriculo,
+      obsAuditoria: obsAuditoria,
+      status: 'pendente_validacao',
+      atualizadoEm: new Date().toISOString()
+    }
+  }).then(function(){
+    // Atualizar cache local
+    if (window.nr1mapEmpresa) {
+      window.nr1mapEmpresa.responsavelTecnico = { nome:nome, cargo:cargo, registro:registro, formacao:formacao, curriculo:curriculo, obsAuditoria:obsAuditoria };
+    }
+    if(btn){ btn.textContent = '💾 Salvar Responsável Técnico'; btn.disabled = false; }
+    alert('✅ Responsável técnico e observações de auditoria salvos!');
+  }).catch(function(e){
+    if(btn){ btn.textContent = '💾 Salvar Responsável Técnico'; btn.disabled = false; }
+    console.log(e); alert('Erro ao salvar. Tente novamente.');
+  });
+}
+
+function solicitarAssinaturaLucia() {
+  var empresaId   = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var empresaNome = window.nr1mapEmpresa && window.nr1mapEmpresa.nome;
+  var numColab    = window.nr1mapEmpresa && (window.nr1mapEmpresa.numColaboradores || 0);
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa não carregada.'); return; }
+
+  // Calcula custo
+  var custo = numColab <= 20 ? 97 : numColab <= 100 ? 197 : 297;
+  var custoLabel = 'R$ ' + custo.toFixed(2).replace('.', ',');
+
+  if (!confirm('Solicitar assinatura da Dra. Lucia Kratz no laudo técnico?\n\nCusto: ' + custoLabel + ' por laudo assinado.\n\nUm chamado será aberto e você receberá instruções de pagamento.')) return;
+
+  window.nr1mapDb.collection('nr1map_chamados').add({
+    tipo: 'assinatura_laudo',
+    empresaId: empresaId,
+    empresaNome: empresaNome || '',
+    numColaboradores: numColab,
+    custo: custo,
+    status: 'pendente_pagamento',
+    criadoEm: new Date().toISOString()
+  }).then(function(){
+    alert('✅ Solicitação enviada!\n\nA Dra. Lucia Kratz entrará em contato em até 1 dia útil com as instruções de pagamento e assinatura.');
+  }).catch(function(e){ console.log(e); alert('Erro ao enviar solicitação.'); });
+}
+
+function _carregarResponsavelTecnico() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc){
+      if (!doc.exists) return;
+      var d = doc.data();
+      // Nome empresa
+      var cbNome = document.getElementById('cb-nome-empresa');
+      if(cbNome) cbNome.value = d.nome || '';
+      // Logo existente da empresa
+      if (d.logo_url) {
+        var prev = document.getElementById('logo-empresa-preview');
+        if (prev) prev.innerHTML = '<img src="' + d.logo_url + '" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.logo_url = d.logo_url;
+      }
+      // Preview logo parceiro no co-branding
+      var prevParc = document.getElementById('logo-parceiro-herdado-preview');
+      var logoParc = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
+      if (prevParc) {
+        if (logoParc) {
+          prevParc.innerHTML = '<img src="' + logoParc + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+        } else {
+          // Ainda carregando — aguarda 1s e tenta novamente
+          setTimeout(function() {
+            var lp2 = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
+            if (lp2) prevParc.innerHTML = '<img src="' + lp2 + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+          }, 1200);
+        }
+      }
+      // Responsável técnico
+      var rt = d.responsavelTecnico;
+      if(!rt) return;
+      if(document.getElementById('rt-nome')) document.getElementById('rt-nome').value = rt.nome||'';
+      if(document.getElementById('rt-cargo')) document.getElementById('rt-cargo').value = rt.cargo||'';
+      if(document.getElementById('rt-registro')) document.getElementById('rt-registro').value = rt.registro||'';
+      if(document.getElementById('rt-formacao')) document.getElementById('rt-formacao').value = rt.formacao||'';
+      if(document.getElementById('rt-curriculo')) document.getElementById('rt-curriculo').value = rt.curriculo||'';
+      if(document.getElementById('rt-obs-auditoria')) document.getElementById('rt-obs-auditoria').value = rt.obsAuditoria||'';
+    }).catch(function(){});
+}
+
+/* ===== CO-BRANDING — logo da empresa ===== */
+function previewLogoEmpresa(input, targetId){
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=function(e){
+      document.getElementById(targetId).innerHTML='<img src="'+e.target.result+'" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+function salvarLogoEmpresa(){
+  var input = document.getElementById('logo-empresa');
+  var nomeEmpresa = (document.getElementById('cb-nome-empresa').value||'').trim();
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Empresa não carregada.'); return; }
+
+  // Salvar nome da empresa sempre
+  var updates = {};
+  if (nomeEmpresa) updates.nome = nomeEmpresa;
+
+  var btn = document.querySelector('[onclick="salvarLogoEmpresa()"]');
+
+  // Se há arquivo selecionado, fazer upload para Firebase Storage
+  if (input && input.files && input.files[0]) {
+    var file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 5MB.'); return; }
+    if(btn){ btn.textContent = 'Enviando...'; btn.disabled = true; }
+
+    // Usar Firebase Storage via SDK global
+    var storage = firebase.app('nr1map').storage ? firebase.app('nr1map').storage() : (firebase.storage ? firebase.storage() : null);
+    if (!storage) {
+      // Fallback: salvar como base64 no Firestore
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        updates.logo_url = e.target.result;
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.logo_url = e.target.result;
+        window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update(updates)
+          .then(function(){
+            if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; }
+            alert('✅ Logo e nome da empresa salvos!');
+          }).catch(function(e){ if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; } console.log(e); });
+      };
+      reader.readAsDataURL(file);
+      return;
     }
 
+    var ref = storage.ref('nr1map_logos/' + empresaId + '/' + file.name);
+    ref.put(file).then(function(snapshot){
+      return snapshot.ref.getDownloadURL();
+    }).then(function(url){
+      updates.logo_url = url;
+      if (window.nr1mapEmpresa) window.nr1mapEmpresa.logo_url = url;
+      return window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update(updates);
+    }).then(function(){
+      if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; }
+      alert('✅ Logo enviada e nome da empresa salvos!');
+    }).catch(function(e){
+      if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; }
+      console.log(e); alert('Erro ao enviar logo: ' + e.message);
+    });
 
-# ───────────────────────────── ESTILOS ─────────────────────────────
-styles = getSampleStyleSheet()
-s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
-                       spaceAfter=4, fontName='Helvetica-Bold')
-s_sub = ParagraphStyle('sub', parent=styles['Normal'], fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1,
-                       spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
-s_h3 = ParagraphStyle('h3', parent=styles['Heading3'], fontSize=10.5, textColor=AZUL_ESCURO,
-                       spaceBefore=10, spaceAfter=4, fontName='Helvetica-Bold')
-s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
-s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.5, textColor=CINZA_TEXTO, leading=12)
-s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
-s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', textColor=colors.black,
-                          alignment=TA_CENTER)
+  } else if (nomeEmpresa) {
+    // Só atualizar nome
+    if(btn){ btn.textContent = 'Salvando...'; btn.disabled = true; }
+    if (window.nr1mapEmpresa) window.nr1mapEmpresa.nome = nomeEmpresa;
+    window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).update(updates)
+      .then(function(){
+        if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; }
+        alert('✅ Nome da empresa salvo!');
+      }).catch(function(e){ if(btn){ btn.textContent = 'Salvar logo da empresa'; btn.disabled = false; } console.log(e); });
+  } else {
+    alert('Selecione uma logo ou preencha o nome da empresa.');
+  }
+}
+
+/* ===== ACOMPANHAMENTO — linha do tempo de evidências ===== */
+var historicoEventos=[];
+function nomeSetorDaLinha(tr){
+  const primeiraCelula=tr.querySelector('td div[contenteditable]');
+  return primeiraCelula?primeiraCelula.textContent.split('\n')[0].trim():'Ação';
+}
+function registrarEvento(selectEl){
+  const tr=selectEl.closest('tr');
+  const setor=nomeSetorDaLinha(tr);
+  const status=selectEl.value;
+  const agora=new Date();
+  const dataStr=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  historicoEventos.unshift({data:dataStr, resp:'Você (sessão atual)', evento:`${setor} — Status alterado para ${status}`});
+  renderHistorico();
+}
+function renderHistorico(){
+  const cor={'criada':'var(--cinza-medio)','Pendente':'#C53030','Em andamento':'#D4A017','Concluída':'var(--verde-claro)'};
+  const lista=document.getElementById('lista-historico');
+  if(!lista)return;
+  lista.innerHTML=historicoEventos.map(ev=>{
+    let c='var(--cinza-medio)';
+    if(ev.evento.includes('Concluída'))c='var(--verde-claro)';
+    else if(ev.evento.includes('Em andamento'))c='#D4A017';
+    else if(ev.evento.includes('criada')||ev.evento.includes('Pendente'))c='#C53030';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--linha);border-radius:7px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-top:4px;flex-shrink:0;"></span>
+      <div style="flex:1;">
+        <div style="font-size:12px;">${ev.evento}</div>
+        <div style="font-size:10px;color:var(--cinza-medio);margin-top:2px;">${ev.data} · ${ev.resp}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function gerarPdfAcompanhamento(){
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = document.querySelector('[onclick="gerarPdfAcompanhamento()"]');
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=acompanhamento')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Gerar PDF de Acompanhamento'; btn.disabled = false; }
+      if(d.url){
+        window.open(d.url, '_blank');
+        alert('✅ PDF de Acompanhamento gerado com sucesso!');
+      } else {
+        alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Gerar PDF de Acompanhamento'; btn.disabled = false; }
+      alert('Erro de conexão: ' + e.message);
+    });
+}
+/* ===== VELOCÍMETROS IBP ===== */
+function drawGauge(id, ibp) {
+  var c = document.getElementById(id);
+  if (!c) return;
+  var ctx = c.getContext('2d'), W = c.width, H = c.height, cx = W/2, cy = H-4, r = 68;
+  ctx.clearRect(0, 0, W, H);
+  function ang(v) { return Math.PI + ((v+5)/10) * Math.PI; }
+  var segs = [[-5,-1.5,'#fca5a5'],[-1.5,-0.1,'#fdba74'],[-0.1,1.4,'#fde68a'],[1.4,3,'#86efac'],[3,5,'#6ee7b7']];
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.arc(cx,cy,r*0.58,2*Math.PI,Math.PI,true); ctx.fillStyle='#f3f4f6'; ctx.fill();
+  segs.forEach(function(s) {
+    ctx.beginPath(); ctx.arc(cx,cy,r,ang(s[0]),ang(s[1])); ctx.arc(cx,cy,r*0.58,ang(s[1]),ang(s[0]),true);
+    ctx.closePath(); ctx.fillStyle = s[2]; ctx.fill();
+  });
+  [-5,-2.5,0,2.5,5].forEach(function(v) {
+    var a = ang(v);
+    ctx.beginPath(); ctx.moveTo(cx+r*0.6*Math.cos(a),cy+r*0.6*Math.sin(a)); ctx.lineTo(cx+r*0.72*Math.cos(a),cy+r*0.72*Math.sin(a));
+    ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+  var na = ang(Math.max(-5, Math.min(5, ibp))), nl = r*0.78;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(na);
+  ctx.beginPath(); ctx.moveTo(-2.5,0); ctx.lineTo(0,-nl); ctx.lineTo(2.5,0); ctx.closePath();
+  ctx.fillStyle='#111827'; ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.arc(cx,cy,8,0,2*Math.PI); ctx.fillStyle='#111827'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+}
+function animGauge(id, target) {
+  var i=0, steps=45;
+  var iv = setInterval(function() {
+    i++; var p = 1 - Math.pow(1-i/steps,3);
+    drawGauge(id, -5+(target+5)*p);
+    if (i >= steps) clearInterval(iv);
+  }, 18);
+}
+function dispararVelocimetros(fis, seg, soc, mot) {
+  animGauge('gauge-fis', fis !== undefined ? fis : 0);
+  setTimeout(function(){ animGauge('gauge-seg', seg !== undefined ? seg : 0); }, 150);
+  setTimeout(function(){ animGauge('gauge-soc', soc !== undefined ? soc : 0); }, 300);
+  setTimeout(function(){ animGauge('gauge-mot', mot !== undefined ? mot : 0); }, 450);
+}
+
+/* ===== CARGOS / ORGANOGRAMA / NÍVEIS ===== */
+var BANCO_CBO = [
+  {c:'1111-05',n:'Diretor Geral'},{c:'1411-05',n:'Gerente de RH'},{c:'1412-05',n:'Gerente Financeiro'},
+  {c:'1414-05',n:'Gerente Comercial'},{c:'1415-05',n:'Gerente de Operações'},{c:'2124-05',n:'Analista de Sistemas'},
+  {c:'2310-05',n:'Professor Universitário'},{c:'2394-05',n:'Coordenador de Curso'},
+  {c:'2515-10',n:'Psicólogo Clínico'},{c:'2515-15',n:'Psicólogo Organizacional'},{c:'2515-20',n:'Psicólogo Escolar'},
+  {c:'2524-05',n:'Analista de RH'},{c:'2524-10',n:'Analista de T&D'},{c:'2525-05',n:'Assistente Social'},
+  {c:'3122-05',n:'Supervisor de Produção'},{c:'3171-05',n:'Técnico de Suporte TI'},{c:'3222-05',n:'Técnico de Enfermagem'},
+  {c:'3514-05',n:'Assistente de RH'},{c:'3541-05',n:'Representante Comercial'},{c:'3542-05',n:'Vendedor Interno'},
+  {c:'4110-10',n:'Auxiliar Administrativo'},{c:'4221-05',n:'Recepcionista'},{c:'5169-10',n:'Auxiliar de Serviços Gerais'},
+  {c:'7170-05',n:'Operador de Linha de Produção'},{c:'8324-20',n:'Auxiliar de Produção'},
+  {c:'9412-05',n:'Inspetor de Qualidade'},{c:'9517-05',n:'Técnico de Manutenção'},
+  {c:'2251-05',n:'Médico Clínico'},{c:'2232-05',n:'Enfermeiro'},{c:'2235-05',n:'Nutricionista'},
+  {c:'2523-05',n:'Especialista em SST'},{c:'3519-05',n:'Técnico em SST'},
+];
+
+var niveisHier = [
+  {id:'nv1',nome:'Direção',cor:'#7B00C4'},
+  {id:'nv2',nome:'Gerência',cor:'#0A6E4F'},
+  {id:'nv3',nome:'Coordenação',cor:'#2563EB'},
+  {id:'nv4',nome:'Analista / Técnico',cor:'#D97706'},
+  {id:'nv5',nome:'Operacional',cor:'#DC2626'},
+];
+
+var cargos = [];
+var unidades = [];
+var departamentos = [];
+
+function swCargos(aba) {
+  document.getElementById('pc-lista').style.display = aba === 'lista' ? 'block' : 'none';
+  document.getElementById('pc-org').style.display = aba === 'org' ? 'block' : 'none';
+  document.getElementById('pc-niveis').style.display = aba === 'niveis' ? 'block' : 'none';
+  var udEl = document.getElementById('pc-unidepts');
+  if (udEl) udEl.style.display = aba === 'unidepts' ? 'block' : 'none';
+  var ids = {lista:'aba-cl', org:'aba-co', niveis:'aba-cn', unidepts:'aba-ud'};
+  ['lista','org','niveis','unidepts'].forEach(function(a) {
+    var el = document.getElementById(ids[a]);
+    if (el) { el.classList.remove('aba-ativa'); if (a === aba) el.classList.add('aba-ativa'); }
+  });
+  var btnNovo = document.getElementById('btn-novo-cargo');
+  if (btnNovo) btnNovo.style.display = aba === 'lista' ? '' : 'none';
+  if (aba === 'org') carregarOrgImagem();
+  if (aba === 'niveis') renderNiveis();
+  if (aba === 'unidepts') { renderUnidades(); renderDepartamentos(); }
+}
+
+function getNivel(id) {
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) return niveisHier[i]; }
+  return null;
+}
+function getCargo(id) {
+  for (var i=0; i<cargos.length; i++) { if (cargos[i].id === id) return cargos[i]; }
+  return null;
+}
+
+function renderCargos() {
+  var tbody = document.getElementById('tbody-cargos');
+  if (!tbody) return;
+  var html = '';
+  for (var i=0; i<cargos.length; i++) {
+    var c = cargos[i];
+    var nv = getNivel(c.nvId);
+    var sup = getCargo(c.repId);
+    var nvNome = nv ? nv.nome : '—';
+    var nvCor = nv ? nv.cor : '#999';
+    var supNome = sup ? sup.nome : '— Topo —';
+    html += '<tr>';
+    html += '<td style="font-weight:600;">' + c.nome + '</td>';
+    html += '<td style="font-family:monospace;font-size:12px;">' + c.cbo + '</td>';
+    html += '<td><span style="background:' + nvCor + '22;color:' + nvCor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + nvNome + '</span></td>';
+    html += '<td style="font-size:12px;">' + supNome + '</td>';
+    html += '<td style="text-align:center;font-size:12px;">' + c.n + '</td>';
+    html += '<td style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="editarCargo(\'' + c.id + '\')">✏️</button><button class="btn btn-danger btn-sm" onclick="delCargo(\'' + c.id + '\')">🗑️</button></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+  // Atualiza selects do modal de novo cargo
+  var selNv = document.getElementById('nc-nivel');
+  if (selNv) {
+    var opNv = '<option value="">Selecione o nível...</option>';
+    for (var j=0; j<niveisHier.length; j++) { opNv += '<option value="' + niveisHier[j].id + '">' + niveisHier[j].nome + '</option>'; }
+    selNv.innerHTML = opNv;
+  }
+  var selRep = document.getElementById('nc-reporta');
+  if (selRep) {
+    var opRep = '<option value="">— Nenhum (topo) —</option>';
+    for (var k=0; k<cargos.length; k++) { opRep += '<option value="' + cargos[k].id + '">' + cargos[k].nome + '</option>'; }
+    selRep.innerHTML = opRep;
+  }
+  _popularSelectsDepto();
+  // Popula select de cargos no modal de colaborador
+  var selCargo = document.getElementById('colab-cargo-select');
+  if (selCargo) {
+    var opCargo = '<option value="">Selecione o cargo...</option>';
+    for (var m=0; m<cargos.length; m++) {
+      opCargo += '<option value="' + cargos[m].nome + ' · ' + cargos[m].cbo + '">' + cargos[m].nome + ' · ' + cargos[m].cbo + '</option>';
+    }
+    selCargo.innerHTML = opCargo;
+  }
+}
+
+function renderNiveis() {
+  var tbody = document.getElementById('tbody-niveis');
+  if (!tbody) return;
+  var html = '';
+  for (var i=0; i<niveisHier.length; i++) {
+    var nv = niveisHier[i];
+    var qtd = 0;
+    for (var j=0; j<cargos.length; j++) { if (cargos[j].nvId === nv.id) qtd++; }
+    html += '<tr>';
+    html += '<td style="font-weight:600;color:' + nv.cor + ';">Nível ' + (i+1) + '</td>';
+    html += '<td><input class="form-control" value="' + nv.nome + '" data-id="' + nv.id + '" onchange="renomearNivel(this)" style="font-size:12px;padding:5px 8px;"/></td>';
+    html += '<td><input type="color" value="' + nv.cor + '" data-id="' + nv.id + '" onchange="recolorirNivel(this)" style="width:36px;height:28px;border:none;cursor:pointer;border-radius:4px;"/></td>';
+    html += '<td>' + qtd + '</td>';
+    html += '<td><button class="btn btn-ghost btn-sm" onclick="delNivel(\'' + nv.id + '\')">✕</button></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function renomearNivel(input) {
+  var id = input.getAttribute('data-id');
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].nome = input.value; break; } }
+  renderCargos();
+}
+function recolorirNivel(input) {
+  var id = input.getAttribute('data-id');
+  for (var i=0; i<niveisHier.length; i++) { if (niveisHier[i].id === id) { niveisHier[i].cor = input.value; break; } }
+  renderCargos();
+}
+function addNivel() {
+  var nome = document.getElementById('novo-nivel-nome').value.trim();
+  var cor = document.getElementById('novo-nivel-cor').value;
+  if (!nome) { alert('Informe o nome do nível.'); return; }
+  niveisHier.push({id:'nv'+Date.now(), nome:nome, cor:cor});
+  document.getElementById('novo-nivel-nome').value = '';
+  renderNiveis(); renderCargos();
+}
+function delNivel(id) {
+  for (var i=0; i<cargos.length; i++) { if (cargos[i].nvId === id) { alert('Este nível possui cargos. Remova os cargos antes.'); return; } }
+  niveisHier = niveisHier.filter(function(n){ return n.id !== id; });
+  renderNiveis(); renderCargos();
+}
+function delCargo(id) {
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').doc(id).delete().catch(function(e){ console.log(e); });
+  }
+  cargos = cargos.filter(function(c){ return c.id !== id; });
+  renderCargos();
+}
+
+/* ===== UNIDADES ===== */
+function renderUnidades() {
+  var tbody = document.getElementById('tbody-unidades');
+  if (!tbody) return;
+  if (!unidades.length) { tbody.innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhuma unidade cadastrada.</td></tr>'; return; }
+  var html = '';
+  unidades.forEach(function(u) {
+    html += '<tr style="border-bottom:1px solid var(--linha);">';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + u.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:12px;color:var(--cinza-medio);">' + (u.cidade || '—') + '</td>';
+    html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delUnidade(\"" + u.id + "\")'>🗑️</button></td>";
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  _popularSelectsUnidade();
+}
+function addUnidade() {
+  var nome = (document.getElementById('nova-unidade-nome').value || '').trim();
+  var cidade = (document.getElementById('nova-unidade-cidade').value || '').trim();
+  if (!nome) { alert('Informe o nome da unidade.'); return; }
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var obj = { id: 'un' + Date.now(), nome: nome, cidade: cidade, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
+  if (window.nr1mapDb && empresaId) {
+    window.nr1mapDb.collection('nr1map_unidades').add(obj).then(function(doc) {
+      obj.id = doc.id; unidades.push(obj);
+      document.getElementById('nova-unidade-nome').value = '';
+      document.getElementById('nova-unidade-cidade').value = '';
+      renderUnidades();
+    }).catch(function(e) { alert('Erro: ' + e.message); });
+  } else {
+    unidades.push(obj);
+    document.getElementById('nova-unidade-nome').value = '';
+    document.getElementById('nova-unidade-cidade').value = '';
+    renderUnidades();
+  }
+}
+function delUnidade(id) {
+  if (!confirm('Excluir esta unidade?')) return;
+  unidades = unidades.filter(function(u) { return u.id !== id; });
+  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_unidades').doc(id).delete().catch(function(e){ console.log(e); });
+  renderUnidades();
+}
+function _popularSelectsUnidade() {
+  var opts = '<option value="Todas">Todas as unidades</option>';
+  unidades.forEach(function(u) { opts += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+  ['ag-unidade','plan-unidade','pulso-unidade'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) { var cur = sel.value; sel.innerHTML = opts; sel.value = cur || 'Todas'; }
+  });
+  // Também popular o select na view-diagnostico (mesmo id ag-unidade já cobre)
+  // Select de unidade no cadastro de colaborador
+  var selColab = document.getElementById('colab-unidade');
+  if (selColab && selColab.tagName === 'SELECT') {
+    var optsColab = '<option value="">— Nenhuma —</option>';
+    unidades.forEach(function(u) { optsColab += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+    var cur = selColab.value;
+    selColab.innerHTML = optsColab;
+    if (cur) selColab.value = cur;
+  }
+}
+function carregarUnidades(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_unidades').where('empresaId','==',empresaId).get()
+    .then(function(snap) {
+      unidades = [];
+      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; unidades.push(d); });
+      _popularSelectsUnidade();
+    }).catch(function(e){ console.log('unidades err:', e); });
+}
+
+/* ===== DEPARTAMENTOS ===== */
+function renderDepartamentos() {
+  var tbody = document.getElementById('tbody-departamentos');
+  if (!tbody) return;
+  // Popular select de nível no formulário
+  var selNv = document.getElementById('novo-depto-nivel');
+  if (selNv) {
+    var optsNv = '<option value="">Nível hierárquico</option>';
+    niveisHier.forEach(function(nv) { optsNv += '<option value="' + nv.id + '">' + nv.nome + '</option>'; });
+    selNv.innerHTML = optsNv;
+  }
+  if (!departamentos.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;font-size:12px;color:var(--cinza-medio);">Nenhum departamento cadastrado.</td></tr>'; return; }
+  var tiposLabel = { operacional: 'Operacional', staff: '⚡ Staff', suporte: 'Suporte' };
+  var html = '';
+  departamentos.forEach(function(d) {
+    var nvNome = '';
+    niveisHier.forEach(function(nv) { if (nv.id === d.nvId) nvNome = nv.nome; });
+    html += '<tr style="border-bottom:1px solid var(--linha);">';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + d.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (nvNome || '—') + '</td>';
+    html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (tiposLabel[d.tipo] || d.tipo) + '</td>';
+    html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delDepartamento(\"" + d.id + "\")'>🗑️</button></td>";
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  _popularSelectsDepto();
+}
+function addDepartamento() {
+  var nome  = (document.getElementById('novo-depto-nome').value || '').trim();
+  var nvId  = document.getElementById('novo-depto-nivel').value;
+  var tipo  = document.getElementById('novo-depto-tipo').value;
+  if (!nome) { alert('Informe o nome do departamento.'); return; }
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var obj = { id: 'dp' + Date.now(), nome: nome, nvId: nvId, tipo: tipo, empresaId: empresaId || '', criadoEm: new Date().toISOString() };
+  if (window.nr1mapDb && empresaId) {
+    window.nr1mapDb.collection('nr1map_departamentos').add(obj).then(function(doc) {
+      obj.id = doc.id; departamentos.push(obj);
+      document.getElementById('novo-depto-nome').value = '';
+      renderDepartamentos();
+    }).catch(function(e) { alert('Erro: ' + e.message); });
+  } else {
+    departamentos.push(obj);
+    document.getElementById('novo-depto-nome').value = '';
+    renderDepartamentos();
+  }
+}
+function delDepartamento(id) {
+  if (!confirm('Excluir este departamento?')) return;
+  departamentos = departamentos.filter(function(d) { return d.id !== id; });
+  if (window.nr1mapDb) window.nr1mapDb.collection('nr1map_departamentos').doc(id).delete().catch(function(e){ console.log(e); });
+  renderDepartamentos();
+}
+function _popularSelectsDepto() {
+  // Modal novo cargo
+  var selDepto = document.getElementById('nc-depto');
+  if (selDepto) {
+    var opts = '<option value="">— Nenhum —</option>';
+    departamentos.forEach(function(d) { opts += '<option value="' + d.id + '">' + d.nome + '</option>'; });
+    selDepto.innerHTML = opts;
+  }
+  // Selects de depto nas telas de disparo
+  ['ag-depto','plan-depto','pulso-depto'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) {
+      var optsD = '<option value="Todos">Todos os departamentos</option>';
+      departamentos.forEach(function(d) { optsD += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+      var cur = sel.value; sel.innerHTML = optsD; sel.value = cur || 'Todos';
+    }
+  });
+  // Selects de cargo nas telas de disparo
+  ['ag-cargo','plan-cargo','pulso-cargo'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    if (sel) {
+      var optsC2 = '<option value="Todos">Todos os cargos</option>';
+      cargos.forEach(function(c) { optsC2 += '<option value="' + c.nome + '">' + c.nome + '</option>'; });
+      var cur = sel.value; sel.innerHTML = optsC2; sel.value = cur || 'Todos';
+    }
+  });
+  // Modal novo colaborador
+  var selColabDepto = document.getElementById('colab-depto');
+  if (selColabDepto && selColabDepto.tagName === 'SELECT') {
+    var optsC = '<option value="">— Nenhum —</option>';
+    departamentos.forEach(function(d) { optsC += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+    var cur = selColabDepto.value;
+    selColabDepto.innerHTML = optsC;
+    if (cur) selColabDepto.value = cur;
+  }
+}
+function carregarDepartamentos(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_departamentos').where('empresaId','==',empresaId).get()
+    .then(function(snap) {
+      departamentos = [];
+      snap.forEach(function(doc) { var d = doc.data(); d.id = doc.id; departamentos.push(d); });
+      _popularSelectsDepto();
+    }).catch(function(e){ console.log('departamentos err:', e); });
+}
+
+/* ===== MODAL AGENDA — popular selects ===== */
+function _popularModalAgenda() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var db = window.nr1mapDb;
+
+  function _preencher() {
+    var selUn = document.getElementById('plan-unidade');
+    if (selUn) {
+      var optsUn = '<option value="Todas">Todas as unidades</option>';
+      (unidades || []).forEach(function(u) { optsUn += '<option value="' + u.nome + '">' + u.nome + (u.cidade ? ' — ' + u.cidade : '') + '</option>'; });
+      selUn.innerHTML = optsUn;
+    }
+    var selDp = document.getElementById('plan-depto');
+    if (selDp) {
+      var optsDp = '<option value="Todos">Todos os departamentos</option>';
+      (departamentos || []).forEach(function(d) { optsDp += '<option value="' + d.nome + '">' + d.nome + '</option>'; });
+      selDp.innerHTML = optsDp;
+    }
+    // ag-cargo já populado por carregarCargos()
+  }
+
+  // Usa arrays já carregados; se vazios, busca do Firestore
+  if ((cargos && cargos.length > 0) || (unidades && unidades.length > 0)) {
+    _preencher();
+    return;
+  }
+  if (!db || !empresaId) { _preencher(); return; }
+  Promise.all([
+    db.collection('nr1map_unidades').where('empresaId','==',empresaId).get(),
+    db.collection('nr1map_departamentos').where('empresaId','==',empresaId).get(),
+    db.collection('nr1map_cargos').where('empresaId','==',empresaId).get()
+  ]).then(function(results) {
+    unidades = []; results[0].forEach(function(d){ var x=d.data(); x.id=d.id; unidades.push(x); });
+    departamentos = []; results[1].forEach(function(d){ var x=d.data(); x.id=d.id; departamentos.push(x); });
+    cargos = []; results[2].forEach(function(d){ var x=d.data(); x.id=d.id; cargos.push(x); });
+    _preencher();
+  }).catch(function(e){ _preencher(); });
+}
+
+/* ===== ORGANOGRAMA AGRUPADO POR DEPARTAMENTO ===== */
+function _orgV(el) {
+  var CW=148, CH=52, GX=24, GY=60, SEC_GAP=40, HDR=28;
+
+  // Agrupar cargos por departamento
+  var semDepto = [];
+  var porDepto = {};
+  cargos.forEach(function(c) {
+    if (!c.deptoId) { semDepto.push(c); return; }
+    if (!porDepto[c.deptoId]) porDepto[c.deptoId] = [];
+    porDepto[c.deptoId].push(c);
+  });
+
+  // Montar grupos: cada depto + cargos sem depto juntos no final
+  var grupos = [];
+  departamentos.forEach(function(dp) {
+    if (porDepto[dp.id] && porDepto[dp.id].length) {
+      grupos.push({ label: dp.nome, nvId: dp.nvId, cargos: porDepto[dp.id] });
+    }
+  });
+  if (semDepto.length) grupos.push({ label: null, cargos: semDepto });
+
+  // Se não há departamentos, fallback sem agrupamento
+  if (!grupos.length || (grupos.length === 1 && !grupos[0].label)) {
+    _orgVSimples(el, cargos, CW, CH, GX, GY);
+    return;
+  }
+
+  var svgParts = '', curY = 0, totalW = 0;
+
+  // Calcular largura máxima
+  grupos.forEach(function(g) {
+    var w = g.cargos.length * (CW + GX) - GX;
+    if (w > totalW) totalW = w;
+  });
+  totalW = Math.max(totalW + 40, 500);
+
+  grupos.forEach(function(g) {
+    // Cabeçalho do departamento
+    if (g.label) {
+      var nv = null;
+      if (g.nvId) niveisHier.forEach(function(n){ if(n.id===g.nvId) nv=n; });
+      var cor = nv ? nv.cor : '#6B7280';
+      svgParts += '<rect x="0" y="' + curY + '" width="' + totalW + '" height="' + HDR + '" rx="6" fill="' + cor + '22"/>';
+      svgParts += '<text x="12" y="' + (curY + 18) + '" font-size="11" font-weight="700" fill="' + cor + '" font-family="Inter,sans-serif">' + g.label + '</text>';
+      curY += HDR + 10;
+    }
+
+    // Posicionar cargos do grupo
+    var posMap = {};
+    var rw = g.cargos.length * (CW + GX) - GX;
+    var sx = Math.floor((totalW - rw) / 2);
+    g.cargos.forEach(function(c, i) { posMap[c.id] = { x: sx + i * (CW + GX), y: curY }; });
+
+    // Linhas entre cargos do mesmo grupo
+    g.cargos.forEach(function(cr) {
+      if (!cr.repId || !posMap[cr.id] || !posMap[cr.repId]) return;
+      var px = posMap[cr.repId].x + CW/2, py = posMap[cr.repId].y + CH;
+      var cx = posMap[cr.id].x + CW/2,    cy = posMap[cr.id].y;
+      var my = py + Math.floor(GY/2);
+      svgParts += '<path d="M' + px + ',' + py + ' L' + px + ',' + my + ' L' + cx + ',' + my + ' L' + cx + ',' + cy + '" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    });
+
+    // Cards
+    g.cargos.forEach(function(c) {
+      if (posMap[c.id]) svgParts += _card(posMap[c.id].x, posMap[c.id].y, c, CW, CH);
+    });
+
+    curY += CH + SEC_GAP;
+  });
+
+  el.innerHTML = '<svg width="' + totalW + '" height="' + (curY + 20) + '" xmlns="http://www.w3.org/2000/svg" style="display:block;">' + svgParts + '</svg>';
+}
+
+function _orgVSimples(el, lista, CW, CH, GX, GY) {
+  var nvMap = _nvMap(); var maxNv = 0;
+  for (var k in nvMap) { if (parseInt(k) > maxNv) maxNv = parseInt(k); }
+  var totalW = 0;
+  for (var nv=1; nv<=maxNv; nv++) { var rw=((nvMap[nv]||[]).length*(CW+GX)-GX); if(rw>totalW) totalW=rw; }
+  var posMap = {};
+  for (var nv=1; nv<=maxNv; nv++) {
+    var it=nvMap[nv]||[]; var rw=it.length*(CW+GX)-GX;
+    var sx=Math.floor((totalW-rw)/2);
+    for (var m=0; m<it.length; m++) posMap[it[m].id]={x:sx+m*(CW+GX),y:(nv-1)*(CH+GY)};
+  }
+  var svgW=Math.max(totalW+40,500), svgH=maxNv*(CH+GY)+40, lin='', cards='';
+  lista.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW/2,py=posMap[cr.repId].y+CH;
+    var cx=posMap[cr.id].x+CW/2,cy=posMap[cr.id].y;
+    var my=py+Math.floor(GY/2);
+    lin+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx+','+my+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+  });
+  lista.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
+/* ===== SUGESTÕES AUTOMÁTICAS DE PLANO DE AÇÃO ===== */
+var _SUGESTOES_BASE = {
+  '1.1': { modId:'M1', nome:'Ritmo de Trabalho', acao:'Revisar distribuição de tarefas e prazos; implementar metodologia de gestão de carga horária (ex: Kanban ou sprints semanais).', responsavel:'Gestão de RH', prazo:30 },
+  '1.2': { modId:'M1', nome:'Pausas e Descompressão', acao:'Estabelecer política formal de pausas; criar espaço físico de descompressão; comunicar e garantir cumprimento dos intervalos legais.', responsavel:'Gestão de RH', prazo:15 },
+  '1.3': { modId:'M1', nome:'Estresse e Esgotamento', acao:'Oferecer suporte psicológico (EAP ou psicólogo parceiro); promover programa de saúde mental; monitorar absenteísmo relacionado a estresse.', responsavel:'RH / Diretoria', prazo:30 },
+  '1.4': { modId:'M1', nome:'Ergonomia e Sobrecarga Cognitiva', acao:'Auditar ferramentas e sistemas utilizados; reduzir notificações desnecessárias; capacitar equipe para uso eficiente das tecnologias.', responsavel:'TI / RH', prazo:20 },
+  '2.1': { modId:'M2', nome:'Estabilidade Laboral', acao:'Comunicar política clara de remuneração e segurança no emprego; garantir pontualidade de pagamentos; estabelecer canais de diálogo com liderança.', responsavel:'Diretoria / RH', prazo:15 },
+  '2.2': { modId:'M2', nome:'Clareza de Papéis e Metas', acao:'Revisar e publicar descritivos de cargo; realizar reunião de alinhamento de metas trimestrais; eliminar ambiguidades nas ordens e processos.', responsavel:'Gestão / RH', prazo:20 },
+  '2.3': { modId:'M2', nome:'Segurança Psicológica', acao:'Treinar lideranças em feedback construtivo; implantar cultura de aprendizado com o erro; criar canal anônimo para sugestões e reclamações.', responsavel:'RH / Liderança', prazo:30 },
+  '2.4': { modId:'M2', nome:'Treinamento e Capacitação', acao:'Mapear gaps de competência por cargo; estruturar plano de capacitação anual; garantir treinamento antes de mudanças tecnológicas.', responsavel:'RH / T&D', prazo:45 },
+  '2.5': { modId:'M2', nome:'Segurança e Riscos Físicos', acao:'Realizar inspeção de segurança; atualizar fornecimento de EPIs; revisar protocolos de segurança conforme NR específicas da atividade.', responsavel:'SESMT / RH', prazo:15 },
+  '3.1': { modId:'M3', nome:'Relação com Liderança', acao:'Capacitar líderes em gestão humanizada; implantar reuniões 1:1 mensais; avaliar clima de relacionamento por equipe semestralmente.', responsavel:'RH / Diretoria', prazo:30 },
+  '3.2': { modId:'M3', nome:'Clima entre Pares', acao:'Promover dinâmicas de integração de equipe; mediar conflitos identificados; estabelecer código de conduta interpessoal.', responsavel:'RH / Gestão', prazo:20 },
+  '3.3': { modId:'M3', nome:'Fit Cultural', acao:'Comunicar valores e missão da empresa; promover encontros intergeracionais; revisar onboarding cultural de novos colaboradores.', responsavel:'RH / Comunicação', prazo:30 },
+  '3.4': { modId:'M3', nome:'Reconhecimento e Valor', acao:'Implantar programa formal de reconhecimento (mensal); garantir feedback positivo nas reuniões de equipe; reconhecer entregas excepcionais publicamente.', responsavel:'Liderança / RH', prazo:15 },
+  '3.5': { modId:'M3', nome:'Proteção contra Assédio', acao:'Divulgar política anti-assédio; treinar toda a equipe; estabelecer canal de denúncia seguro e anônimo; garantir investigação sigilosa.', responsavel:'RH / Jurídico', prazo:10 },
+  '4.1': { modId:'M4', nome:'Propósito e Significado', acao:'Comunicar impacto do trabalho de cada área; promover encontros de cultura; alinhar objetivos pessoais com metas da empresa (PDI).', responsavel:'RH / Liderança', prazo:30 },
+  '4.2': { modId:'M4', nome:'Identidade e Crescimento', acao:'Estruturar plano de carreira formal; oferecer cursos e certificações; criar trilhas de desenvolvimento por cargo.', responsavel:'RH / T&D', prazo:45 },
+  '4.3': { modId:'M4', nome:'Autonomia e Criatividade', acao:'Reduzir microgerenciamento; criar espaços de inovação (hackathons, grupos de melhoria); delegar decisões operacionais aos times.', responsavel:'Gestão / Diretoria', prazo:20 },
+  '4.4': { modId:'M4', nome:'Ações Motivadoras', acao:'Revisar política de benefícios e incentivos; promover eventos de integração genuínos; coletar feedback sobre o que motiva cada equipe.', responsavel:'RH / Diretoria', prazo:30 }
+};
+
+var _RISCO_GRO = function(ibp) {
+  if (ibp >= 2.5)  return { nivel:'Trivial',      cor:'#16a34a', badge:'background:#dcfce7;color:#166534' };
+  if (ibp >= 0.5)  return { nivel:'Tolerável',     cor:'#65a30d', badge:'background:#ecfccb;color:#365314' };
+  if (ibp >= -0.5) return { nivel:'Moderado',      cor:'#d97706', badge:'background:#fef3c7;color:#92400e' };
+  if (ibp >= -2.5) return { nivel:'Substancial',   cor:'#dc2626', badge:'background:#fee2e2;color:#991b1b' };
+  return              { nivel:'Intolerável',    cor:'#7f1d1d', badge:'background:#fecaca;color:#7f1d1d' };
+};
+
+var _ZONA_DEJOURS = function(ibp) {
+  if (ibp >= 1.5)  return 'Terreno Fértil';
+  if (ibp >= -1.5) return 'Defesa Oculta';
+  return 'Sofrimento Patogênico';
+};
+
+function gerarSugestoesAutomaticas() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  // Verificar ciclo ativo — deve ter sido definido ao clicar em um card de ciclo
+  if (!_planoCicloAtual) {
+    alert('Selecione um ciclo acima antes de gerar sugestoes automaticas.');
+    return;
+  }
+
+  // Tenta usar cache do mapa de risco primeiro, depois _histCiclos, depois busca Firestore
+  var subcats = window._mapaRiscoSubcats || null;
+  if (!subcats && window._histCiclos && window._histCiclos.length) {
+    subcats = window._histCiclos[0].ibpSubcats || null;
+  }
+
+  if (subcats && Object.keys(subcats).length) {
+    _executarSugestoes(empresaId, subcats);
+    return;
+  }
+
+  // Fallback: buscar do Firestore
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) { alert('Nenhum ciclo encontrado. Realize um Diagnostico Geral primeiro.'); return; }
+      var allDocs = [];
+      snap.forEach(function(doc) { var d = doc.data(); allDocs.push(d); });
+      allDocs.sort(function(a,b){ return (b.totalRespostas||0)-(a.totalRespostas||0); });
+      var found = null;
+      for (var i = 0; i < allDocs.length; i++) {
+        if (allDocs[i].ibpSubcats && Object.keys(allDocs[i].ibpSubcats).length) {
+          found = allDocs[i].ibpSubcats; break;
+        }
+      }
+      if (!found) { alert('Dados de subcategorias nao disponiveis. Realize um novo Diagnostico Geral.'); return; }
+      window._mapaRiscoSubcats = found;
+      _executarSugestoes(empresaId, found);
+    }).catch(function(e){ alert('Erro ao buscar dados: ' + e.message); });
+}
+
+function _executarSugestoes(empresaId, subcats) {
+  if (!subcats || !Object.keys(subcats).length) {
+    alert('Dados de subcategorias nao disponiveis neste ciclo. Realize um novo Diagnostico Geral para gerar sugestoes automaticas.'); return;
+  }
+  var criticas = [];
+  Object.keys(subcats).forEach(function(k) {
+    var ibp = typeof subcats[k] === 'object' ? subcats[k].ibp : subcats[k];
+    if (ibp <= -0.5) criticas.push({ id: k, ibp: ibp });
+  });
+  if (!criticas.length) {
+    alert('Nenhuma subcategoria em risco identificada. Continue monitorando!'); return;
+  }
+  if (!confirm('Serao geradas ' + criticas.length + ' sugestoes de acao para as subcategorias com risco identificado. Continuar?')) return;
+
+  var promises = criticas.map(function(sc) {
+    var base = _SUGESTOES_BASE[sc.id];
+    if (!base) return Promise.resolve();
+    var risco = _RISCO_GRO(sc.ibp);
+    var prazoDate = new Date(); prazoDate.setDate(prazoDate.getDate() + (base.prazo || 30));
+    var prazoStr = prazoDate.toISOString().split('T')[0];
+    var cicloSugestao = _planoCicloAtual || null;
+    return window.nr1mapDb.collection('nr1map_plano_acao').add({
+      empresaId: empresaId,
+      cicloId: cicloSugestao,
+      setor: base.nome,
+      acao: '[IA] ' + base.acao,
+      responsavel: base.responsavel,
+      status: 'pendente',
+      prazo: prazoStr,
+      risco: risco.nivel,
+      ibpOrigem: sc.ibp,
+      subcatId: sc.id,
+      modId: base.modId,
+      origem: 'automatica',
+      criadoEm: new Date().toISOString()
+    });
+  });
+
+  Promise.all(promises).then(function() {
+    alert('Acoes geradas com sucesso: ' + criticas.length + ' itens adicionados ao Plano de Acao!');
+    sv('plano-acao');
+    carregarPlanoAcao(empresaId, _planoCicloAtual || null);
+  }).catch(function(e) { alert('Erro: ' + e.message); });
+}
+
+/* ===== LAUDO DETALHADO POR MÓDULO E SUBCATEGORIA ===== */
+function _renderLaudoDetalhado(ibpSubcats) {
+  var el = document.getElementById('laudo-subcats-detail');
+  if (!el || !ibpSubcats) return;
+
+  var modulos = [
+    { id:'M1', nome:'Fisiológico', cor:'#0A6E4F', subs:['1.1','1.2','1.3','1.4'] },
+    { id:'M2', nome:'Segurança',   cor:'#2563EB', subs:['2.1','2.2','2.3','2.4','2.5'] },
+    { id:'M3', nome:'Relacionamentos e Social', cor:'#D97706', subs:['3.1','3.2','3.3','3.4','3.5'] },
+    { id:'M4', nome:'Fatores Motivacionais',    cor:'#7B00C4', subs:['4.1','4.2','4.3','4.4'] }
+  ];
+
+  var html = '<div style="margin-top:20px;">';
+  modulos.forEach(function(mod) {
+    var temDados = mod.subs.some(function(s){ return ibpSubcats[s] !== undefined; });
+    if (!temDados) return;
+    html += '<div style="margin-bottom:16px;">';
+    html += '<div style="font-size:12px;font-weight:700;color:' + mod.cor + ';text-transform:uppercase;letter-spacing:0.5px;padding:6px 0;border-bottom:2px solid ' + mod.cor + ';margin-bottom:8px;">' + mod.nome + '</div>';
+    html += '<table style="width:100%;border-collapse:collapse;">';
+    html += '<thead><tr style="background:#f9fafb;"><th style="padding:6px 10px;font-size:10px;text-align:left;color:#6b7280;font-weight:600;text-transform:uppercase;">Subcategoria</th><th style="padding:6px 10px;font-size:10px;text-align:center;color:#6b7280;font-weight:600;text-transform:uppercase;">IBP</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Zona Dejours</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Risco GRO</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">Ação sugerida</th></tr></thead><tbody>';
+    mod.subs.forEach(function(sid) {
+      var raw = ibpSubcats[sid];
+      if (raw === undefined) return;
+      var ibp = typeof raw === 'object' ? raw.ibp : raw;
+      var nome = (typeof raw === 'object' && raw.nome) ? raw.nome : (_SUGESTOES_BASE[sid] ? _SUGESTOES_BASE[sid].nome : sid);
+      var zona = _ZONA_DEJOURS(ibp);
+      var risco = _RISCO_GRO(ibp);
+      var sinal = ibp >= 0 ? '+' : '';
+      var base = _SUGESTOES_BASE[sid];
+      var acaoTxt = (ibp <= -0.5 && base) ? base.acao.substring(0,80) + '...' : '—';
+      html += '<tr style="border-bottom:1px solid #f3f4f6;">';
+      html += '<td style="padding:7px 10px;font-size:12px;"><strong>' + sid + '</strong> ' + nome + '</td>';
+      html += '<td style="padding:7px 10px;text-align:center;font-family:monospace;font-weight:700;font-size:13px;color:' + risco.cor + ';">' + sinal + ibp.toFixed(1) + '</td>';
+      html += '<td style="padding:7px 10px;font-size:11px;color:' + risco.cor + ';">' + zona + '</td>';
+      html += '<td style="padding:7px 10px;"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;' + risco.badge + '">' + risco.nivel + '</span></td>';
+      html += '<td style="padding:7px 10px;font-size:11px;color:#6b7280;">' + acaoTxt + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function buscarCBO(query) {
+  var div = document.getElementById('nc-cbo-drop');
+  if (!div) return;
+  var q = (query || '').toLowerCase().trim();
+  var db = (typeof CBO_DATABASE !== 'undefined') ? CBO_DATABASE : [];
+  var res = q.length === 0
+    ? db.slice(0, 12)
+    : db.filter(function(x){ return x.titulo.toLowerCase().indexOf(q) > -1 || x.cbo.indexOf(q) > -1; }).slice(0, 15);
+  div.innerHTML = '';
+  if (!res.length) { div.style.display = 'none'; return; }
+  res.forEach(function(r) {
+    var d = document.createElement('div');
+    d.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;';
+    d.innerHTML = '<strong>' + r.titulo + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.cbo + '</span>';
+    d.addEventListener('mouseover', function(){ this.style.background='#f9fafb'; });
+    d.addEventListener('mouseout', function(){ this.style.background=''; });
+    d.addEventListener('click', function(){
+      document.getElementById('nc-cbo-busca').value = r.titulo + ' · ' + r.cbo;
+      document.getElementById('nc-cbo-val').value = r.cbo;
+      var manual = document.getElementById('nc-cbo-manual');
+      if (manual) manual.value = '';
+      div.style.display = 'none';
+    });
+    div.appendChild(d);
+  });
+  if (q.length === 0) {
+    var info = document.createElement('div');
+    info.style.cssText = 'padding:7px 14px;font-size:10px;color:#9ca3af;';
+    info.textContent = db.length + ' cargos disponíveis — digite para filtrar';
+    div.appendChild(info);
+  }
+  div.style.display = 'block';
+  setTimeout(function(){
+    document.addEventListener('click', function fechar(e){
+      if (!div.contains(e.target) && e.target.id !== 'nc-cbo-busca'){ div.style.display='none'; document.removeEventListener('click',fechar); }
+    });
+  }, 100);
+}
+function selCBO(el) {
+  var codigo = el.dataset.cbo;
+  var nome = el.dataset.titulo;
+  document.getElementById('nc-cbo-busca').value = nome + ' · ' + codigo;
+  document.getElementById('nc-cbo-val').value = codigo;
+  document.getElementById('nc-cbo-drop').style.display = 'none';
+  var manual = document.getElementById('nc-cbo-manual');
+  if (manual) manual.value = '';
+}
+function salvarCargo() {
+  var nome = document.getElementById('nc-nome').value.trim();
+  var cbo = document.getElementById('nc-cbo-val').value || document.getElementById('nc-cbo-busca').value.trim();
+  var nvId = document.getElementById('nc-nivel').value;
+  var repId = document.getElementById('nc-reporta').value || null;
+  var deptoId = document.getElementById('nc-depto') ? (document.getElementById('nc-depto').value || null) : null;
+  if (!nome) { alert('Informe o nome do cargo.'); return; }
+  if (!nvId) { alert('Selecione o nível hierárquico.'); return; }
+  if (!window.nr1mapEmpresa) { alert('Aguarde o carregamento da empresa.'); return; }
+  var empresaId = window.nr1mapEmpresa.id;
+  var novoCargo = {nome:nome, cbo:cbo, nvId:nvId, repId:repId, deptoId:deptoId, n:0, empresaId:empresaId, criadoEm:new Date().toISOString()};
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_cargos').add(novoCargo)
+      .then(function(doc) {
+        novoCargo.id = doc.id;
+        cargos.push(novoCargo);
+        fecharModal('modal-novo-cargo');
+        document.getElementById('nc-nome').value = '';
+        document.getElementById('nc-cbo-busca').value = '';
+        document.getElementById('nc-cbo-val').value = '';
+        renderCargos();
+      }).catch(function(e){ alert('Erro ao salvar: ' + e.message); });
+  } else {
+    novoCargo.id = 'c'+Date.now();
+    cargos.push(novoCargo);
+    fecharModal('modal-novo-cargo');
+    document.getElementById('nc-nome').value = '';
+    document.getElementById('nc-cbo-busca').value = '';
+    document.getElementById('nc-cbo-val').value = '';
+    renderCargos();
+  }
+}
+
+var _orgL = 'v';
+function setOrgLayout(l) {
+  _orgL = l;
+  ['v','h','r'].forEach(function(b){ var btn=document.getElementById('org-btn-'+b); if(btn) btn.className=b===l?'btn btn-primary btn-sm':'btn btn-ghost btn-sm'; });
+  renderOrg();
+}
+
+function carregarOrgImagem() {
+  var imgWrap = document.getElementById('org-imagem-wrap');
+  var semImg  = document.getElementById('org-sem-imagem');
+  var img     = document.getElementById('org-imagem-view');
+
+  // Tenta pegar do cache global primeiro
+  var url = window.nr1mapEmpresa && window.nr1mapEmpresa.orgogramaUrl;
+  if (url) {
+    if (img)     img.src = url;
+    if (imgWrap) imgWrap.style.display = 'block';
+    if (semImg)  semImg.style.display  = 'none';
+    return;
+  }
+
+  // Busca no Firestore
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) {
+    if (imgWrap) imgWrap.style.display = 'none';
+    if (semImg)  semImg.style.display  = 'block';
+    return;
+  }
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get()
+    .then(function(doc) {
+      var orgUrl = doc.exists && doc.data().orgogramaUrl;
+      if (orgUrl) {
+        if (window.nr1mapEmpresa) window.nr1mapEmpresa.orgogramaUrl = orgUrl;
+        if (img)     img.src = orgUrl;
+        if (imgWrap) imgWrap.style.display = 'block';
+        if (semImg)  semImg.style.display  = 'none';
+      } else {
+        if (imgWrap) imgWrap.style.display = 'none';
+        if (semImg)  semImg.style.display  = 'block';
+      }
+    }).catch(function() {
+      if (imgWrap) imgWrap.style.display = 'none';
+      if (semImg)  semImg.style.display  = 'block';
+    });
+}
+
+function renderOrg() {
+  var el = document.getElementById('org-chart');
+  if (!el) return;
+  if (!cargos || cargos.length === 0) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cadastre cargos na aba Lista de Cargos para visualizar o organograma.</div>';
+    return;
+  }
+  if (_orgL === 'h') { _orgH(el); return; }
+  if (_orgL === 'r') { _orgR(el); return; }
+  _orgV(el);
+}
+
+function _nvMap() {
+  var nvMap = {};
+  for (var i=0;i<cargos.length;i++) {
+    var pos=0;
+    for (var j=0;j<niveisHier.length;j++){if(niveisHier[j].id===cargos[i].nvId){pos=j+1;break;}}
+    if(!pos) pos=niveisHier.length+1;
+    if(!nvMap[pos]) nvMap[pos]=[];
+    nvMap[pos].push(cargos[i]);
+  }
+  return nvMap;
+}
+
+function _card(x,y,c,CW,CH) {
+  var nv=getNivel(c.nvId); var cor=nv?nv.cor:'#6B7280';
+  var nm=c.nome.length>18?c.nome.slice(0,17)+'…':c.nome;
+  var g='<g>';
+  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="8" fill="white" stroke="'+cor+'" stroke-width="1.5"'+(c.staffTipo==='externo'?' stroke-dasharray="4,3"':'')+'/>';
+  g+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="5" rx="3" fill="'+cor+'"/>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+20)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#111827" font-family="Inter,sans-serif">'+nm+'</text>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+32)+'" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="monospace">'+c.cbo+'</text>';
+  g+='<text x="'+(x+CW/2)+'" y="'+(y+46)+'" text-anchor="middle" font-size="9" fill="'+cor+'" font-family="Inter,sans-serif">'+(c.n||0)+' colab.</text>';
+  g+='</g>'; return g;
+}
+
+function _orgV(el) {
+  var CW=148,CH=52,GX=24,GY=70;
+  var nvMap=_nvMap(); var maxNv=0;
+  for(var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
+  var totalW=0;
+  for(var nv=1;nv<=maxNv;nv++){var rw=((nvMap[nv]||[]).length*(CW+GX)-GX);if(rw>totalW)totalW=rw;}
+  var posMap={};
+  for(var nv=1;nv<=maxNv;nv++){
+    var it=nvMap[nv]||[]; var rw=it.length*(CW+GX)-GX;
+    var sx=Math.floor((totalW-rw)/2);
+    for(var m=0;m<it.length;m++) posMap[it[m].id]={x:sx+m*(CW+GX),y:(nv-1)*(CH+GY)};
+  }
+  var svgW=Math.max(totalW+40,500),svgH=maxNv*(CH+GY)+40,lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW/2,py=posMap[cr.repId].y+CH;
+    var cx=posMap[cr.id].x+CW/2,cy=posMap[cr.id].y;
+    if(cr.isStaff||cr.staffTipo){
+      var dash=cr.staffTipo==='externo'?' stroke-dasharray="5,4"':'';
+      lin+='<line x1="'+px+'" y1="'+(posMap[cr.repId].y+CH/2)+'" x2="'+cx+'" y2="'+(posMap[cr.id].y+CH/2)+'" stroke="#A78BFA" stroke-width="1.5"'+dash+'/>';
+    } else {
+      var my=py+Math.floor(GY/2);
+      lin+='<path d="M'+px+','+py+' L'+px+','+my+' L'+cx+','+my+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+    }
+  });
+  cargos.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
+function _orgH(el) {
+  var CW=148,CH=52,GX=80,GY=16;
+  var nvMap=_nvMap(); var maxNv=0;
+  for(var k in nvMap){if(parseInt(k)>maxNv)maxNv=parseInt(k);}
+  var totalH=0;
+  for(var nv=1;nv<=maxNv;nv++){var ch=((nvMap[nv]||[]).length*(CH+GY)-GY);if(ch>totalH)totalH=ch;}
+  var posMap={};
+  for(var nv=1;nv<=maxNv;nv++){
+    var it=nvMap[nv]||[]; var ch=it.length*(CH+GY)-GY;
+    var sy=Math.floor((totalH-ch)/2);
+    for(var m=0;m<it.length;m++) posMap[it[m].id]={x:(nv-1)*(CW+GX),y:sy+m*(CH+GY)};
+  }
+  var svgW=maxNv*(CW+GX)+40,svgH=Math.max(totalH+40,300),lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+CW,py=posMap[cr.repId].y+CH/2;
+    var cx=posMap[cr.id].x,cy=posMap[cr.id].y+CH/2;
+    var mx=(px+cx)/2;
+    lin+='<path d="M'+px+','+py+' L'+mx+','+py+' L'+mx+','+cy+' L'+cx+','+cy+'" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>';
+  });
+  cargos.forEach(function(dr){if(posMap[dr.id]) cards+=_card(posMap[dr.id].x,posMap[dr.id].y,dr,CW,CH);});
+  el.innerHTML='<svg width="'+svgW+'" height="'+svgH+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
+
+function _orgR(el) {
+  var CW=130,CH=48;
+  var roots=cargos.filter(function(c){return !c.repId;});
+  var center=roots[0]||cargos[0]; if(!center) return;
+  var posMap={}; posMap[center.id]={x:0,y:0};
+  var queue=[{id:center.id,depth:1}],visited={},byDepth={};
+  visited[center.id]=true;
+  while(queue.length){
+    var curr=queue.shift();
+    cargos.filter(function(c){return c.repId===curr.id&&!visited[c.id];}).forEach(function(ch){
+      visited[ch.id]=true;
+      if(!byDepth[curr.depth]) byDepth[curr.depth]=[];
+      byDepth[curr.depth].push(ch);
+      queue.push({id:ch.id,depth:curr.depth+1});
+    });
+  }
+  Object.keys(byDepth).forEach(function(d){
+    var items=byDepth[d]; var r=160+(parseInt(d)-1)*140;
+    items.forEach(function(item,i){
+      var angle=(2*Math.PI/items.length)*i-Math.PI/2;
+      posMap[item.id]={x:Math.round(r*Math.cos(angle)),y:Math.round(r*Math.sin(angle))};
+    });
+  });
+  var allX=Object.keys(posMap).map(function(k){return posMap[k].x;});
+  var allY=Object.keys(posMap).map(function(k){return posMap[k].y;});
+  var minX=Math.min.apply(null,allX)-CW/2-20,minY=Math.min.apply(null,allY)-CH/2-20;
+  var maxX=Math.max.apply(null,allX)+CW/2+20,maxY=Math.max.apply(null,allY)+CH/2+20;
+  var ox=-minX,oy=-minY,lin='',cards='';
+  cargos.forEach(function(cr){
+    if(!cr.repId||!posMap[cr.id]||!posMap[cr.repId]) return;
+    var px=posMap[cr.repId].x+ox+CW/2,py=posMap[cr.repId].y+oy+CH/2;
+    var cx=posMap[cr.id].x+ox+CW/2,cy=posMap[cr.id].y+oy+CH/2;
+    lin+='<line x1="'+px+'" y1="'+py+'" x2="'+cx+'" y2="'+cy+'" stroke="#D1D5DB" stroke-width="1.5"/>';
+  });
+  cargos.forEach(function(dr){
+    if(!posMap[dr.id]) return;
+    cards+=_card(posMap[dr.id].x+ox-CW/2,posMap[dr.id].y+oy-CH/2,dr,CW,CH);
+  });
+  el.innerHTML='<svg width="'+(maxX-minX)+'" height="'+(maxY-minY)+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">'+lin+cards+'</svg>';
+}
 
 
-def desenhar_cabecalho_rodape(canvas_obj, doc):
-    canvas_obj.saveState()
-    w, h = A4
-    # Logo esquerda — parceiro ou NR-1 Map como fallback
-    _lp = getattr(desenhar_cabecalho_rodape, '_logo_parc', None)
-    _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
-    if _lp and __import__('os').path.exists(_lp):
-        try: canvas_obj.drawImage(_lp, 18*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c')
-        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
-    else:
-        canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
-    # Logo direita — empresa
-    _tem_le = False
-    if _le and __import__('os').path.exists(_le):
-        try: canvas_obj.drawImage(_le, w-60*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c'); _tem_le = True
-        except: pass
-    # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
+function carregarAgenda() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var lista = document.getElementById('agenda-lista');
+  var titulo = document.getElementById('agenda-titulo');
+  if (lista) lista.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
+  window.nr1mapDb.collection('nr1map_agenda')
+    .where('empresaId','==',empresaId)
+    .get()
+    .then(function(snap) {
+      if (!lista) return;
+      if (snap.empty) {
+        lista.innerHTML = '<div style="text-align:center;padding:32px;color:var(--cinza-medio);">Nenhuma pesquisa agendada ainda.<br/><span style="font-size:12px;">Use "+ Agendar pesquisa" para começar.</span></div>';
+        if (titulo) titulo.textContent = 'Agenda';
+        return;
+      }
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var docs = [];
+      snap.forEach(function(doc){ docs.push({id:doc.id, d:doc.data()}); });
+      docs.sort(function(a,b){ return (a.d.data||'') < (b.d.data||'') ? -1 : 1; });
+      lista.innerHTML = '';
+      docs.forEach(function(item) {
+        var d = item.d;
+        var dt = d.data ? new Date(d.data+'T12:00:00') : null;
+        var dia = dt ? String(dt.getDate()).padStart(2,'0') : '—';
+        var mes = dt ? meses[dt.getMonth()] : '—';
+        var tipoCls = d.tipo === 'geral' ? 'tipo-geral' : 'tipo-pulso';
+        var tipoLabel = d.tipo === 'geral' ? 'Geral' : 'Pulso';
+        var info = [d.canal||'WhatsApp'];
+        if (d.unidade && d.unidade !== 'Todas') info.push(d.unidade);
+        else info.push('todas as unidades');
+        var div = document.createElement('div');
+        div.className = 'agenda-item';
+        div.innerHTML =
+          '<div class="agenda-data"><div class="dia">'+dia+'</div><div class="mes">'+mes+'</div></div>'+
+          '<div class="agenda-info"><h4>'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+(d.tema?' — '+d.tema:'')+'</h4>'+
+          '<p>'+info.join(' · ')+'</p></div>'+
+          '<span class="agenda-tipo '+tipoCls+'">'+tipoLabel+'</span>'+
+          '<button class="btn-edit-ag" style="background:none;border:none;cursor:pointer;color:#7B00C4;font-size:14px;margin-left:4px;">✏️</button>'+
+          '<button class="btn-del-ag" style="margin-left:4px;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">🗑️</button>';
+        div.querySelector('.btn-del-ag').addEventListener('click', (function(id){ return function(){ excluirAgendamento(id); }; })(item.id));
+        div.querySelector('.btn-edit-ag').addEventListener('click', (function(item){ return function(){ editarAgendamento(item); }; })(item));
+        lista.appendChild(div);
+      });
+      if (titulo) titulo.textContent = 'Agenda';
+    }).catch(function(e){ console.log('agenda:', e); });
+}
 
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
-    _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, _en)
+function salvarAgendamento() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var data = document.getElementById('plan-data') ? document.getElementById('plan-data').value : '';
+  if (!data) { alert('Selecione a data de disparo.'); return; }
+  var _d = new Date(); var hoje = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
+  var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
+  var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
+  var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
+  var agPrazo   = document.getElementById('plan-prazo')   ? document.getElementById('plan-prazo').value   : '7';
+  var agDepto   = document.getElementById('plan-depto')   ? document.getElementById('plan-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('plan-cargo')   ? document.getElementById('plan-cargo').value   : 'Todos';
+  var agendaData = {
+    empresaId: empresaId,
+    tipo: agTipo,
+    tema: document.getElementById('ag-tema') ? document.getElementById('ag-tema').value.trim() : '',
+    data: data,
+    canal: agCanal,
+    unidade: agUnidade,
+    prazo: agPrazo,
+    depto: agDepto,
+    cargo: agCargo,
+    status: data === hoje ? 'disparado' : 'agendado',
+    criadoEm: new Date().toISOString()
+  };
 
-    canvas_obj.setFont('Helvetica', 8.5)
-    canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
+  var promise;
+  if (window._editAgendaId) {
+    window._currentAgendaId = window._editAgendaId;
+    promise = window.nr1mapDb.collection('nr1map_agenda').doc(window._editAgendaId).update(agendaData);
+    window._editAgendaId = null;
+  } else {
+    promise = window.nr1mapDb.collection('nr1map_agenda').add(agendaData).then(function(ref){
+      window._currentAgendaId = ref.id;
+      return ref;
+    });
+  }
 
-    canvas_obj.setFont('Helvetica-Bold', 10)
-    canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "PLANO DE AÇÃO 5W2H")
+  promise.then(function() {
+    fecharModal('modal-agendar');
+    carregarAgenda();
+    if (data === hoje) {
+      var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+      setTimeout(function(){
+        sv(tipoDisparo);
+        _preencherTelaDisparo({ prazo: agPrazo, unidade: agUnidade, depto: agDepto, cargo: agCargo, canal: agCanal, tipo: agTipo });
+      }, 600);
+    }
+  }).catch(function(e){ alert('Erro: ' + e.message); });
+}
 
-    canvas_obj.setStrokeColor(VERDE_NR1)
-    canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
+function dispararPulsoComCanal() {
+  // Lê canal do d-opt (mesmo padrão do diagnóstico)
+  var optSel = document.querySelector('#view-nova-pulso .d-opt.sel .d-lb');
+  var canalVal = optSel ? optSel.textContent.trim() : 'WhatsApp';
+  var elCanal = document.getElementById('pulso-canal');
+  if (!elCanal) {
+    // Injeta valor temporário para dispararPesquisa ler
+    var tmp = document.createElement('select');
+    tmp.id = 'pulso-canal'; tmp.style.display = 'none';
+    var op = document.createElement('option');
+    op.value = canalVal; op.selected = true;
+    tmp.appendChild(op);
+    document.body.appendChild(tmp);
+    dispararPesquisa('pulso');
+    setTimeout(function(){ document.body.removeChild(tmp); }, 2000);
+  } else {
+    elCanal.value = canalVal;
+    dispararPesquisa('pulso');
+  }
+}
 
-    canvas_obj.setFont('Helvetica', 7.5)
-    canvas_obj.setFillColor(CINZA_TEXTO)
-    canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
-    canvas_obj.restoreState()
+function carregarHistoricoUnificado(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var el = document.getElementById('hist-timeline-body');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Carregando...</div>';
 
+  var todos = [];
 
+  // Busca ciclos em nr1map_respostas
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(ciclosSnap) {
+      var promises = [];
+      ciclosSnap.forEach(function(cicloDoc) {
+        var d = cicloDoc.data();
+        d._id = cicloDoc.id;
+        d._tipo = d.tipo || d.Tipo || 'geral';
 
-def _baixar_logo_doc(url):
-    """Aceita http(s):// URLs e data:image/...;base64,... strings."""
-    import urllib.request as _ur, tempfile as _tf, os as _os, base64 as _b64
-    if not url:
-        return None
-    try:
-        tmp = _tf.NamedTemporaryFile(suffix='.png', delete=False)
-        if url.startswith('data:'):
-            header, data = url.split(',', 1)
-            tmp.write(_b64.b64decode(data))
-            tmp.close()
-        else:
-            tmp.close()
-            _ur.urlretrieve(url, tmp.name)
-        return tmp.name if _os.path.exists(tmp.name) else None
-    except Exception as _e:
-        print(f"[logo] erro: {_e}")
-        return None
-
-def gerar_5w2h(dados: dict = None, output_path=None):
-    _dados = dados or {}
-    _empresa_nome = _dados.get('empresa_nome') or _dados.get('empresa', {}).get('nome', 'Empresa')
-    _meses = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-    _referencia   = _dados.get('referencia') or (_meses[datetime.datetime.now().month-1] + ' de ' + str(datetime.datetime.now().year))
-    _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
-    _logo_parc    = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
-    _logo_emp     = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
-    # Monta SETORES_CBO dinamico
-    por_cargo = _dados.get('porCargo') or []
-    if por_cargo:
-        SETORES_CBO_DIN = [{'setor': c.get('unidade') or c.get('cargo','Geral'),
-            'cbo': c.get('cbo',''), 'cargo': c.get('cargo',''),
-            'n': c.get('n',0), 'ibp': c.get('ibp',0.0),
-            'qtd_perigos': 2 if c.get('ibp',0)<=-1.5 else (1 if c.get('ibp',0)<=0 else 0)}
-            for c in por_cargo]
-    else:
-        por_unidade = _dados.get('porUnidade') or []
-        SETORES_CBO_DIN = [{'setor': u.get('unidade','Geral'), 'cbo':'', 'cargo':'Geral',
-            'n': u.get('n',0), 'ibp': u.get('ibp',0.0),
-            'qtd_perigos': 2 if u.get('ibp',0)<=-1.5 else (1 if u.get('ibp',0)<=0 else 0)}
-            for u in por_unidade] or [{'setor':'Empresa','cbo':'','cargo':'Todos',
-            'n':_dados.get('respondentes',0),'ibp':_dados.get('ibp_geral',0.0) or 0.0,'qtd_perigos':1}]
-
-    output_path = output_path or nome_arquivo_padrao("PlanoDeAcao5W2H")
-    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=48 * mm, bottomMargin=20 * mm,
-                             leftMargin=18 * mm, rightMargin=18 * mm)
-    story = []
-
-    story.append(Paragraph("Plano de Ação 5W2H", s_h1))
-    story.append(Paragraph(
-        f"{_empresa_nome} · Referencia: {_referencia} · Documento editável — "
-        f"3º instrumento do fluxo GRO (Inventário → Avaliação → <b>Plano de Ação</b> → Acompanhamento)",
-        s_sub
-    ))
-    story.append(Paragraph(
-        "Este Plano estrutura, automaticamente, as medidas de controle exigidas para todo CBO ou setor "
-        "classificado como <b>Substancial</b> ou <b>Intolerável</b> na Avaliação do Risco (instrumento 2), "
-        "conforme item 1.5.4.4.3 da NR-1 — definição de medidas de controle com prazo. Cada ação será "
-        "reavaliada no instrumento de Acompanhamento (4) com nova medição de IBP para comprovação de eficácia.",
-        s_body
-    ))
-    story.append(Spacer(1, 4 * mm))
-
-    acoes = gerar_acoes(SETORES_CBO_DIN)
-
-    if not acoes:
-        story.append(Paragraph(
-            "Nenhum CBO ou setor classificado como Substancial ou Intolerável neste ciclo. "
-            "Nenhuma ação corretiva obrigatória — manter monitoramento de rotina via Pesquisa Pulso.",
-            s_body
-        ))
-    else:
-        for i, item in enumerate(acoes, start=1):
-            t = texto_acao(item)
-            story.append(Paragraph(f"Ação {i} — {item['nivel']}", s_h3))
-
-            badge_row = [
-                Paragraph(f"Zona: {item['zona']['zona_dejours']} (IBP {item['ibp']:+.1f})", s_badge),
-                Paragraph(f"GRO: {item['classif']}", s_badge),
-            ]
-            t_badge = Table([badge_row], colWidths=[85 * mm, 89 * mm])
-            t_badge.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (0, 0), ZONA_COR_FUNDO[item["zona"]["zona_dejours"]]),
-                ('BACKGROUND', (1, 0), (1, 0), GRO_COR[item["classif"]]),
-                ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ]))
-            story.append(t_badge)
-            story.append(Spacer(1, 2 * mm))
-
-            rows_5w2h = [
-                ["What (O quê)", Paragraph(t["what"], s_cell)],
-                ["Why (Por quê)", Paragraph(t["why"], s_cell)],
-                ["Who (Quem)", Paragraph(t["who"], s_cell)],
-                ["Where (Onde)", Paragraph(t["where"], s_cell)],
-                ["When (Quando)", Paragraph(t["when"], s_cell)],
-                ["How (Como)", Paragraph(t["how"], s_cell)],
-                ["How Much (Quanto)", Paragraph(t["howmuch"], s_cell)],
-            ]
-            t_5w2h = Table(rows_5w2h, colWidths=[34 * mm, 140 * mm])
-            t_5w2h.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (0, -1), VERDE_NR1),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-                ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('TOPPADDING', (0, 0), (-1, -1), 5),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ]))
-            story.append(t_5w2h)
-            story.append(Spacer(1, 6 * mm))
-
-    story.append(Paragraph(
-        "Acompanhamento e Reavaliação", s_h2
-    ))
-    story.append(Paragraph(
-        "Este plano será reavaliado a cada ciclo de Pesquisa Pulso semanal e Diagnóstico Geral periódico, "
-        "conforme a exigência de melhoria contínua do item 1.5.4.4.6 da NR-1. As ações marcadas como "
-        "concluídas serão documentadas com nova medição de IBP no instrumento de Acompanhamento (4) para "
-        "comprovação de eficácia.",
-        s_body
-    ))
-
-    story.append(PageBreak())
-
-    # ── Assinatura ──
-    story.append(Paragraph("Assinatura e Validação", s_h2))
-    story.append(Paragraph("✓ DOCUMENTO ASSINADO ELETRONICAMENTE", ParagraphStyle(
-        'assinado', parent=s_body, textColor=VERDE_OK, fontName='Helvetica-Bold', fontSize=10)))
-    story.append(Spacer(1, 3 * mm))
-    agora = datetime.datetime.now(datetime.timezone.utc).strftime("%d/%m/%Y %H:%M:%S UTC")
-    hash_uuid = str(uuid.uuid4()).upper()
-    sig_rows = [
-        ["Responsavel Tecnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
-        ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
-        ["Data e Hora (UTC):", agora],
-        ["Hash UUID de Validacao:", hash_uuid],
-    ]
-    t_sig = Table(sig_rows, colWidths=[45 * mm, 100 * mm])
-    t_sig.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-        ('TEXTCOLOR', (0, 0), (-1, -1), CINZA_TEXTO),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-    ]))
-    story.append(t_sig)
-    story.append(Spacer(1, 3 * mm))
-    story.append(Spacer(1, 6*mm))
-    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
-    story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
-        'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
-    story.append(Spacer(1, 3*mm))
-    sig_lucia = [
-        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
-        ["Registro Profissional:",         "CRP 09/20590"],
-        ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
-        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
-        ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
-    ]
-    t_sig_lucia = Table(sig_lucia, colWidths=[45*mm, 100*mm])
-    t_sig_lucia.setStyle(TableStyle([
-        ('FONTNAME',  (0,0), (0,-1), 'Helvetica-Bold'),
-        ('FONTSIZE',  (0,0), (-1,-1), 7.8),
-        ('TEXTCOLOR', (0,0), (-1,-1), CINZA_TEXTO),
-        ('TOPPADDING',(0,0), (-1,-1), 3),
-        ('BOTTOMPADDING',(0,0),(-1,-1),3),
-        ('LINEBELOW', (0,-1), (-1,-1), 0.5, LINHA),
-    ]))
-    story.append(t_sig_lucia)
-    story.append(Spacer(1, 4*mm))
-
-    story.append(Paragraph(
-        "Este registro é imutável e serve como homologação oficial para fiscalização trabalhista (NR-1).",
-        s_body
-    ))
-
-    # Injetar logos como atributos da funcao de cabecalho
-    desenhar_cabecalho_rodape._empresa_nome = _empresa_nome
-    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
-    _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
-    desenhar_cabecalho_rodape._logo_parc = _lp_path
-    desenhar_cabecalho_rodape._logo_emp  = _le_path
-    doc.build(story, onFirstPage=desenhar_cabecalho_rodape, onLaterPages=desenhar_cabecalho_rodape)
-    for _tmp in [_lp_path, _le_path]:
-        if _tmp and __import__('os').path.exists(_tmp):
-            try: __import__('os').unlink(_tmp)
-            except: pass
-    print(f"Gerado: {output_path}")
+        if (d.ibpGeral !== undefined) {
+          // Ciclo já tem dados agregados (versão nova)
+          todos.push(d);
+        } else {
+          // Ciclo vazio — buscar respostas internas e agregar
+          var p = window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+            .collection('ciclos').doc(cicloDoc.id)
+            .collection('respostas').get()
+            .then(function(respSnap) {
+              if (respSnap.empty) return;
+              var somaIbp = 0, n = 0, tipo = 'geral', criadoEm = '';
+              var ibpSubcats = {}, ibpModulos = {};
+              respSnap.forEach(function(r) {
+                var rd = r.data();
+                somaIbp += (rd.ibpGeral || 0); n++;
+                if (rd.tipo || rd.Tipo) tipo = rd.tipo || rd.Tipo;
+                if (rd.respondidoEm && !criadoEm) criadoEm = rd.respondidoEm;
+                if (rd.criadoEm && !criadoEm) criadoEm = rd.criadoEm;
+                // Agregar subcats
+                if (rd.ibpSubcats) {
+                  Object.keys(rd.ibpSubcats).forEach(function(k) {
+                    if (!ibpSubcats[k]) ibpSubcats[k] = { soma: 0, n: 0, nome: rd.ibpSubcats[k].nome, modId: rd.ibpSubcats[k].modId };
+                    ibpSubcats[k].soma += (rd.ibpSubcats[k].ibp || 0);
+                    ibpSubcats[k].n++;
+                  });
+                }
+              });
+              if (!n) return;
+              // Calcular médias das subcats
+              var subcatsMedia = {};
+              Object.keys(ibpSubcats).forEach(function(k) {
+                subcatsMedia[k] = { ibp: Math.round(ibpSubcats[k].soma/ibpSubcats[k].n * 100)/100, nome: ibpSubcats[k].nome, modId: ibpSubcats[k].modId };
+              });
+              todos.push({
+                _id: cicloDoc.id,
+                _tipo: tipo,
+                tipo: tipo,
+                ibpGeral: Math.round(somaIbp/n * 100)/100,
+                totalRespostas: n,
+                criadoEm: criadoEm,
+                ibpSubcats: subcatsMedia
+              });
+            });
+          promises.push(p);
+        }
+      });
+      return Promise.all(promises);
+    })
+    .then(function() {
+      // Buscar agendamentos planejados e adicionar ao histórico
+      return window.nr1mapDb.collection('nr1map_agenda')
+        .where('empresaId','==',empresaId)
+        .get()
+        .then(function(agSnap) {
+          agSnap.forEach(function(doc) {
+            var a = doc.data();
+            // Só adiciona se não houver ciclo já executado com mesmo id
+            var jaExiste = todos.some(function(c){ return c._id === doc.id; });
+            var foiDisparado = a.status === 'disparado';
+            if (!jaExiste && !foiDisparado) {
+              todos.push({
+                _id: doc.id,
+                _tipo: a.tipo || 'geral',
+                tipo: a.tipo || 'geral',
+                ibpGeral: undefined,
+                totalRespostas: 0,
+                criadoEm: a.data || a.criadoEm || '',
+                _status: 'planejado',
+                _canal: a.canal,
+                _unidade: a.unidade
+              });
+            }
+          });
+        }).catch(function(){});
+    })
+    .then(function() {
+      if (!todos.length) {
+        el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhuma pesquisa realizada ainda.</div>';
+        return;
+      }
+      todos.sort(function(a,b){ return (b.criadoEm||'') > (a.criadoEm||'') ? 1 : -1; });
+      window._histCiclos = todos;
+      renderHistoricoUnificado();
+    })
+    .catch(function(e){
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Erro: ' + e.message + '</div>';
+    });
+}
 
 
-if __name__ == "__main__":
-    gerar_5w2h()
+function renderHistoricoUnificado() {
+  var el = document.getElementById('hist-timeline-body');
+  if (!el) return;
+  var filtro = (document.getElementById('hist-filtro-tipo') || {}).value || 'todos';
+  var ciclos = window._histCiclos || [];
+  var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var filtrados = ciclos.filter(function(d) {
+    if (filtro === 'todos') return true;
+    var _t = d._tipo || d.tipo || d.Tipo || '';
+    if (filtro === 'geral') return _t !== 'pulso';
+    return _t === filtro;
+  });
+  if (!filtrados.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);">Nenhum item para este filtro.</div>';
+    return;
+  }
+  el.innerHTML = filtrados.map(function(d) {
+    var t = d._tipo || d.tipo || d.Tipo || '';
+    var isGeral = t !== 'pulso';
+    var cor     = isGeral ? '#0A6E4F' : '#7B00C4';
+    var bgCor   = isGeral ? 'rgba(10,110,79,0.06)' : 'rgba(123,0,196,0.06)';
+    var borda   = isGeral ? 'rgba(10,110,79,0.2)'  : 'rgba(123,0,196,0.15)';
+    var label   = isGeral ? 'Diagnóstico Geral'    : 'Pesquisa Pulso';
+    // Suporta Timestamp Firestore (.toDate()), string ISO, ou ausente
+    var dt = null;
+    if (d.criadoEm) {
+      if (typeof d.criadoEm === 'object' && d.criadoEm.toDate) dt = d.criadoEm.toDate();
+      else dt = new Date(d.criadoEm);
+    }
+    var dataStr = (dt && !isNaN(dt)) ? (dt.getDate() + '/' + (dt.getMonth()+1) + '/' + dt.getFullYear()) : '—';
+    var respostas = d.totalRespostas || 0;
+    var ibp = d.ibpGeral !== undefined ? (parseFloat(d.ibpGeral) > 0 ? '+' : '') + parseFloat(d.ibpGeral).toFixed(1) : '—';
+    var cicloId = d._id || '';
+    var isPlanejado = d._status === 'planejado';
+    var badgePlan = isPlanejado ? '<span style="font-size:9px;font-weight:700;background:rgba(243,156,18,0.15);color:#F39C12;border:1px solid rgba(243,156,18,0.3);border-radius:20px;padding:1px 7px;margin-left:6px;">Planejado</span>' : '';
+    var subInfo = isPlanejado
+      ? (dataStr + ' · Aguardando respostas' + (d._canal ? ' · ' + d._canal : ''))
+      : (dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp);
+    var acaoBotao = isPlanejado
+      ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(&quot;planejamento&quot;)">Ver agenda</button>'
+      : '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="abrirLaudoDoCiclo(\'' + cicloId + '\',\'' + (d.tipo||'geral') + '\')">Ver laudo</button>';
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + borda + ';border-radius:8px;background:' + bgCor + ';margin-bottom:8px;' + (isPlanejado ? 'opacity:0.75;' : '') + '">' +
+      '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (isPlanejado ? '#F39C12' : cor) + ';opacity:0.7;margin-top:4px;flex-shrink:0;"></span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:12px;font-weight:600;color:' + cor + ';">' + label + (d.tema ? ' — ' + d.tema : '') + badgePlan + '</div>' +
+        '<div style="font-size:11px;color:var(--cinza-medio);margin-top:2px;">' + subInfo + '</div>' +
+      '</div>' +
+      acaoBotao +
+    '</div>';
+  }).join('');
+}
+
+
+function dispararDoAgendamento() {
+  var agTipo    = document.getElementById('plan-tipo')    ? document.getElementById('plan-tipo').value    : 'pulso';
+  var agPrazo   = document.getElementById('plan-prazo')   ? document.getElementById('plan-prazo').value   : '7';
+  var agUnidade = document.getElementById('plan-unidade') ? document.getElementById('plan-unidade').value : 'Todas';
+  var agDepto   = document.getElementById('plan-depto')   ? document.getElementById('plan-depto').value   : 'Todos';
+  var agCargo   = document.getElementById('plan-cargo')   ? document.getElementById('plan-cargo').value   : 'Todos';
+  var agCanal   = document.getElementById('plan-canal')   ? document.getElementById('plan-canal').value   : 'WhatsApp';
+  // Capturar ID ANTES de salvarAgendamento zerar o _editAgendaId
+  var capturedId = window._editAgendaId || '';
+  try { if (capturedId) localStorage.setItem('nr1map_agendaId', capturedId); } catch(e){}
+  salvarAgendamento();
+  window._currentAgendaId = capturedId;
+  var tipoDisparo = agTipo === 'geral' ? 'diagnostico' : 'nova-pulso';
+  setTimeout(function() {
+    sv(tipoDisparo);
+    _preencherTelaDisparo({ prazo: agPrazo, unidade: agUnidade, depto: agDepto, cargo: agCargo, canal: agCanal, tipo: agTipo });
+  }, 700);
+}
+
+function _preencherTelaDisparo(d) {
+  // Prazo — mesmo select em ambas as telas
+  var elPrazo = document.getElementById('ag-prazo');
+  if (elPrazo) elPrazo.value = d.prazo || '7';
+
+  // Unidade
+  var elUn = document.getElementById(d.tipo === 'pulso' ? 'pulso-unidade' : 'ag-unidade');
+  if (elUn) elUn.value = d.unidade || 'Todas';
+
+  // Departamento
+  var elDp = document.getElementById(d.tipo === 'pulso' ? 'pulso-depto' : 'ag-depto');
+  if (elDp) elDp.value = d.depto || 'Todos';
+
+  // Cargo
+  var elCg = document.getElementById(d.tipo === 'pulso' ? 'pulso-cargo' : 'ag-cargo');
+  if (elCg) elCg.value = d.cargo || 'Todos';
+
+  // Canal — Diagnóstico usa .d-opt, Pulso usa select
+  if (d.tipo === 'geral') {
+    document.querySelectorAll('.d-opt').forEach(function(opt) {
+      opt.classList.remove('sel');
+      var lb = opt.querySelector('.d-lb');
+      if (lb && lb.textContent.trim() === (d.canal || 'WhatsApp')) opt.classList.add('sel');
+    });
+  } else {
+    var elCanal = document.getElementById('pulso-canal');
+    if (elCanal) elCanal.value = d.canal || 'WhatsApp';
+  }
+}
+
+function editarAgendamento(item) {
+  var d = item.d;
+  var docId = item.id;
+  window._editAgendaId = docId;
+  window._currentAgendaId = docId;
+  try { localStorage.setItem('nr1map_agendaId', docId); } catch(e){}
+
+  _popularModalAgenda();
+
+  var agTipo    = document.getElementById('plan-tipo');
+  var agData    = document.getElementById('plan-data');
+  var agCanal   = document.getElementById('plan-canal');
+  var agUnidade = document.getElementById('plan-unidade');
+  var agPrazo   = document.getElementById('plan-prazo');
+  var agDepto   = document.getElementById('plan-depto');
+  var agCargo   = document.getElementById('plan-cargo');
+
+  if (agTipo)    agTipo.value    = d.tipo    || 'pulso';
+  if (agData)    agData.value    = d.data    || '';
+  if (agCanal)   agCanal.value   = d.canal   || 'WhatsApp';
+  if (agUnidade) agUnidade.value = d.unidade || 'Todas';
+  if (agPrazo)   agPrazo.value   = d.prazo   || '7';
+  if (agDepto)   agDepto.value   = d.depto   || 'Todos';
+  if (agCargo)   agCargo.value   = d.cargo   || 'Todos';
+
+  var mhdr = document.querySelector('#modal-agendar .modal-header h3');
+  if (mhdr) mhdr.textContent = '✏️ Editar agendamento';
+
+  var wrap = document.getElementById('btn-disparar-agora-wrap');
+  if (wrap) wrap.style.display = 'block';
+
+  abrirModal('modal-agendar');
+}
+
+function excluirAgendamento(docId) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!confirm('ATENCAO\n\nExcluir este agendamento apagara permanentemente todos os dados, respostas, tokens e historico vinculados.\n\nEsta acao nao pode ser desfeita.\n\nDeseja continuar?')) return;
+  var db = window.nr1mapDb;
+
+  var refCiclo = db.collection('nr1map_respostas').doc(empresaId).collection('ciclos').doc(docId);
+
+  // 1. Apagar respostas individuais do ciclo
+  refCiclo.collection('respostas').get()
+  .then(function(snap) {
+    if (snap.empty) return Promise.resolve();
+    var batch = db.batch();
+    snap.forEach(function(d) { batch.delete(d.ref); });
+    return batch.commit();
+  })
+  // 2. Apagar documento do ciclo agregado
+  .then(function() {
+    return refCiclo.delete().catch(function(){});
+  })
+  // 3. Apagar tokens vinculados (por pesquisaId)
+  .then(function() {
+    return db.collection('nr1map_tokens')
+      .where('pesquisaId', '==', docId).get();
+  })
+  .then(function(tokSnap) {
+    if (tokSnap.empty) return Promise.resolve();
+    var batch2 = db.batch();
+    tokSnap.forEach(function(d) { batch2.delete(d.ref); });
+    return batch2.commit();
+  })
+  // 4. Apagar historico pessoal dos colaboradores (nr1map_respostas_colab)
+  .then(function() {
+    return db.collection('nr1map_respostas_colab')
+      .where('pesquisaId', '==', docId).get()
+      .catch(function(){ return { empty: true, docs: [] }; });
+  })
+  .then(function(colabSnap) {
+    if (!colabSnap || colabSnap.empty) return Promise.resolve();
+    var batch3 = db.batch();
+    colabSnap.forEach(function(d) { batch3.delete(d.ref); });
+    return batch3.commit();
+  })
+  // 5. Apagar doc de historico pelo padrao empresaId_pesquisaId (forma antiga)
+  .then(function() {
+    return db.collection('nr1map_respostas_colab')
+      .doc(empresaId + '_' + docId).delete().catch(function(){});
+  })
+  // 6. Apagar streak do ciclo
+  .then(function() {
+    return db.collection('nr1map_streak')
+      .doc(empresaId + '_' + docId).delete().catch(function(){});
+  })
+  // 7. Apagar o agendamento
+  .then(function() {
+    return db.collection('nr1map_agenda').doc(docId).delete();
+  })
+  .then(function() {
+    // Atualizar interface
+    carregarAgenda();
+    carregarHistoricoUnificado(empresaId);
+    carregarHistoricoReal(empresaId);
+    atualizarHistoricoTimeline(empresaId);
+    // Limpar cache de ciclos para evitar fantasmas
+    window._histCiclos = [];
+  })
+  .catch(function(e) {
+    console.log('Erro ao excluir:', e);
+    // Fallback: apaga pelo menos o agendamento
+    db.collection('nr1map_agenda').doc(docId).delete()
+      .then(function(){
+        carregarAgenda();
+        window._histCiclos = [];
+        carregarHistoricoUnificado(empresaId);
+      });
+  });
+}
+
+function exportarOrgPDF() {
+  alert('⬇ Exportando Organograma em PDF...\n\nEm produção: chama gerar_organograma.py e retorna o PDF co-branded.');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  atualizarTodosSinalizadores();
+  atualizarBadgePendentes();
+  renderHistorico();
+  renderCargos();
+  setTimeout(function(){ dispararVelocimetros(0,0,0,0); }, 200);
+});
+
+function buscarCBOColab(q) {
+  var div = document.getElementById('colab-cbo-drop');
+  if (!div) return;
+  q = (q||'').toLowerCase().trim();
+  var db = (typeof CBO_DATABASE !== 'undefined') ? CBO_DATABASE : [];
+  var res = q.length === 0
+    ? db.slice(0,12)
+    : db.filter(function(x){ return x.titulo.toLowerCase().indexOf(q)>-1 || x.cbo.indexOf(q)>-1; }).slice(0,10);
+  div.innerHTML = '';
+  if (!res.length) { div.style.display='none'; return; }
+  res.forEach(function(r){
+    var d = document.createElement('div');
+    d.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6;';
+    d.innerHTML = '<strong>' + r.titulo + '</strong> <span style="color:#9ca3af;font-family:monospace;font-size:11px;">' + r.cbo + '</span>';
+    d.addEventListener('mouseover', function(){ this.style.background='#f9fafb'; });
+    d.addEventListener('mouseout', function(){ this.style.background=''; });
+    d.addEventListener('click', function(){
+      document.getElementById('colab-cbo-input').value = r.titulo + ' · ' + r.cbo;
+      document.getElementById('colab-cbo-valor').value = r.cbo;
+      div.style.display = 'none';
+    });
+    div.appendChild(d);
+  });
+  div.style.display='block';
+}
+function selCBOColab(el) {
+  var codigo = el.dataset.cbo;
+  var nome = el.dataset.titulo;
+  document.getElementById('nc-cbo-input').value = nome + ' · ' + codigo;
+  document.getElementById('nc-cbo-valor').value = codigo;
+  document.getElementById('nc-cbo-drop-colab').style.display = 'none';
+}
+function salvarNovoColab() {
+  var nome     = (document.getElementById('colab-nome')||{}).value.trim() || '';
+  var email    = (document.getElementById('colab-email')||{}).value.trim() || '';
+  var whatsapp = ((document.getElementById('colab-whatsapp')||{}).value || '').replace(/[^0-9]/g,'');
+  var cargoVal = (document.getElementById('colab-cargo-select')||{}).value || '';
+  var depto    = (document.getElementById('colab-depto')||{}).value.trim() || '';
+  var unidade  = (document.getElementById('colab-unidade')||{}).value.trim() || '';
+  var admissao = (document.getElementById('colab-admissao')||{}).value || '';
+
+  var nivelAcesso = (document.getElementById('colab-nivel')||{}).value || 'colaborador';
+
+  if (!nome)     { alert('Informe o nome do colaborador.'); return; }
+  if (!email)    { alert('Informe o e-mail do colaborador.'); return; }
+  if (!cargoVal) { alert('Selecione o cargo do colaborador.'); return; }
+
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) { alert('Erro: empresa não carregada.'); return; }
+
+  // Separa "Cargo · CBO" → cargo e cbo
+  var partes    = cargoVal.split(' · ');
+  var cargoNome = partes[0] || cargoVal;
+  var cbo       = partes[1] || '';
+
+  var btn = document.querySelector('#modal-novo-colab .btn-primary');
+  if (btn) { btn.textContent = 'Cadastrando...'; btn.disabled = true; }
+
+  // USA APP SECUNDÁRIO ISOLADO — não afeta sessão do RH logado
+  var firebaseConfig = {
+    apiKey:'AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4',
+    authDomain:'entrevista-inicial.firebaseapp.com',
+    projectId:'entrevista-inicial',
+    storageBucket:'entrevista-inicial.firebasestorage.app',
+    messagingSenderId:'437375609844',
+    appId:'1:437375609844:web:9435b1fb3b21778f2e27a1'
+  };
+  var secApp;
+  try { secApp = firebase.app('nr1map-colab-create'); }
+  catch(e) { secApp = firebase.initializeApp(firebaseConfig, 'nr1map-colab-create'); }
+  var secAuth = firebase.auth(secApp);
+
+  secAuth.createUserWithEmailAndPassword(email, _gerarSenhaTemp())
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      // Desloga do app secundário imediatamente — sessão do RH não é afetada
+      secAuth.signOut();
+      return window.nr1mapDb.collection('nr1map_colaboradores').doc(uid).set({
+        empresaId: empresaId,
+        nome: nome,
+        email: email,
+        whatsapp: whatsapp,
+        cargo: cargoNome,
+        cbo: cbo,
+        setor: depto,
+        departamento: depto,
+        unidade: unidade,
+        admissao: admissao,
+        status: 'ativo',
+        nivelAcesso: nivelAcesso,
+        criadoEm: new Date().toISOString()
+      }).then(function() {
+        return window.nr1mapDb.collection('nr1map_usuarios_pf').doc(uid).set({
+          empresaId: empresaId,
+          nome: nome,
+          email: email,
+          cargo: cargoNome,
+          cbo: cbo,
+          tipo: nivelAcesso === 'colaborador' ? 'colaborador' : 'gestor',
+          nivelAcesso: nivelAcesso,
+          status: 'ativo',
+          criadoEm: new Date().toISOString()
+        });
+      }).then(function() {
+        // Envia reset de senha pelo app principal (não afeta sessão pois já está logada)
+        return window.nr1mapAuth.sendPasswordResetEmail(email);
+      }).then(function() {
+        return uid;
+      });
+    })
+    .then(function(uid) {
+      if (btn) { btn.textContent = 'Cadastrar e enviar acesso'; btn.disabled = false; }
+      ['colab-nome','colab-email','colab-whatsapp','colab-depto','colab-unidade','colab-admissao'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.value = '';
+      });
+      var sel = document.getElementById('colab-cargo-select');
+      if(sel) sel.selectedIndex = 0;
+      fecharModal('modal-novo-colab');
+      adicionarLinhaColab(uid, nome, email, cargoNome + ' · ' + cbo, depto, unidade, admissao, 'ativo');
+      atualizarContadorColab();
+      // WhatsApp opcional
+      var msg = '✅ Colaborador cadastrado! E-mail de acesso enviado para: ' + email;
+      if (whatsapp) {
+        var nomeEmp = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome && window.nr1mapEmpresa.nome !== 'Empresa') ? window.nr1mapEmpresa.nome : 'sua empresa';
+        var txt = 'Olá ' + nome + '! 👋\n\n' +
+          'Você foi cadastrado(a) no *NR-1 Map* de *' + nomeEmp + '*.\n\n' +
+          'Para acessar sua área:\n' +
+          '1️⃣ Verifique seu e-mail: *' + email + '*\n' +
+          '2️⃣ Clique no link *Redefinir senha* que chegou\n' +
+          '⚠️ _Pode estar na pasta Spam ou Atualizações!_\n' +
+          '3️⃣ Crie sua senha\n' +
+          '4️⃣ Acesse: https://luciakratz-arch.github.io/NR-1Map/admin.html\n' +
+          '5️⃣ Clique na aba *Usuário* e entre com e-mail e senha\n\n' +
+          '🔒 Suas respostas são 100% anônimas.';
+        if (confirm(msg + '\n\nEnviar instruções via WhatsApp?')) {
+          window.open('https://wa.me/55' + whatsapp + '?text=' + encodeURIComponent(txt), '_blank');
+        }
+      } else {
+        alert(msg);
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = 'Cadastrar e enviar acesso'; btn.disabled = false; }
+      console.error(e);
+      if (e.code === 'auth/email-already-in-use') {
+        alert('Este e-mail já está cadastrado.');
+      } else if (e.code === 'auth/invalid-email') {
+        alert('E-mail inválido.');
+      } else {
+        alert('Erro ao cadastrar: ' + (e.message || e));
+      }
+  });
+}
+
+function adicionarLinhaColab(docId, nome, contato, cargo, depto, unidade, admissao, status, nivelAcesso) {
+  var tbody = document.getElementById('tbody-colab');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.dataset.nome   = nome || '';
+  tr.dataset.status = status || 'ativo';
+  tr.dataset.docid  = docId;
+  var badgeStatus = status === 'ativo'
+    ? '<span class="bdg-s s-ok"><span class="dot"></span>Ativo</span>'
+    : '<span class="bdg-s s-warn"><span class="dot"></span>Inativo</span>';
+  var nivel = nivelAcesso || 'colaborador';
+  var badgeNivel =
+    nivel === 'rh'     ? '<span style="background:#0A6E4F;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">🏢 RH</span>' :
+    nivel === 'gestor' ? '<span style="background:#7B00C4;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">👔 Gestor</span>' :
+                         '<span style="background:#e5e7eb;color:#374151;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">👤 Colab.</span>';
+  tr.innerHTML =
+    '<td>' + (nome||'—') + '</td>' +
+    '<td>' + (contato||'—') + '</td>' +
+    '<td>' + (cargo||'—') + '</td>' +
+    '<td>' + (depto||'—') + '</td>' +
+    '<td>' + (unidade||'—') + '</td>' +
+    '<td>' + (admissao||'—') + '</td>' +
+    '<td>—</td>' +
+    '<td>' + badgeStatus + '</td>' +
+    '<td>' + badgeNivel + '</td>' +
+    '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
+    '<td>' +
+      '<button class="btn btn-ghost btn-sm" onclick="editarColab(this)">✏️ Editar</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="excluirColab(this)">🗑️</button>' +
+    '</td>';
+  tbody.appendChild(tr);
+}
+
+function excluirColab(btn) {
+  if (!confirm('Excluir este colaborador?')) return;
+  var tr = btn.closest('tr');
+  var docId = tr && tr.dataset.docid;
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_colaboradores').doc(docId).delete()
+      .catch(function(e){ console.log(e); });
+  }
+  if (tr) tr.remove();
+  atualizarContadorColab();
+}
+
+function atualizarContadorColab() {
+  var rows = document.querySelectorAll('#tbody-colab tr');
+  var ativos = 0, inativos = 0;
+  rows.forEach(function(r){
+    if (r.dataset.status === 'ativo') ativos++;
+    else if (r.dataset.status === 'inativo') inativos++;
+  });
+  var el = document.getElementById('mc-colab-ativos');
+  if (el) el.textContent = ativos;
+  var el2 = document.getElementById('mc-colab-inativos');
+  if (el2) el2.textContent = inativos + ' inativos';
+  var sub = document.getElementById('sub-colab');
+  if (sub) sub.textContent = ativos + ' ativos · ' + inativos + ' inativos';
+  var bdg = document.getElementById('bdg-colab');
+  if (bdg) { bdg.textContent = ativos; bdg.style.display = ativos > 0 ? '' : 'none'; }
+}
+
+function atualizarBadgePulso() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  // Filtra por tipo='pulso' para nao contar tokens de diagnostico geral
+  window.nr1mapDb.collection('nr1map_tokens')
+    .where('empresaId', '==', empresaId)
+    .where('tipo', '==', 'pulso')
+    .where('usado', '==', false)
+    .get()
+    .then(function(snap) {
+      var bdg = document.getElementById('bdg-pulso');
+      if (!bdg) return;
+      // So exibe badge se ha tokens pulso ativos reais (aguardando resposta)
+      var ativos = snap.size;
+      if (ativos > 0) {
+        bdg.textContent = ativos;
+        bdg.style.display = '';
+      } else {
+        bdg.style.display = 'none';
+      }
+    }).catch(function(e){ console.log('badge pulso:', e); });
+}
+
+function carregarColabs() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-colab');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId', '==', empresaId)
+    .orderBy('criadoEm', 'desc')
+    .get()
+    .then(function(snap) {
+      tbody.innerHTML = '';
+      // Atualiza badge do menu lateral
+      var bdgColab = document.getElementById('bdg-colab');
+      if (bdgColab) {
+        var ativos = 0;
+        snap.forEach(function(d){ if(d.data().status === 'ativo') ativos++; });
+        bdgColab.textContent = ativos;
+        bdgColab.style.display = ativos > 0 ? '' : 'none';
+      }
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum colaborador cadastrado ainda.</td></tr>';
+        return;
+      }
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        var contato = '';
+        if (d.email) contato += d.email;
+        if (d.whatsapp) contato += (contato ? '<br><span style="font-size:11px;color:#6b7280;">📱 ' + d.whatsapp + '</span>' : d.whatsapp);
+        if (!contato) contato = '—';
+        adicionarLinhaColab(doc.id, d.nome, contato, d.cargo, d.departamento, d.unidade, d.admissao, d.status, d.nivelAcesso || 'colaborador');
+      });
+      atualizarContadorColab();
+    }).catch(function(e) {
+      console.log(e);
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--cinza-medio);">Erro ao carregar colaboradores.</td></tr>';
+    });
+}
+</script>
+
+<!-- FIREBASE SDK -->
+<script>
+function aplicarRestricoesPorNivel(nivel) {
+  if (nivel !== 'gestor') return;
+  // Gestor: somente leitura — esconde botões de ação
+  var style = document.createElement('style');
+  style.textContent = [
+    '.btn-danger { display:none !important; }',
+    '#btn-novo-colab { display:none !important; }',
+    '.btn[onclick*="salvar"], .btn[onclick*="excluir"], .btn[onclick*="deletar"] { display:none !important; }',
+    '#btn-importar-planilha { display:none !important; }',
+    '#btn-iniciar-diagnostico { pointer-events:none; opacity:.5; }',
+    '.sidebar-gestor-badge { display:inline-block !important; }',
+  ].join('\n');
+  document.head.appendChild(style);
+  // Badge na sidebar indicando nível
+  setTimeout(function(){
+    var nomeEl = document.querySelector('.sidebar-empresa .nome');
+    if(nomeEl && !document.getElementById('gestor-badge')){
+      var badge = document.createElement('span');
+      badge.id = 'gestor-badge';
+      badge.style.cssText = 'display:inline-block;background:#7B00C4;color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle;';
+      badge.textContent = 'GESTOR';
+      nomeEl.appendChild(badge);
+    }
+  }, 1000);
+}
+
+function carregarEmpresa(uid, email) {
+  window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+  .then(function(snap){
+    if(!snap.empty){
+      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
+      return aplicarEmpresa(e);
+    }
+    return window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
+      .then(function(doc){
+        if(doc.exists){ var e=doc.data(); e.id=doc.id; return aplicarEmpresa(e); }
+        return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
+          .then(function(snap2){
+            if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; return aplicarEmpresa(e); }
+            aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
+          });
+      });
+  }).catch(function(err){
+    aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
+  });
+}
+
+
+
+
+/* ===== GERAR LAUDO PDF ===== */
+function gerarLaudoCompleto() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  // Capturar botao ANTES do confirm (event.target perde referencia apos dialogo em alguns browsers)
+  var btn = (event && event.target) ? event.target : document.querySelector('[onclick="gerarLaudoCompleto()"]');
+  if (!confirm('Gerar o Laudo Tecnico Psicossocial completo?\n\nIsso pode levar ate 30 segundos.')) return;
+  if (btn) { btn.textContent = '⏳ Gerando laudo...'; btn.disabled = true; }
+
+  // FIX: tipo=laudo_tecnico explícito + logos via POST
+  var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresa, logoParceiroUrl: logoParceiro, cicloId: _laudoCicloAtual || null })
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (btn) { btn.textContent = '📄 Gerar Laudo Tecnico PDF'; btn.disabled = false; }
+      if (d.url) {
+        window.open(d.url, '_blank');
+        // Salva laudoUrl no ciclo selecionado
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, d.cicloId || _laudoCicloAtual || null, 'laudoUrl');
+        // Recarrega a view do laudo para o seletor refletir o novo PDF
+        _laudoCiclosCache = [];
+        setTimeout(function() { carregarLaudoTecnico(empresaId); }, 800);
+        alert('Laudo Tecnico gerado e salvo com sucesso!');
+      } else {
+        alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e){
+      if (btn) { btn.textContent = '📄 Gerar Laudo Tecnico PDF'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+function gerarLaudoDoCicloAtual() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  if (!_laudoCicloAtual) { alert('Selecione um ciclo primeiro.'); return; }
+
+  var btn = document.getElementById('btn-gerar-laudo-ciclo');
+  var txtOrig = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      empresaId: empresaId,
+      tipo: 'laudo_tecnico',
+      cicloId: _laudoCicloAtual,
+      logoEmpresaUrl: logoEmpresa,
+      logoParceiroUrl: logoParceiro
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = txtOrig; btn.disabled = false; }
+      if (d.url) {
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, 'laudoUrl');
+        var urlFresh = d.url + '?bust=' + Date.now();
+        window.open(urlFresh, '_blank');
+        // Atualiza botão baixar
+        var btnBaixar = document.getElementById('btn-baixar-laudo-ciclo');
+        if (btnBaixar) { btnBaixar.style.display = 'inline-block'; btnBaixar.dataset.url = urlFresh; }
+        // Atualiza texto do seletor
+        var opt = document.querySelector('#laudo-ciclo-select option[value="' + _laudoCicloAtual + '"]');
+        if (opt && opt.textContent.indexOf('✓ PDF') === -1) opt.textContent += ' ✓ PDF';
+      } else {
+        alert('Erro ao gerar: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = txtOrig; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+function _salvarLaudoUrlNoCiclo(empresaId, url, cicloId, urlField) {
+  var db = window.nr1mapDb;
+  if (!db) return;
+  var campo = urlField || 'laudoUrl';
+  var geradoEm = new Date().toISOString();
+  var upd = {}; upd[campo] = url; upd['laudoGeradoEm'] = geradoEm;
+  // Se cicloId foi retornado pela Cloud Function, usa direto
+  if (cicloId) {
+    db.collection('nr1map_respostas').doc(empresaId)
+      .collection('ciclos').doc(cicloId)
+      .update(upd)
+      .catch(function(){});
+    return;
+  }
+  // Fallback: pega o ciclo mais recente por atualizadoEm ou criadoEm
+  var salvar = function(snap) {
+    if (!snap || snap.empty) return;
+    snap.docs[0].ref.update(upd).catch(function(){});
+  };
+  db.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('atualizadoEm', 'desc').limit(1).get()
+    .then(salvar)
+    .catch(function() {
+      db.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').orderBy('criadoEm', 'desc').limit(1).get()
+        .then(salvar).catch(function(){});
+    });
+}
+
+/* ===== VERSÕES DE DIAGNÓSTICO ===== */
+
+// Versão Rápida — 1 pergunta por subcategoria (as mais representativas)
+var PERGUNTAS_RAPIDAS_SET = [1,7,14,21,28,34,40,45,50,57,62,67,73,77,82,87,92,97];
+
+// Versão Padrão — 3 primeiras perguntas de cada subcategoria
+function _getPerguntasPadrao() {
+  var ids = [];
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
+    s.perguntas.slice(0,3).forEach(function(p){ ids.push(String(p.id)); });
+  }); });
+  return ids;
+}
+
+// Versão Completa — todas as 101
+function _getPerguntasCompletas() {
+  var ids = [];
+  MODULOS.forEach(function(m){ m.subcats.forEach(function(s){
+    s.perguntas.forEach(function(p){ ids.push(String(p.id)); });
+  }); });
+  return ids;
+}
+
+var _versaoDiag = 'padrao';
+
+var DESCRICOES_VERSAO = {
+  rapida: '⚡ <strong>Rápida:</strong> 21 perguntas essenciais (1 por subcategoria). Ideal para Pulso e primeira avaliação rápida.',
+  padrao: '⭐ <strong>Padrão:</strong> 3 perguntas por subcategoria pré-selecionadas = 54 perguntas. Personalize abaixo se quiser.',
+  completa: '📋 <strong>Completa:</strong> todas as 101 perguntas do banco. Ideal para laudo técnico aprofundado e GRO.'
+};
+
+function aplicarVersao(v) {
+  _versaoDiag = v;
+
+  // Atualiza alertas
+  ['rapida','padrao','completa'].forEach(function(x){
+    var al = document.getElementById('alerta-'+x);
+    if(al) al.style.display = x===v ? 'block' : 'none';
+  });
+
+  // Atualiza visual dos cards
+  ['rapida','padrao','completa'].forEach(function(x){
+    var card = document.getElementById('ver-card-'+x);
+    if(!card) return;
+    if(x===v){
+      card.style.borderColor='var(--verde)';
+      card.style.background='var(--verde-xp)';
+    } else {
+      card.style.borderColor='var(--linha)';
+      card.style.background='#fff';
+    }
+  });
+
+  // Atualiza descrição
+  var desc = document.getElementById('ver-descricao');
+  if(desc) desc.innerHTML = DESCRICOES_VERSAO[v] || '';
+
+  // Pré-seleciona perguntas
+  var ids;
+  if(v === 'rapida') ids = PERGUNTAS_RAPIDAS_SET.map(String);
+  else if(v === 'completa') ids = _getPerguntasCompletas();
+  else ids = _getPerguntasPadrao();
+
+  _rhSel = new Set(ids);
+  _salvarSelecoes();
+  renderRH();
+}
+
+function selecionarVersao(v) { aplicarVersao(v); }
+
+function dispararPesquisaVersao() { dispararPesquisa('diagnostico'); }
+function verLinksEnviados() {
+  // Se modal ja existe na sessao, so abre
+  var modalExist = document.getElementById('modal-disparo-confirmacao');
+  if (modalExist) { modalExist.classList.add('open'); return; }
+
+  // Busca tokens no Firestore para a empresa ativa
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var db = window.nr1mapDb;
+  if (!empresaId || !db) { alert('Empresa nao carregada.'); return; }
+
+  // Usa pesquisaId da sessao atual; se nao tiver, busca todos nao usados
+  var pesquisaId = window._currentAgendaId || window._editAgendaId ||
+    (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
+
+  var query = pesquisaId
+    ? db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('pesquisaId','==',pesquisaId)
+    : db.collection('nr1map_tokens').where('empresaId','==',empresaId).where('usado','==',false);
+
+  query.get().then(function(snap) {
+    var modal = document.createElement('div');
+    modal.id = 'modal-disparo-confirmacao';
+    modal.className = 'modal-overlay';
+    var mDiv = document.createElement('div');
+    mDiv.className = 'modal';
+    mDiv.style.cssText = 'max-width:520px;width:95%;';
+    var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+    var mH3 = document.createElement('h3'); mH3.textContent = 'Links gerados';
+    var mBtnX = document.createElement('button'); mBtnX.className = 'modal-close'; mBtnX.textContent = 'x';
+    mBtnX.onclick = function(){ modal.classList.remove('open'); };
+    mHdr.appendChild(mH3); mHdr.appendChild(mBtnX);
+    var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+    var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+    var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+    mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+    mFtr.appendChild(mFtrBtn);
+    mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+    modal.appendChild(mDiv);
+    document.body.appendChild(modal);
+
+    if (snap.empty) {
+      mBody.innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum token encontrado para esta empresa. Dispare uma pesquisa primeiro.</p>';
+      modal.classList.add('open');
+      return;
+    }
+
+    var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+    var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + snap.size + ' links</p>';
+    snap.forEach(function(td) {
+      var t = td.data();
+      var statusTxt = t.usado
+        ? '<span style="color:#ef4444;font-size:11px;">Respondido</span>'
+        : '<span style="color:#10b981;font-size:11px;">Pendente</span>';
+      var url = base + t.codigo;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;gap:8px;">' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (t.colaboradorNome || 'Colaborador') + '</div>' +
+        '<div>' + statusTxt + '</div></div>' +
+        '<a href="' + url + '" target="_blank" style="background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;">Abrir link</a>' +
+        '</div>';
+    });
+    mBody.innerHTML = html;
+    modal.classList.add('open');
+  }).catch(function(e) { alert('Erro ao buscar links: ' + e.message); });
+}
+function verLinksEnviadosLEGACY() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  var db = window.nr1mapDb;
+  if (!empresaId || !db) { alert('Empresa nao carregada.'); return; }
+  var prazoEl = document.getElementById('ag-prazo');
+  var prazoNum = parseInt((prazoEl && prazoEl.value) || '7', 10);
+  var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum + ' dias';
+  var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+  var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
+  var agendaId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
+  if (!agendaId) { alert('Abra o agendamento pelo lapis e dispare primeiro.'); return; }
+  db.collection('nr1map_agenda').doc(agendaId).get().then(function(doc) {
+    var waLinks = (doc.exists && doc.data().waLinks) ? doc.data().waLinks : [];
+    var modal = document.getElementById('modal-disparo-confirmacao');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modal-disparo-confirmacao';
+      modal.className = 'modal-overlay';
+      var mDiv = document.createElement('div'); mDiv.className = 'modal'; mDiv.style.cssText = 'max-width:520px;width:95%;';
+      var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+      var mH3 = document.createElement('h3'); mH3.id = 'modal-disp-titulo';
+      var mBtn = document.createElement('button'); mBtn.className = 'modal-close'; mBtn.textContent = 'x';
+      mBtn.onclick = function(){ modal.classList.remove('open'); };
+      mHdr.appendChild(mH3); mHdr.appendChild(mBtn);
+      var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+      var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+      var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+      mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+      mFtr.appendChild(mFtrBtn);
+      mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+      modal.appendChild(mDiv);
+      document.body.appendChild(modal);
+    }
+    document.getElementById('modal-disp-titulo').textContent = 'Links enviados';
+    if (!waLinks.length) {
+      document.getElementById('modal-disp-body').innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum link salvo. Dispare primeiro para gerar.</p>';
+      modal.classList.add('open');
+      return;
+    }
+    var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + waLinks.length + ' links</p>';
+    waLinks.forEach(function(w) {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;">' +
+        '<span style="font-size:13px;">' + (w.nome || 'Colaborador') + '</span>' +
+        (w.url ? '<a href="' + w.url + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">Abrir</a>' : '<span style="font-size:11px;color:#9ca3af;">Sem WhatsApp</span>') +
+        '</div>';
+    });
+    document.getElementById('modal-disp-body').innerHTML = html;
+    modal.classList.add('open');
+  }).catch(function(e) { alert('Erro: ' + e.message); });
+}
+
+
+
+function gerarToken6() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function dispararPesquisa(tipo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) {
+    alert('Erro: empresa não carregada.'); return;
+  }
+
+  // Para Pulso usa pulso-*, para Diagnóstico usa ag-*
+  var _unEl  = document.getElementById(tipo === 'pulso' ? 'pulso-unidade' : 'ag-unidade');
+  var _dpEl  = document.getElementById(tipo === 'pulso' ? 'pulso-depto'   : 'ag-depto');
+  var _cgEl  = document.getElementById(tipo === 'pulso' ? 'pulso-cargo'   : 'ag-cargo');
+  // Pegar prazo do select visível na view ativa
+  var _prEl = null;
+  document.querySelectorAll('[id="ag-prazo"]').forEach(function(el){
+    if (el.offsetParent !== null) _prEl = el;
+  });
+  if (!_prEl) _prEl = document.getElementById('ag-prazo');
+  var filtroUnidade = (_unEl && _unEl.value) || 'Todas';
+  var filtroDepto   = (_dpEl && _dpEl.value) || 'Todos';
+  var filtroCargo   = (_cgEl && _cgEl.value) || 'Todos';
+  var prazoVal      = parseInt((_prEl && _prEl.value) || '7', 10);
+
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId', '==', empresaId)
+    .where('status', '==', 'ativo')
+    .get()
+    .then(function(snap) {
+      if (snap.empty) {
+        alert('Nenhum colaborador ativo cadastrado.'); return;
+      }
+
+      var colabsFiltrados = [];
+      snap.forEach(function(doc) {
+        var c = doc.data(); c._id = doc.id;
+        var okUnidade = filtroUnidade === 'Todas' || (c.unidade || '') === filtroUnidade;
+        var okDepto   = filtroDepto   === 'Todos' || (c.depto || c.departamento || c.setor || '') === filtroDepto;
+        var okCargo   = filtroCargo   === 'Todos' || (c.cargo || '').indexOf(filtroCargo) !== -1;
+        if (okUnidade && okDepto && okCargo) colabsFiltrados.push({ doc: doc, data: c });
+      });
+
+      if (!colabsFiltrados.length) {
+        alert('Nenhum colaborador encontrado com os filtros de público-alvo selecionados.'); return;
+      }
+
+      var total = colabsFiltrados.length;
+      var links = [];
+      var expiraMsec = prazoVal * 24 * 3600 * 1000;
+      var agora = new Date().toISOString();
+      var pesquisaId = window._currentAgendaId || window._editAgendaId || '';
+
+      // Verificar tokens existentes para este ciclo antes de criar novos
+      var tokenQuery = pesquisaId
+        ? window.nr1mapDb.collection('nr1map_tokens').where('empresaId','==',empresaId).where('pesquisaId','==',pesquisaId).get()
+        : Promise.resolve({ docs: [] });
+
+      tokenQuery.then(function(tokensSnap) {
+        // Mapear tokens existentes por colaboradorId
+        var tokensExistentes = {};
+        tokensSnap.docs && tokensSnap.docs.forEach(function(td) {
+          var t = td.data();
+          if (!t.usado && t.expiraEm > agora) {
+            tokensExistentes[t.colaboradorId] = t.codigo;
+          }
+        });
+
+        var batch = window.nr1mapDb.batch();
+        colabsFiltrados.forEach(function(item) {
+          var colab = item.data;
+          // Reutilizar token existente ou criar novo
+          var token = tokensExistentes[item.doc.id] || gerarToken6();
+          var jaExiste = !!tokensExistentes[item.doc.id];
+
+          if (!jaExiste) {
+            var ref = window.nr1mapDb.collection('nr1map_tokens').doc();
+            batch.set(ref, {
+              codigo: token,
+              empresaId: empresaId,
+              empresaNome: window.nr1mapEmpresa.nome || '',
+              colaboradorId: item.doc.id,
+              colaboradorNome: colab.nome || '',
+              whatsapp: colab.whatsapp || '',
+              tipo: tipo,
+              pesquisaId: pesquisaId,
+              usado: false,
+              criadoEm: new Date().toISOString(),
+              expiraEm: new Date(Date.now() + expiraMsec).toISOString()
+            });
+          }
+
+          links.push({
+            nome: colab.nome || 'Colaborador',
+            whatsapp: (colab.whatsapp || '').replace(/[^0-9]/g, ''),
+            email: colab.email || '',
+            token: token
+          });
+        });
+
+        batch.commit().then(function() {
+        var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+        var tipotxt = tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnóstico Geral';
+        var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
+
+        // Detectar canal
+        var canalVal = 'WhatsApp';
+        var optSel = document.querySelector('.d-opt.sel .d-lb');
+        if (optSel) canalVal = optSel.textContent.trim();
+        if (tipo === 'pulso') {
+          var pc = document.getElementById('pulso-canal');
+          if (pc) canalVal = pc.value;
+        }
+
+        // Criar modal
+        var modal = document.getElementById('modal-disparo-confirmacao');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'modal-disparo-confirmacao';
+          modal.className = 'modal-overlay';
+          var mDiv = document.createElement('div');
+          mDiv.className = 'modal'; mDiv.style.cssText = 'max-width:520px;width:95%;';
+          var mHdr = document.createElement('div'); mHdr.className = 'modal-header';
+          var mH3 = document.createElement('h3'); mH3.id = 'modal-disp-titulo';
+          var mBtn = document.createElement('button'); mBtn.className = 'modal-close'; mBtn.textContent = '×';
+          mBtn.onclick = function(){ modal.classList.remove('open'); };
+          mHdr.appendChild(mH3); mHdr.appendChild(mBtn);
+          var mBody = document.createElement('div'); mBody.className = 'modal-body'; mBody.id = 'modal-disp-body';
+          var mFtr = document.createElement('div'); mFtr.className = 'modal-footer';
+          var mFtrBtn = document.createElement('button'); mFtrBtn.className = 'btn btn-ghost'; mFtrBtn.textContent = 'Fechar';
+          mFtrBtn.onclick = function(){ modal.classList.remove('open'); };
+          mFtr.appendChild(mFtrBtn);
+          mDiv.appendChild(mHdr); mDiv.appendChild(mBody); mDiv.appendChild(mFtr);
+          modal.appendChild(mDiv);
+          document.body.appendChild(modal);
+        }
+        document.getElementById('modal-disp-titulo').textContent = '🚀 Disparando ' + tipotxt + '...';
+        document.getElementById('modal-disp-body').innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-medio);">Enviando para ' + total + ' colaboradores via ' + canalVal + '...</p>';
+        modal.classList.add('open');
+
+        // Payload para o script automático
+        var payload = {
+          tipo: tipo,
+          canal: canalVal,
+          empresa: empresaNome,
+          prazo: prazoVal,
+          colaboradores: links.map(function(l){ return { nome:l.nome, email:l.email, whatsapp:l.whatsapp, token:l.token }; })
+        };
+
+        var disparoUrl = window.NR1MAP_DISPARO_URL || '';
+        if (!disparoUrl) {
+          document.getElementById('modal-disp-titulo').textContent = '⚠️ URL do script não configurada';
+          document.getElementById('modal-disp-body').innerHTML = '<p style="color:var(--laranja);">Configure NR1MAP_DISPARO_URL no painel.</p>';
+          return;
+        }
+
+        // Google Apps Script requer JSONP para evitar CORS
+        var cbName = 'nr1cb_' + Date.now();
+        var getUrl = disparoUrl + '?dados=' + encodeURIComponent(JSON.stringify(payload)) + '&callback=' + cbName;
+        var scriptTag = document.createElement('script');
+        scriptTag.src = getUrl;
+        var jsonpPromise = new Promise(function(resolve, reject) {
+          window[cbName] = function(res) {
+            delete window[cbName];
+            document.body.removeChild(scriptTag);
+            resolve(res);
+          };
+          scriptTag.onerror = function() {
+            delete window[cbName];
+            document.body.removeChild(scriptTag);
+            reject(new Error('Falha ao conectar com o script de disparo.'));
+          };
+        });
+        document.body.appendChild(scriptTag);
+        jsonpPromise
+        .then(function(res) {
+          var html = '<div style="max-height:50vh;overflow-y:auto;">';
+
+          if (canalVal === 'E-mail' || canalVal === 'Ambos') {
+            html += '<div style="background:var(--verde-xp);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--verde);">✅ ' + (res.enviados||0) + ' e-mail(s) enviado(s) automaticamente</div>';
+            if (res.erros && res.erros.length) {
+              res.erros.forEach(function(er){ html += '<div style="font-size:12px;color:var(--laranja);padding:2px 0;">⚠️ ' + er.nome + ' — ' + er.erro + '</div>'; });
+            }
+          }
+
+          if ((canalVal === 'WhatsApp' || canalVal === 'Ambos') && res.waLinks && res.waLinks.length) {
+            if (canalVal === 'Ambos') html += '<div style="font-size:12px;font-weight:600;color:var(--preto);margin:12px 0 6px;">📱 WhatsApp — clique para abrir cada conversa:</div>';
+            res.waLinks.forEach(function(w) {
+              html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);">';
+              html += '<span style="font-size:13px;">' + w.nome + '</span>';
+              if (w.url) {
+                html += '<a href="' + w.url + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">📱 Abrir</a>';
+              } else {
+                html += '<span style="font-size:11px;color:var(--cinza-medio);">Sem WhatsApp</span>';
+              }
+              html += '</div>';
+            });
+          }
+
+          html += '</div>';
+          document.getElementById('modal-disp-titulo').textContent = '\u2705 ' + tipotxt + ' - ' + total + ' colaborador(es)';
+          document.getElementById('modal-disp-body').innerHTML = html;
+          // Salvar waLinks na agenda para resgatar depois
+          if (window.nr1mapDb && res.waLinks) {
+            var _agId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
+            if (_agId) window.nr1mapDb.collection('nr1map_agenda').doc(_agId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
+          }
+        })
+        .catch(function(err) {
+          document.getElementById('modal-disp-titulo').textContent = '❌ Erro no disparo';
+          document.getElementById('modal-disp-body').innerHTML = '<p style="color:var(--laranja);">Erro: ' + err.message + '</p>';
+        });
+
+      }).catch(function(e) {
+        console.log(e);
+        alert('Erro ao gerar tokens. Tente novamente.');
+      });
+
+      }).catch(function(e) {
+        console.log(e);
+        alert('Erro ao verificar tokens existentes.');
+      });
+    })
+    .catch(function(e) {
+      console.log(e);
+      alert('Erro ao buscar colaboradores.');
+    });
+}
+
+/* ===== CARREGAMENTO REAL DO FIRESTORE ===== */
+
+function carregarDashboard(empresaId) {
+  if (!window.nr1mapDb || !empresaId) return;
+
+  // Colaboradores
+  window.nr1mapDb.collection('nr1map_colaboradores')
+    .where('empresaId','==',empresaId)
+    .get().then(function(snap){
+      var ativos=0, inativos=0;
+      snap.forEach(function(d){ if(d.data().status==='ativo') ativos++; else inativos++; });
+      var el=document.getElementById('mc-colab-ativos');
+      var el2=document.getElementById('mc-colab-inativos');
+      if(el) el.textContent=ativos;
+      if(el2) el2.textContent=inativos+' inativos';
+    }).catch(function(e){ console.log('colab err:',e); });
+
+  // Respostas do ciclo mais recente com respostas (ordena por atualizadoEm)
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('atualizadoEm','desc').limit(1)
+    .get().then(function(cicloSnap){
+      if(cicloSnap.empty) {
+        // Fallback: tenta orderBy criadoEm
+        window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+          .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+          .get().then(function(s2){ if(!s2.empty) carregarCicloRespostas(empresaId, s2.docs[0]); });
+        return;
+      }
+      carregarCicloRespostas(empresaId, cicloSnap.docs[0]);
+    }).catch(function(e){
+      // Fallback para criadoEm se atualizadoEm nao indexado ainda
+      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').orderBy('criadoEm','desc').limit(1)
+        .get().then(function(s2){ if(!s2.empty) carregarCicloRespostas(empresaId, s2.docs[0]); })
+        .catch(function(e2){ console.log('respostas err:', e2); });
+    });
+}
+
+function carregarCicloRespostas(empresaId, cicloDoc) {
+  var cicloId = cicloDoc.id;
+  // Usa totalRespostas do cicloDoc como fonte primaria
+  var totalAgg = cicloDoc.data().totalRespostas || 0;
+  var ibpGeralAgg = cicloDoc.data().ibpGeral;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').doc(cicloId)
+    .collection('respostas').get()
+    .then(function(snap){
+    var total = snap.size > 0 ? snap.size : totalAgg;
+    if(total === 0) return;
+
+    // Se subcoleção vazia mas cicloDoc tem ibpGeral agregado, usa direto
+    if(snap.size === 0 && ibpGeralAgg !== undefined && ibpGeralAgg !== null) {
+      var elResp2 = document.getElementById('mc-respondentes');
+      var elRespSub2 = document.getElementById('mc-respondentes-sub');
+      var ativosEl2 = document.getElementById('mc-colab-ativos');
+      var ativos2 = ativosEl2 ? parseInt(ativosEl2.textContent)||0 : 0;
+      if(elResp2) elResp2.textContent = total;
+      if(elRespSub2) elRespSub2.textContent = 'de ' + ativos2 + ' colaboradores';
+      var taxa2 = ativos2 > 0 ? Math.min(Math.round((total/ativos2)*100),100) : 0;
+      var elTaxa2 = document.getElementById('mc-taxa');
+      var elTaxaSub2 = document.getElementById('mc-taxa-sub');
+      if(elTaxa2) elTaxa2.textContent = taxa2 + '%';
+      if(elTaxaSub2) elTaxaSub2.textContent = ativos2 > 0 ? (ativos2-total)+' pendentes' : '—';
+      var zona2 = ibpGeralAgg>=1.5?'Terreno Fertil':ibpGeralAgg<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
+      var cor2 = ibpGeralAgg>=1.5?'var(--verde)':ibpGeralAgg<=-1.5?'#ef4444':'var(--laranja)';
+      var elG2 = document.getElementById('mc-ibp-geral');
+      var elZ2 = document.getElementById('mc-ibp-zona');
+      if(elG2){ elG2.textContent=(ibpGeralAgg>=0?'+':'')+ibpGeralAgg.toFixed(1); elG2.style.color=cor2; }
+      if(elZ2){ elZ2.textContent=zona2; elZ2.style.color=cor2; }
+      atualizarHistoricoTimeline(empresaId);
+      return;
+    }
+
+    // Agrega IBP real por modulo
+    var total = snap.size;
+    var porMod = { M1:{soma:0,n:0}, M2:{soma:0,n:0}, M3:{soma:0,n:0}, M4:{soma:0,n:0} };
+    var somaGeral=0, nGeral=0;
+
+    snap.forEach(function(doc){
+      var d = doc.data();
+      if(d.ibpSubcats){
+        Object.keys(d.ibpSubcats).forEach(function(sc){
+          var modId = d.ibpSubcats[sc].modId;
+          if(porMod[modId]){
+            porMod[modId].soma += d.ibpSubcats[sc].ibp;
+            porMod[modId].n++;
+          }
+        });
+      }
+      if(d.ibpGeral !== undefined){ somaGeral+=d.ibpGeral; nGeral++; }
+    });
+
+    var mods = {
+      M1: { elIbp:'ibp-fis', elGauge:'gauge-fis' },
+      M2: { elIbp:'ibp-seg', elGauge:'gauge-seg' },
+      M3: { elIbp:'ibp-soc', elGauge:'gauge-soc' },
+      M4: { elIbp:'ibp-mot', elGauge:'gauge-mot' }
+    };
+    Object.keys(mods).forEach(function(m){
+      if(porMod[m].n===0) return;
+      var ibp = Math.round((porMod[m].soma/porMod[m].n)*100)/100;
+      var el = document.getElementById(mods[m].elIbp);
+      if(el){
+        el.textContent = (ibp>=0?'+':'')+ibp.toFixed(1);
+        el.style.color = ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)';
+        var zona = ibp>=1.5?'Terreno Fertil':ibp<=-1.5?'Sofrimento Patogenico':'Defesa Oculta';
+        var zonaEl = el.nextElementSibling;
+        if(zonaEl) zonaEl.textContent = zona;
+      }
+      var canvas = document.getElementById(mods[m].elGauge);
+      if(canvas && typeof desenharGauge==='function') desenharGauge(canvas, ibp);
+    });
+
+    var ibpGeral = nGeral > 0 ? Math.round((somaGeral/nGeral)*100)/100 : null;
+    var ativosEl = document.getElementById('mc-colab-ativos');
+    var ativos = ativosEl ? parseInt(ativosEl.textContent)||0 : 0;
+    var taxa = ativos > 0 ? Math.min(Math.round((total/ativos)*100), 100) : 0;
+
+    var elResp = document.getElementById('mc-respondentes');
+    var elRespSub = document.getElementById('mc-respondentes-sub');
+    if(elResp) elResp.textContent = total;
+    if(elRespSub) elRespSub.textContent = 'de ' + ativos + ' colaboradores';
+
+    var elTaxa = document.getElementById('mc-taxa');
+    var elTaxaSub = document.getElementById('mc-taxa-sub');
+    if(elTaxa) elTaxa.textContent = taxa + '%';
+    if(elTaxaSub) elTaxaSub.textContent = ativos > 0 ? (ativos - total) + ' pendentes' : '—';
+
+    if(ibpGeral !== null) {
+      var zona = ibpGeral >= 1.5 ? 'Terreno Fertil' : ibpGeral <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+      var corIbp = ibpGeral >= 1.5 ? 'var(--verde)' : ibpGeral <= -1.5 ? '#ef4444' : 'var(--laranja)';
+      var elIbpG = document.getElementById('mc-ibp-geral');
+      var elZona = document.getElementById('mc-ibp-zona');
+      if(elIbpG){ elIbpG.textContent = (ibpGeral>=0?'+':'') + ibpGeral.toFixed(1); elIbpG.style.color = corIbp; }
+      if(elZona){ elZona.textContent = zona; elZona.style.color = corIbp; }
+    }
+
+    atualizarHistoricoTimeline(empresaId);
+  }).catch(function(e){ console.log('respostas err:',e); });
+}
+
+function atualizarHistoricoTimeline(empresaId) {
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','desc').limit(5)
+    .get().then(function(snap){
+      if(snap.empty) return;
+      var container = document.getElementById('timeline-historico');
+      if(!container) return;
+      container.innerHTML = '';
+      snap.forEach(function(ciclo) {
+        var d = ciclo.data();
+        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
+        var ibp = d.ibpGeral !== undefined ? d.ibpGeral : null;
+        var cor = ibp !== null ? (ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)') : 'var(--cinza-medio)';
+        var zona = ibp !== null ? (ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta') : '—';
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--linha);';
+        div.innerHTML =
+          '<div style="width:10px;height:10px;border-radius:50%;background:'+cor+';flex-shrink:0;"></div>'+
+          '<div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--preto);">'+data+'</div>'+
+          '<div style="font-size:11px;color:var(--cinza-medio);">'+zona+'</div></div>'+
+          '<div style="font-size:14px;font-weight:700;color:'+cor+';">'+(ibp!==null?(ibp>=0?'+':'')+ibp.toFixed(1):'—')+'</div>';
+        container.appendChild(div);
+      });
+    }).catch(function(){});
+}
+
+function carregarSugestoes(empresaId) {
+  if(!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_sugestoes')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm','desc').limit(20)
+    .get().then(function(snap){
+      var container = document.getElementById('container-sugestoes');
+      if(!container || snap.empty) return;
+      container.innerHTML = '';
+      snap.forEach(function(doc){
+        var d = doc.data();
+        var div = document.createElement('div');
+        div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">'+(d.categoria||'Geral')+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);line-height:1.5;">'+d.texto+'</div>'+
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+        container.appendChild(div);
+      });
+    }).catch(function(e){ console.log('sugestoes err:',e); });
+}
+
+function carregarChamados(empresaId) {
+  if(!window.nr1mapDb || !empresaId) return;
+  window.nr1mapDb.collection('nr1map_chamados')
+    .where('empresaId','==',empresaId)
+    .orderBy('criadoEm','desc').limit(10)
+    .get().then(function(snap){
+      var container = document.getElementById('container-chamados');
+      if(!container || snap.empty) return;
+      container.innerHTML = '';
+      snap.forEach(function(doc){
+        var d = doc.data();
+        var tipos = {socorro:'🧠 Apoio psicológico', assedio:'🛡️ Denúncia de assédio', emergencia:'🆘 Emergência'};
+        var div = document.createElement('div');
+        div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">'+(tipos[d.tipo]||d.tipo)+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);">'+d.mensagem+'</div>'+
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+        container.appendChild(div);
+      });
+    }).catch(function(e){ console.log('chamados err:',e); });
+}
+
+function aplicarEmpresa(e) {
+  window.nr1mapEmpresa = e;
+  var nomeEl=document.querySelector('.sidebar-empresa .nome');
+  var planoEl=document.querySelector('.sidebar-empresa .plano');
+  var nmEl=document.querySelector('.nm');
+  if(nomeEl) nomeEl.textContent=e.nome||'—';
+  if(planoEl) planoEl.textContent=(e.tipo==='mensal'?'Assinatura':'Uso Único')+' · '+(e.faixa||'');
+  if(nmEl) nmEl.textContent=e.responsavel||'—';
+  carregarCargos(e.id);
+  carregarUnidades(e.id);
+  carregarDepartamentos(e.id);
+  carregarDashboard(e.id);
+  carregarHistoricoUnificado(e.id);
+  // Carregar dados completos da empresa (logo, responsável técnico)
+  if (window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_empresas').doc(e.id).get().then(function(doc){
+      if (!doc.exists || !window.nr1mapEmpresa) return;
+      var d = doc.data();
+      if (d.responsavelTecnico) window.nr1mapEmpresa.responsavelTecnico = d.responsavelTecnico;
+      if (d.logo_url) window.nr1mapEmpresa.logo_url = d.logo_url;
+      if (d.contextoEmpresa) window.nr1mapEmpresa.contextoEmpresa = d.contextoEmpresa;
+      if (d.orgogramaUrl) window.nr1mapEmpresa.orgogramaUrl = d.orgogramaUrl;
+      // Buscar logo do parceiro — se nao tiver, usa logo NR-1 Map como fallback
+      var parceiroId = d.parceiroId || null;
+      if (parceiroId && window.nr1mapDb) {
+        window.nr1mapDb.collection('nr1map_parceiros').doc(parceiroId).get()
+          .then(function(pDoc) {
+            var logoParc = (pDoc.exists && pDoc.data().logo_url) ? pDoc.data().logo_url : null;
+            window.nr1mapEmpresa.logoParceiroUrl = logoParc || 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.temParceiro = !!logoParc;
+          }).catch(function() {
+            window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.temParceiro = false;
+          });
+      } else {
+        // Sem parceiro — exibe logo NR-1 Map
+        window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+        window.nr1mapEmpresa.temParceiro = false;
+      }
+    }).catch(function(){});
+  }
+  carregarColabs();
+  carregarHistoricoReal(e.id);
+  carregarHistoricoPulso(e.id);
+  carregarEvolucaoIndicadores(e.id);
+  // Plano de Acao carregado apenas ao entrar na view (cicloId definido pelo seletor)
+  atualizarBadgePulso();
+  carregarSugestoes(e.id);
+  carregarChamados(e.id);
+}
+
+function carregarCargos(empresaId) {
+  if (!window.nr1mapDb) return;
+  var tbody = document.getElementById('tbody-cargos');
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#9ca3af;">Carregando...</td></tr>';
+  window.nr1mapDb.collection('nr1map_cargos')
+    .where('empresaId','==',empresaId)
+    .get()
+    .then(function(snap){
+      cargos = [];
+      snap.forEach(function(doc){
+        var d = doc.data(); d.id = doc.id;
+        cargos.push(d);
+      });
+      renderCargos();
+      // Popular select do modal de agenda
+      var selCg = document.getElementById('ag-cargo');
+      if (selCg) {
+        selCg.innerHTML = '<option value="Todos">Todos os cargos</option>';
+        cargos.forEach(function(c) {
+          selCg.innerHTML += '<option value="' + c.nome + '">' + c.nome + '</option>';
+        });
+      }
+    }).catch(function(e){ 
+      console.log('Erro carregarCargos:', e);
+      if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:16px;color:#e53935;">Erro: ' + e.message + '</td></tr>';
+    });
+}
+
+(function(){
+  var cfg={apiKey:"AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",authDomain:"entrevista-inicial.firebaseapp.com",projectId:"entrevista-inicial",storageBucket:"entrevista-inicial.firebasestorage.app",messagingSenderId:"437375609844",appId:"1:437375609844:web:9435b1fb3b21778f2e27a1"};
+  var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
+  window.nr1mapDb=firebase.firestore(app);
+  window.nr1mapAuth=firebase.auth(app);
+
+  window.nr1mapAuth.onAuthStateChanged(function(user){
+    if(user){
+      // Verifica nível de acesso antes de carregar o painel
+      window.nr1mapDb.collection('nr1map_usuarios_pf').doc(user.uid).get()
+        .then(function(doc){
+          if(doc.exists){
+            var nivel = doc.data().nivelAcesso || doc.data().tipo || '';
+            if(nivel === 'colaborador'){
+              window.nr1mapAuth.signOut();
+              alert('Acesso restrito. Use a aba Usuário para acessar sua área.');
+              window.location.href = 'admin.html';
+              return;
+            }
+            window._nivelAcesso = nivel; // 'rh', 'gestor'
+            aplicarRestricoesPorNivel(nivel);
+          }
+          carregarEmpresa(user.uid, user.email);
+        })
+        .catch(function(){ carregarEmpresa(user.uid, user.email); });
+    } else {
+      var uid = sessionStorage.getItem('nr1map_rh_uid');
+      var email = sessionStorage.getItem('nr1map_rh_email');
+      var pwd = sessionStorage.getItem('nr1map_rh_pwd');
+      if(uid){
+        // Se tem senha, fazer login real no Firebase Auth para ter request.auth válido
+        if(email && pwd){
+          window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
+            .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
+            .catch(function(){
+              // Fallback sem auth
+              window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
+                .then(function(doc){
+                  if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); }
+                }).catch(function(err){ console.log('auth painel err:', err); });
+            });
+        } else {
+          // Tenta pelo doc.id primeiro
+          window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
+            .then(function(doc){
+              if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); return; }
+              return window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
+                .then(function(snap){
+                  if(!snap.empty){ var e=snap.docs[0].data(); e.id=snap.docs[0].id; aplicarEmpresa(e); return; }
+                  if(email) return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
+                    .then(function(snap2){
+                      if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; aplicarEmpresa(e); }
+                    });
+                });
+            }).catch(function(err){ console.log('auth painel err:', err); });
+        }
+      } else if(email && pwd){
+        window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
+          .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
+          .catch(function(e){ console.log('Re-auth falhou:', e); });
+      }
+    }
+  });
+})();
+
+function abrirLaudoDoCiclo(cicloId, tipo) {
+  if (!cicloId || !window.nr1mapEmpresa || !window.nr1mapDb) return;
+  var empresaId = window.nr1mapEmpresa.id;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').doc(cicloId).get()
+    .then(function(doc) {
+      if (!doc.exists) { sv('laudo-tecnico'); return; }
+      var d = doc.data();
+      // Se ja tem PDF gerado, abre direto sem ir para a view de laudo HTML
+      if (d.laudoUrl) {
+        var urlFresh3 = d.laudoUrl + (d.laudoUrl.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+        window.open(urlFresh3, '_blank');
+        return;
+      }
+      // Sem PDF — renderiza laudo HTML na view
+      sv('laudo-tecnico');
+      _renderLaudoDados(d);
+    }).catch(function(e){
+      console.log('ciclo err:', e);
+      sv('laudo-tecnico');
+    });
+}
+
+function _renderLaudoDados(d) {
+  var semDados = document.getElementById('laudo-sem-dados');
+  var comDados = document.getElementById('laudo-dados');
+  if (semDados) semDados.style.display = 'none';
+  if (comDados) comDados.style.display = 'block';
+
+  var zonaFn = function(ibp) {
+    return ibp >= 1.5 ? 'Terreno Fertil' : ibp <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+  };
+  var corFn = function(ibp) {
+    return ibp >= 1.5 ? '#16a34a' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+  };
+  var groFn = function(ibp) {
+    if (ibp <= -3.0) return 'INTOLERAVEL';
+    if (ibp <= -1.5) return 'SUBSTANCIAL';
+    if (ibp <= 0.0)  return 'MODERADO';
+    if (ibp <= 1.5)  return 'TOLERAVEL';
+    return 'TRIVIAL';
+  };
+  var groCorFn = function(g) {
+    return {INTOLERAVEL:'#F08A8A',SUBSTANCIAL:'#F8B25A',MODERADO:'#FCE98A',TOLERAVEL:'#C8EAB8',TRIVIAL:'#BFE6FB'}[g] || '#e5e7eb';
+  };
+  var nomesMod = {
+    M1: 'Fatores Fisiologicos / Corpo e Mente',
+    M2: 'Fatores de Seguranca / Previsibilidade',
+    M3: 'Fatores Sociais / Relacionamentos',
+    M4: 'Fatores Motivacionais / Proposito'
+  };
+  var nomesSubcat = {
+    '1.1':'Ergonomia e Conforto Fisico','1.2':'Pausas e Ritmo','1.3':'Saude Mental e Ansiedade','1.4':'Carga Cognitiva Digital',
+    '2.1':'Clareza de Papeis','2.2':'Metas e Pressao','2.3':'Estabilidade no Emprego','2.4':'Treinamento e Capacitacao',
+    '3.1':'Lideranca e Gestao','3.2':'Relacionamento com Pares','3.3':'Cultura e Valores','3.4':'Comunicacao Interna','3.5':'Assedio e Violencia',
+    '4.1':'Proposito e Missao','4.2':'Reconhecimento','4.3':'Crescimento e Desenvolvimento','4.4':'Autonomia e Pertencimento','4.5':'Remuneracao e Beneficios'
+  };
+  var MIN_RESP = 3;
+
+  // ── Responsavel tecnico ──
+  var rt = (window.nr1mapEmpresa && window.nr1mapEmpresa.responsavelTecnico) || {};
+  var nomeEl  = document.getElementById('laudo-responsavel-nome');
+  var cargoEl = document.getElementById('laudo-responsavel-cargo');
+  if (nomeEl)  nomeEl.textContent  = rt.nome  || 'Dra. Lucia Kratz';
+  if (cargoEl) cargoEl.textContent = (rt.cargo || 'Psicologa') + (rt.registro || rt.crp ? ' · ' + (rt.registro || rt.crp) : ' · CRP 09/20590');
+
+  // ── IBP Geral e zona ──
+  var ibpG = (d.ibpGeral !== undefined && d.ibpGeral !== null) ? parseFloat(d.ibpGeral) : null;
+  var sg   = ibpG !== null ? (ibpG >= 0 ? '+' : '') + ibpG.toFixed(1) : '—';
+  var zonaG = ibpG !== null ? zonaFn(ibpG) : '—';
+  var groG  = ibpG !== null ? groFn(ibpG)  : '—';
+
+  // ── Fundamentacao teorica ──
+  var fundEl = document.getElementById('laudo-fundamentacao');
+  if (fundEl) {
+    fundEl.innerHTML =
+      '<div style="background:#f0fdf4;border-left:3px solid #0A6E4F;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#0A6E4F;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Psicodinamica do Trabalho — Christophe Dejours</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">A Psicodinamica do Trabalho investiga o equilibrio entre Prazer e Sofrimento no contexto laboral. ' +
+      'O <b>Indice de Balanca Psicodinamica (IBP)</b> quantifica esse equilibrio em escala de <b>-5,0 a +5,0</b>, convertendo as frequencias de resposta: ' +
+      'Sempre=+5 | Na maioria=+2,5 | Na metade=0 | Poucas vezes=-2,5 | Raramente=-5. ' +
+      'Tres zonas resultantes: <span style="color:#ef4444;font-weight:600;">Sofrimento Patogenico</span> (-5 a -1,5), ' +
+      '<span style="color:#f59e0b;font-weight:600;">Defesa Oculta</span> (-1,4 a +1,4) e ' +
+      '<span style="color:#16a34a;font-weight:600;">Terreno Fertil</span> (+1,5 a +5).</div>' +
+      '</div>' +
+      '<div style="background:#faf5ff;border-left:3px solid #7B00C4;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#7B00C4;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Teoria dos Dois Fatores — Frederick Herzberg</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">Herzberg distingue <b>fatores higienicos</b> (condicoes fisicas, salario, politicas — Modulos 1 e 2) ' +
+      'dos <b>fatores motivadores</b> (reconhecimento, crescimento, proposito — Modulos 3 e 4). ' +
+      'A ausencia dos fatores higienicos gera insatisfacao; os motivadores produzem engajamento genuino.</div>' +
+      '</div>' +
+      '<div style="background:#eff6ff;border-left:3px solid #2563EB;padding:12px 14px;border-radius:6px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Hierarquia de Maslow aplicada ao trabalho</div>' +
+      '<div style="font-size:12px;color:#374151;line-height:1.6;">A base da piramide (necessidades fisiologicas, seguranca e sociais) corresponde ' +
+      'diretamente aos Modulos 1, 2 e 3 deste diagnostico. Falhas nesses niveis sao precursoras do risco psicossocial mapeado pela NR-1.</div>' +
+      '</div>' +
+      '<div style="background:#fff7ed;border-left:3px solid #ea580c;padding:10px 14px;border-radius:6px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:4px;">Base Legal</div>' +
+      '<div style="font-size:12px;color:#374151;">Conformidade com a <b>NR-1</b> e <b>Portaria MTE n. 1.419/2024</b> — obrigacao de identificacao, ' +
+      'avaliacao e controle de riscos psicossociais no PGR. Classificacao GRO: Trivial | Toleravel | Moderado | Substancial | Intoleravel.</div>' +
+      '</div>';
+  }
+
+  // ── Modulos e Subcategorias ──
+  var mods = document.getElementById('laudo-modulos');
+  if (mods) {
+    if (d.ibpModulos && Object.keys(d.ibpModulos).length) {
+      var html = '<div style="display:flex;flex-direction:column;gap:14px;">';
+      ['M1','M2','M3','M4'].forEach(function(m) {
+        var ibpM = d.ibpModulos[m];
+        if (ibpM === undefined || ibpM === null) return;
+        var zonaM = zonaFn(ibpM); var groM = groFn(ibpM);
+        var corM  = corFn(ibpM);  var corGroM = groCorFn(groM);
+        html += '<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">';
+        html += '<div style="padding:8px 12px;background:#1F2937;display:flex;align-items:center;justify-content:space-between;">';
+        html += '<span style="font-size:12px;font-weight:600;color:#fff;">' + (nomesMod[m] || m) + '</span>';
+        html += '<div style="display:flex;gap:8px;align-items:center;">';
+        html += '<span style="font-family:monospace;font-size:14px;font-weight:700;color:' + corM + ';">' + (ibpM >= 0 ? '+' : '') + ibpM.toFixed(1) + '</span>';
+        html += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + groCorM + ';color:#111;">' + groM + '</span>';
+        html += '</div></div>';
+
+        // Subcategorias do modulo
+        var subcats = d.ibpSubcats || {};
+        var modId = m;
+        var scHtml = '';
+        var scKeys = Object.keys(subcats).filter(function(k) {
+          var sc = subcats[k];
+          return (typeof sc === 'object' && sc.modId === modId) ||
+                 (k.charAt(0) === m.charAt(1));
+        });
+        if (scKeys.length) {
+          scHtml += '<table style="width:100%;border-collapse:collapse;">';
+          scHtml += '<tr style="background:#f9fafb;">' +
+            '<th style="padding:6px 10px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">Subcategoria</th>' +
+            '<th style="padding:6px 10px;text-align:center;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">N</th>' +
+            '<th style="padding:6px 10px;text-align:center;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">IBP</th>' +
+            '<th style="padding:6px 10px;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">Zona</th>' +
+            '<th style="padding:6px 10px;font-size:10px;color:#6B7280;font-weight:600;border-bottom:1px solid #e5e7eb;">GRO</th>' +
+            '</tr>';
+          scKeys.forEach(function(sc_id) {
+            var sc   = subcats[sc_id];
+            var nSc  = (typeof sc === 'object' && sc.n) ? sc.n : 0;
+            var ibpSc = typeof sc === 'object' ? (sc.ibp || 0) : sc;
+            var nomeSc = nomesSubcat[sc_id] || (typeof sc === 'object' && sc.nome) || sc_id;
+            if (nSc > 0 && nSc < MIN_RESP) {
+              scHtml += '<tr><td style="padding:5px 10px;font-size:11px;color:#6B7280;border-bottom:1px solid #e5e7eb;" colspan="5">' + nomeSc + ' — dados suprimidos (anonimato, n&lt;' + MIN_RESP + ')</td></tr>';
+              return;
+            }
+            var zonaS = zonaFn(ibpSc); var groS = groFn(ibpSc);
+            var corS  = corFn(ibpSc);  var corGroS = groCorFn(groS);
+            scHtml += '<tr>' +
+              '<td style="padding:5px 10px;font-size:11px;color:#374151;border-bottom:1px solid #e5e7eb;">' + nomeSc + '</td>' +
+              '<td style="padding:5px 10px;text-align:center;font-size:11px;border-bottom:1px solid #e5e7eb;">' + (nSc || '—') + '</td>' +
+              '<td style="padding:5px 10px;text-align:center;font-family:monospace;font-size:12px;font-weight:700;color:' + corS + ';border-bottom:1px solid #e5e7eb;">' + (ibpSc >= 0 ? '+' : '') + ibpSc.toFixed(1) + '</td>' +
+              '<td style="padding:5px 10px;font-size:11px;color:' + corS + ';border-bottom:1px solid #e5e7eb;">' + zonaS + '</td>' +
+              '<td style="padding:5px 10px;border-bottom:1px solid #e5e7eb;"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:' + corGroS + ';color:#111;">' + groS + '</span></td>' +
+              '</tr>';
+          });
+          scHtml += '</table>';
+        } else {
+          scHtml = '<p style="padding:8px 12px;font-size:12px;color:#6B7280;margin:0;">Sem dados de subcategoria para este modulo.</p>';
+        }
+        html += scHtml + '</div>';
+      });
+      html += '</div>';
+      mods.innerHTML = html;
+    } else {
+      mods.innerHTML = '<p style="color:#6B7280;font-size:13px;">Dados por modulo serao gerados apos o proximo diagnostico.</p>';
+    }
+  }
+
+  // ── Conclusao ──
+  var concl = document.getElementById('laudo-conclusao');
+  if (concl) {
+    var pioresHtml = '';
+    if (d.ibpModulos) {
+      var entrada = Object.keys(d.ibpModulos).map(function(m){ return {m: m, ibp: d.ibpModulos[m]}; });
+      entrada.sort(function(a,b){ return a.ibp - b.ibp; });
+      if (entrada.length) {
+        var pior = entrada[0];
+        pioresHtml = ' O modulo de maior criticidade e <strong>' + (nomesMod[pior.m]||pior.m) + '</strong> (IBP ' + (pior.ibp >= 0 ? '+' : '') + pior.ibp.toFixed(1) + ').';
+      }
+    }
+    concl.innerHTML =
+      '<p style="font-size:13px;color:#374151;line-height:1.6;">Com base no Diagnostico Psicossocial realizado em conformidade com a <strong>Portaria MTE n. 1.419/2024</strong>, ' +
+      'a organizacao apresenta IBP Geral de <strong style="color:' + (ibpG !== null ? corFn(ibpG) : '#374151') + ';">' + sg + '</strong>, ' +
+      'zona de <strong>' + zonaG + '</strong>, classificado como <strong>' + groG + '</strong> na Matriz GRO.' +
+      pioresHtml +
+      ' Recomenda-se a implementacao ou manutencao do Plano de Acao 5W2H para os grupos criticos, ' +
+      'monitoramento continuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) e reavaliacao no proximo periodo.</p>' +
+      '<div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border-radius:6px;font-size:11px;color:#374151;">' +
+      '<strong>Documentos anexos ao PGR:</strong> (1) Inventario de Riscos Psicossociais · (2) Mapa de Risco GRO · (3) Plano de Acao 5W2H · (4) Acompanhamento de Acoes' +
+      '</div>';
+  }
+
+  // Chama render detalhado legado se existir
+  if (typeof _renderLaudoDetalhado === 'function') {
+    _renderLaudoDetalhado(d.ibpSubcats || {});
+  }
+}
+
+
+// ===== RELATORIOS POR CICLO =====
+var _rcCiclosCache = [];
+
+// ===== FUNÇÕES COMPARTILHADAS DE SELETOR DE CICLOS =====
+var _laudoCiclosCache = []; // cache global de todos os ciclos
+
+function _carregarCiclosParaSeletor(selectId, statusId, baixarBtnId, urlField, onSelect) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+
+  var carregarSeletor = function(ciclos) {
+    var select = document.getElementById(selectId);
+    var seletor = select && select.closest('[id$="-seletor-ciclos"]');
+    if (!select) return;
+    var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    select.innerHTML = '';
+    ciclos.forEach(function(c, idx) {
+      var dt   = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+      var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
+      var resp  = c.data.totalRespostas || 0;
+      var temPdf = c.data[urlField] ? ' ✓ PDF' : '';
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = dtStr + ' — ' + resp + ' respondentes' + temPdf;
+      if (idx === 0) opt.selected = true;
+      select.appendChild(opt);
+    });
+    if (seletor) seletor.style.display = 'block';
+    if (ciclos.length) {
+      _atualizarStatusSeletor(statusId, baixarBtnId, ciclos[0].data[urlField]);
+      onSelect(ciclos[0].id, ciclos[0].data);
+    }
+  };
+
+  if (_ciclosCache) { carregarSeletor(_ciclosCache); return; }
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a,b) { return (b.data.criadoEm||'') > (a.data.criadoEm||'') ? 1 : -1; });
+      _ciclosCache = ciclos;
+      carregarSeletor(ciclos);
+    }).catch(function(e){ console.log('ciclos err:', e); });
+}
+
+function _atualizarStatusSeletor(statusId, baixarBtnId, url) {
+  var statusEl = document.getElementById(statusId);
+  var btnEl    = document.getElementById(baixarBtnId);
+  if (statusEl) {
+    statusEl.textContent = url ? 'PDF disponivel' : 'PDF nao gerado ainda';
+    statusEl.style.color = url ? '#16a34a' : '#f59e0b';
+  }
+  if (btnEl) {
+    btnEl.style.display = url ? 'inline-block' : 'none';
+    if (url) btnEl.dataset.url = url;
+  }
+}
+
+function baixarDocCiclo(urlField) {
+  // Descobre o btn que foi clicado e pega a URL
+  var btn = event && event.target;
+  var url = btn && btn.dataset && btn.dataset.url;
+  if (!url) return;
+  var urlFresh = url + (url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+  window.open(urlFresh, '_blank');
+}
+
+function gerarAtualizarDoc(tipo, btnId, urlField) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  var btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  var tipoLabel = {laudo_tecnico:'Laudo Tecnico Psicossocial', mapa_risco:'Mapa', plano_5w2h:'Plano', inventario:'Inventario', acompanhamento:'Acompanhamento'}[tipo] || tipo;
+
+  // FIX: laudo_tecnico usa POST com logos; outros tipos usam GET simples
+  var fetchOpts = (tipo === 'laudo_tecnico')
+    ? { method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          empresaId: empresaId, tipo: 'laudo_tecnico',
+          logoEmpresaUrl:  (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
+          logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                           'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
+        }) }
+    : undefined;
+
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=' + tipo, fetchOpts)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
+      if (d.url) {
+        // Salva URL no cicloDoc atual
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, urlField);
+        // Cache bust e abre
+        var urlFresh = d.url + '?bust=' + Date.now();
+        window.open(urlFresh, '_blank');
+        // Invalida cache de ciclos para recarregar com novo PDF
+        _laudoCiclosCache = [];
+      } else {
+        alert('Erro: ' + (d.error || 'tente novamente'));
+      }
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+// Carrega ciclos do Mapa de Risco como cards individuais
+function _carregarCiclosMapaCards(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var seletor = document.getElementById('mapa-seletor-ciclos');
+  var lista   = document.getElementById('mapa-ciclos-lista');
+  var semDados = document.getElementById('mapa-sem-dados');
+  if (!lista) return;
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) return;
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a,b){ return (b.data.criadoEm||'') > (a.data.criadoEm||'') ? 1 : -1; });
+      if (!ciclos.length) return;
+
+      lista.innerHTML = '';
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      ciclos.forEach(function(cl, idx) {
+        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dtStr = dt ? dt.getDate()+'/'+meses[dt.getMonth()]+'/'+dt.getFullYear() : 'Ciclo '+(idx+1);
+        var resp  = cl.data.totalRespostas || 0;
+        var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
+        var ibpStr = ibpVal !== null ? ' · IBP '+(ibpVal>=0?'+':'')+ibpVal : '';
+        var temPdf = !!cl.data.mapaUrl;
+
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#f9fafb;border:1px solid '+(idx===0?'#0A6E4F':'#e5e7eb')+';border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;';
+
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+        info.textContent = dtStr+' — '+resp+' respondentes'+ibpStr;
+        card.appendChild(info);
+
+        var badge = document.createElement('span');
+        badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;'+(temPdf?'background:#D1FAE5;color:#065F46;':'background:#FEF3C7;color:#92400E;');
+        badge.textContent = temPdf ? '✓ PDF disponível' : 'Sem PDF';
+        card.appendChild(badge);
+
+        if (temPdf) {
+          var btnB = document.createElement('button');
+          btnB.setAttribute('data-baixar','1');
+          btnB.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnB.textContent = '⬇ Baixar PDF';
+          (function(url){ btnB.onclick = function(e){ e.stopPropagation(); window.open(url+'?bust='+Date.now(),'_blank'); }; })(cl.data.mapaUrl);
+          card.appendChild(btnB);
+        }
+
+        var btnG = document.createElement('button');
+        btnG.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnG.textContent = temPdf ? '⟳ Atualizar Mapa' : '🗺 Gerar Mapa';
+        (function(cicloId, btnRef, cardRef, badgeRef) {
+          btnRef.onclick = function(e) {
+            e.stopPropagation();
+            var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (!empId) return;
+            btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
+            var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+            var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                        'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            var fetchOpts = { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ empresaId:empId, tipo:'mapa_risco', cicloId:cicloId, logoEmpresaUrl:logoE, logoParceiroUrl:logoP }) };
+            fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empId+'&tipo=mapa_risco', fetchOpts)
+              .then(function(r){ return r.json(); })
+              .then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  var upd = { mapaUrl: d.url, mapaGeradoEm: new Date().toISOString() };
+                  window.nr1mapDb.collection('nr1map_respostas').doc(empId).collection('ciclos').doc(cicloId).update(upd).catch(function(){});
+                  window.open(d.url+'?bust='+Date.now(),'_blank');
+                  btnRef.textContent = '⟳ Atualizar Mapa';
+                  badgeRef.textContent = '✓ PDF disponível'; badgeRef.style.background='#D1FAE5'; badgeRef.style.color='#065F46';
+                  var existB = cardRef.querySelector('button[data-baixar]');
+                  if (existB) { (function(url){ existB.onclick=function(e){e.stopPropagation();window.open(url+'?bust='+Date.now(),'_blank');}; })(d.url); }
+                  else {
+                    var nb=document.createElement('button'); nb.setAttribute('data-baixar','1');
+                    nb.style.cssText='padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent='⬇ Baixar PDF';
+                    nb.onclick=function(e){e.stopPropagation();window.open(d.url+'?bust='+Date.now(),'_blank');};
+                    cardRef.insertBefore(nb,btnRef);
+                  }
+                } else { btnRef.textContent='🗺 Gerar Mapa'; alert('Erro: '+(d.error||'tente novamente')); }
+              }).catch(function(e){ btnRef.disabled=false; btnRef.textContent='🗺 Gerar Mapa'; alert('Erro: '+e.message); });
+          };
+        })(cl.id, btnG, card, badge);
+        card.appendChild(btnG);
+
+        (function(cicloId, data, cardEl) {
+          card.onclick = function() {
+            document.querySelectorAll('#mapa-ciclos-lista > div').forEach(function(d){ d.style.borderColor='#e5e7eb'; });
+            cardEl.style.borderColor='#0A6E4F';
+            var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (empId) carregarMapaRisco(empId, cicloId, data);
+          };
+        })(cl.id, cl.data, card);
+
+        lista.appendChild(card);
+      });
+
+      if (seletor) seletor.style.display = 'block';
+      if (semDados) semDados.style.display = 'none';
+      // Carrega o mais recente automaticamente
+      var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+      if (empId) carregarMapaRisco(empId, ciclos[0].id, ciclos[0].data);
+    }).catch(function(e){ console.log('mapa cards err:', e); });
+}
+
+// Seletores específicos por tela
+function selecionarCicloMapa(cicloId) {
+  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
+  if (!ciclo) return;
+  _atualizarStatusSeletor('mapa-ciclo-status', 'btn-baixar-mapa-ciclo', ciclo.data.mapaUrl);
+  // Recarregar mapa com dados deste ciclo
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (empresaId) carregarMapaRisco(empresaId, cicloId, ciclo.data);
+}
+
+function selecionarCicloPlano(cicloId) {
+  _planoCicloAtual = cicloId;
+  var ciclo = _ciclosCache && _ciclosCache.find(function(c){ return c.id === cicloId; });
+  if (ciclo) {
+    _atualizarStatusSeletor('plano-ciclo-status', 'btn-baixar-plano-ciclo', ciclo.data.planoUrl);
+  }
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (empresaId) carregarPlanoAcao(empresaId, cicloId);
+}
+
+// Filtro de ano no Relatório Anual
+function filtrarAnual(ano) {
+  var tbody = document.getElementById('anual-tbody');
+  if (!tbody) return;
+  var rows = tbody.querySelectorAll('tr');
+  rows.forEach(function(tr) {
+    var show = !ano || tr.dataset.ano === ano;
+    tr.style.display = show ? '' : 'none';
+  });
+}
+
+function toggleGlossario() {
+  var body = document.getElementById('glossario-body');
+  var chev = document.getElementById('glossario-chevron');
+  if (!body) return;
+  var aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
+  if (chev) chev.textContent = aberto ? '▼' : '▲';
+}
+
+function carregarRelatoriosPorCiclo(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('rc-sem-dados');
+  var lista    = document.getElementById('rc-lista');
+  if (!lista) return;
+
+  lista.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-medio);font-size:13px;">Carregando ciclos...</div>';
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+      _rcCiclosCache = ciclos;
+
+      if (!ciclos.length) {
+        if (semDados) semDados.style.display = 'block';
+        lista.style.display = 'none';
+        return;
+      }
+      if (semDados) semDados.style.display = 'none';
+      lista.style.display = 'block';
+      lista.innerHTML = '';
+
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var zonaFn = function(ibp) {
+        return ibp >= 1.5 ? 'Terreno Fertil' : ibp <= -1.5 ? 'Sofrimento Patogenico' : 'Defesa Oculta';
+      };
+      var corFn = function(ibp) {
+        return ibp >= 1.5 ? '#16a34a' : ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+      };
+
+      ciclos.forEach(function(c) {
+        var d    = c.data;
+        var dt   = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : '—';
+        var resp  = d.totalRespostas || 0;
+        var ibp   = d.ibpGeral !== undefined && d.ibpGeral !== null ? parseFloat(d.ibpGeral) : null;
+        var ibpStr = ibp !== null ? (ibp >= 0 ? '+' : '') + ibp.toFixed(1) : '—';
+        var zona  = ibp !== null ? zonaFn(ibp) : '—';
+        var cor   = ibp !== null ? corFn(ibp) : '#6b7280';
+        var tipo  = d.tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnostico Geral';
+        var temLaudo = !!d.laudoUrl;
+
+        // Documentos disponiveis
+        var docs = [];
+        if (d.laudoUrl)     docs.push({ label: '📋 Laudo Tecnico', url: d.laudoUrl });
+        if (d.mapaUrl)      docs.push({ label: '🗺 Mapa de Risco',  url: d.mapaUrl });
+        if (d.planoUrl)     docs.push({ label: '✅ Plano 5W2H',     url: d.planoUrl });
+        if (d.inventarioUrl) docs.push({ label: '📄 Inventario',    url: d.inventarioUrl });
+
+        var card = document.createElement('div');
+        card.style.cssText = 'border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden;background:#fff;';
+
+        // Header do card
+        var hdr = document.createElement('div');
+        hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb;';
+        hdr.innerHTML =
+          '<div>' +
+            '<div style="font-size:13px;font-weight:600;color:#111827;">' + tipo + ' — ' + dtStr + '</div>' +
+            '<div style="font-size:11px;color:#6b7280;margin-top:2px;">' + resp + ' respondentes</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            (ibp !== null ? '<span style="font-family:monospace;font-size:15px;font-weight:700;color:' + cor + ';">' + ibpStr + '</span>' +
+            '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + cor + '22;color:' + cor + ';">' + zona + '</span>' : '') +
+          '</div>';
+        card.appendChild(hdr);
+
+        // Body do card — documentos + botoes de gerar
+        var body = document.createElement('div');
+        body.style.cssText = 'padding:12px 16px;';
+
+        if (docs.length) {
+          var docsHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">';
+          docs.forEach(function(doc) {
+            docsHtml += '<a href="' + doc.url + '" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:500;color:#374151;text-decoration:none;background:#f9fafb;">' + doc.label + ' ↗</a>';
+          });
+          docsHtml += '</div>';
+          body.innerHTML = docsHtml;
+        }
+
+        // Botoes de gerar documentos
+        var btns = document.createElement('div');
+        btns.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+
+        var tiposGerar = [
+          { tipo: 'laudo_tecnico', label: temLaudo ? '↻ Atualizar Laudo' : '📋 Gerar Laudo', urlField: 'laudoUrl' },
+          { tipo: 'mapa_risco',    label: d.mapaUrl ? '↻ Atualizar Mapa' : '🗺 Gerar Mapa de Risco', urlField: 'mapaUrl' },
+          { tipo: 'plano_5w2h',   label: d.planoUrl ? '↻ Atualizar Plano' : '✅ Gerar Plano 5W2H', urlField: 'planoUrl' },
+          { tipo: 'inventario',   label: d.inventarioUrl ? '↻ Atualizar Inventario' : '📄 Gerar Inventario', urlField: 'inventarioUrl' },
+        ];
+        tiposGerar.forEach(function(tg) {
+          var btn = document.createElement('button');
+          btn.className = 'btn btn-ghost btn-sm';
+          btn.style.fontSize = '11px';
+          btn.textContent = tg.label;
+          btn.onclick = (function(cicloId, tipo, urlField, btnRef, cardRef) {
+            return function() {
+              var empId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+              if (!empId) return;
+              btnRef.textContent = '⏳ Gerando...';
+              btnRef.disabled = true;
+              // FIX: laudo_tecnico usa POST com logos
+              var _opts4 = (tipo === 'laudo_tecnico')
+                ? { method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ empresaId: empId, tipo: 'laudo_tecnico',
+                      logoEmpresaUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
+                      logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                                       'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png' }) }
+                : undefined;
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo, _opts4)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                  btnRef.disabled = false;
+                  if (res.url) {
+                    // Salva URL no cicloDoc
+                    var upd = {};
+                    upd[urlField] = res.url;
+                    upd[urlField + 'GeradoEm'] = new Date().toISOString();
+                    window.nr1mapDb.collection('nr1map_respostas').doc(empId)
+                      .collection('ciclos').doc(cicloId)
+                      .update(upd).catch(function(){});
+                    // Atualiza card sem recarregar tudo
+                    var urlFresh2 = res.url + (res.url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+                    window.open(urlFresh2, '_blank');
+                    btnRef.textContent = '↻ Atualizar ' + btnRef.textContent.replace(/^[^\s]+\s/, '');
+                    // Adicionar link ao bloco de docs
+                    var tiposLabel = { laudo_tecnico:'📋 Laudo Tecnico', mapa_risco:'🗺 Mapa de Risco', plano_5w2h:'✅ Plano 5W2H', inventario:'📄 Inventario' };
+                    var novoLink = document.createElement('a');
+                    novoLink.href = res.url;
+                    novoLink.target = '_blank';
+                    novoLink.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:500;color:#374151;text-decoration:none;background:#f9fafb;';
+                    novoLink.textContent = (tiposLabel[tipo] || tipo) + ' ↗';
+                    cardRef.querySelector('div[style*="flex-wrap:wrap;margin-bottom"]') && cardRef.querySelector('div[style*="flex-wrap:wrap;margin-bottom"]').appendChild(novoLink);
+                  } else {
+                    btnRef.textContent = tg.label;
+                    alert('Erro: ' + (res.error || 'tente novamente'));
+                  }
+                })
+                .catch(function(e) {
+                  btnRef.disabled = false;
+                  btnRef.textContent = tg.label;
+                  alert('Erro de conexao: ' + e.message);
+                });
+            };
+          })(c.id, tg.tipo, tg.urlField, btn, card);
+          btns.appendChild(btn);
+        });
+
+        body.appendChild(btns);
+        card.appendChild(body);
+        lista.appendChild(card);
+      });
+    })
+    .catch(function(e) {
+      console.log('rc err:', e);
+      lista.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;font-size:13px;">Erro ao carregar ciclos.</div>';
+    });
+}
+
+// Ciclo atualmente selecionado no laudo
+var _laudoCicloAtual = null;
+// Ciclo atualmente selecionado no Plano de Acao
+var _planoCicloAtual = null;
+var _laudoCiclosCache = []; // [{id, data, ibp, laudoUrl, totalRespostas}]
+
+// ===== HISTORICO DO PLANO DE ACAO (por ciclo, igual ao laudo) =====
+function carregarHistoricoPlano(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var seletor = document.getElementById('plano-seletor-ciclos');
+  var lista   = document.getElementById('plano-ciclos-lista');
+  var tbody   = document.getElementById('tbody-plano');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Selecione um ciclo acima para ver o plano.</td></tr>';
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+
+      if (!ciclos.length) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum ciclo encontrado. Realize um diagnostico primeiro.</td></tr>';
+        return;
+      }
+
+      // Atualizar cache
+      _laudoCiclosCache = ciclos;
+      if (seletor) seletor.style.display = 'block';
+      if (!lista) return;
+      lista.innerHTML = '';
+
+      var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      ciclos.forEach(function(cl, idx) {
+        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx + 1);
+        var resp  = cl.data.totalRespostas || 0;
+        var temPdf = !!cl.data.planoUrl;
+
+        var card = document.createElement('div');
+        card.id = 'plano-card-' + cl.id;
+        card.style.cssText = 'background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:border-color .15s;';
+        if (idx === 0) card.style.borderColor = '#0A6E4F';
+
+        // Info do ciclo
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+        info.textContent = dtStr + ' -- ' + resp + ' respondentes';
+        card.appendChild(info);
+
+        // Badge PDF
+        var badge = document.createElement('span');
+        badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;' +
+          (temPdf ? 'background:#D1FAE5;color:#065F46;' : 'background:#FEF3C7;color:#92400E;');
+        badge.textContent = temPdf ? 'PDF disponivel' : 'Sem PDF';
+        card.appendChild(badge);
+
+        // Botao Baixar PDF do plano
+        if (temPdf) {
+          var btnBaixar = document.createElement('button');
+          btnBaixar.setAttribute('data-baixar', '1');
+          btnBaixar.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnBaixar.textContent = 'Baixar PDF';
+          (function(url) {
+            btnBaixar.onclick = function(e) { e.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); };
+          })(cl.data.planoUrl);
+          card.appendChild(btnBaixar);
+        }
+
+        // Botao Ver/Carregar acoes deste ciclo
+        var btnVer = document.createElement('button');
+        btnVer.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnVer.textContent = 'Ver Acoes';
+        (function(cicloId, cardEl) {
+          btnVer.onclick = function(e) {
+            e.stopPropagation();
+            var todos = lista.querySelectorAll('[id^="plano-card-"]');
+            todos.forEach(function(c) { c.style.borderColor = '#e5e7eb'; });
+            cardEl.style.borderColor = '#0A6E4F';
+            _planoCicloAtual = cicloId;
+            carregarPlanoAcao(empresaId, cicloId);
+            var tbl = document.getElementById('tbl-plano');
+            if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+        })(cl.id, card);
+        card.appendChild(btnVer);
+
+        // Botao Gerar PDF do plano
+        var btnGerar = document.createElement('button');
+        btnGerar.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+        btnGerar.textContent = temPdf ? 'Atualizar PDF' : 'Gerar PDF';
+        (function(cicloId, btnRef, cardRef, badgeRef) {
+          btnRef.onclick = function(e) {
+            e.stopPropagation();
+            var eid = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+            if (!eid) return;
+            btnRef.textContent = 'Gerando...'; btnRef.disabled = true;
+            fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + eid + '&tipo=plano_5w2h&cicloId=' + cicloId)
+              .then(function(r) { return r.json(); })
+              .then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  _salvarLaudoUrlNoCiclo(eid, d.url, cicloId, 'planoUrl');
+                  window.open(d.url + '?bust=' + Date.now(), '_blank');
+                  btnRef.textContent = 'Atualizar PDF';
+                  badgeRef.textContent = 'PDF disponivel';
+                  badgeRef.style.background = '#D1FAE5'; badgeRef.style.color = '#065F46';
+                  var existBaixar = cardRef.querySelector('button[data-baixar]');
+                  if (existBaixar) {
+                    (function(url) { existBaixar.onclick = function(ev) { ev.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); }; })(d.url);
+                  } else {
+                    var nb = document.createElement('button');
+                    nb.setAttribute('data-baixar', '1');
+                    nb.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent = 'Baixar PDF';
+                    nb.onclick = function(ev) { ev.stopPropagation(); window.open(d.url + '?bust=' + Date.now(), '_blank'); };
+                    cardRef.insertBefore(nb, btnRef);
+                  }
+                } else {
+                  btnRef.textContent = 'Gerar PDF';
+                  alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
+                }
+              }).catch(function(e) {
+                btnRef.disabled = false; btnRef.textContent = 'Gerar PDF';
+                alert('Erro: ' + e.message);
+              });
+          };
+        })(cl.id, btnGerar, card, badge);
+        card.appendChild(btnGerar);
+
+        // Clique no card seleciona ciclo e carrega plano filtrado
+        (function(cicloId, cardEl) {
+          card.onclick = function(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            // Destacar card ativo
+            var todos = lista.querySelectorAll('[id^="plano-card-"]');
+            todos.forEach(function(c) { c.style.borderColor = '#e5e7eb'; });
+            cardEl.style.borderColor = '#0A6E4F';
+            // Selecionar ciclo e carregar
+            _planoCicloAtual = cicloId;
+            carregarPlanoAcao(empresaId, cicloId);
+            // Rolar para a tabela
+            var tbl = document.getElementById('tbl-plano');
+            if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+        })(cl.id, card);
+
+        lista.appendChild(card);
+
+        // Selecionar automaticamente o primeiro ciclo
+        if (idx === 0) {
+          _planoCicloAtual = cl.id;
+          carregarPlanoAcao(empresaId, cl.id);
+        }
+      });
+    }).catch(function(e) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:red;">Erro ao carregar ciclos: ' + e.message + '</td></tr>';
+    });
+}
+
+
+function carregarLaudoTecnico(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('laudo-sem-dados');
+  var comDados = document.getElementById('laudo-dados');
+  var seletor  = document.getElementById('laudo-seletor-ciclos');
+  var select   = document.getElementById('laudo-ciclo-select');
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        if(seletor)  seletor.style.display  = 'none';
+        return;
+      }
+      // Ordenar por criadoEm desc no cliente
+      var ciclos = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if ((d.totalRespostas || 0) > 0 || d.ibpGeral !== undefined) {
+          ciclos.push({ id: doc.id, data: d });
+        }
+      });
+      ciclos.sort(function(a, b) {
+        return (b.data.criadoEm || '') > (a.data.criadoEm || '') ? 1 : -1;
+      });
+      if (!ciclos.length) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        return;
+      }
+      _laudoCiclosCache = ciclos;
+
+      // Popular lista de cards — um por ciclo
+      var lista = document.getElementById('laudo-ciclos-lista');
+      if (lista) {
+        lista.innerHTML = '';
+        var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        ciclos.forEach(function(cl, idx) {
+          var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+          var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
+          var resp  = cl.data.totalRespostas || 0;
+          var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
+          var ibpStr = ibpVal !== null ? ' · IBP ' + (ibpVal >= 0 ? '+' : '') + ibpVal : '';
+          var temPdf = !!cl.data.laudoUrl;
+
+          var card = document.createElement('div');
+          card.id = 'laudo-card-' + cl.id;
+          card.style.cssText = 'background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;';
+          if (idx === 0) card.style.borderColor = '#0A6E4F';
+
+          // Info do ciclo
+          var info = document.createElement('div');
+          info.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:#374151;';
+          info.textContent = dtStr + ' — ' + resp + ' respondentes' + ibpStr;
+          card.appendChild(info);
+
+          // Badge PDF
+          var badge = document.createElement('span');
+          badge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;' +
+            (temPdf ? 'background:#D1FAE5;color:#065F46;' : 'background:#FEF3C7;color:#92400E;');
+          badge.textContent = temPdf ? '✓ PDF disponível' : 'Sem PDF';
+          card.appendChild(badge);
+
+          // Botão Baixar (só se tiver PDF)
+          if (temPdf) {
+            var btnBaixar = document.createElement('button');
+            btnBaixar.setAttribute('data-baixar','1');
+            btnBaixar.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+            btnBaixar.textContent = '⬇ Baixar PDF';
+            (function(url) {
+              btnBaixar.onclick = function(e) { e.stopPropagation(); window.open(url + '?bust=' + Date.now(), '_blank'); };
+            })(cl.data.laudoUrl);
+            card.appendChild(btnBaixar);
+          }
+
+          // Botão Gerar/Atualizar
+          var btnGerar = document.createElement('button');
+          btnGerar.style.cssText = 'padding:5px 12px;border:none;background:#7B00C4;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+          btnGerar.textContent = temPdf ? '⟳ Atualizar Laudo' : '📄 Gerar Laudo';
+          (function(cicloId, btnRef, cardRef, badgeRef) {
+            btnRef.onclick = function(e) {
+              e.stopPropagation();
+              var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+              if (!empresaId) return;
+              btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
+              var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+              var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                          'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', cicloId: cicloId, logoEmpresaUrl: logoE, logoParceiroUrl: logoP })
+              }).then(function(r){ return r.json(); }).then(function(d) {
+                btnRef.disabled = false;
+                if (d.url) {
+                  _salvarLaudoUrlNoCiclo(empresaId, d.url, cicloId, 'laudoUrl');
+                  window.open(d.url + '?bust=' + Date.now(), '_blank');
+                  btnRef.textContent = '⟳ Atualizar Laudo';
+                  badgeRef.textContent = '✓ PDF disponível';
+                  badgeRef.style.background = '#D1FAE5'; badgeRef.style.color = '#065F46';
+                  // Atualiza ou cria botão baixar
+                  var existBaixar = cardRef.querySelector('button[data-baixar]') || cardRef.querySelector('button[style*="0A6E4F"]');
+                  if (existBaixar) {
+                    (function(url){ existBaixar.onclick = function(e){ e.stopPropagation(); window.open(url+'?bust='+Date.now(),'_blank'); }; })(d.url);
+                  } else {
+                    var nb = document.createElement('button');
+                    nb.setAttribute('data-baixar','1');
+                    nb.style.cssText = 'padding:5px 12px;border:none;background:#0A6E4F;color:#fff;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;';
+                    nb.textContent = '⬇ Baixar PDF';
+                    nb.onclick = function(e) { e.stopPropagation(); window.open(d.url + '?bust=' + Date.now(), '_blank'); };
+                    cardRef.insertBefore(nb, btnRef);
+                  }
+                  // Recarrega dados na view
+                  _laudoCicloAtual = cicloId;
+                  var cc = _laudoCiclosCache.find(function(x){ return x.id === cicloId; });
+                  if (cc) _renderLaudoDadosComCiclo(cicloId, cc.data);
+                } else {
+                  btnRef.textContent = '📄 Gerar Laudo';
+                  alert('Erro: ' + (d.error || 'tente novamente'));
+                }
+              }).catch(function(e) {
+                btnRef.disabled = false; btnRef.textContent = '📄 Gerar Laudo';
+                alert('Erro: ' + e.message);
+              });
+            };
+          })(cl.id, btnGerar, card, badge);
+          card.appendChild(btnGerar);
+
+          // Clique no card seleciona o ciclo e renderiza dados
+          (function(cicloId, data, cardEl) {
+            card.onclick = function() {
+              document.querySelectorAll('#laudo-ciclos-lista > div').forEach(function(d){ d.style.borderColor = '#e5e7eb'; });
+              cardEl.style.borderColor = '#0A6E4F';
+              _laudoCicloAtual = cicloId;
+              _renderLaudoDadosComCiclo(cicloId, data);
+            };
+          })(cl.id, cl.data, card);
+
+          lista.appendChild(card);
+        });
+      }
+      if (seletor) seletor.style.display = 'block';
+
+      // Carregar o ciclo mais recente automaticamente
+      _laudoCicloAtual = ciclos[0].id;
+      _renderLaudoDadosComCiclo(ciclos[0].id, ciclos[0].data);
+    }).catch(function(e) { console.log('laudo err:', e); });
+}
+
+function selecionarCicloLaudo(cicloId) {
+  if (!cicloId) return;
+  _laudoCicloAtual = cicloId;
+  var ciclo = _laudoCiclosCache.find(function(c) { return c.id === cicloId; });
+  if (ciclo) {
+    _renderLaudoDadosComCiclo(cicloId, ciclo.data);
+  } else {
+    // Buscar do Firestore se nao estiver em cache
+    var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+    if (!empresaId) return;
+    window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+      .collection('ciclos').doc(cicloId).get()
+      .then(function(doc) {
+        if (doc.exists) _renderLaudoDadosComCiclo(cicloId, doc.data());
+      });
+  }
+}
+
+function _renderLaudoDadosComCiclo(cicloId, d) {
+  var statusEl = document.getElementById('laudo-ciclo-status');
+  var btnBaixar = document.getElementById('btn-baixar-laudo-ciclo');
+  if (statusEl) {
+    statusEl.textContent = d.laudoUrl ? 'PDF disponivel' : 'PDF nao gerado ainda';
+    statusEl.style.color = d.laudoUrl ? '#16a34a' : '#f59e0b';
+  }
+  if (btnBaixar) {
+    if (d.laudoUrl) {
+      btnBaixar.style.display = 'inline-block';
+      btnBaixar.dataset.url = d.laudoUrl;
+    } else {
+      btnBaixar.style.display = 'none';
+    }
+  }
+  _renderLaudoDados(d);
+}
+
+function baixarLaudoCicloAtual() {
+  var btn = document.getElementById('btn-baixar-laudo-ciclo');
+  var url = btn && btn.dataset.url;
+  if (!url) return;
+  var urlFresh = url + (url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+  window.open(urlFresh, '_blank');
+}
+
+function gerarAtualizarLaudo() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  var btn = document.getElementById('btn-gerar-atualizar-laudo');
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  // FIX: logos via POST
+  var logoEmpresaA  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
+  var logoParceiroA = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
+                      'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresaA, logoParceiroUrl: logoParceiroA })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.textContent = '📄 Gerar Laudo Técnico Psicossocial PDF'; btn.disabled = false; }
+      if (d.url) {
+        // Salva laudoUrl no ciclo atual
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, 'laudoUrl');
+        // Atualiza cache e seletor
+        if (_laudoCicloAtual) {
+          var ciclo = _laudoCiclosCache.find(function(c) { return c.id === _laudoCicloAtual; });
+          if (ciclo) {
+            ciclo.data.laudoUrl = d.url;
+            // Atualizar label no select
+            var select = document.getElementById('laudo-ciclo-select');
+            if (select) {
+              var opt = select.querySelector('option[value="' + _laudoCicloAtual + '"]');
+              if (opt && opt.textContent.indexOf('PDF') === -1) {
+                opt.textContent = opt.textContent + ' ✓ PDF';
+              }
+            }
+          }
+          var statusEl = document.getElementById('laudo-ciclo-status');
+          if (statusEl) { statusEl.textContent = 'PDF disponivel'; statusEl.style.color = '#16a34a'; }
+        }
+        // Cache-bust para forcar browser a nao usar PDF antigo
+        var urlFresh = d.url + (d.url.indexOf('?') === -1 ? '?' : '&') + 'bust=' + Date.now();
+        window.open(urlFresh, '_blank');
+        // Recarrega lista de ciclos para o seletor mostrar "✓ PDF" atualizado
+        _laudoCiclosCache = [];
+        setTimeout(function() { carregarLaudoTecnico(empresaId); }, 800);
+      } else {
+        alert('Erro ao gerar laudo: ' + (d.error || 'tente novamente'));
+      }
+    })
+    .catch(function(e) {
+      if (btn) { btn.textContent = '📄 Gerar Laudo Técnico Psicossocial PDF'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
+    });
+}
+
+function carregarMapaRisco(empresaId, cicloIdFiltro, dadosCicloFiltro) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('mapa-sem-dados');
+  var comDados = document.getElementById('mapa-dados');
+  var tbody    = document.getElementById('mapa-tbody');
+
+  // Helpers GRO com matriz Severidade x Probabilidade real
+  var zonaFn = function(ibp) {
+    if (ibp >= 1.5)  return 'Terreno Fertil';
+    if (ibp <= -1.5) return 'Sofrimento Patogenico';
+    return 'Defesa Oculta';
+  };
+  var sevFn = function(ibp) {
+    if (ibp <= -1.5) return 4;  // Maior
+    if (ibp <= 1.4)  return 3;  // Moderada (mascarado)
+    return 1;                    // Leve
+  };
+  var groFn = function(ibp, n) {
+    var sev  = sevFn(ibp);
+    var prob = Math.min((n || 1) + 1, 5); // proxy: n respondentes -> probabilidade
+    var MATRIZ = {
+      '5-4':'INTOLERAVEL','5-3':'SUBSTANCIAL','5-2':'SUBSTANCIAL','5-1':'MODERADO',
+      '4-4':'SUBSTANCIAL','4-3':'MODERADO',   '4-2':'MODERADO',   '4-1':'TOLERAVEL',
+      '3-4':'SUBSTANCIAL','3-3':'MODERADO',   '3-2':'TOLERAVEL',  '3-1':'TRIVIAL',
+      '2-4':'MODERADO',   '2-3':'TOLERAVEL',  '2-2':'TOLERAVEL',  '2-1':'TRIVIAL',
+      '1-4':'TOLERAVEL',  '1-3':'TOLERAVEL',  '1-2':'TRIVIAL',    '1-1':'TRIVIAL'
+    };
+    return MATRIZ[prob+'-'+sev] || 'MODERADO';
+  };
+  var groBg = function(g) {
+    return {INTOLERAVEL:'#F08A8A',SUBSTANCIAL:'#F8B25A',MODERADO:'#FCE98A',TOLERAVEL:'#C8EAB8',TRIVIAL:'#BFE6FB'}[g] || '#e5e7eb';
+  };
+  var escapeHtml = function(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  };
+
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      if (snap.empty) {
+        if(semDados) semDados.style.display = 'block';
+        if(comDados) comDados.style.display = 'none';
+        return;
+      }
+      // Pega ciclo com mais respostas (nao apenas o mais recente por data)
+      var allDocs = [];
+      snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; allDocs.push(d); });
+      allDocs.sort(function(a,b) { return (b.totalRespostas||0) - (a.totalRespostas||0) || ((b.atualizadoEm||b.criadoEm||'') > (a.atualizadoEm||a.criadoEm||'') ? 1 : -1); });
+
+      // Pega ciclo com mais respostas
+      var cicloAlvo = allDocs[0];
+      var cicloId   = cicloAlvo._id;
+      var nResp     = cicloAlvo.totalRespostas || 1;
+
+      if(semDados) semDados.style.display = 'none';
+      if(comDados) comDados.style.display = 'block';
+      if(!tbody) return;
+
+      // Se cicloDoc já tem ibpSubcats, usa direto; senão busca das respostas individuais
+      var subcatsDoc = cicloAlvo.ibpSubcats || {};
+      if (Object.keys(subcatsDoc).length) {
+        _renderMapaSubcats(subcatsDoc, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml);
+        window._mapaRiscoSubcats = subcatsDoc;
+        window._mapaRiscoNResp = nResp;
+        return;
+      }
+
+      // Busca respostas individuais e agrega subcats
+      window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+        .collection('ciclos').doc(cicloId)
+        .collection('respostas').get()
+        .then(function(resSnap) {
+          var subcatsAgr = {};
+          resSnap.forEach(function(rdoc) {
+            var rd = rdoc.data();
+            var sc_map = rd.ibpSubcats || {};
+            Object.keys(sc_map).forEach(function(sc_id) {
+              var val = sc_map[sc_id];
+              var ibpV = typeof val === 'object' ? parseFloat(val.ibp || 0) : parseFloat(val || 0);
+              var modId = typeof val === 'object' ? (val.modId || ('M' + sc_id.split('.')[0])) : ('M' + sc_id.split('.')[0]);
+              var nome  = typeof val === 'object' ? (val.nome || sc_id) : sc_id;
+              if (!subcatsAgr[sc_id]) subcatsAgr[sc_id] = { soma: 0, n: 0, modId: modId, nome: nome };
+              subcatsAgr[sc_id].soma += ibpV;
+              subcatsAgr[sc_id].n   += 1;
+            });
+          });
+          // Calcular media de cada subcat
+          var subcatsFinal = {};
+          Object.keys(subcatsAgr).forEach(function(sc_id) {
+            var ag = subcatsAgr[sc_id];
+            subcatsFinal[sc_id] = { ibp: ag.n > 0 ? Math.round((ag.soma/ag.n)*100)/100 : 0, n: ag.n, modId: ag.modId, nome: ag.nome };
+          });
+          if (!Object.keys(subcatsFinal).length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#6B7280;">Dados de subcategoria disponiveis apos o proximo diagnostico.</td></tr>';
+            return;
+          }
+          window._mapaRiscoSubcats = subcatsFinal;
+          window._mapaRiscoNResp = nResp;
+          _renderMapaSubcats(subcatsFinal, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml);
+        }).catch(function(e) { console.log('mapa respostas err:', e.message); });
+      return; // aguarda Promise acima
+    }).catch(function(e){ console.log('mapa err:', e.message); });
+}
+
+function _renderMapaSubcats(subcats, nResp, tbody, zonaFn, sevFn, groFn, groBg, escapeHtml) {
+      tbody.innerHTML = '';
+      Object.keys(subcats).forEach(function(sc) {
+        var s   = subcats[sc];
+        var ibp = typeof s === 'object' ? parseFloat(s.ibp || 0) : parseFloat(s || 0);
+        var n   = (typeof s === 'object' && s.n) ? s.n : nResp;
+        if (isNaN(ibp)) ibp = 0;
+        var sinal   = ibp >= 0 ? '+' : '';
+        var zona    = zonaFn(ibp);
+        var sev     = sevFn(ibp);
+        var groN    = groFn(ibp, n);
+        var groCorV = groBg(groN);
+        var nomeSc  = escapeHtml(typeof s === 'object' ? (s.nome || sc) : sc);
+        var modNome = escapeHtml(typeof s === 'object' ? (s.modNome || s.modId || '') : '');
+        var sevStr  = sev === 4 ? 'Alta (4)' : sev === 3 ? 'Media (3)' : 'Baixa (1)';
+        var probStr = n >= 4 ? 'Provavel (D)' : n >= 3 ? 'Possivel (C)' : 'Pouco Provavel (B)';
+
+        var tr = document.createElement('tr');
+        // Usar textContent para evitar problemas com caracteres especiais
+        var cells = [nomeSc, modNome, sevStr, probStr, groN, sinal + ibp.toFixed(1), zona];
+        var styles = [
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;',
+          'padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;'
+        ];
+        cells.forEach(function(txt, idx) {
+          var td = document.createElement('td');
+          td.style.cssText = styles[idx];
+          if (idx === 4) {
+            // Badge GRO com cor
+            var span = document.createElement('span');
+            span.style.cssText = 'background:' + groCorV + ';padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;color:#111;';
+            span.textContent = txt;
+            td.appendChild(span);
+          } else {
+            td.textContent = txt;
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      // Cache global para Plano de Acao
+      window._mapaRiscoSubcats = subcats;
+      window._mapaRiscoNResp   = nResp;
+}
+
+function _popularFiltroAnos() {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId || !window.nr1mapDb) return;
+  var select = document.getElementById('anual-ano-select');
+  if (!select) return;
+  var carregarAnos = function(ciclos) {
+    var anos = {};
+    ciclos.forEach(function(c) {
+      var dt = c.data.criadoEm ? new Date(c.data.criadoEm) : null;
+      if (dt) anos[dt.getFullYear()] = true;
+    });
+    select.innerHTML = '<option value="">Todos os anos</option>';
+    Object.keys(anos).sort().reverse().forEach(function(ano) {
+      var opt = document.createElement('option');
+      opt.value = ano;
+      opt.textContent = ano;
+      select.appendChild(opt);
+    });
+    // Selecionar ano atual por padrão
+    var anoAtual = new Date().getFullYear().toString();
+    if (anos[anoAtual]) select.value = anoAtual;
+  };
+  if (_ciclosCache) { carregarAnos(_ciclosCache); return; }
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').get()
+    .then(function(snap) {
+      var ciclos = [];
+      snap.forEach(function(doc){ ciclos.push({ id: doc.id, data: doc.data() }); });
+      _ciclosCache = ciclos;
+      carregarAnos(ciclos);
+    }).catch(function(){});
+}
+
+function carregarRelatorioAnual(empresaId) {
+  if (!empresaId || !window.nr1mapDb) return;
+  var semDados = document.getElementById('anual-sem-dados');
+  var comDados = document.getElementById('anual-dados');
+  var tbody = document.getElementById('anual-tbody');
+  var grafico = document.getElementById('anual-grafico');
+  window.nr1mapDb.collection('nr1map_respostas').doc(empresaId)
+    .collection('ciclos').orderBy('criadoEm','asc').limit(12).get()
+    .then(function(snap) {
+      if (snap.empty||snap.size<2) { if(semDados) semDados.style.display='block'; if(comDados) comDados.style.display='none'; return; }
+      if(semDados) semDados.style.display='none'; if(comDados) comDados.style.display='block';
+      var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      var ciclos=[]; snap.forEach(function(doc){ ciclos.push(doc.data()); });
+      if(grafico){
+        var maxW=600,barH=28,gap=8,svgH=ciclos.length*(barH+gap)+20,midX=maxW/2;
+        var svg='<svg width="100%" viewBox="0 0 '+maxW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg"><line x1="'+midX+'" y1="0" x2="'+midX+'" y2="'+svgH+'" stroke="#E5E7EB" stroke-width="1"/>';
+        ciclos.forEach(function(d,i){
+          var ibp=d.ibpGeral||0; var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var label=dt?meses[dt.getMonth()]+'/'+dt.getFullYear().toString().slice(2):'—';
+          var bW=Math.abs(ibp)/5*(midX-60); var cor=ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b';
+          var y=i*(barH+gap)+10; var bX=ibp>=0?midX:midX-bW;
+          svg+='<text x="55" y="'+(y+barH/2+4)+'" text-anchor="end" font-size="10" fill="#6B7280">'+label+'</text>';
+          svg+='<rect x="'+bX+'" y="'+y+'" width="'+bW+'" height="'+barH+'" rx="3" fill="'+cor+'"/>';
+          var tx=ibp>=0?midX+bW+4:midX-bW-4; var an=ibp>=0?'start':'end'; var s=ibp>=0?'+':'';
+          svg+='<text x="'+tx+'" y="'+(y+barH/2+4)+'" text-anchor="'+an+'" font-size="10" font-weight="600" fill="'+cor+'">'+s+ibp.toFixed(1)+'</text>';
+        });
+        svg+='</svg>'; grafico.innerHTML=svg;
+      }
+      if(tbody){
+        tbody.innerHTML='';
+        ciclos.forEach(function(d,i){
+          var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var ds=dt?meses[dt.getMonth()]+' '+dt.getFullYear():'—';
+          var ibp=d.ibpGeral||0; var s=ibp>=0?'+':'';
+          var zona=ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta';
+          var var_=i>0?(ibp-(ciclos[i-1].ibpGeral||0)).toFixed(1):'—';
+          var vc=var_==='—'?'':parseFloat(var_)>0?'color:#16a34a':parseFloat(var_)<0?'color:#ef4444':'';
+          var tr=document.createElement('tr');
+          tr.innerHTML='<td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+ds+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+(d.tipo==='geral'?'Diagnóstico Geral':'Pesquisa Pulso')+'</td><td style="padding:8px;font-family:monospace;font-weight:700;border-bottom:1px solid #E5E7EB;">'+s+ibp.toFixed(1)+'</td><td style="padding:8px;font-size:12px;border-bottom:1px solid #E5E7EB;">'+zona+'</td><td style="padding:8px;border-bottom:1px solid #E5E7EB;">'+(d.totalRespostas||'—')+'</td><td style="padding:8px;font-weight:600;border-bottom:1px solid #E5E7EB;'+vc+'">'+(var_==='—'?'—':(parseFloat(var_)>0?'+':'')+var_)+'</td>';
+          tbody.appendChild(tr);
+        });
+      }
+    }).catch(function(e){ console.log('anual err:',e); });
+}
+
+function gerarRelatorio(tipo) {
+  var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
+  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empresaId+'&tipo='+tipo)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(btn){ btn.textContent = '⬇ Exportar PDF'; btn.disabled = false; }
+      if(d.url){ window.open(d.url,'_blank'); }
+      else { alert('Erro ao gerar: '+(d.error||'tente novamente')); }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = '⬇ Exportar PDF'; btn.disabled = false; }
+      alert('Erro: '+e.message);
+    });
+}
+</script>
+<script>
+// URL do script de disparo automatico
+window.NR1MAP_DISPARO_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT2bVAoEkf6klteOEnH7d0fQa-kv8WvCw7k2h7boVqRpc2jhk0IftN2DGL/exec';
+</script>
+
+<script>
+// ============================================================
+// verLinksEnviados definida acima
+</script>
+</body>
+</html>
