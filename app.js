@@ -148,22 +148,70 @@ async function enviarDep() {
 // ─── CALCULADORA / PREÇOS ────────────────
 var opcaoAtiva = 'mensal';
 
+// Descontos por pacote: mensal=sem desconto | 6m=5% | 12m=8%
+var _DESC_6M  = 0.05;
+var _DESC_12M = 0.08;
+
+function _aplicarDesconto(unit, desc) {
+  return Math.round(unit * (1 - desc) * 100) / 100;
+}
+
 var dados = {
   mensal: {
     titulo: 'Assinatura Mensal — Gestão Contínua',
-    sub: 'Diagnóstico Inicial + Painel IA + Pesquisas Pulso semanais anônimas via WhatsApp',
+    sub: 'Renovação automática mês a mês · Cancele quando quiser',
     labelValor: 'Valor mensal',
     sufixo: '/mês',
     cor: 'var(--verde-claro)',
     btn: 'Assinar agora com este valor →',
+    pacote: 'mensal',
+    desconto: 0,
     itens: '✓ Diagnóstico Inicial completo|✓ Painel dinâmico Prazer/Sofrimento|✓ Pesquisa Pulso semanal anônima|✓ Atualizações de IA contínuas',
     faixas: [
-      { label: 'Até 5',       unit: 35,   ex: '5 × R$35 = R$175' },
-      { label: '6 a 20',      unit: 25,   ex: '10 × R$25 = R$250' },
-      { label: '21 a 50',     unit: 20,   ex: '30 × R$20 = R$600' },
-      { label: '51 a 100',    unit: 16.5, ex: '60 × R$16,50 = R$990' },
-      { label: '101 a 200',   unit: 13,   ex: '150 × R$13 = R$1.950' },
-      { label: '201 a 500 ⭐', unit: 10,  ex: '300 × R$10 = R$3.000' }
+      { label: 'Até 5',       unit: 35,   ex: '5 × R$35 = R$175/mês' },
+      { label: '6 a 20',      unit: 25,   ex: '10 × R$25 = R$250/mês' },
+      { label: '21 a 50',     unit: 20,   ex: '30 × R$20 = R$600/mês' },
+      { label: '51 a 100',    unit: 16.5, ex: '60 × R$16,50 = R$990/mês' },
+      { label: '101 a 200',   unit: 13,   ex: '150 × R$13 = R$1.950/mês' },
+      { label: '201 a 500 ⭐', unit: 10,  ex: '300 × R$10 = R$3.000/mês' }
+    ]
+  },
+  pacote6: {
+    titulo: 'Pacote 6 Meses — 5% de desconto',
+    sub: 'Pague 6 meses antecipado · Economia garantida · Sem renovação automática',
+    labelValor: 'Valor mensal com desconto',
+    sufixo: '/mês',
+    cor: '#F59E0B',
+    btn: 'Contratar Pacote 6 Meses →',
+    pacote: '6m',
+    desconto: _DESC_6M,
+    itens: '✓ 5% de desconto sobre o valor mensal|✓ Pagamento total em 6x iguais|✓ Todos os recursos da Assinatura|✓ Sem renovação automática',
+    faixas: [
+      { label: 'Até 5',       unit: _aplicarDesconto(35,   _DESC_6M), ex: '' },
+      { label: '6 a 20',      unit: _aplicarDesconto(25,   _DESC_6M), ex: '' },
+      { label: '21 a 50',     unit: _aplicarDesconto(20,   _DESC_6M), ex: '' },
+      { label: '51 a 100',    unit: _aplicarDesconto(16.5, _DESC_6M), ex: '' },
+      { label: '101 a 200',   unit: _aplicarDesconto(13,   _DESC_6M), ex: '' },
+      { label: '201 a 500 *', unit: _aplicarDesconto(10,  _DESC_6M), ex: '' }
+    ]
+  },
+  pacote12: {
+    titulo: 'Pacote 12 Meses — 8% de desconto',
+    sub: 'Melhor custo-benefício · Pague anual · Maior economia',
+    labelValor: 'Valor mensal com desconto',
+    sufixo: '/mês',
+    cor: '#7B00C4',
+    btn: 'Contratar Pacote 12 Meses →',
+    pacote: '12m',
+    desconto: _DESC_12M,
+    itens: '✓ 8% de desconto sobre o valor mensal|✓ Pagamento total em 12x iguais|✓ Todos os recursos da Assinatura|✓ Melhor custo-benefício do ano',
+    faixas: [
+      { label: 'Até 5',       unit: _aplicarDesconto(35,   _DESC_12M), ex: '' },
+      { label: '6 a 20',      unit: _aplicarDesconto(25,   _DESC_12M), ex: '' },
+      { label: '21 a 50',     unit: _aplicarDesconto(20,   _DESC_12M), ex: '' },
+      { label: '51 a 100',    unit: _aplicarDesconto(16.5, _DESC_12M), ex: '' },
+      { label: '101 a 200',   unit: _aplicarDesconto(13,   _DESC_12M), ex: '' },
+      { label: '201 a 500 *', unit: _aplicarDesconto(10,  _DESC_12M), ex: '' }
     ]
   },
   unico: {
@@ -218,7 +266,19 @@ function selectOpcao(op) {
     radioM.innerHTML        = '';
   }
 
-  document.getElementById('slider-n').style.accentColor = op === 'mensal' ? '#12A073' : '#9B30E0';
+  // Reset todos os cards
+  var cardP6  = document.getElementById('card-pacote6');
+  var cardP12 = document.getElementById('card-pacote12');
+  if (cardP6)  { cardP6.style.border  = op === 'pacote6'  ? '2px solid #F59E0B' : '2px solid #3A2A4E'; }
+  if (cardP12) { cardP12.style.border = op === 'pacote12' ? '2px solid #7B00C4' : '2px solid #7B00C4'; }
+  if (op !== 'mensal' && op !== 'unico') {
+    if (cardM)  { cardM.style.border = '2px solid var(--linha)'; cardM.style.background = 'var(--branco)'; }
+    if (cardU)  { cardU.style.border = '2px solid var(--linha)'; cardU.style.background = 'var(--branco)'; }
+    if (radioM) { radioM.style.background = 'var(--branco)'; radioM.style.borderColor = 'var(--linha)'; radioM.innerHTML = ''; }
+    if (radioU) { radioU.style.background = 'var(--branco)'; radioU.style.borderColor = 'var(--linha)'; radioU.innerHTML = ''; }
+  }
+  var corAcc = op === 'mensal' ? '#12A073' : op === 'unico' ? '#9B30E0' : op === 'pacote6' ? '#F59E0B' : '#7B00C4';
+  document.getElementById('slider-n').style.accentColor = corAcc;
   document.getElementById('calc-titulo').textContent     = d.titulo;
   document.getElementById('calc-sub').textContent        = d.sub;
   document.getElementById('calc-label-valor').textContent= d.labelValor;
@@ -247,9 +307,20 @@ function calcValor(n) {
   if (fi === 4) { var piso = 100 * faixas[3].unit; if (total < piso) total = piso; }
   if (fi === 5) { var piso = 200 * faixas[4].unit; if (total < piso) total = piso; }
 
-  document.getElementById('calc-faixa').textContent  = 'Faixa ' + (fi+1) + ' — ' + faixas[fi].label + ' colaboradores';
+  var meses = (opcaoAtiva === 'pacote6') ? 6 : (opcaoAtiva === 'pacote12') ? 12 : 0;
+  var totalPacote = meses > 0 ? total * meses : 0;
+
+  document.getElementById('calc-faixa').textContent  = 'Faixa ' + (fi+1) + ' — ' + faixas[fi].label + ' colaboradores' + (d.desconto > 0 ? ' · ' + (d.desconto*100).toFixed(0) + '% desc.' : '');
   document.getElementById('calc-total').textContent  = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  document.getElementById('calc-detalhe').textContent= n + ' × R$ ' + unit.toFixed(2).replace('.', ',') + (d.sufixo ? ' / colaborador/mês' : ' / colaborador · pagamento único');
+  document.getElementById('calc-detalhe').textContent= (meses > 0
+    ? n + ' x R$ ' + unit.toFixed(2).replace('.', ',') + '/colab./mês x ' + meses + ' meses = R$ ' + totalPacote.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' total'
+    : n + ' × R$ ' + unit.toFixed(2).replace('.', ',') + (d.sufixo ? ' / colaborador/mês' : ' / colaborador · pagamento unico'));
+
+  // Atualizar exemplos das faixas dinamicamente
+  faixas.forEach(function(f) {
+    var ex_total = n * f.unit;
+    f.ex = n + ' x R$' + f.unit.toFixed(2).replace('.', ',') + ' = R$' + ex_total.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2}) + (meses > 0 ? '/mes' : '');
+  });
 
   var cor = opcaoAtiva === 'mensal' ? '#12A073' : '#9B30E0';
   faixas.forEach(function(f, i) {
@@ -288,8 +359,10 @@ async function irParaCheckout(qtd, tipo, nome, email, empresa) {
 }
 
 function assinarAgora() {
-  var qtd  = parseInt(document.getElementById('input-n') ? document.getElementById('input-n').value : 10);
-  var tipo = window.opcaoAtiva || 'mensal';
+  var qtd   = parseInt(document.getElementById('input-n') ? document.getElementById('input-n').value : 10);
+  var op    = window.opcaoAtiva || 'mensal';
+  // Mapear opcao para tipo de checkout
+  var tipo  = op === 'unico' ? 'unico' : op === 'pacote6' ? 'mensal-6m' : op === 'pacote12' ? 'mensal-12m' : 'mensal';
   irParaCheckout(qtd, tipo);
 }
 
