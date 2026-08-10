@@ -56,8 +56,8 @@ def salvar_firestore(empresa_id, empresa_nome, tipo, url, num_colab, ibp_geral):
         'criadoEm': datetime.datetime.now().isoformat()
     })
 
-def buscar_dados_empresa(empresa_id):
-    """Busca dados completos da empresa e ciclo mais recente do Firestore."""
+def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
+    """Busca dados completos da empresa. Se ciclo_id_fixo informado, usa esse ciclo."""
     # Empresa
     empresa_doc = db.collection('nr1map_empresas').document(empresa_id).get()
     if not empresa_doc.exists:
@@ -80,17 +80,27 @@ def buscar_dados_empresa(empresa_id):
             'unidade': d.get('unidade', '') or d.get('departamento', ''),
         }
 
-    # Ciclo mais recente com respostas (atualizadoEm > criadoEm como fallback)
+    # Ciclo: usa ciclo_id_fixo se fornecido, senao busca o mais recente
     ciclo_doc = None
-    try:
-        ciclos = db.collection('nr1map_respostas').document(empresa_id) \
-            .collection('ciclos') \
-            .order_by('atualizadoEm', direction=firestore.Query.DESCENDING) \
-            .limit(1).get()
-        if ciclos:
-            ciclo_doc = ciclos[0]
-    except Exception:
-        pass
+    if ciclo_id_fixo:
+        try:
+            ciclo_doc = db.collection('nr1map_respostas').document(empresa_id) \
+                .collection('ciclos').document(ciclo_id_fixo).get()
+            if not ciclo_doc.exists:
+                ciclo_doc = None
+        except Exception:
+            ciclo_doc = None
+
+    if not ciclo_doc:
+        try:
+            ciclos = db.collection('nr1map_respostas').document(empresa_id) \
+                .collection('ciclos') \
+                .order_by('atualizadoEm', direction=firestore.Query.DESCENDING) \
+                .limit(1).get()
+            if ciclos:
+                ciclo_doc = ciclos[0]
+        except Exception:
+            pass
 
     if not ciclo_doc:
         try:
@@ -218,20 +228,40 @@ def buscar_dados_empresa(empresa_id):
         for k, v in cargo_acum.items()
     ]
 
-    # Acoes do plano (resumo)
+    # Acoes do plano — filtra por cicloId quando disponivel
     acoes = []
+    ciclo_id_para_acoes = ciclo_id_fixo or (ciclo_doc.id if ciclo_doc else None)
     try:
-        acoes_snap = db.collection('nr1map_plano_acao') \
-            .where('empresaId', '==', empresa_id).limit(20).get()
-        for a in acoes_snap:
+        q_acoes = db.collection('nr1map_plano_acao').where('empresaId', '==', empresa_id)
+        if ciclo_id_para_acoes:
+            # Busca acoes do ciclo especifico OU sem cicloId (legadas)
+            acoes_ciclo = q_acoes.where('cicloId', '==', ciclo_id_para_acoes).limit(50).get()
+            acoes_sem   = q_acoes.where('cicloId', '==', '').limit(50).get()
+            acoes_snap_list = list(acoes_ciclo) + list(acoes_sem)
+            # Tambem incluir docs sem campo cicloId (nao indexado — busca geral e filtra)
+            todos = q_acoes.limit(100).get()
+            for a in todos:
+                d = a.to_dict()
+                if not d.get('cicloId'):
+                    acoes_snap_list.append(a)
+        else:
+            acoes_snap_list = list(q_acoes.limit(50).get())
+        seen = set()
+        for a in acoes_snap_list:
+            if a.id in seen: continue
+            seen.add(a.id)
             d = a.to_dict()
             acoes.append({
                 'descricao': d.get('acao', '') or d.get('descricao', ''),
                 'status':    d.get('status', ''),
                 'classif':   d.get('classif', '') or d.get('classificacao', ''),
+                'setor':     d.get('setor', ''),
+                'responsavel': d.get('responsavel', ''),
+                'prazo':     d.get('prazo', ''),
+                'cicloId':   d.get('cicloId', ''),
             })
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[buscar_dados_empresa] erro acoes: {e}")
 
     # Responsavel tecnico da metodologia — sempre fixo como Dra. Lucia Kratz
     # O campo responsavelTecnico do Firestore refere-se ao responsavel da empresa (campo separado)
@@ -405,8 +435,12 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response(json.dumps({"error": "empresaId obrigatorio"}),
                                      status=400, mimetype='application/json')
 
-        # Busca dados do Firestore
-        dados = buscar_dados_empresa(empresa_id)
+        # Extrai cicloId do request (GET param ou POST body)
+        body_ciclo = req.get_json(silent=True) or {}
+        ciclo_id_req = req.args.get('cicloId') or body_ciclo.get('cicloId') or None
+
+        # Busca dados do Firestore — usa ciclo especifico se informado
+        dados = buscar_dados_empresa(empresa_id, ciclo_id_fixo=ciclo_id_req)
         if not dados:
             return https_fn.Response(json.dumps({"error": "Empresa nao encontrada"}),
                                      status=404, mimetype='application/json')
