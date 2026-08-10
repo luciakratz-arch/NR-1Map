@@ -179,6 +179,31 @@
 
   </div>
 
+  <!-- CARD PACOTES -->
+  <div style="max-width:720px;margin-bottom:32px;background:linear-gradient(135deg,#1A0A2E,#0D1210);border-radius:16px;padding:28px 32px;border:1px solid #2A1A3E;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <span style="font-size:20px;">📦</span>
+      <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;">Pacotes com desconto — Assinatura comprometida</span>
+    </div>
+    <p style="font-size:12px;color:#8A9590;margin-bottom:20px;">Pague por 6 ou 12 meses antecipado e economize. O valor mensal com desconto e dividido em parcelas iguais.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div onclick="selectOpcao('pacote6')" id="card-pacote6" style="border:2px solid #3A2A4E;border-radius:12px;padding:20px;cursor:pointer;background:rgba(123,0,196,.08);transition:all .2s;">
+        <div style="font-size:11px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Pacote 6 Meses</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;">5% OFF</div>
+        <div style="font-size:11px;color:#8A9590;margin-bottom:12px;">sobre o valor mensal da sua faixa</div>
+        <div style="font-size:11px;color:#F59E0B;">Ex.: R$600/mes → R$570/mes<br/>Total: R$3.420 em 6x iguais</div>
+      </div>
+      <div onclick="selectOpcao('pacote12')" id="card-pacote12" style="border:2px solid #7B00C4;border-radius:12px;padding:20px;cursor:pointer;background:rgba(123,0,196,.15);transition:all .2s;position:relative;">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#7B00C4;color:#fff;font-size:10px;font-weight:700;padding:2px 12px;border-radius:100px;white-space:nowrap;">MELHOR CUSTO</div>
+        <div style="font-size:11px;font-weight:700;color:#C084FC;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Pacote 12 Meses</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;">8% OFF</div>
+        <div style="font-size:11px;color:#8A9590;margin-bottom:12px;">sobre o valor mensal da sua faixa</div>
+        <div style="font-size:11px;color:#C084FC;">Ex.: R$600/mes → R$552/mes<br/>Total: R$6.624 em 12x iguais</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:#4A5450;text-align:center;">Os exemplos acima usam 30 colaboradores (Faixa 3 — R$20/colab./mes). Use a calculadora abaixo para simular sua empresa.</div>
+  </div>
+
   <!-- CALCULADORA DINÂMICA -->
   <div style="background:var(--preto);border-radius:16px;padding:36px;max-width:720px;margin-bottom:40px;">
     <div id="calc-titulo" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;"></div>
