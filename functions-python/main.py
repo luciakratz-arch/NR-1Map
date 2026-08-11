@@ -232,33 +232,35 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
     acoes = []
     ciclo_id_para_acoes = ciclo_id_fixo or (ciclo_doc.id if ciclo_doc else None)
     try:
-        q_acoes = db.collection('nr1map_plano_acao').where('empresaId', '==', empresa_id)
-        if ciclo_id_para_acoes:
-            # Busca acoes do ciclo especifico OU sem cicloId (legadas)
-            acoes_ciclo = q_acoes.where('cicloId', '==', ciclo_id_para_acoes).limit(50).get()
-            acoes_sem   = q_acoes.where('cicloId', '==', '').limit(50).get()
-            acoes_snap_list = list(acoes_ciclo) + list(acoes_sem)
-            # Tambem incluir docs sem campo cicloId (nao indexado — busca geral e filtra)
-            todos = q_acoes.limit(100).get()
-            for a in todos:
-                d = a.to_dict()
-                if not d.get('cicloId'):
-                    acoes_snap_list.append(a)
-        else:
-            acoes_snap_list = list(q_acoes.limit(50).get())
-        seen = set()
-        for a in acoes_snap_list:
-            if a.id in seen: continue
-            seen.add(a.id)
+        # Busca TODAS as acoes da empresa e filtra no Python
+        # (evita problema com documentos que nao tem o campo cicloId)
+        todos_snap = db.collection('nr1map_plano_acao') \
+            .where('empresaId', '==', empresa_id).limit(200).get()
+
+        # Verificar se o ciclo tem acoes proprias
+        tem_acoes_proprias = any(
+            a.to_dict().get('cicloId') == ciclo_id_para_acoes
+            for a in todos_snap
+        ) if ciclo_id_para_acoes else False
+
+        for a in todos_snap:
             d = a.to_dict()
+            ciclo_doc_id = d.get('cicloId') or ''
+            if ciclo_id_para_acoes:
+                if ciclo_doc_id == ciclo_id_para_acoes:
+                    pass  # acao propria do ciclo — inclui
+                elif not ciclo_doc_id and not tem_acoes_proprias:
+                    pass  # acao legada sem cicloId — inclui se ciclo nao tem acoes proprias
+                else:
+                    continue  # acao de outro ciclo — pula
             acoes.append({
-                'descricao': d.get('acao', '') or d.get('descricao', ''),
-                'status':    d.get('status', ''),
-                'classif':   d.get('classif', '') or d.get('classificacao', ''),
-                'setor':     d.get('setor', ''),
+                'descricao':   d.get('acao', '') or d.get('descricao', ''),
+                'status':      d.get('status', ''),
+                'classif':     d.get('classif', '') or d.get('classificacao', ''),
+                'setor':       d.get('setor', ''),
                 'responsavel': d.get('responsavel', ''),
-                'prazo':     d.get('prazo', ''),
-                'cicloId':   d.get('cicloId', ''),
+                'prazo':       d.get('prazo', ''),
+                'cicloId':     ciclo_doc_id,
             })
     except Exception as e:
         print(f"[buscar_dados_empresa] erro acoes: {e}")
