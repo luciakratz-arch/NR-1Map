@@ -303,56 +303,122 @@ def gerar_5w2h(dados: dict = None, output_path=None):
     ))
     story.append(Spacer(1, 4 * mm))
 
-    acoes = gerar_acoes(SETORES_CBO_DIN)
+    # Usar acoes salvas no Firestore (nr1map_plano_acao) se existirem
+    # Caso contrario, gerar automaticamente a partir do diagnostico
+    acoes_firestore = _dados.get('acoes') or []
 
-    if not acoes:
-        story.append(Paragraph(
-            "Nenhum CBO ou setor classificado como Substancial ou Intolerável neste ciclo. "
-            "Nenhuma ação corretiva obrigatória — manter monitoramento de rotina via Pesquisa Pulso.",
-            s_body
-        ))
+    if acoes_firestore:
+        # -- Ações salvas no painel pelo RH --
+        if not acoes_firestore:
+            story.append(Paragraph(
+                "Nenhuma acao cadastrada para este ciclo.",
+                s_body
+            ))
+        else:
+            story.append(Paragraph(
+                f"Total de acoes cadastradas: {len(acoes_firestore)}",
+                ParagraphStyle('sub2', parent=s_body, textColor=VERDE_NR1, fontSize=9)
+            ))
+            story.append(Spacer(1, 3 * mm))
+            STATUS_COR = {
+                'Concluida': colors.HexColor('#065F46'),
+                'Em andamento': colors.HexColor('#92400E'),
+                'Pendente': colors.HexColor('#1E3A5F'),
+            }
+            for i, acao in enumerate(acoes_firestore, start=1):
+                setor     = acao.get('setor', 'Setor nao informado')
+                descricao = acao.get('descricao', '')
+                responsavel = acao.get('responsavel', '')
+                prazo     = acao.get('prazo', '')
+                status    = acao.get('status', 'Pendente')
+                cor_status = STATUS_COR.get(status, colors.HexColor('#1E3A5F'))
+
+                story.append(Paragraph(f"Acao {i} -- {setor}", s_h3))
+
+                badge_row = [
+                    Paragraph(f"Setor / CBO: {setor}", s_badge),
+                    Paragraph(f"Status: {status}", ParagraphStyle(
+                        'badge_status', parent=s_badge,
+                        backColor=cor_status, textColor=colors.white)),
+                ]
+                t_badge = Table([badge_row], colWidths=[95 * mm, 79 * mm])
+                t_badge.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, 0), VERDE_NR1),
+                    ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(t_badge)
+                story.append(Spacer(1, 2 * mm))
+
+                rows_5w2h = [
+                    ["What (O que)", Paragraph(descricao or "--", s_cell)],
+                    ["Who (Quem)", Paragraph(responsavel or "--", s_cell)],
+                    ["When (Quando)", Paragraph(prazo or "--", s_cell)],
+                    ["Status", Paragraph(status, s_cell)],
+                ]
+                t_5w2h = Table(rows_5w2h, colWidths=[34 * mm, 140 * mm])
+                t_5w2h.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), VERDE_NR1),
+                    ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                    ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ]))
+                story.append(t_5w2h)
+                story.append(Spacer(1, 6 * mm))
     else:
-        for i, item in enumerate(acoes, start=1):
-            t = texto_acao(item)
-            story.append(Paragraph(f"Ação {i} — {item['nivel']}", s_h3))
-
-            badge_row = [
-                Paragraph(f"Zona: {item['zona']['zona_dejours']} (IBP {item['ibp']:+.1f})", s_badge),
-                Paragraph(f"GRO: {item['classif']}", s_badge),
-            ]
-            t_badge = Table([badge_row], colWidths=[85 * mm, 89 * mm])
-            t_badge.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (0, 0), ZONA_COR_FUNDO[item["zona"]["zona_dejours"]]),
-                ('BACKGROUND', (1, 0), (1, 0), GRO_COR[item["classif"]]),
-                ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ]))
-            story.append(t_badge)
-            story.append(Spacer(1, 2 * mm))
-
-            rows_5w2h = [
-                ["What (O quê)", Paragraph(t["what"], s_cell)],
-                ["Why (Por quê)", Paragraph(t["why"], s_cell)],
-                ["Who (Quem)", Paragraph(t["who"], s_cell)],
-                ["Where (Onde)", Paragraph(t["where"], s_cell)],
-                ["When (Quando)", Paragraph(t["when"], s_cell)],
-                ["How (Como)", Paragraph(t["how"], s_cell)],
-                ["How Much (Quanto)", Paragraph(t["howmuch"], s_cell)],
-            ]
-            t_5w2h = Table(rows_5w2h, colWidths=[34 * mm, 140 * mm])
-            t_5w2h.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (0, -1), VERDE_NR1),
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-                ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('TOPPADDING', (0, 0), (-1, -1), 5),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ]))
-            story.append(t_5w2h)
-            story.append(Spacer(1, 6 * mm))
+        # -- Fallback: gerar automaticamente a partir do diagnostico --
+        acoes = gerar_acoes(SETORES_CBO_DIN)
+        if not acoes:
+            story.append(Paragraph(
+                "Nenhum CBO ou setor classificado como Substancial ou Intoleravel neste ciclo. "
+                "Nenhuma acao corretiva obrigatoria — manter monitoramento de rotina via Pesquisa Pulso.",
+                s_body
+            ))
+        else:
+            for i, item in enumerate(acoes, start=1):
+                t = texto_acao(item)
+                story.append(Paragraph(f"Acao {i} — {item['nivel']}", s_h3))
+                badge_row = [
+                    Paragraph(f"Zona: {item['zona']['zona_dejours']} (IBP {item['ibp']:+.1f})", s_badge),
+                    Paragraph(f"GRO: {item['classif']}", s_badge),
+                ]
+                t_badge = Table([badge_row], colWidths=[85 * mm, 89 * mm])
+                t_badge.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, 0), ZONA_COR_FUNDO[item["zona"]["zona_dejours"]]),
+                    ('BACKGROUND', (1, 0), (1, 0), GRO_COR[item["classif"]]),
+                    ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(t_badge)
+                story.append(Spacer(1, 2 * mm))
+                rows_5w2h = [
+                    ["What (O que)", Paragraph(t["what"], s_cell)],
+                    ["Why (Por que)", Paragraph(t["why"], s_cell)],
+                    ["Who (Quem)", Paragraph(t["who"], s_cell)],
+                    ["Where (Onde)", Paragraph(t["where"], s_cell)],
+                    ["When (Quando)", Paragraph(t["when"], s_cell)],
+                    ["How (Como)", Paragraph(t["how"], s_cell)],
+                    ["How Much (Quanto)", Paragraph(t["howmuch"], s_cell)],
+                ]
+                t_5w2h = Table(rows_5w2h, colWidths=[34 * mm, 140 * mm])
+                t_5w2h.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), VERDE_NR1),
+                    ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                    ('GRID', (0, 0), (-1, -1), 0.5, LINHA),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ]))
+                story.append(t_5w2h)
+                story.append(Spacer(1, 6 * mm))
 
     story.append(Paragraph(
         "Acompanhamento e Reavaliação", s_h2
