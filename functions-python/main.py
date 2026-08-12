@@ -331,6 +331,72 @@ def classificacao_gro(ibp):
 
 # ── Gerador de PDF ────────────────────────────────────────────────
 
+def buscar_todos_ciclos(empresa_id):
+    """Busca todos os ciclos da empresa para o Relatorio Anual."""
+    empresa_doc = db.collection('nr1map_empresas').document(empresa_id).get()
+    if not empresa_doc.exists:
+        return None
+    empresa = empresa_doc.to_dict()
+
+    # Buscar todos os ciclos
+    try:
+        ciclos_snap = db.collection('nr1map_respostas').document(empresa_id)             .collection('ciclos').get()
+    except Exception:
+        ciclos_snap = []
+
+    ciclos = []
+    for doc in ciclos_snap:
+        d = doc.to_dict()
+        if not d:
+            continue
+        ibp = d.get('ibpGeral')
+        if ibp is None:
+            continue
+        ciclos.append({
+            'id':          doc.id,
+            'criadoEm':    d.get('criadoEm', ''),
+            'ibpGeral':    ibp,
+            'totalRespostas': d.get('totalRespostas', 0),
+            'ibpModulos':  d.get('ibpModulos') or {},
+            'laudoUrl':    d.get('laudoUrl', ''),
+            'planoUrl':    d.get('planoUrl', ''),
+        })
+
+    # Ordenar cronologicamente
+    ciclos.sort(key=lambda x: x.get('criadoEm', ''))
+
+    # Buscar acoes do plano
+    acoes = []
+    try:
+        acoes_snap = db.collection('nr1map_plano_acao')             .where('empresaId', '==', empresa_id).limit(200).get()
+        for a in acoes_snap:
+            d = a.to_dict()
+            acoes.append({
+                'setor':       d.get('setor', ''),
+                'descricao':   (d.get('acao') or d.get('descricao', '')).replace('[IA] ', '').replace('[IA]', ''),
+                'responsavel': d.get('responsavel', ''),
+                'prazo':       d.get('prazo', ''),
+                'status':      d.get('status', 'Pendente'),
+                'cicloId':     d.get('cicloId', ''),
+            })
+    except Exception:
+        pass
+
+    # Responsavel tecnico fixo
+    resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
+
+    return {
+        'empresa_nome':     empresa.get('nome', ''),
+        'empresa_cnpj':     empresa.get('cnpj', ''),
+        'responsavel':      empresa.get('responsavel', ''),
+        'responsavelTecnico': resp_tec,
+        'ciclos':           ciclos,
+        'acoes':            acoes,
+        'logoEmpresaUrl':   empresa.get('logo_url', ''),
+        'logoParceiroUrl':  'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png',
+    }
+
+
 def gerar_pdf_por_tipo(dados, tipo):
     """Roteia para o gerador correto. laudo_tecnico usa SEMPRE gerar_relatorio_final completo."""
     import sys
@@ -379,9 +445,12 @@ def gerar_pdf_por_tipo(dados, tipo):
         from gerar_acompanhamento import gerar_acompanhamento
         gerar_acompanhamento(dados=dados, output_path=tmp.name)
 
+    elif tipo == 'relatorio_anual':
+        from gerar_relatorio_anual import gerar_relatorio_anual
+        gerar_relatorio_anual(dados=dados, output_path=tmp.name)
+
     else:
-        # Tipo nao reconhecido ou relatorio_anual (futuro gerador dedicado)
-        # Por ora: gera o Laudo Tecnico completo como substituto seguro
+        # Tipo nao reconhecido
         print(f"[gerarLaudo] tipo='{tipo}' nao mapeado — usando gerar_relatorio_final como fallback seguro")
         from gerar_relatorio_final import gerar_relatorio_final
         payload_fallback = {
@@ -442,8 +511,11 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         body_ciclo = req.get_json(silent=True) or {}
         ciclo_id_req = req.args.get('cicloId') or body_ciclo.get('cicloId') or None
 
-        # Busca dados do Firestore — usa ciclo especifico se informado
-        dados = buscar_dados_empresa(empresa_id, ciclo_id_fixo=ciclo_id_req)
+        # Relatorio anual busca TODOS os ciclos
+        if tipo == 'relatorio_anual':
+            dados = buscar_todos_ciclos(empresa_id)
+        else:
+            dados = buscar_dados_empresa(empresa_id, ciclo_id_fixo=ciclo_id_req)
         if not dados:
             return https_fn.Response(json.dumps({"error": "Empresa nao encontrada"}),
                                      status=404, mimetype='application/json')
