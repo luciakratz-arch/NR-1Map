@@ -160,25 +160,63 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 def gerar_acompanhamento(dados: dict = None, output_path=None):
     _dados = dados or {}
     _empresa_nome = _dados.get('empresa_nome') or _dados.get('empresa', {}).get('nome', 'Empresa')
-    _referencia   = _dados.get('referencia', __import__('datetime').datetime.now().strftime('%B de %Y'))
+    _referencia   = _dados.get('referencia') or __import__('datetime').datetime.now().strftime('%d/%m/%Y')
     _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
     _acoes        = _dados.get('acoes') or []
 
     # Gera lista de acompanhamento a partir das acoes do Firestore
     _acompanhamento = []
     por_cargo = _dados.get('porCargo') or _dados.get('porUnidade') or []
+    ibp_subcats = _dados.get('ibpSubcats') or {}
+
     for a in _acoes:
-        nivel = a.get('descricao') or a.get('cargo') or 'Geral'
-        ibp_antes = next((cc.get('ibp', 0.0) for cc in por_cargo
-                          if cc.get('cargo') == a.get('cargo') or cc.get('unidade') == a.get('unidade')), 0.0)
+        setor = a.get('setor', '')
+        descricao = (a.get('descricao', '') or a.get('acao', '')).replace('[IA] ', '').replace('[IA]', '')
+        responsavel = a.get('responsavel', '')
+        prazo = a.get('prazo', '')
+        status = a.get('status', 'Pendente')
+        # Tentar encontrar IBP do setor/cargo correspondente
+        ibp_antes = 0.0
+        for cc in por_cargo:
+            cargo_cc = (cc.get('cargo') or '').lower()
+            unidade_cc = (cc.get('unidade') or '').lower()
+            setor_lower = setor.lower()
+            if setor_lower in cargo_cc or setor_lower in unidade_cc or cargo_cc in setor_lower:
+                ibp_antes = cc.get('ibp', 0.0)
+                break
+        # Fallback: buscar em ibpSubcats pelo nome do setor
+        if ibp_antes == 0.0 and setor:
+            for k, v in ibp_subcats.items():
+                if setor.lower() in k.lower():
+                    ibp_antes = round(v.get('soma', 0) / max(v.get('n', 1), 1), 2) if isinstance(v, dict) else 0.0
+                    break
+
+        # Historico de status — data de criacao + data de ultima atualizacao se houver
+        hist = []
+        if a.get('criadoEm'):
+            try:
+                import datetime as _dt
+                dt_criado = _dt.datetime.fromisoformat(a['criadoEm'].replace('Z',''))
+                hist.append((dt_criado.strftime('%d/%m/%Y'), responsavel or 'Sistema', 'Acao criada'))
+            except Exception:
+                hist.append((__import__('datetime').datetime.now().strftime('%d/%m/%Y'), responsavel or 'Sistema', 'Acao criada'))
+        else:
+            hist.append((__import__('datetime').datetime.now().strftime('%d/%m/%Y'), responsavel or 'Sistema', 'Acao registrada'))
+
+        if status and status.lower() != 'pendente':
+            hist.append((__import__('datetime').datetime.now().strftime('%d/%m/%Y'), responsavel or 'RH', f'Status atualizado para: {status}'))
+
         _acompanhamento.append({
-            'nivel': nivel,
-            'classif_origem': a.get('classif', '—'),
-            'status_atual': a.get('status', 'Pendente'),
+            'nivel': setor or descricao[:60] or 'Geral',
+            'descricao': descricao,
+            'responsavel': responsavel,
+            'prazo': prazo,
+            'classif_origem': a.get('classif') or a.get('risco') or '',
+            'status_atual': status,
             'ibp_antes': ibp_antes,
             'ibp_depois': None,
             'data_remedicao': None,
-            'historico': [(__import__('datetime').datetime.now().strftime('%d/%m/%Y'), 'Sistema', 'Acao registrada')],
+            'historico': hist,
         })
     if not _acompanhamento:
         _acompanhamento = ACOMPANHAMENTO  # fallback para dados de exemplo
@@ -245,12 +283,90 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
     ))
     story.append(Spacer(1, 5 * mm))
 
+    # -- Grafico de Progresso (Gantt simplificado) --
+    import datetime as _dt_gantt
+    STATUS_GANTT_COR = {
+        'Concluida': '#065F46', 'Concluída': '#065F46',
+        'Em andamento': '#92400E',
+        'Pendente': '#374151',
+    }
+    TOTAL_ACOES = len(_acompanhamento)
+    concluidas  = sum(1 for x in _acompanhamento if 'onclu' in x['status_atual'])
+    andamento   = sum(1 for x in _acompanhamento if 'andamento' in x['status_atual'].lower())
+    pendentes   = TOTAL_ACOES - concluidas - andamento
+
+    # Cabecalho do resumo
+    story.append(Paragraph("Resumo do Plano de Acao", s_h2))
+    resumo_rows = [
+        [Paragraph("<b>Total de Acoes</b>", s_cell),
+         Paragraph("<b>Concluidas</b>", s_cell),
+         Paragraph("<b>Em Andamento</b>", s_cell),
+         Paragraph("<b>Pendentes</b>", s_cell)],
+        [Paragraph(str(TOTAL_ACOES), s_cell),
+         Paragraph(str(concluidas), s_cell),
+         Paragraph(str(andamento), s_cell),
+         Paragraph(str(pendentes), s_cell)],
+    ]
+    t_resumo = Table(resumo_rows, colWidths=[43*mm, 43*mm, 43*mm, 43*mm])
+    t_resumo.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), VERDE_NR1),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('FONTNAME',   (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BACKGROUND', (1, 1), (1, 1), colors.HexColor('#D1FAE5')),
+        ('BACKGROUND', (2, 1), (2, 1), colors.HexColor('#FEF3C7')),
+        ('BACKGROUND', (3, 1), (3, 1), colors.HexColor('#F3F4F6')),
+        ('ALIGN',      (0, 0), (-1, -1), 'CENTER'),
+        ('FONTSIZE',   (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+        ('GRID',       (0, 0), (-1, -1), 0.5, LINHA),
+    ]))
+    story.append(t_resumo)
+    story.append(Spacer(1, 5 * mm))
+
+    # Gantt -- barra de progresso por acao
+    story.append(Paragraph("Progresso por Acao", s_h2))
+    gantt_header = [
+        Paragraph("<b>Acao</b>", s_cell),
+        Paragraph("<b>Responsavel</b>", s_cell),
+        Paragraph("<b>Prazo</b>", s_cell),
+        Paragraph("<b>Status</b>", s_cell),
+    ]
+    gantt_rows = [gantt_header]
+    for gi, gitem in enumerate(_acompanhamento, 1):
+        st = gitem['status_atual']
+        cor_st = colors.HexColor(STATUS_GANTT_COR.get(st, '#374151'))
+        gantt_rows.append([
+            Paragraph(f"{gi}. {gitem['nivel'][:45]}", s_cell),
+            Paragraph(gitem.get('responsavel', '') or '', s_cell),
+            Paragraph(gitem.get('prazo', '') or '', s_cell),
+            Paragraph(f"<b>{st}</b>", ParagraphStyle('gs', parent=s_badge,
+                textColor=cor_st, fontSize=8)),
+        ])
+    t_gantt = Table(gantt_rows, colWidths=[75*mm, 42*mm, 28*mm, 29*mm])
+    t_gantt.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), VERDE_NR1),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('FONTNAME',   (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE',   (0, 0), (-1, -1), 8),
+        ('GRID',       (0, 0), (-1, -1), 0.5, LINHA),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('VALIGN',     (0, 0), (-1, -1), 'MIDDLE'),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F9FAFB')]),
+    ]))
+    story.append(t_gantt)
+    story.append(Spacer(1, 8 * mm))
+
+    story.append(Paragraph("Detalhamento por Acao", s_h2))
+    story.append(Spacer(1, 3 * mm))
+
     for i, item in enumerate(_acompanhamento, start=1):
-        story.append(Paragraph(f"Ação {i} — {item['nivel']}", s_h3))
+        story.append(Paragraph(f"Acao {i} -- {item['nivel']}", s_h3))
 
         delta, msg_eficacia = eficacia(item["ibp_antes"], item["ibp_depois"])
-        depois_txt = f"{item['ibp_depois']:+.1f}" if item["ibp_depois"] is not None else "—"
-        delta_txt = f"{delta:+.1f}" if delta is not None else "—"
+        depois_txt = f"{item['ibp_depois']:+.1f}" if item["ibp_depois"] is not None else "--"
+        delta_txt = f"{delta:+.1f}" if delta is not None else "--"
 
         # Badge de status + remedição IBP
         badge_row = [
