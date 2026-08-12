@@ -2028,6 +2028,9 @@ function editarItem(btn, tipo) {
       document.getElementById('edit-emp-colab').value = cells[4].innerText.trim();
       window._editRow = row;
       window._editCard = null;
+      // Capturar docId do botao ou da linha
+      var docIdBtn = btn.getAttribute('data-id') || btn.closest('[data-id]') && btn.closest('[data-id]').getAttribute('data-id') || null;
+      document.getElementById('modal-edit-empresa')._docId = docIdBtn;
     } else if(card) {
       // Vem do card de aprovação pendente — pega os dados do card
       var linhas = card.querySelectorAll('.card-body strong');
@@ -2080,16 +2083,53 @@ function editarItem(btn, tipo) {
 }
 
 function salvarEditEmpresa() {
-  if(window._editRow) {
-    var cells = Array.from(window._editRow.querySelectorAll('td'));
-    cells[0].innerHTML = '<strong>' + document.getElementById('edit-emp-nome').value + '</strong>';
-    cells[1].innerText = document.getElementById('edit-emp-resp').value;
-    cells[2].innerText = document.getElementById('edit-emp-email').value;
-    cells[3].innerText = document.getElementById('edit-emp-plano').value;
-    cells[4].innerText = document.getElementById('edit-emp-colab').value;
+  var nome   = document.getElementById('edit-emp-nome').value.trim();
+  var resp   = document.getElementById('edit-emp-resp').value.trim();
+  var email  = document.getElementById('edit-emp-email').value.trim();
+  var plano  = document.getElementById('edit-emp-plano').value;
+  var colab  = document.getElementById('edit-emp-colab').value;
+  var docId  = document.getElementById('modal-edit-empresa')._docId;
+
+  if (!nome || !email) { alert('Preencha nome e e-mail.'); return; }
+
+  // Salvar no Firestore se tiver docId
+  if (docId && window.nr1mapDb) {
+    window.nr1mapDb.collection('nr1map_empresas').doc(docId).update({
+      nome: nome,
+      responsavel: resp,
+      email: email,
+      plano: plano,
+      numColaboradores: parseInt(colab) || 0,
+      atualizadoEm: new Date().toISOString()
+    }).then(function() {
+      // Atualizar linha da tabela se existir
+      if (window._editRow) {
+        var cells = Array.from(window._editRow.querySelectorAll('td'));
+        cells[0].innerHTML = '<strong>' + nome + '</strong>';
+        cells[1].innerText = resp;
+        cells[2].innerText = email;
+        cells[3].innerText = plano;
+        cells[4].innerText = colab;
+      }
+      document.getElementById('modal-edit-empresa').classList.remove('open');
+      alert('Dados salvos com sucesso!');
+      carregarClientes();
+    }).catch(function(e) {
+      alert('Erro ao salvar: ' + e.message);
+    });
+  } else {
+    // Sem docId — atualiza so a tabela (fallback)
+    if (window._editRow) {
+      var cells = Array.from(window._editRow.querySelectorAll('td'));
+      cells[0].innerHTML = '<strong>' + nome + '</strong>';
+      cells[1].innerText = resp;
+      cells[2].innerText = email;
+      cells[3].innerText = plano;
+      cells[4].innerText = colab;
+    }
+    document.getElementById('modal-edit-empresa').classList.remove('open');
+    alert('Dados atualizados localmente (sem ID do documento).');
   }
-  document.getElementById('modal-edit-empresa').classList.remove('open');
-  alert('✅ Dados atualizados!');
 }
 
 function salvarEditLead() {
