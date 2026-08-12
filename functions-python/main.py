@@ -120,6 +120,7 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
     soma_geral    = 0.0
     n_geral       = 0
 
+    ciclo_data = {}  # fallback — definido antes do if para uso posterior
     if ciclo_doc:
         ciclo_id = ciclo_doc.id
         # Prioriza totalRespostas/ibpGeral do cicloDoc se existirem
@@ -292,10 +293,10 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
             sc: {'soma': v['ibp'] * v['n'], 'n': v['n'], 'modId': v['modId']}
             for sc, v in ibp_subcats_final.items()
         },
-        'referencia': (lambda d: [
-            'Janeiro','Fevereiro','Marco','Abril','Maio','Junho',
-            'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
-        ][d.month - 1] + ' de ' + str(d.year))(datetime.datetime.now()),
+        'referencia': (lambda d: d.strftime('%d/%m/%Y'))(
+            datetime.datetime.fromisoformat(ciclo_data.get('criadoEm', datetime.datetime.now().isoformat()).replace('Z',''))
+            if ciclo_data.get('criadoEm') else datetime.datetime.now()
+        ),
         # campos novos para gerar_relatorio_final
         'empresa_cnpj':         empresa.get('cnpj', ''),
         'responsavel':          empresa.get('responsavel', ''),
