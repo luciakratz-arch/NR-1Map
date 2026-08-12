@@ -3086,23 +3086,28 @@ function adicionarAcao(){
 }
 function gerarPdfPlano(){
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
-  if (!empresaId) { alert('Empresa não carregada.'); return; }
+  if (!empresaId) { alert('Empresa nao carregada.'); return; }
+  // Usa ciclo ativo selecionado no historico
+  var cicloId = _planoCicloAtual || '';
+  if (!cicloId) { alert('Selecione um ciclo no historico acima antes de gerar o PDF.'); return; }
   var btn = document.querySelector('[onclick="gerarPdfPlano()"]');
-  if(btn){ btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
-  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=plano_5w2h')
+  if(btn){ btn.textContent = 'Gerando...'; btn.disabled = true; }
+  fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=plano_5w2h&cicloId=' + cicloId)
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
+      if(btn){ btn.textContent = 'Gerar PDF'; btn.disabled = false; }
       if(d.url){
+        _salvarLaudoUrlNoCiclo(empresaId, d.url, cicloId, 'planoUrl');
         window.open(d.url, '_blank');
-        alert('✅ PDF do Plano de Ação gerado com sucesso!');
+        // Recarregar historico para refletir badge PDF disponivel
+        carregarHistoricoPlano(empresaId);
       } else {
         alert('Erro ao gerar PDF: ' + (d.error || 'tente novamente'));
       }
     })
     .catch(function(e){
-      if(btn){ btn.textContent = '⬇ Gerar PDF'; btn.disabled = false; }
-      alert('Erro de conexão: ' + e.message);
+      if(btn){ btn.textContent = 'Gerar PDF'; btn.disabled = false; }
+      alert('Erro de conexao: ' + e.message);
     });
 }
 
