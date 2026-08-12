@@ -2118,7 +2118,7 @@ function salvarEditEmpresa() {
       alert('Erro ao salvar: ' + e.message);
     });
   } else {
-    // Sem docId — atualiza so a tabela (fallback)
+    // Sem docId - atualiza so a tabela (fallback)
     if (window._editRow) {
       var cells = Array.from(window._editRow.querySelectorAll('td'));
       cells[0].innerHTML = '<strong>' + nome + '</strong>';
