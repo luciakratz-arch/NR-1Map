@@ -327,7 +327,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
             }
             for i, acao in enumerate(acoes_firestore, start=1):
                 setor     = acao.get('setor', 'Setor nao informado')
-                descricao = acao.get('descricao', '')
+                descricao = acao.get('descricao', '').replace('[IA] ', '').replace('[IA]', '')
                 responsavel = acao.get('responsavel', '')
                 prazo     = acao.get('prazo', '')
                 status    = acao.get('status', 'Pendente')
