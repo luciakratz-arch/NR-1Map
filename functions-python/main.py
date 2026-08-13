@@ -385,6 +385,9 @@ def buscar_todos_ciclos(empresa_id):
     # Responsavel tecnico fixo
     resp_tec = {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590', 'email': 'luciakratz@gmail.com'}
 
+    # IBP do ciclo mais recente para salvar_firestore
+    ibp_ultimo = ciclos[-1]['ibpGeral'] if ciclos else None
+
     return {
         'empresa_nome':     empresa.get('nome', ''),
         'empresa_cnpj':     empresa.get('cnpj', ''),
@@ -392,6 +395,8 @@ def buscar_todos_ciclos(empresa_id):
         'responsavelTecnico': resp_tec,
         'ciclos':           ciclos,
         'acoes':            acoes,
+        'num_colab':        empresa.get('numColaboradores', 0),
+        'ibp_geral':        ibp_ultimo,
         'logoEmpresaUrl':   empresa.get('logo_url', ''),
         'logoParceiroUrl':  'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png',
     }
@@ -555,8 +560,8 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             dados['empresa_nome'],
             tipo,
             url,
-            dados['num_colab'],
-            dados['ibp_geral']
+            dados.get('num_colab', 0),
+            dados.get('ibp_geral')
         )
 
         os.unlink(pdf_path)
