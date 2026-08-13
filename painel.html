@@ -6671,12 +6671,14 @@ function carregarRelatoriosPorCiclo(empresaId) {
         btns.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
 
         var tiposGerar = [
-          { tipo: 'laudo_tecnico', label: temLaudo ? '↻ Atualizar Laudo' : '📋 Gerar Laudo', urlField: 'laudoUrl' },
-          { tipo: 'mapa_risco',    label: d.mapaUrl ? '↻ Atualizar Mapa' : '🗺 Gerar Mapa de Risco', urlField: 'mapaUrl' },
-          { tipo: 'plano_5w2h',   label: d.planoUrl ? '↻ Atualizar Plano' : '✅ Gerar Plano 5W2H', urlField: 'planoUrl' },
-          { tipo: 'inventario',   label: d.inventarioUrl ? '↻ Atualizar Inventario' : '📄 Gerar Inventario', urlField: 'inventarioUrl' },
+          { tipo: 'laudo_tecnico', label: '📋 Gerar Laudo', urlField: 'laudoUrl', soSeNaoTiver: true },
+          { tipo: 'mapa_risco',    label: '🗺 Gerar Mapa de Risco', urlField: 'mapaUrl', soSeNaoTiver: true },
+          { tipo: 'plano_5w2h',   label: '✅ Gerar Plano 5W2H', urlField: 'planoUrl', soSeNaoTiver: true },
+          { tipo: 'inventario',   label: '📄 Gerar Inventario', urlField: 'inventarioUrl', soSeNaoTiver: true },
         ];
         tiposGerar.forEach(function(tg) {
+          // So mostra botao Gerar se ainda nao tiver o PDF
+          if (d[tg.urlField]) return;
           var btn = document.createElement('button');
           btn.className = 'btn btn-ghost btn-sm';
           btn.style.fontSize = '11px';
