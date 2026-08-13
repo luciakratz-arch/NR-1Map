@@ -196,9 +196,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
                                   width=42*mm, height=18*mm,
                                   preserveAspectRatio=True, mask='auto')
         except Exception:
-            canvas_obj.setFont('Helvetica', 7)
-            canvas_obj.setFillColor(CINZA_TEXTO)
-            canvas_obj.drawString(18*mm, h-20*mm, "NR-1 Map")
+            pass
+    # Sem logo parceiro: espaco esquerdo fica em branco
 
     # Logo empresa (direita)
     if _le:
@@ -208,11 +207,12 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
                                   preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
+    # Sem logo empresa: espaco direito fica em branco
 
-    # Nome empresa (centro)
+    # Nome empresa (centro) — posicionado abaixo das logos
     canvas_obj.setFont('Helvetica-Bold', 11)
     canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 20 * mm, _en)
+    canvas_obj.drawCentredString(w / 2, h - 32 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
     canvas_obj.setFillColor(ROXO_NR1)
