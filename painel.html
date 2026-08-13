@@ -6691,11 +6691,12 @@ function carregarRelatoriosPorCiclo(empresaId) {
               var _opts4 = (tipo === 'laudo_tecnico')
                 ? { method: 'POST', headers: {'Content-Type':'application/json'},
                     body: JSON.stringify({ empresaId: empId, tipo: 'laudo_tecnico',
+                      cicloId: cicloId,
                       logoEmpresaUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
                       logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
                                        'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png' }) }
                 : undefined;
-              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo, _opts4)
+              fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo + '&cicloId=' + cicloId, _opts4)
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
                   btnRef.disabled = false;
