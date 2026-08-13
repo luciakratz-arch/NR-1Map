@@ -183,9 +183,8 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
     if _lp and __import__('os').path.exists(_lp):
         try: canvas_obj.drawImage(_lp, 18*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c')
-        except: canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-18*mm, "NR-1Map")
-    else:
-        canvas_obj.setFont('Helvetica-Bold',8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(20*mm, h-13*mm, "NR-1Map")
+        except: pass
+    # Sem logo parceiro: espaco esquerdo fica em branco
     # Logo direita — empresa
     _tem_le = False
     if _le and __import__('os').path.exists(_le):
@@ -278,10 +277,19 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     output_path = output_path or nome_arquivo_padrao(f"MapaDeRisco_{_slug_ref}", _empresa_nome)
 
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
+        from reportlab.lib.utils import ImageReader as _IR
         canvas_obj.saveState()
         w, h = A4
-        canvas_obj.setFont('Helvetica', 8)
-        canvas_obj.setFillColor(CINZA_TEXTO)
+        _lp_loc = getattr(desenhar_cabecalho_rodape_local, '_logo_parc', None)
+        _le_loc = getattr(desenhar_cabecalho_rodape_local, '_logo_emp', None)
+        # Logo parceiro (esquerda)
+        if _lp_loc:
+            try: canvas_obj.drawImage(_IR(_lp_loc), 18*mm, h-28*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, mask='auto')
+            except: pass
+        # Logo empresa (direita)
+        if _le_loc:
+            try: canvas_obj.drawImage(_IR(_le_loc), w-62*mm, h-28*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, mask='auto')
+            except: pass
         canvas_obj.setFont('Helvetica-Bold', 11)
         canvas_obj.setFillColor(VERDE_NR1)
         canvas_obj.drawCentredString(w / 2, h - 31 * mm, _empresa_nome)
