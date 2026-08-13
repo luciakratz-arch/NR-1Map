@@ -507,9 +507,12 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response(json.dumps({"error": "empresaId obrigatorio"}),
                                      status=400, mimetype='application/json')
 
-        # Extrai cicloId do request (GET param ou POST body)
-        body_ciclo = req.get_json(silent=True) or {}
-        ciclo_id_req = req.args.get('cicloId') or body_ciclo.get('cicloId') or None
+        # Tipo definido PRIMEIRO — usado antes de qualquer outra logica
+        body_json = req.get_json(silent=True) or {}
+        tipo = req.args.get('tipo') or body_json.get('tipo') or 'laudo_tecnico'
+
+        # Extrai cicloId
+        ciclo_id_req = req.args.get('cicloId') or body_json.get('cicloId') or None
 
         # Relatorio anual busca TODOS os ciclos
         if tipo == 'relatorio_anual':
@@ -519,10 +522,6 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         if not dados:
             return https_fn.Response(json.dumps({"error": "Empresa nao encontrada"}),
                                      status=404, mimetype='application/json')
-
-        # Tipo de documento solicitado — POST body tem prioridade sobre query string
-        body_json = req.get_json(silent=True) or {}
-        tipo = req.args.get('tipo') or body_json.get('tipo') or 'laudo_tecnico'
 
         # FIX: logos do body JS sobrescrevem as do Firestore (garante que chegam ao PDF)
         if body_json.get('logoEmpresaUrl'):
