@@ -130,7 +130,7 @@ def zona_de(ibp: float) -> dict:
     return ZONAS_IBP[2]
 
 
-def nome_arquivo_padrao(tipo_documento: str, empresa: str = EMPRESA, ano: int = None) -> str:
+def nome_arquivo_padrao(tipo_documento: str, empresa: str = '', ano: int = None) -> str:
     """Padrão: ANO_NR-1_Map_NomeDaEmpresa_TipoDoDocumento.pdf"""
     import unicodedata, re
     ano = ano or datetime.datetime.now().year
