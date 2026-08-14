@@ -67,9 +67,13 @@ def _baixar_logo(url):
             tmp.close()
             return tmp.name
         tmp = _tmpmod.NamedTemporaryFile(suffix='.png', delete=False)
-        _urllib_req.urlretrieve(url, tmp.name)
         tmp.close()
-        return tmp.name
+        req = _urllib_req.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+        with _urllib_req.urlopen(req, timeout=10) as resp:
+            with open(tmp.name, 'wb') as f_out:
+                f_out.write(resp.read())
+        import os as _os_ra
+        return tmp.name if _os_ra.path.exists(tmp.name) and _os_ra.path.getsize(tmp.name) > 0 else None
     except Exception:
         return None
 
@@ -111,7 +115,10 @@ def gerar_relatorio_anual(dados=None, output_path=None):
             try:
                 canvas_obj.drawImage(ImageReader(lp_path), 18*mm, h-28*mm,
                                       width=42*mm, height=18*mm, preserveAspectRatio=True, mask='auto')
-            except Exception: pass
+            except Exception:
+                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
+        else:
+            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
         if le_path:
             try:
                 canvas_obj.drawImage(ImageReader(le_path), w-62*mm, h-28*mm,
