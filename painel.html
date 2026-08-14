@@ -2461,7 +2461,7 @@ function carregarEvolucaoIndicadores(empresaId) {
       var ciclos = [];
       snap.forEach(function(doc) {
         var d = doc.data();
-        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dt = d.criadoEm ? _parseCriadoEm(d.criadoEm) : null;
         ciclos.push({
           mes: dt ? meses[dt.getMonth()] : '—',
           sofrimento: d.sofrimentoGeral || null,
@@ -2531,7 +2531,7 @@ function carregarHistoricoReal(empresaId) {
       el.innerHTML = '';
       snap.forEach(function(doc) {
         var d = doc.data();
-        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dt = d.criadoEm ? _parseCriadoEm(d.criadoEm) : null;
         var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
         var tipo = d.tipo === 'geral' ? 'Diagnóstico Geral' : 'Pesquisa Pulso';
         var tipoCls = d.tipo === 'geral' ? 'tl-geral' : 'tl-pulso';
@@ -2573,7 +2573,7 @@ function carregarHistoricoPulso(empresaId) {
       el.innerHTML = '';
       snap.forEach(function(doc) {
         var d = doc.data();
-        var dt = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dt = d.criadoEm ? _parseCriadoEm(d.criadoEm) : null;
         var dataStr = dt ? meses[dt.getMonth()]+' '+dt.getFullYear() : '—';
         var div = document.createElement('div');
         div.className = 'timeline-item';
@@ -4692,7 +4692,7 @@ function renderHistoricoUnificado() {
     var dt = null;
     if (d.criadoEm) {
       if (typeof d.criadoEm === 'object' && d.criadoEm.toDate) dt = d.criadoEm.toDate();
-      else dt = new Date(d.criadoEm);
+      else dt = _parseCriadoEm(d.criadoEm);
     }
     var dataStr = (dt && !isNaN(dt)) ? (dt.getDate() + '/' + (dt.getMonth()+1) + '/' + dt.getFullYear()) : '—';
     var respostas = d.totalRespostas || 0;
@@ -5172,6 +5172,14 @@ function carregarColabs() {
 
 <!-- FIREBASE SDK -->
 <script>
+function _parseCriadoEm(val) {
+  if (!val) return null;
+  if (typeof val === 'object' && val.toDate) return val.toDate();
+  if (typeof val === 'object' && val.seconds) return new Date(val.seconds * 1000);
+  if (typeof val !== 'string') return null;
+  if (val.indexOf('T') !== -1) return new Date(val);
+  return new Date(val + 'T12:00:00');
+}
 function aplicarRestricoesPorNivel(nivel) {
   if (nivel !== 'gestor') return;
   // Gestor: somente leitura — esconde botões de ação
@@ -5905,7 +5913,7 @@ function atualizarHistoricoTimeline(empresaId) {
       container.innerHTML = '';
       snap.forEach(function(ciclo) {
         var d = ciclo.data();
-        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
+        var data = d.criadoEm ? _parseCriadoEm(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
         var ibp = d.ibpGeral !== undefined ? d.ibpGeral : null;
         var cor = ibp !== null ? (ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)') : 'var(--cinza-medio)';
         var zona = ibp !== null ? (ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta') : '—';
@@ -5936,7 +5944,7 @@ function carregarSugestoes(empresaId) {
         div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
         div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">'+(d.categoria||'Geral')+'</div>'+
           '<div style="font-size:13px;color:var(--cinza-escuro);line-height:1.5;">'+d.texto+'</div>'+
-          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+_parseCriadoEm(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
         container.appendChild(div);
       });
     }).catch(function(e){ console.log('sugestoes err:',e); });
@@ -5958,7 +5966,7 @@ function carregarChamados(empresaId) {
         div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
         div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">'+(tipos[d.tipo]||d.tipo)+'</div>'+
           '<div style="font-size:13px;color:var(--cinza-escuro);">'+d.mensagem+'</div>'+
-          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+new Date(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
+          '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+_parseCriadoEm(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
         container.appendChild(div);
       });
     }).catch(function(e){ console.log('chamados err:',e); });
@@ -6619,7 +6627,7 @@ function carregarRelatoriosPorCiclo(empresaId) {
 
       ciclos.forEach(function(c) {
         var d    = c.data;
-        var dt   = d.criadoEm ? new Date(d.criadoEm) : null;
+        var dt   = d.criadoEm ? _parseCriadoEm(d.criadoEm) : null;
         var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : '—';
         var resp  = d.totalRespostas || 0;
         var ibp   = d.ibpGeral !== undefined && d.ibpGeral !== null ? parseFloat(d.ibpGeral) : null;
@@ -7369,7 +7377,7 @@ function carregarRelatorioAnual(empresaId) {
         var maxW=600,barH=28,gap=8,svgH=ciclos.length*(barH+gap)+20,midX=maxW/2;
         var svg='<svg width="100%" viewBox="0 0 '+maxW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg"><line x1="'+midX+'" y1="0" x2="'+midX+'" y2="'+svgH+'" stroke="#E5E7EB" stroke-width="1"/>';
         ciclos.forEach(function(d,i){
-          var ibp=d.ibpGeral||0; var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var ibp=d.ibpGeral||0; var dt=d.criadoEm?_parseCriadoEm(d.criadoEm):null;
           var label=dt?meses[dt.getMonth()]+'/'+dt.getFullYear().toString().slice(2):'—';
           var bW=Math.abs(ibp)/5*(midX-60); var cor=ibp>=1.5?'#16a34a':ibp<=-1.5?'#ef4444':'#f59e0b';
           var y=i*(barH+gap)+10; var bX=ibp>=0?midX:midX-bW;
@@ -7383,7 +7391,7 @@ function carregarRelatorioAnual(empresaId) {
       if(tbody){
         tbody.innerHTML='';
         ciclos.forEach(function(d,i){
-          var dt=d.criadoEm?new Date(d.criadoEm):null;
+          var dt=d.criadoEm?_parseCriadoEm(d.criadoEm):null;
           var ds=dt?meses[dt.getMonth()]+' '+dt.getFullYear():'—';
           var ibp=d.ibpGeral||0; var s=ibp>=0?'+':'';
           var zona=ibp>=1.5?'Terreno Fértil':ibp<=-1.5?'Sofrimento Patogênico':'Defesa Oculta';
