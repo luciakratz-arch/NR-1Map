@@ -230,10 +230,13 @@ def _baixar_logo_doc(url):
             tmp.close()
         else:
             tmp.close()
-            _ur.urlretrieve(url, tmp.name)
-        return tmp.name if _os.path.exists(tmp.name) else None
+            req = _ur.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+            with _ur.urlopen(req, timeout=10) as resp:
+                with open(tmp.name, 'wb') as f_out:
+                    f_out.write(resp.read())
+        return tmp.name if _os.path.exists(tmp.name) and _os.path.getsize(tmp.name) > 0 else None
     except Exception as _e:
-        print(f"[logo] erro: {_e}")
+        print("[logo] erro: " + str(_e))
         return None
 
 def gerar_mapa_risco(dados: dict = None, output_path=None):
@@ -561,9 +564,13 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
             if url.startswith('data:'):
                 tmp.write(_b642.b64decode(url.split(',',1)[1])); tmp.close()
             else:
-                tmp.close(); _ur2.urlretrieve(url, tmp.name)
-            return tmp.name if _os3.path.exists(tmp.name) else None
-        except: return None
+                tmp.close()
+                req2 = _ur2.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+                with _ur2.urlopen(req2, timeout=10) as resp2:
+                    with open(tmp.name, 'wb') as f_out2:
+                        f_out2.write(resp2.read())
+            return tmp.name if _os3.path.exists(tmp.name) and _os3.path.getsize(tmp.name) > 0 else None
+        except Exception as _e2: print("[dl_logo] " + str(_e2)); return None
     _lp_path = _dl_logo(_dados.get('logoParceiroUrl') or 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
     _le_path  = _dl_logo(_dados.get('logoEmpresaUrl') or '')
     desenhar_cabecalho_rodape_local._logo_parc = _lp_path
