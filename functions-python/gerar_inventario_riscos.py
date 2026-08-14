@@ -173,10 +173,13 @@ def _baixar_logo_inv(url):
             tmp.close()
         else:
             tmp.close()
-            _ur.urlretrieve(url, tmp.name)
-        return tmp.name if _os.path.exists(tmp.name) else None
+            req = _ur.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+            with _ur.urlopen(req, timeout=10) as resp:
+                with open(tmp.name, 'wb') as f_out:
+                    f_out.write(resp.read())
+        return tmp.name if _os.path.exists(tmp.name) and _os.path.getsize(tmp.name) > 0 else None
     except Exception as _e:
-        print(f"[logo] erro: {_e}")
+        print("[logo] erro: " + str(_e))
         return None
 
 def desenhar_cabecalho_rodape(canvas_obj, doc):
@@ -196,8 +199,9 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
                                   width=42*mm, height=18*mm,
                                   preserveAspectRatio=True, mask='auto')
         except Exception:
-            pass
-    # Sem logo parceiro: espaco esquerdo fica em branco
+            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
+    else:
+        canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
 
     # Logo empresa (direita)
     if _le:
@@ -281,7 +285,9 @@ def gerar_inventario(dados: dict = None, output_path=None):
                                       width=42*mm, height=18*mm,
                                       preserveAspectRatio=True, mask='auto')
             except Exception:
-                pass
+                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
+        else:
+            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
         # Logo empresa (direita)
         if _le_path_inv:
             try:
