@@ -250,7 +250,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     acoes         = dados.get("acoes") or []
 
     # Logos — baixar para arquivo temporario (ReportLab nao aceita URL direta)
-    _logo_parceiro_path = _baixar_logo(dados.get("logoParceiroUrl") or 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+    _logo_parceiro_path = _baixar_logo(dados.get("logoParceiroUrl") or 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png')
     _logo_empresa_path  = _baixar_logo(dados.get("logoEmpresaUrl") or '')
 
     output_path = output_path or nome_arquivo_padrao(empresa)
