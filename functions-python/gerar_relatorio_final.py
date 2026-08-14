@@ -117,10 +117,13 @@ def _baixar_logo(url):
             tmp.close()
         else:
             tmp.close()
-            _ur.urlretrieve(url, tmp.name)
-        return tmp.name if _os.path.exists(tmp.name) else None
+            req = _ur.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+            with _ur.urlopen(req, timeout=10) as resp:
+                with open(tmp.name, 'wb') as f_out:
+                    f_out.write(resp.read())
+        return tmp.name if _os.path.exists(tmp.name) and __import__('os').path.getsize(tmp.name) > 0 else None
     except Exception as _e:
-        print(f"[logo] erro: {_e}")
+        print("[logo] erro: " + str(_e))
         return None
 
 def nome_arquivo_padrao(empresa, ano=None):
