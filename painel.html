@@ -5242,7 +5242,7 @@ function gerarLaudoCompleto() {
   // FIX: tipo=laudo_tecnico explícito + logos via POST
   var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
   var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+                     _getLogoNR1Map();
   fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -5280,7 +5280,7 @@ function gerarLaudoDoCicloAtual() {
 
   var logoEmpresa  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
   var logoParceiro = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                     'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+                     _getLogoNR1Map();
 
   fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
     method: 'POST',
@@ -6000,15 +6000,15 @@ function aplicarEmpresa(e) {
         window.nr1mapDb.collection('nr1map_parceiros').doc(parceiroId).get()
           .then(function(pDoc) {
             var logoParc = (pDoc.exists && pDoc.data().logo_url) ? pDoc.data().logo_url : null;
-            window.nr1mapEmpresa.logoParceiroUrl = logoParc || 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.logoParceiroUrl = logoParc || _getLogoNR1Map();
             window.nr1mapEmpresa.temParceiro = !!logoParc;
           }).catch(function() {
-            window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+            window.nr1mapEmpresa.logoParceiroUrl = _getLogoNR1Map();
             window.nr1mapEmpresa.temParceiro = false;
           });
       } else {
         // Sem parceiro — exibe logo NR-1 Map
-        window.nr1mapEmpresa.logoParceiroUrl = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+        window.nr1mapEmpresa.logoParceiroUrl = _getLogoNR1Map();
         window.nr1mapEmpresa.temParceiro = false;
       }
     }).catch(function(){});
@@ -6056,6 +6056,26 @@ function carregarCargos(empresaId) {
   var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
   window.nr1mapDb=firebase.firestore(app);
   window.nr1mapAuth=firebase.auth(app);
+
+  // Pre-carrega logo NR-1Map como base64 para evitar bloqueio 403 do GitHub Pages na Cloud Function
+  window._logoNR1MapBase64 = '';
+  (function() {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        window._logoNR1MapBase64 = canvas.toDataURL('image/png');
+      } catch(e) { window._logoNR1MapBase64 = ''; }
+    };
+    img.src = 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  })();
+
+  function _getLogoNR1Map() {
+    return window._logoNR1MapBase64 || 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+  }
 
   window.nr1mapAuth.onAuthStateChanged(function(user){
     if(user){
@@ -6407,7 +6427,7 @@ function gerarAtualizarDoc(tipo, btnId, urlField) {
           empresaId: empresaId, tipo: 'laudo_tecnico',
           logoEmpresaUrl:  (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
           logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                           'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'
+                           _getLogoNR1Map()
         }) }
     : undefined;
 
@@ -6497,7 +6517,7 @@ function _carregarCiclosMapaCards(empresaId) {
             btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
             var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
             var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                        'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+                        _getLogoNR1Map();
             var fetchOpts = { method:'POST', headers:{'Content-Type':'application/json'},
               body: JSON.stringify({ empresaId:empId, tipo:'mapa_risco', cicloId:cicloId, logoEmpresaUrl:logoE, logoParceiroUrl:logoP }) };
             fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empId+'&tipo=mapa_risco', fetchOpts)
@@ -6704,7 +6724,7 @@ function carregarRelatoriosPorCiclo(empresaId) {
                       cicloId: cicloId,
                       logoEmpresaUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '',
                       logoParceiroUrl: (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                                       'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png' }) }
+                                       _getLogoNR1Map() }) }
                 : undefined;
               fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empId + '&tipo=' + tipo + '&cicloId=' + cicloId, _opts4)
                 .then(function(r) { return r.json(); })
@@ -7013,7 +7033,7 @@ function carregarLaudoTecnico(empresaId) {
               btnRef.textContent = '⏳ Gerando...'; btnRef.disabled = true;
               var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
               var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                          'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+                          _getLogoNR1Map();
               fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', cicloId: cicloId, logoEmpresaUrl: logoE, logoParceiroUrl: logoP })
@@ -7127,7 +7147,7 @@ function gerarAtualizarLaudo() {
   // FIX: logos via POST
   var logoEmpresaA  = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
   var logoParceiroA = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
-                      'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png';
+                      _getLogoNR1Map();
   fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
