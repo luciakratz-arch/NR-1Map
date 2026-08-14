@@ -5177,7 +5177,11 @@ function _parseCriadoEm(val) {
   if (typeof val === 'object' && val.toDate) return val.toDate();
   if (typeof val === 'object' && val.seconds) return new Date(val.seconds * 1000);
   if (typeof val !== 'string') return null;
-  if (val.indexOf('T') !== -1) return new Date(val);
+  // Usar componentes UTC para evitar conversao de fuso — exibe a data como gravada no banco
+  if (val.indexOf('T') !== -1) {
+    var d = new Date(val);
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12, 0, 0);
+  }
   return new Date(val + 'T12:00:00');
 }
 function aplicarRestricoesPorNivel(nivel) {
@@ -5246,7 +5250,7 @@ function gerarLaudoCompleto() {
   fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId=' + empresaId + '&tipo=laudo_tecnico', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresa, logoParceiroUrl: logoParceiro, cicloId: _laudoCicloAtual || null })
+    body: JSON.stringify({ empresaId: empresaId, tipo: 'laudo_tecnico', logoEmpresaUrl: logoEmpresa, logoParceiroUrl: (logoParceiro && logoParceiro.indexOf('data:') === 0) ? logoParceiro : '', cicloId: _laudoCicloAtual || null })
   })
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -5290,7 +5294,7 @@ function gerarLaudoDoCicloAtual() {
       tipo: 'laudo_tecnico',
       cicloId: _laudoCicloAtual,
       logoEmpresaUrl: logoEmpresa,
-      logoParceiroUrl: logoParceiro
+      logoParceiroUrl: (logoParceiro && logoParceiro.indexOf('data:') === 0) ? logoParceiro : ''
     })
   })
     .then(function(r) { return r.json(); })
@@ -6519,8 +6523,10 @@ function _carregarCiclosMapaCards(empresaId) {
             var logoE = (window.nr1mapEmpresa && window.nr1mapEmpresa.logo_url) || '';
             var logoP = (window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl) ||
                         _getLogoNR1Map();
+            // So enviar logoP se for base64 — URLs externas sao bloqueadas na Cloud Function
+            var logoPEnvio = (logoP && logoP.indexOf('data:') === 0) ? logoP : '';
             var fetchOpts = { method:'POST', headers:{'Content-Type':'application/json'},
-              body: JSON.stringify({ empresaId:empId, tipo:'mapa_risco', cicloId:cicloId, logoEmpresaUrl:logoE, logoParceiroUrl:logoP }) };
+              body: JSON.stringify({ empresaId:empId, tipo:'mapa_risco', cicloId:cicloId, logoEmpresaUrl:logoE, logoParceiroUrl:logoPEnvio }) };
             fetch('https://southamerica-east1-entrevista-inicial.cloudfunctions.net/gerarLaudo?empresaId='+empId+'&tipo=mapa_risco', fetchOpts)
               .then(function(r){ return r.json(); })
               .then(function(d) {
