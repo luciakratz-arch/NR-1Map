@@ -294,14 +294,14 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
             for sc, v in ibp_subcats_final.items()
         },
         'referencia': (lambda _cr: (
-            datetime.datetime.utcfromtimestamp(_cr.seconds) + datetime.timedelta(hours=-3)
+            (datetime.datetime.utcfromtimestamp(_cr.seconds) + datetime.timedelta(hours=-3)).strftime('%d/%m/%Y')
             if hasattr(_cr, 'seconds') else
-            datetime.datetime.fromisoformat(_cr.replace('Z','')) + datetime.timedelta(hours=0)
-            if isinstance(_cr, str) and 'T' in _cr and (_cr.endswith('Z') or '+' in _cr) else
-            datetime.datetime.fromisoformat(_cr.replace('Z',''))
+            (datetime.datetime.fromisoformat(_cr.replace('Z','')) + datetime.timedelta(hours=-3)).strftime('%d/%m/%Y')
+            if isinstance(_cr, str) and _cr.endswith('Z') else
+            datetime.datetime.fromisoformat(_cr.replace('Z','')).strftime('%d/%m/%Y')
             if isinstance(_cr, str) else
-            datetime.datetime.now()
-        ).strftime('%d/%m/%Y'))(ciclo_data.get('criadoEm')) if ciclo_data.get('criadoEm') else datetime.datetime.now().strftime('%d/%m/%Y'),
+            datetime.datetime.now().strftime('%d/%m/%Y')
+        ))(ciclo_data.get('criadoEm')) if ciclo_data.get('criadoEm') else datetime.datetime.now().strftime('%d/%m/%Y'),
         # campos novos para gerar_relatorio_final
         'empresa_cnpj':         empresa.get('cnpj', ''),
         'responsavel':          empresa.get('responsavel', ''),
