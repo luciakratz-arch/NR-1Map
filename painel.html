@@ -6436,6 +6436,7 @@ function gerarAtualizarDoc(tipo, btnId, urlField) {
     .then(function(d) {
       if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
       if (d.url) {
+        if (btn) { btn.textContent = '📄 Gerar ' + tipoLabel + ' PDF'; btn.disabled = false; }
         // Salva URL no cicloDoc atual
         _salvarLaudoUrlNoCiclo(empresaId, d.url, _laudoCicloAtual, urlField);
         // Cache bust e abre
@@ -6477,7 +6478,7 @@ function _carregarCiclosMapaCards(empresaId) {
       lista.innerHTML = '';
       var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
       ciclos.forEach(function(cl, idx) {
-        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dt    = cl.data.criadoEm ? _parseCriadoEm(cl.data.criadoEm) : null;
         var dtStr = dt ? dt.getDate()+'/'+meses[dt.getMonth()]+'/'+dt.getFullYear() : 'Ciclo '+(idx+1);
         var resp  = cl.data.totalRespostas || 0;
         var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
@@ -6817,7 +6818,7 @@ function carregarHistoricoPlano(empresaId) {
 
       var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
       ciclos.forEach(function(cl, idx) {
-        var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+        var dt    = cl.data.criadoEm ? _parseCriadoEm(cl.data.criadoEm) : null;
         var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx + 1);
         var resp  = cl.data.totalRespostas || 0;
         var temPdf = !!cl.data.planoUrl;
@@ -6984,7 +6985,7 @@ function carregarLaudoTecnico(empresaId) {
         lista.innerHTML = '';
         var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
         ciclos.forEach(function(cl, idx) {
-          var dt    = cl.data.criadoEm ? new Date(cl.data.criadoEm) : null;
+          var dt    = cl.data.criadoEm ? _parseCriadoEm(cl.data.criadoEm) : null;
           var dtStr = dt ? dt.getDate() + '/' + meses[dt.getMonth()] + '/' + dt.getFullYear() : 'Ciclo ' + (idx+1);
           var resp  = cl.data.totalRespostas || 0;
           var ibpVal = cl.data.ibpGeral !== undefined ? parseFloat(cl.data.ibpGeral).toFixed(1) : null;
