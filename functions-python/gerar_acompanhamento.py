@@ -133,8 +133,17 @@ def _baixar_logo_ac(url):
     try:
         tmp = _tempfile_ac.NamedTemporaryFile(suffix='.png', delete=False)
         tmp.close()
-        _urllib_req_ac.urlretrieve(url, tmp.name)
-        return tmp.name
+        if url.startswith('data:'):
+            import base64 as _b64ac
+            with open(tmp.name, 'wb') as f_out:
+                f_out.write(_b64ac.b64decode(url.split(',', 1)[1]))
+        else:
+            req = _urllib_req_ac.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+            with _urllib_req_ac.urlopen(req, timeout=10) as resp:
+                with open(tmp.name, 'wb') as f_out:
+                    f_out.write(resp.read())
+        import os as _osac
+        return tmp.name if _osac.path.exists(tmp.name) and _osac.path.getsize(tmp.name) > 0 else None
     except Exception:
         return None
 
@@ -236,7 +245,9 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
                                       width=42*mm, height=18*mm,
                                       preserveAspectRatio=True, mask='auto')
             except Exception:
-                pass
+                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
+        else:
+            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
         if _le_path_ac:
             try:
                 canvas_obj.drawImage(ImageReader(_le_path_ac), w-62*mm, h-28*mm,
