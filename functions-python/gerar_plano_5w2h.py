@@ -205,8 +205,10 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     _le = getattr(desenhar_cabecalho_rodape, '_logo_emp', None)
     if _lp and __import__('os').path.exists(_lp):
         try: canvas_obj.drawImage(_lp, 18*mm, h-24*mm, width=42*mm, height=18*mm, preserveAspectRatio=True, anchor='c')
-        except: pass
-    # Sem logo parceiro: espaco esquerdo fica em branco
+        except:
+            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-20*mm, 'NR-1Map')
+    else:
+        canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-20*mm, 'NR-1Map')
     # Logo direita — empresa
     _tem_le = False
     if _le and __import__('os').path.exists(_le):
@@ -252,10 +254,13 @@ def _baixar_logo_doc(url):
             tmp.close()
         else:
             tmp.close()
-            _ur.urlretrieve(url, tmp.name)
-        return tmp.name if _os.path.exists(tmp.name) else None
+            req = _ur.Request(url, headers={'User-Agent': 'Mozilla/5.0 NR1Map/1.0'})
+            with _ur.urlopen(req, timeout=10) as resp:
+                with open(tmp.name, 'wb') as f_out:
+                    f_out.write(resp.read())
+        return tmp.name if _os.path.exists(tmp.name) and __import__('os').path.getsize(tmp.name) > 0 else None
     except Exception as _e:
-        print(f"[logo] erro: {_e}")
+        print("[logo] erro: " + str(_e))
         return None
 
 def gerar_5w2h(dados: dict = None, output_path=None):
