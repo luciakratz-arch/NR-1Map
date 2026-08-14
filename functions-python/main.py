@@ -293,10 +293,15 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
             sc: {'soma': v['ibp'] * v['n'], 'n': v['n'], 'modId': v['modId']}
             for sc, v in ibp_subcats_final.items()
         },
-        'referencia': (lambda d: d.strftime('%d/%m/%Y'))(
-            datetime.datetime.fromisoformat(ciclo_data.get('criadoEm', datetime.datetime.now().isoformat()).replace('Z',''))
-            if ciclo_data.get('criadoEm') else datetime.datetime.now()
-        ),
+        'referencia': (lambda _cr: (
+            datetime.datetime.utcfromtimestamp(_cr.seconds) + datetime.timedelta(hours=-3)
+            if hasattr(_cr, 'seconds') else
+            datetime.datetime.fromisoformat(_cr.replace('Z','')) + datetime.timedelta(hours=0)
+            if isinstance(_cr, str) and 'T' in _cr and (_cr.endswith('Z') or '+' in _cr) else
+            datetime.datetime.fromisoformat(_cr.replace('Z',''))
+            if isinstance(_cr, str) else
+            datetime.datetime.now()
+        ).strftime('%d/%m/%Y'))(ciclo_data.get('criadoEm')) if ciclo_data.get('criadoEm') else datetime.datetime.now().strftime('%d/%m/%Y'),
         # campos novos para gerar_relatorio_final
         'empresa_cnpj':         empresa.get('cnpj', ''),
         'responsavel':          empresa.get('responsavel', ''),
