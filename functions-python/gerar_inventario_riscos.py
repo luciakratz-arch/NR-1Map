@@ -197,7 +197,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
         try:
             canvas_obj.drawImage(ImageReader(_lp), 18*mm, h-28*mm,
                                   width=42*mm, height=18*mm,
-                                  preserveAspectRatio=True, mask='auto')
+                                  preserveAspectRatio=True)
         except Exception:
             canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
     else:
@@ -208,7 +208,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
         try:
             canvas_obj.drawImage(ImageReader(_le), w-62*mm, h-28*mm,
                                   width=42*mm, height=18*mm,
-                                  preserveAspectRatio=True, mask='auto')
+                                  preserveAspectRatio=True)
         except Exception:
             pass
     # Sem logo empresa: espaco direito fica em branco
@@ -283,7 +283,7 @@ def gerar_inventario(dados: dict = None, output_path=None):
             try:
                 canvas_obj.drawImage(ImageReader(_lp_path_inv), 18*mm, h-28*mm,
                                       width=42*mm, height=18*mm,
-                                      preserveAspectRatio=True, mask='auto')
+                                      preserveAspectRatio=True)
             except Exception:
                 canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
         else:
@@ -293,7 +293,7 @@ def gerar_inventario(dados: dict = None, output_path=None):
             try:
                 canvas_obj.drawImage(ImageReader(_le_path_inv), w-62*mm, h-28*mm,
                                       width=42*mm, height=18*mm,
-                                      preserveAspectRatio=True, mask='auto')
+                                      preserveAspectRatio=True)
             except Exception:
                 pass
 
