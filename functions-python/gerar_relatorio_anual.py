@@ -91,6 +91,9 @@ def gerar_relatorio_anual(dados=None, output_path=None):
 
     lp_path = _baixar_logo(_dados.get('logoParceiroUrl'))
     le_path = _baixar_logo(_dados.get('logoEmpresaUrl'))
+    ctx           = _dados.get('contextoEmpresa') or {}
+    organograma_url = _dados.get('orgogramaUrl', '')
+    cargos_lista  = _dados.get('cargos') or []
 
     styles = getSampleStyleSheet()
     s_h1   = ParagraphStyle('h1', fontSize=16, fontName='Helvetica-Bold', textColor=VERDE,
@@ -180,6 +183,75 @@ def gerar_relatorio_anual(dados=None, output_path=None):
     ]))
     story.append(t_id)
     story.append(PageBreak())
+
+    # -- Contexto Institucional --
+    _ctx_items = [
+        ('Setor de atuacao', ctx.get('setor', '')),
+        ('Fundacao',         ctx.get('fundacao', '')),
+        ('Missao / Proposito', ctx.get('missao', '')),
+    ]
+    _ctx_textos = [
+        ('Historico e contexto organizacional', ctx.get('historico', '')),
+        ('Contexto do diagnostico',             ctx.get('diagnostico', '')),
+    ]
+    _tem_ctx = any(v for _, v in _ctx_items) or any(v for _, v in _ctx_textos)
+    if _tem_ctx:
+        story.append(Paragraph('Contexto Institucional da Organizacao', s_h2))
+        _tab_ctx = [[k, v] for k, v in _ctx_items if v]
+        if _tab_ctx:
+            _tc = Table(
+                [[Paragraph(r[0], ParagraphStyle('lb', fontSize=8.5, fontName='Helvetica-Bold', textColor=PRETO)),
+                  Paragraph(r[1], s_cell)] for r in _tab_ctx],
+                colWidths=[55*mm, 117*mm])
+            _tc.setStyle(TableStyle([
+                ('GRID',       (0,0), (-1,-1), 0.5, LINHA),
+                ('BACKGROUND', (0,0), (0,-1),  CINZA_CL),
+                ('TOPPADDING', (0,0), (-1,-1), 4),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ]))
+            story.append(_tc)
+            story.append(Spacer(1, 4*mm))
+        for _label, _texto in _ctx_textos:
+            if _texto:
+                story.append(Paragraph(_label, s_h3))
+                story.append(Paragraph(_texto, s_body))
+                story.append(Spacer(1, 3*mm))
+        story.append(Spacer(1, 4*mm))
+
+    # Organograma
+    if organograma_url:
+        _org_path = _baixar_logo(organograma_url)
+        if _org_path:
+            story.append(Paragraph('Organograma da Empresa', s_h2))
+            try:
+                from reportlab.platypus import Image as RLImage
+                story.append(RLImage(_org_path, width=169*mm, height=80*mm, kind='proportional'))
+            except Exception as _e:
+                print('[organograma] erro: ' + str(_e))
+            story.append(Spacer(1, 4*mm))
+
+    # Estrutura de cargos
+    if cargos_lista:
+        story.append(Paragraph('Estrutura Organizacional — Cargos e Hierarquia', s_h2))
+        _hdr = ['Cargo', 'CBO', 'Nivel Hierarquico', 'Reporta a']
+        _rows = [_hdr] + [
+            [c.get('cargo',''), c.get('cbo',''), c.get('nivel',''), c.get('reportaA','')]
+            for c in cargos_lista
+        ]
+        _tc2 = Table(_rows, colWidths=[55*mm, 22*mm, 42*mm, 50*mm], repeatRows=1)
+        _tc2.setStyle(TableStyle([
+            ('BACKGROUND',    (0,0), (-1,0), VERDE),
+            ('TEXTCOLOR',     (0,0), (-1,0), colors.white),
+            ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTNAME',      (0,1), (-1,-1), 'Helvetica'),
+            ('FONTSIZE',      (0,0), (-1,-1), 8),
+            ('GRID',          (0,0), (-1,-1), 0.4, LINHA),
+            ('ROWBACKGROUNDS',(0,1), (-1,-1), [colors.white, CINZA_CL]),
+            ('TOPPADDING',    (0,0), (-1,-1), 3),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ]))
+        story.append(_tc2)
+        story.append(Spacer(1, 4*mm))
 
     # -- 1. Evolucao Historica dos Ciclos --
     story.append(Paragraph('1. Evolucao Historica dos Ciclos', s_h2))
