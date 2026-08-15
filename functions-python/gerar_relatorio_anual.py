@@ -114,7 +114,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         if lp_path:
             try:
                 canvas_obj.drawImage(ImageReader(lp_path), 18*mm, h-28*mm,
-                                      width=42*mm, height=18*mm, preserveAspectRatio=True)
+                                      width=50*mm, height=14*mm, preserveAspectRatio=True)
             except Exception:
                 canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
         else:
@@ -122,7 +122,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         if le_path:
             try:
                 canvas_obj.drawImage(ImageReader(le_path), w-62*mm, h-28*mm,
-                                      width=42*mm, height=18*mm, preserveAspectRatio=True)
+                                      width=50*mm, height=14*mm, preserveAspectRatio=True)
             except Exception: pass
         canvas_obj.setFont('Helvetica-Bold', 10)
         canvas_obj.setFillColor(VERDE)
