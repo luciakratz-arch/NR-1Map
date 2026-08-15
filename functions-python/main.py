@@ -428,6 +428,9 @@ def buscar_todos_ciclos(empresa_id):
         'ibp_geral':        ibp_ultimo,
         'logoEmpresaUrl':   empresa.get('logo_url', ''),
         'logoParceiroUrl':  'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png',
+        'contextoEmpresa':  empresa.get('contextoEmpresa') or {},
+        'orgogramaUrl':     empresa.get('orgogramaUrl', ''),
+        'cargos':           _buscar_cargos(empresa_id),
     }
 
 
