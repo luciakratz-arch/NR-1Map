@@ -213,19 +213,15 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
             pass
     # Sem logo empresa: espaco direito fica em branco
 
-    # Nome empresa (centro) — posicionado abaixo das logos
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 32 * mm, _en)
-
-    canvas_obj.setFont('Helvetica', 8.5)
-    canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
-
-    canvas_obj.setFont('Helvetica-Bold', 10)
+    canvas_obj.setStrokeColor(VERDE_NR1)
+    canvas_obj.setLineWidth(1.0)
+    canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
+    canvas_obj.setFont('Helvetica-Bold', 9.5)
     canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
-
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
+    canvas_obj.setFont('Helvetica', 8)
+    canvas_obj.setFillColor(CINZA_TEXTO)
+    canvas_obj.drawCentredString(w / 2, h - 36 * mm, _en)
     canvas_obj.setStrokeColor(VERDE_NR1)
     canvas_obj.setLineWidth(1.2)
     canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
@@ -297,12 +293,15 @@ def gerar_inventario(dados: dict = None, output_path=None):
             except Exception:
                 pass
 
-        canvas_obj.setFont('Helvetica-Bold', 11)
-        canvas_obj.setFillColor(VERDE_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, _empresa_nome)
-        canvas_obj.setFont('Helvetica', 8.5)
-        canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
+        canvas_obj.setStrokeColor(VERDE_NR1)
+        canvas_obj.setLineWidth(1.0)
+        canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
+        canvas_obj.setFont('Helvetica-Bold', 9.5)
+        canvas_obj.setFillColor(AZUL_ESCURO)
+        canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
+        canvas_obj.setFont('Helvetica', 8)
+        canvas_obj.setFillColor(CINZA_TEXTO)
+        canvas_obj.drawCentredString(w / 2, h - 36 * mm, _empresa_nome)
         canvas_obj.setFont('Helvetica-Bold', 10)
         canvas_obj.setFillColor(AZUL_ESCURO)
         canvas_obj.drawCentredString(w / 2, h - 41 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")

@@ -216,22 +216,16 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
         except: pass
     # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
 
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
-    _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
-    canvas_obj.drawCentredString(w / 2, h - 31 * mm, _en)
-
-    canvas_obj.setFont('Helvetica', 8.5)
-    canvas_obj.setFillColor(ROXO_NR1)
-    canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
-
-    canvas_obj.setFont('Helvetica-Bold', 10)
-    canvas_obj.setFillColor(AZUL_ESCURO)
-    canvas_obj.drawCentredString(w / 2, h - 41 * mm, "PLANO DE AÇÃO 5W2H")
-
+    _en2 = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
     canvas_obj.setStrokeColor(VERDE_NR1)
-    canvas_obj.setLineWidth(1.2)
-    canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
+    canvas_obj.setLineWidth(1.0)
+    canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
+    canvas_obj.setFont('Helvetica-Bold', 9.5)
+    canvas_obj.setFillColor(AZUL_ESCURO)
+    canvas_obj.drawCentredString(w / 2, h - 31 * mm, "PLANO DE ACAO 5W2H")
+    canvas_obj.setFont('Helvetica', 8)
+    canvas_obj.setFillColor(CINZA_TEXTO)
+    canvas_obj.drawCentredString(w / 2, h - 36 * mm, _en2)
 
     canvas_obj.setFont('Helvetica', 7.5)
     canvas_obj.setFillColor(CINZA_TEXTO)
