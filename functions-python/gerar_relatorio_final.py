@@ -169,7 +169,7 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
     if logo_parceiro_path and os.path.exists(logo_parceiro_path):
         try:
             canvas_obj.drawImage(logo_parceiro_path, 18*mm, h-24*mm,
-                                 width=42*mm, height=18*mm,
+                                 width=50*mm, height=14*mm,
                                  preserveAspectRatio=True, anchor='c')
         except Exception:
             canvas_obj.setFont('Helvetica-Bold', 8)
