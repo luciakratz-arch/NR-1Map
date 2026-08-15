@@ -56,6 +56,25 @@ def salvar_firestore(empresa_id, empresa_nome, tipo, url, num_colab, ibp_geral):
         'criadoEm': datetime.datetime.now().isoformat()
     })
 
+def _buscar_cargos(empresa_id):
+    """Busca cargos cadastrados da empresa com hierarquia."""
+    try:
+        snaps = db.collection('nr1map_cargos').where('empresaId', '==', empresa_id).get()
+        cargos = []
+        for s in snaps:
+            d = s.to_dict()
+            cargos.append({
+                'cargo':    d.get('cargo', ''),
+                'cbo':      d.get('cbo', ''),
+                'nivel':    d.get('nivel', ''),
+                'reportaA': d.get('reportaA', ''),
+                'colab':    d.get('numColaboradores', 0),
+            })
+        return cargos
+    except Exception as e:
+        print("erro _buscar_cargos: " + str(e))
+        return []
+
 def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
     """Busca dados completos da empresa. Se ciclo_id_fixo informado, usa esse ciclo."""
     # Empresa
@@ -314,6 +333,11 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
         'acoes':                acoes,
         'logoParceiroUrl':      logo_parceiro_url,
         'logoEmpresaUrl':       empresa.get('logo_url', ''),
+        # Contexto institucional para o Laudo Tecnico
+        'contextoEmpresa':      empresa.get('contextoEmpresa') or {},
+        'orgogramaUrl':         empresa.get('orgogramaUrl', ''),
+        # Cargos cadastrados com hierarquia
+        'cargos':               _buscar_cargos(empresa_id),
     }
 
 def zona_dejours(ibp):
