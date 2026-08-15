@@ -270,7 +270,7 @@ def gerar_inventario(dados: dict = None, output_path=None):
 
     # Logos reais para o cabecalho
     _lp_path_inv = _baixar_logo_inv(_dados.get('logoParceiroUrl') or
-                   'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png')
+                   'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png')
     _le_path_inv = _baixar_logo_inv(_dados.get('logoEmpresaUrl') or '')
 
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):

@@ -194,9 +194,14 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
         except: pass
     # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
 
-    canvas_obj.setFont('Helvetica-Bold', 11)
-    canvas_obj.setFillColor(VERDE_NR1)
     _en = getattr(desenhar_cabecalho_rodape, '_empresa_nome', 'Empresa')
+
+    canvas_obj.setStrokeColor(VERDE_NR1)
+    canvas_obj.setLineWidth(1.2)
+    canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
+
+    canvas_obj.setFont('Helvetica-Bold', 9.5)
+    canvas_obj.setFillColor(VERDE_NR1)
     canvas_obj.drawCentredString(w / 2, h - 31 * mm, _en)
 
     canvas_obj.setFont('Helvetica', 8.5)
@@ -298,18 +303,21 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         if _le_loc:
             try: canvas_obj.drawImage(_IR(_le_loc), w-62*mm, h-28*mm, width=50*mm, height=14*mm, preserveAspectRatio=True)
             except: pass
-        canvas_obj.setFont('Helvetica-Bold', 11)
-        canvas_obj.setFillColor(VERDE_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, _empresa_nome)
-        canvas_obj.setFont('Helvetica', 8.5)
-        canvas_obj.setFillColor(ROXO_NR1)
-        canvas_obj.drawCentredString(w / 2, h - 36 * mm, "NR-1Map")
-        canvas_obj.setFont('Helvetica-Bold', 10)
-        canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w / 2, h - 41 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
         canvas_obj.setStrokeColor(VERDE_NR1)
         canvas_obj.setLineWidth(1.2)
-        canvas_obj.line(18 * mm, h - 44 * mm, w - 18 * mm, h - 44 * mm)
+        canvas_obj.line(18 * mm, h - 30 * mm, w - 18 * mm, h - 30 * mm)
+        canvas_obj.setFont('Helvetica-Bold', 9.5)
+        canvas_obj.setFillColor(VERDE_NR1)
+        canvas_obj.drawCentredString(w / 2, h - 35 * mm, _empresa_nome)
+        canvas_obj.setFont('Helvetica', 8.5)
+        canvas_obj.setFillColor(ROXO_NR1)
+        canvas_obj.drawCentredString(w / 2, h - 40 * mm, "NR-1Map")
+        canvas_obj.setFont('Helvetica-Bold', 10)
+        canvas_obj.setFillColor(AZUL_ESCURO)
+        canvas_obj.drawCentredString(w / 2, h - 45 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
+        canvas_obj.setStrokeColor(VERDE_NR1)
+        canvas_obj.setLineWidth(1.2)
+        canvas_obj.line(18 * mm, h - 48 * mm, w - 18 * mm, h - 48 * mm)
         canvas_obj.setFont('Helvetica', 7.5)
         canvas_obj.setFillColor(CINZA_TEXTO)
         canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")

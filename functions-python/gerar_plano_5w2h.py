@@ -269,7 +269,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
     _meses = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
     _referencia   = _dados.get('referencia') or (_meses[datetime.datetime.now().month-1] + ' de ' + str(datetime.datetime.now().year))
     _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
-    _logo_parc    = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
+    _logo_parc    = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png'))
     _logo_emp     = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
     # Monta SETORES_CBO dinamico
     por_cargo = _dados.get('porCargo') or []
@@ -491,7 +491,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
 
     # Injetar logos como atributos da funcao de cabecalho
     desenhar_cabecalho_rodape._empresa_nome = _empresa_nome
-    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png'))
+    _lp_path = _baixar_logo_doc(_dados.get('logoParceiroUrl', 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png'))
     _le_path  = _baixar_logo_doc(_dados.get('logoEmpresaUrl', ''))
     desenhar_cabecalho_rodape._logo_parc = _lp_path
     desenhar_cabecalho_rodape._logo_emp  = _le_path
