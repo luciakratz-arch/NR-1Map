@@ -6077,9 +6077,9 @@ function carregarCargos(empresaId) {
     img.src = 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png';
   })();
 
-  function _getLogoNR1Map() {
+  window._getLogoNR1Map = function() {
     return window._logoNR1MapBase64 || 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png';
-  }
+  };
 
   window.nr1mapAuth.onAuthStateChanged(function(user){
     if(user){
