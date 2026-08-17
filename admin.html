@@ -4102,11 +4102,31 @@ function atualizarBadgeContratos() {
       deferredPrompt.userChoice.then(function(r) {
         if (r.outcome === 'accepted') deferredPrompt = null;
       });
-    } else if (isIOS) {
-      document.getElementById('modal-ios-pwa').style.display = 'flex';
-    } else {
-      window.open('instalar-app.html', '_blank');
+      return;
     }
+    if (isIOS) {
+      document.getElementById('modal-ios-pwa').style.display = 'flex';
+      return;
+    }
+    // Aguarda ate 3s pelo prompt nativo antes de redirecionar
+    var lbl = document.getElementById('label-instalar-pwa');
+    if (lbl) lbl.textContent = 'Aguardando...';
+    var tentativas = 0;
+    var check = setInterval(function() {
+      tentativas++;
+      if (deferredPrompt) {
+        clearInterval(check);
+        if (lbl) lbl.textContent = 'Instalar app';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(r) {
+          if (r.outcome === 'accepted') deferredPrompt = null;
+        });
+      } else if (tentativas >= 6) {
+        clearInterval(check);
+        if (lbl) lbl.textContent = 'Instalar app';
+        window.open('instalar-app.html', '_blank');
+      }
+    }, 500);
   };
 })();
 </script>
