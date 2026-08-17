@@ -617,6 +617,8 @@ function validarTokenAnonimo(codigo) {
       _cargo        = data.cargo || '';
       _cbo          = data.cbo || '';
       _setor        = data.setor || '';
+      // Vincula uid ao colaboradorId para salvar historico pessoal
+      if (data.colaboradorId) _uid = data.colaboradorId;
       carregarApp();
     })
     .catch(function(e) {
@@ -817,9 +819,9 @@ function carregarApp() {
 }
 
 function carregarHistorico() {
-  if (!_uid) return;
-  // Histórico vinculado ao uid do usuário (não ao token)
-  db.collection('nr1map_historico_usuario').doc(_uid).get()
+  var _histId = _uid || (_tokenAnonimo ? 'token_' + _tokenAnonimo : null);
+  if (!_histId) return;
+  db.collection('nr1map_historico_usuario').doc(_histId).get()
     .then(function(doc) {
       if (!doc.exists) return;
       var hist = doc.data().historico || [];
@@ -1066,7 +1068,8 @@ function enviarRespostas() {
     .collection('respostas').doc();
 
   // Histórico pessoal vinculado ao uid
-  var refHist = db.collection('nr1map_historico_usuario').doc(_uid);
+  var _histId = _uid || ('token_' + _tokenAnonimo);
+  var refHist = db.collection('nr1map_historico_usuario').doc(_histId);
 
   var batch = db.batch();
   batch.set(refResp, payload);
@@ -1109,23 +1112,6 @@ function selCat(el) {
 function contarChars(el) {
   document.getElementById('char-count').textContent = el.value.length + ' / 500';
 }
-function enviarSugestao() {
-  var texto = document.getElementById('sug-texto').value.trim();
-  var cat = '';
-  document.querySelectorAll('.chip.sel').forEach(function(c){ cat = c.textContent; });
-  if (!texto) { alert('Digite sua sugestão antes de enviar.'); return; }
-  db.collection('nr1map_sugestoes').add({
-    empresaId: _empresaId,
-    categoria: cat,
-    texto: texto,
-    criadoEm: new Date().toISOString()
-  }).then(function() {
-    document.getElementById('sug-texto').value = '';
-    document.getElementById('char-count').textContent = '0 / 500';
-    alert('Sugestão enviada com sucesso!');
-  }).catch(function(){ alert('Erro ao enviar. Tente novamente.'); });
-}
-
 // ===== CANAL DE ACOLHIMENTO =====
 var _tipoChamado = '';
 var _identifChamado = 'anonimo';
