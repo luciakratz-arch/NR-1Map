@@ -2,7 +2,7 @@
   "name": "NR-1 Map — Gestão de Riscos Psicossociais",
   "short_name": "NR-1 Map",
   "description": "Gestão de riscos psicossociais para empresas brasileiras conforme NR-1",
-  "start_url": "/NR-1Map/",
+  "start_url": "/NR-1Map/usuario.html",
   "scope": "/NR-1Map/",
   "display": "standalone",
   "orientation": "portrait",
@@ -32,8 +32,8 @@
       "icons": [{ "src": "nr1maps logo 512.png", "sizes": "512x512" }]
     },
     {
-      "name": "Área do Usuário",
-      "short_name": "Minha Área",
+      "name": "Minha Area",
+      "short_name": "Minha Area",
       "url": "/NR-1Map/usuario.html",
       "icons": [{ "src": "nr1maps logo 512.png", "sizes": "512x512" }]
     }

@@ -4,6 +4,19 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Área Administrativa</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0A6E4F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="NR-1 Map"/>
+<link rel="apple-touch-icon" href="nr1maps logo 512.png"/>
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -330,6 +343,30 @@ tbody tr:hover td{background:#F5F8F7;}
       </div>
       <button onclick="window.location.href='index.html'" style="width:100%;margin-top:10px;padding:9px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#9ca3af;font-size:12px;cursor:pointer;">🌐 Voltar à página inicial</button>
     </div>
+
+    <!-- BANNER INSTALAR APP -->
+    <div id="banner-instalar" style="margin-top:20px;padding:14px 16px;background:rgba(18,160,115,.1);border:1px solid rgba(18,160,115,.25);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:#12A073;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;">📱 App NR-1 Map</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;">Instale gratuitamente e acesse pelo celular sem precisar de loja de apps.</div>
+      </div>
+      <button id="btn-instalar-pwa" onclick="acionarInstalacaoPWA()" style="flex-shrink:0;background:#12A073;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:9px;border:none;cursor:pointer;white-space:nowrap;">
+        <span id="label-instalar-pwa">⬇ Instalar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL iOS PWA -->
+<div id="modal-ios-pwa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#1a1a2e;border-radius:20px 20px 0 0;padding:28px 24px 44px;width:100%;max-width:420px;color:#fff;">
+    <div style="width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 24px;"></div>
+    <div style="font-weight:700;font-size:17px;margin-bottom:20px;">📱 Instalar no iPhone</div>
+    <p style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.6;">1. Toque em <strong>compartilhar ⬆️</strong> na barra do Safari</p>
+    <p style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.6;">2. Toque em <strong>"Adicionar à Tela de Início"</strong></p>
+    <p style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:16px;line-height:1.6;">3. Toque em <strong>Adicionar</strong></p>
+    <p style="background:rgba(255,193,7,.15);border:1px solid rgba(255,193,7,.3);padding:10px 12px;border-radius:8px;font-size:12px;color:#fbbf24;">⚠️ Precisa estar no <strong>Safari</strong>, não no Chrome.</p>
+    <button onclick="document.getElementById('modal-ios-pwa').style.display='none'" style="width:100%;padding:14px;border-radius:12px;border:none;background:#12A073;color:#fff;font-weight:700;font-size:15px;cursor:pointer;margin-top:20px;">Entendido</button>
   </div>
 </div>
 
@@ -4032,6 +4069,46 @@ function atualizarBadgeContratos() {
 }
 
 
+</script>
+
+<script>
+(function(){
+  var deferredPrompt = null;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  var isSafari = /safari/i.test(navigator.userAgent) && !/chrome|crios/i.test(navigator.userAgent);
+
+  // iOS Safari — mostrar botao sempre
+  if (isIOS && isSafari) {
+    var lbl = document.getElementById('label-instalar-pwa');
+    if (lbl) lbl.textContent = 'Ver como instalar';
+  }
+
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    var lbl = document.getElementById('label-instalar-pwa');
+    if (lbl) lbl.textContent = 'Instalar app';
+  });
+
+  window.addEventListener('appinstalled', function() {
+    deferredPrompt = null;
+    var banner = document.getElementById('banner-instalar');
+    if (banner) banner.innerHTML = '<div style="font-size:13px;color:#12A073;font-weight:600;text-align:center;width:100%;">✅ App instalado com sucesso!</div>';
+  });
+
+  window.acionarInstalacaoPWA = function() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(r) {
+        if (r.outcome === 'accepted') deferredPrompt = null;
+      });
+    } else if (isIOS) {
+      document.getElementById('modal-ios-pwa').style.display = 'flex';
+    } else {
+      window.open('instalar-app.html', '_blank');
+    }
+  };
+})();
 </script>
 
 </body>
