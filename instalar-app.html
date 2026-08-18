@@ -99,7 +99,7 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
   <div class="hero-badge">📱 App gratuito · Sem loja de aplicativos</div>
   <h1 class="hero-title">Instale o <span>NR-1 Map</span><br/>no seu celular</h1>
   <p class="hero-sub">Acesse sua área, responda pesquisas e acompanhe seu bem-estar no trabalho diretamente pela tela inicial — como um app nativo, sem ocupar espaço de loja.</p>
-  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="hero-btn">🚀 Abrir o App agora</a>
+  <button onclick="tentarInstalar()" class="hero-btn" style="border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:15px;">📲 <span id="hero-btn-label">Instalar o App agora</span></button>
 </section>
 
 <!-- BOTÃO INSTALAR PWA -->
@@ -140,22 +140,48 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
   window.addEventListener('beforeinstallprompt',function(e){
     e.preventDefault();
     deferred=e;
-    var btn=document.getElementById('btn-pwa');
-    var sub=document.getElementById('btn-pwa-sub');
-    btn.style.display='inline-flex';
-    sub.style.display='block';
-    btn.addEventListener('click',function(){
+    var lbl=document.getElementById('hero-btn-label');
+    if(lbl) lbl.textContent='Instalar agora — 1 clique!';
+  });
+  window.addEventListener('appinstalled',function(){
+    deferred=null;
+    document.getElementById('pwa-ok').style.display='block';
+  });
+  window.tentarInstalar=function(){
+    if(deferred){
       deferred.prompt();
       deferred.userChoice.then(function(r){
-        deferred=null;
-        btn.style.display='none';
-        sub.style.display='none';
         if(r.outcome==='accepted'){
+          deferred=null;
           document.getElementById('pwa-ok').style.display='block';
         }
       });
-    });
-  });
+    } else if(isIOS && isSafari){
+      document.getElementById('ios-tip').style.display='block';
+      document.getElementById('ios-tip').scrollIntoView({behavior:'smooth'});
+    } else {
+      // Aguarda ate 3s pelo prompt
+      var lbl=document.getElementById('hero-btn-label');
+      if(lbl) lbl.textContent='Aguardando...';
+      var t=0;
+      var iv=setInterval(function(){
+        t+=500;
+        if(deferred){
+          clearInterval(iv);
+          if(lbl) lbl.textContent='Instalar agora!';
+          deferred.prompt();
+          deferred.userChoice.then(function(r){
+            if(r.outcome==='accepted') deferred=null;
+          });
+        } else if(t>=3000){
+          clearInterval(iv);
+          if(lbl) lbl.textContent='Instalar o App agora';
+          // Redireciona para admin.html para instalar de la
+          window.location.href='admin.html';
+        }
+      },500);
+    }
+  };
 })();
 </script>
 
@@ -251,7 +277,7 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
 <section class="cta-final">
   <h2>Tudo pronto para começar?</h2>
   <p>Acesse o NR-1 Map agora e responda sua pesquisa de bem-estar.<br/>Seus dados são 100% anônimos e seguros.</p>
-  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="cta-btn-grande">🚀 Abrir o App agora</a>
+  <button onclick="tentarInstalar()" class="cta-btn-grande" style="border:none;cursor:pointer;font-family:'Syne',sans-serif;">📲 Instalar o App agora</button>
 </section>
 
 <!-- FOOTER -->
