@@ -115,6 +115,20 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
     <strong>iPhone / iPad:</strong> Toque em <strong>⬆️ Compartilhar</strong> na barra inferior do Safari e selecione <strong>"Adicionar à Tela de Início"</strong>.
   </div>
 
+  <!-- Instrucoes Desktop Chrome -->
+  <div id="desktop-tip" style="display:none;background:#E4F5EF;border:1px solid #0A6E4F;border-radius:12px;padding:20px 22px;font-size:14px;color:#1a1a2e;line-height:1.7;text-align:left;margin-top:12px;">
+    <div style="font-weight:700;font-size:15px;color:#0A6E4F;margin-bottom:12px;">💻 Como instalar no computador (Chrome)</div>
+    <p style="margin:0 0 8px;">1. Olhe para o canto direito da barra de endereço do Chrome — deve aparecer um ícone de <strong>computador com +</strong> ou <strong>⊕</strong></p>
+    <p style="margin:0 0 8px;">2. Clique nesse ícone e depois em <strong>"Instalar"</strong></p>
+    <p style="margin:0 0 16px;">3. O app vai aparecer no seu computador como um programa separado</p>
+    <div style="background:#fef3c7;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;">
+      ⚠️ Se o ícone não aparecer, acesse o menu do Chrome (⋮) → <strong>"Instalar NR-1 Map..."</strong>
+    </div>
+    <div style="margin-top:14px;">
+      <a href="admin.html" style="display:inline-block;background:#0A6E4F;color:#fff;font-weight:700;font-size:14px;padding:10px 20px;border-radius:9px;text-decoration:none;">🔐 Acessar minha área agora</a>
+    </div>
+  </div>
+
   <!-- Já instalado -->
   <div id="pwa-ok" style="display:none;background:#E4F5EF;border:1px solid #0A6E4F;border-radius:12px;padding:16px 20px;font-size:14px;color:#0A6E4F;">
     ✅ Você já está usando o NR-1 Map como app instalado!
@@ -149,6 +163,7 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
   });
   window.tentarInstalar=function(){
     if(deferred){
+      // Android/Chrome — prompt nativo disponivel
       deferred.prompt();
       deferred.userChoice.then(function(r){
         if(r.outcome==='accepted'){
@@ -157,29 +172,13 @@ footer p{font-size:12px;color:#4A5450;line-height:1.8;}
         }
       });
     } else if(isIOS && isSafari){
+      // iPhone Safari
       document.getElementById('ios-tip').style.display='block';
       document.getElementById('ios-tip').scrollIntoView({behavior:'smooth'});
     } else {
-      // Aguarda ate 3s pelo prompt
-      var lbl=document.getElementById('hero-btn-label');
-      if(lbl) lbl.textContent='Aguardando...';
-      var t=0;
-      var iv=setInterval(function(){
-        t+=500;
-        if(deferred){
-          clearInterval(iv);
-          if(lbl) lbl.textContent='Instalar agora!';
-          deferred.prompt();
-          deferred.userChoice.then(function(r){
-            if(r.outcome==='accepted') deferred=null;
-          });
-        } else if(t>=3000){
-          clearInterval(iv);
-          if(lbl) lbl.textContent='Instalar o App agora';
-          // Redireciona para admin.html para instalar de la
-          window.location.href='admin.html';
-        }
-      },500);
+      // Desktop ou Android sem prompt — mostrar instrucoes do Chrome
+      document.getElementById('desktop-tip').style.display='block';
+      document.getElementById('desktop-tip').scrollIntoView({behavior:'smooth'});
     }
   };
 })();
