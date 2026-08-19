@@ -88,6 +88,8 @@ def buscar_dados_empresa(empresa_id, ciclo_id_fixo=None):
     if not empresa_doc.exists:
         return None
     empresa = empresa_doc.to_dict()
+    print('[DEBUG] empresa keys: ' + str(list(empresa.keys())))
+    print('[DEBUG] contextoEmpresa: ' + str(empresa.get('contextoEmpresa')))
 
     # Colaboradores ativos
     colab_snap = db.collection('nr1map_colaboradores') \
