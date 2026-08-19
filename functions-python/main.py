@@ -66,12 +66,15 @@ def _buscar_cargos(empresa_id):
         cargos = []
         for s in snaps:
             d = s.to_dict()
+            # Campos reais do Firestore: nome, nvId, repId, n
+            nv_id  = d.get('nvId', '')
+            rep_id = d.get('repId', '')
             cargos.append({
-                'cargo':    d.get('cargo', ''),
+                'cargo':    d.get('nome', '') or d.get('cargo', ''),
                 'cbo':      d.get('cbo', ''),
-                'nivel':    d.get('nivel', ''),
-                'reportaA': d.get('reportaA', ''),
-                'colab':    d.get('numColaboradores', 0),
+                'nivel':    nv_id,
+                'reportaA': rep_id,
+                'colab':    d.get('n', 0),
             })
         return cargos
     except Exception as e:

@@ -480,7 +480,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
                 Paragraph(f'<b>{st}</b>',
                           ParagraphStyle('st', parent=s_cell, textColor=cor_st, fontName='Helvetica-Bold')),
             ])
-        t_ac = Table(ac_rows, colWidths=[38*mm, 65*mm, 30*mm, 22*mm, 17*mm])
+        t_ac = Table(ac_rows, colWidths=[38*mm, 75*mm, 25*mm, 22*mm, 12*mm])
         t_ac.setStyle(TableStyle([
             ('BACKGROUND',    (0,0),(-1,0),  VERDE),
             ('TEXTCOLOR',     (0,0),(-1,0),  colors.white),
