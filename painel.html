@@ -7475,6 +7475,10 @@ function _popularFiltroAnos() {
   if (!empresaId || !window.nr1mapDb) return;
   var select = document.getElementById('anual-ano-select');
   if (!select) return;
+  // _ciclosCache pode estar em outro escopo — usar window._ciclosCache
+  if (typeof _ciclosCache === 'undefined' && typeof window._ciclosCache !== 'undefined') {
+    var _ciclosCache = window._ciclosCache;
+  }
   var carregarAnos = function(ciclos) {
     var anos = {};
     ciclos.forEach(function(c) {
@@ -7498,7 +7502,7 @@ function _popularFiltroAnos() {
     .then(function(snap) {
       var ciclos = [];
       snap.forEach(function(doc){ ciclos.push({ id: doc.id, data: doc.data() }); });
-      _ciclosCache = ciclos;
+      window._ciclosCache = ciclos;
       carregarAnos(ciclos);
     }).catch(function(){});
 }
