@@ -759,6 +759,7 @@ tbody tr:hover td{background:#F5F8F7;}
                 <option value="">Todas as origens</option>
                 <option value="admin">Cadastradas pelo Admin</option>
                 <option value="parceiro">Cadastradas por Parceiro</option>
+                <option value="auto-cadastro">Auto-cadastro (site)</option>
               </select>
               <select id="filtro-status-empresa" class="form-control" style="font-size:12px;padding:5px 10px;width:auto;" onchange="carregarClientes()">
                 <option value="">Todos os status</option>
@@ -3030,14 +3031,22 @@ function carregarClientes() {
   if (origem) query = query.where('criadoPor', '==', origem);
   if (status) query = query.where('status', '==', status);
 
-  query.orderBy('criadoEm', 'desc').get()
+  query.get()
     .then(function(snap) {
       tbody.innerHTML = '';
       if (snap.empty) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma empresa cadastrada ainda.</td></tr>';
         return;
       }
-      snap.forEach(function(doc) {
+      // Ordena no cliente para não depender de índice Firestore
+      var docs = [];
+      snap.forEach(function(doc) { docs.push(doc); });
+      docs.sort(function(a,b){
+        var da = a.data().criadoEm || a.data().data || '';
+        var db2 = b.data().criadoEm || b.data().data || '';
+        return da < db2 ? 1 : -1;
+      });
+      docs.forEach(function(doc) {
         var d = doc.data();
         var statusBdg = d.status === 'ativo'
           ? '<span class="bdg bdg-ok"><span class="dot"></span>Ativo</span>'
