@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Empresa — NR-1 Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --roxo: #7B00C4;
+      --roxo-xp: rgba(123,0,196,.10);
+      --verde: #12A073;
+      --verde-xp: rgba(18,160,115,.10);
+      --verde-claro: #1FCFA0;
+      --bg: #F7F9F8;
+      --surface: #FFFFFF;
+      --border: #E2E8E5;
+      --preto: #0D1210;
+      --cinza: #64748B;
+      --cinza2: #94A3B8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--preto); min-height: 100vh; }
+
+    /* NAVBAR */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--preto); text-decoration: none; }
+    .logo span { color: var(--verde); }
+    .nav-link { font-size: 13px; color: var(--cinza); text-decoration: none; }
+    .nav-link:hover { color: var(--verde); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0A1F1A 0%, #0D2B24 100%);
+      padding: 56px 5% 48px;
+      text-align: center;
+      border-bottom: 3px solid var(--verde-claro);
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(31,207,160,.12);
+      border: 1px solid rgba(31,207,160,.25);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--verde-claro);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .hero p { font-size: 15px; color: #8A9590; max-width: 480px; margin: 0 auto; line-height: 1.65; }
+
+    /* FORM CARD */
+    .form-wrap {
+      max-width: 640px;
+      margin: 40px auto 60px;
+      padding: 0 5%;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    }
+
+    /* PROGRESS */
+    .progress-bar {
+      height: 3px;
+      background: #E2E8E5;
+      border-radius: 2px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--verde-claro);
+      border-radius: 2px;
+      transition: width .3s ease;
+    }
+
+    .step-label {
+      font-size: 11px;
+      color: var(--cinza2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cinza);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin: 20px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 12px; color: var(--cinza); font-weight: 500; }
+    input, select {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: var(--preto);
+      background: #fff;
+      transition: border-color .15s;
+      outline: none;
+      width: 100%;
+    }
+    input:focus, select:focus { border-color: var(--verde-claro); }
+    input::placeholder { color: var(--cinza2); }
+
+    /* PORTE RADIO */
+    .porte-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .porte-opt {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .15s;
+      font-size: 13px;
+      color: var(--cinza);
+    }
+    .porte-opt.selected { border-color: var(--verde-claro); background: var(--verde-xp); color: var(--preto); }
+    .radio-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      transition: all .15s;
+    }
+    .porte-opt.selected .radio-dot {
+      border-color: var(--verde);
+      background: var(--verde);
+    }
+
+    /* BOTÕES */
+    .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-back {
+      padding: 13px 20px;
+      background: transparent;
+      color: var(--cinza);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-next {
+      flex: 1;
+      padding: 13px;
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background .15s;
+    }
+    .btn-next:hover { background: #0E8C65; }
+    .btn-next:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* SUCESSO */
+    .sucesso-wrap { text-align: center; padding: 16px 0; }
+    .sucesso-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--verde-xp);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+      border: 2px solid rgba(18,160,115,.2);
+    }
+    .sucesso-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--preto);
+      margin-bottom: 10px;
+    }
+    .sucesso-sub { font-size: 14px; color: var(--cinza); line-height: 1.65; max-width: 400px; margin: 0 auto 24px; }
+    .sucesso-box {
+      background: var(--verde-xp);
+      border: 1px solid rgba(18,160,115,.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .sucesso-box .box-title { font-size: 12px; font-weight: 600; color: var(--preto); margin-bottom: 10px; }
+    .sucesso-box .box-items { font-size: 13px; color: var(--cinza); line-height: 1.9; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--cinza2);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--verde); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="https://luciakratz-arch.github.io/NR-1Map/" class="logo">NR-1<span>Map</span></a>
+  <a href="https://luciakratz-arch.github.io/NR-1Map/admin.html" class="nav-link">Já sou cliente → Login</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Cadastro de Empresa</div>
+  <h1>Comece a gestão de<br/>riscos psicossociais</h1>
+  <p>Preencha os dados da sua empresa e nossa equipe entrará em contato para configurar seu acesso ao NR-1 Map.</p>
+</div>
+
+<div class="form-wrap">
+  <div class="card">
+
+    <!-- PROGRESSO -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="prog" style="width:33%;"></div>
+    </div>
+
+    <!-- STEP 1 — EMPRESA -->
+    <div id="step-1">
+      <div class="step-label">Passo 1 de 3 — Dados da empresa</div>
+
+      <div class="section-title">Dados da empresa</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Razão Social / Nome *</label>
+          <input id="e-nome" type="text" placeholder="Ex: Clínica Vida S.A."/>
+        </div>
+        <div class="field">
+          <label>CNPJ</label>
+          <input id="e-cnpj" type="text" placeholder="00.000.000/0001-00"/>
+        </div>
+        <div class="field">
+          <label>Setor / Ramo de atividade</label>
+          <input id="e-setor" type="text" placeholder="Ex: Saúde, Indústria..."/>
+        </div>
+        <div class="field">
+          <label>Nº de colaboradores *</label>
+          <div class="porte-grid" id="porte-opts" style="grid-column: 1 / -1;">
+            <div class="porte-opt" onclick="selPorte(this,'Até 5')"><div class="radio-dot"></div>Até 5</div>
+            <div class="porte-opt" onclick="selPorte(this,'6 a 20')"><div class="radio-dot"></div>6 a 20</div>
+            <div class="porte-opt" onclick="selPorte(this,'21 a 50')"><div class="radio-dot"></div>21 a 50</div>
+            <div class="porte-opt" onclick="selPorte(this,'51 a 100')"><div class="radio-dot"></div>51 a 100</div>
+            <div class="porte-opt" onclick="selPorte(this,'101 a 200')"><div class="radio-dot"></div>101 a 200</div>
+            <div class="porte-opt" onclick="selPorte(this,'Acima de 200')"><div class="radio-dot"></div>Acima de 200</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="goStep(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 — RESPONSÁVEL -->
+    <div id="step-2" style="display:none;">
+      <div class="step-label">Passo 2 de 3 — Responsável pelo contato</div>
+
+      <div class="section-title">Responsável (RH / Gestor)</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nome do responsável *</label>
+          <input id="e-responsavel" type="text" placeholder="Nome completo"/>
+        </div>
+        <div class="field">
+          <label>E-mail *</label>
+          <input id="e-email" type="email" placeholder="rh@empresa.com.br"/>
+        </div>
+        <div class="field">
+          <label>WhatsApp *</label>
+          <input id="e-whatsapp" type="tel" placeholder="(62) 9 9999-9999"/>
+        </div>
+        <div class="field">
+          <label>Como conheceu o NR-1 Map?</label>
+          <select id="e-origem">
+            <option value="">Selecione...</option>
+            <option>Indicação de parceiro</option>
+            <option>Google / busca online</option>
+            <option>Redes sociais</option>
+            <option>LinkedIn</option>
+            <option>WhatsApp</option>
+            <option>Evento / palestra</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(1)">← Voltar</button>
+        <button class="btn-next" onclick="goStep(3)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 — CONFIRMAÇÃO -->
+    <div id="step-3" style="display:none;">
+      <div class="step-label">Passo 3 de 3 — Confirmar e enviar</div>
+
+      <div class="section-title">Resumo do cadastro</div>
+      <div id="resumo" style="font-size:13px;color:var(--cinza);line-height:2;margin-bottom:4px;"></div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(2)">← Voltar</button>
+        <button class="btn-next" id="btn-enviar" onclick="enviarCadastro()">✓ Confirmar cadastro</button>
+      </div>
+    </div>
+
+    <!-- SUCESSO -->
+    <div id="step-sucesso" style="display:none;">
+      <div class="sucesso-wrap">
+        <div class="sucesso-icon">✓</div>
+        <div class="sucesso-title">Cadastro enviado!</div>
+        <p class="sucesso-sub">Nossa equipe entrará em contato em breve para configurar o acesso da sua empresa ao NR-1 Map.</p>
+        <div class="sucesso-box">
+          <div class="box-title">O que acontece agora:</div>
+          <div class="box-items">
+            ✓ Seus dados foram registrados<br/>
+            ✓ Nossa equipe entrará em contato em até 24h<br/>
+            ✓ Você receberá as instruções de acesso por e-mail<br/>
+            ✓ Acesso ao painel NR-1 Map será liberado
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 NR-1 Map · <a href="https://luciakratz-arch.github.io/NR-1Map/">Voltar ao site</a> · Desenvolvido por <strong>Dra. Lucia Kratz</strong></p>
+</footer>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
+    authDomain: "entrevista-inicial.firebaseapp.com",
+    projectId: "entrevista-inicial",
+    storageBucket: "entrevista-inicial.firebasestorage.app",
+    messagingSenderId: "437375609844",
+    appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+
+  var _porte = '';
+
+  function selPorte(el, val) {
+    document.querySelectorAll('#porte-opts .porte-opt').forEach(function(o){ o.classList.remove('selected'); });
+    el.classList.add('selected');
+    _porte = val;
+  }
+
+  function goStep(n) {
+    // Validações
+    if (n === 2) {
+      var nome = document.getElementById('e-nome').value.trim();
+      if (!nome) { alert('Informe a razão social / nome da empresa.'); return; }
+      if (!_porte) { alert('Selecione o número de colaboradores.'); return; }
+    }
+    if (n === 3) {
+      var resp = document.getElementById('e-responsavel').value.trim();
+      var email = document.getElementById('e-email').value.trim();
+      var wpp = document.getElementById('e-whatsapp').value.trim();
+      if (!resp || !email || !wpp) { alert('Preencha nome, e-mail e WhatsApp do responsável.'); return; }
+      // Monta resumo
+      document.getElementById('resumo').innerHTML =
+        '<strong>Empresa:</strong> ' + document.getElementById('e-nome').value.trim() + '<br/>' +
+        '<strong>CNPJ:</strong> ' + (document.getElementById('e-cnpj').value.trim() || '—') + '<br/>' +
+        '<strong>Setor:</strong> ' + (document.getElementById('e-setor').value.trim() || '—') + '<br/>' +
+        '<strong>Colaboradores:</strong> ' + _porte + '<br/>' +
+        '<strong>Responsável:</strong> ' + resp + '<br/>' +
+        '<strong>E-mail:</strong> ' + email + '<br/>' +
+        '<strong>WhatsApp:</strong> ' + wpp + '<br/>' +
+        '<strong>Como conheceu:</strong> ' + (document.getElementById('e-origem').value || '—');
+    }
+    // Esconde todos
+    [1,2,3].forEach(function(i){ document.getElementById('step-'+i).style.display = 'none'; });
+    document.getElementById('step-'+n).style.display = '';
+    // Progresso
+    var pcts = {1:33, 2:66, 3:100};
+    document.getElementById('prog').style.width = pcts[n] + '%';
+  }
+
+  function enviarCadastro() {
+    var btn = document.getElementById('btn-enviar');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    var dados = {
+      nome: document.getElementById('e-responsavel').value.trim(),
+      empresa: document.getElementById('e-nome').value.trim(),
+      cnpj: document.getElementById('e-cnpj').value.trim(),
+      setor: document.getElementById('e-setor').value.trim(),
+      porte: _porte,
+      email: document.getElementById('e-email').value.trim(),
+      whatsapp: document.getElementById('e-whatsapp').value.trim(),
+      origem: document.getElementById('e-origem').value || '',
+      status: 'novo',
+      tipo: 'empresa',
+      data: new Date().toISOString(),
+      fonte: 'auto-cadastro'
+    };
+
+    db.collection('nr1map_leads').add(dados)
+      .then(function() {
+        document.getElementById('step-3').style.display = 'none';
+        document.getElementById('step-sucesso').style.display = '';
+        document.getElementById('prog').style.width = '100%';
+
+        // Disparo GAS — notifica Lucia
+        var GAS_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT2bVAoEkf6klteOEnH7d0fQa-kv8WvCw7k2h7boVqRpc2jhk0IftN2DGL/exec';
+        fetch(GAS_URL + '?tipo=lead_novo&nome=' + encodeURIComponent(dados.nome) +
+          '&empresa=' + encodeURIComponent(dados.empresa) +
+          '&email=' + encodeURIComponent(dados.email) +
+          '&whatsapp=' + encodeURIComponent(dados.whatsapp) +
+          '&porte=' + encodeURIComponent(dados.porte) +
+          '&segmento=' + encodeURIComponent(dados.setor),
+          { method: 'GET', mode: 'no-cors' }).catch(function(){});
+      })
+      .catch(function(e) {
+        btn.textContent = '✓ Confirmar cadastro';
+        btn.disabled = false;
+        alert('Erro ao enviar: ' + e.message + '\n\nTente novamente.');
+      });
+  }
+</script>
+</body>
+</html>
