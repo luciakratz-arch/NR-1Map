@@ -904,7 +904,7 @@ tbody tr:hover td{background:#F5F8F7;}
         <div style="margin-top:16px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;border:1px solid rgba(10,110,79,.2);">
           <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para a empresa</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-control" id="link-pj" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <input class="form-control" id="link-pj" readonly value="https://luciakratz-arch.github.io/NR-1Map/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
             <button class="btn btn-primary btn-sm" onclick="copiarLink('link-pj')">Copiar</button>
           </div>
           <p style="font-size:11px;color:var(--verde);margin-top:6px;">📱 Envie este link por WhatsApp para a empresa preencher os dados sozinha.</p>
@@ -996,7 +996,7 @@ tbody tr:hover td{background:#F5F8F7;}
         <div style="margin-top:16px;padding:12px 14px;background:var(--roxo-xp);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
           <div style="font-size:11px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o cliente PF</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-control" id="link-pf" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#formulario" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <input class="form-control" id="link-pf" readonly value="https://luciakratz-arch.github.io/NR-1Map/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
             <button class="btn btn-roxo btn-sm" onclick="copiarLink('link-pf')">Copiar</button>
           </div>
           <p style="font-size:11px;color:var(--roxo);margin-top:6px;">📱 Envie este link por WhatsApp para o cliente preencher os dados sozinho.</p>
@@ -1866,16 +1866,6 @@ function atualizarBadgeLeads() {
 function contatarLead(btn) {
   var row = btn.closest('tr');
   var docId = row.dataset.id;
-  // Pega WhatsApp e nome da linha
-  var cells = row.querySelectorAll('td');
-  var nomeCell = cells[0] ? cells[0].innerText.trim().split('\n')[0] : '';
-  var wppLink = cells[2] ? cells[2].querySelector('a') : null;
-  var wppNum = '';
-  if (wppLink) {
-    var href = wppLink.href || '';
-    var match = href.match(/wa\.me\/(\d+)/);
-    if (match) wppNum = match[1];
-  }
   var bdg = row.querySelector('.bdg');
   if(bdg) { bdg.className = 'bdg bdg-ok'; bdg.innerHTML = '<span class="dot"></span> Contatado'; }
   btn.textContent = '✓';
@@ -1884,11 +1874,6 @@ function contatarLead(btn) {
   // Atualiza status no Firestore
   if(docId && window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_leads').doc(docId).update({ status: 'contatado' }).catch(function(e){ console.log('Erro update lead:', e); });
-  }
-  // Abre WhatsApp do lead
-  if (wppNum) {
-    var msg = encodeURIComponent('Ola ' + nomeCell + '! Aqui e a Dra. Lucia Kratz do NR-1 Map. Vi que voce demonstrou interesse na nossa solucao para gestao de riscos psicossociais conforme a NR-1. Posso te apresentar como funciona?');
-    setTimeout(function() { window.open('https://wa.me/' + wppNum + '?text=' + msg, '_blank'); }, 300);
   }
 }
 
@@ -2955,7 +2940,7 @@ function copiarLinkWhats(tipo) {
   var baseUrl = 'https://luciakratz-arch.github.io/NR-1Map/';
   var txt, url;
   if (tipo === 'rh') {
-    url = baseUrl + 'representantes.html#formulario';
+    url = baseUrl + 'cadastro-empresa.html';
     txt = '🏢 *NR-1 Map — Cadastro de Empresa*\n\nOlá! Segue o link para sua empresa se cadastrar na plataforma NR-1 Map e iniciar a gestão de riscos psicossociais conforme a NR-1:\n\n🔗 ' + url + '\n\nQualquer dúvida, estou à disposição!';
   } else {
     url = baseUrl + 'representantes.html#parceiro';
@@ -3472,25 +3457,13 @@ function carregarLeads() {
 
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Carregando...</td></tr>';
 
-  var _leadsCarregados = false;
   window.nr1mapDb.collection('nr1map_leads')
-    .onSnapshot(function(snap) {
+    .get()
+    .then(function(snap) {
       if (snap.empty) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum lead captado ainda.</td></tr>';
         atualizarBadgeLeads();
-        _leadsCarregados = true;
         return;
-      }
-      // Detecta novos leads (adicionados após carregamento inicial)
-      if (_leadsCarregados) {
-        snap.docChanges().forEach(function(change) {
-          if (change.type === 'added') {
-            var ld = change.doc.data();
-            // Dispara notificacao via GAS
-            var GAS_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT2bVAoEkf6klteOEnH7d0fQa-kv8WvCw7k2h7boVqRpc2jhk0IftN2DGL/exec';
-            fetch(GAS_URL + '?tipo=lead_novo&nome=' + encodeURIComponent(ld.nome||'') + '&empresa=' + encodeURIComponent(ld.empresa||'') + '&email=' + encodeURIComponent(ld.email||'') + '&whatsapp=' + encodeURIComponent(ld.whatsapp||'') + '&porte=' + encodeURIComponent(ld.porte||'') + '&segmento=' + encodeURIComponent(ld.segmento||''), { method: 'GET', mode: 'no-cors' }).catch(function(){});
-          }
-        });
       }
       tbody.innerHTML = '';
       snap.forEach(function(doc) {
@@ -3526,8 +3499,8 @@ function carregarLeads() {
         tbody.appendChild(tr);
       });
       atualizarBadgeLeads();
-      _leadsCarregados = true;
-    }, function(e) {
+    })
+    .catch(function(e) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#e53935;">Erro ao carregar leads: ' + e.message + '</td></tr>';
       console.log('Erro carregarLeads:', e);
     });
