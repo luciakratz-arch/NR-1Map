@@ -3180,9 +3180,16 @@ function carregarClientes() {
         btnDel.title = 'Excluir empresa';
         btnDel.onclick = (function(id){ return function(){ excluirEmpresa(id, this); }; })(doc.id);
 
+        var btnReenviar = document.createElement('button');
+        btnReenviar.className = 'btn btn-ghost btn-sm';
+        btnReenviar.textContent = '📧';
+        btnReenviar.title = 'Reenviar e-mail de notificação';
+        btnReenviar.onclick = (function(data){ return function(){ reenviarEmailEmpresa(data, this); }; })(d);
+
         tdAcoes.appendChild(btnVer);
         tdAcoes.appendChild(btnEdit);
         tdAcoes.appendChild(btnPwd);
+        tdAcoes.appendChild(btnReenviar);
         tdAcoes.appendChild(btnStatus);
         tdAcoes.appendChild(btnDel);
       });
@@ -3850,6 +3857,29 @@ function abrirEditEmpresa(docId, d) {
   document.getElementById('modal-edit-empresa').classList.add('open');
 }
 
+function reenviarEmailEmpresa(d, btn) {
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbxLmxRonLUgmAgZdpy_T7GJbc0h3MMXBRIOe6pQGYUlIfNoINjHIFtCb5C0Gj2JUsWK/exec';
+  var original = btn.textContent;
+  btn.textContent = '⏳'; btn.disabled = true;
+  var params = '?tipo=empresa_nova' +
+    '&empresa=' + encodeURIComponent(d.nome || d.razaoSocial || '') +
+    '&nome='    + encodeURIComponent(d.responsavel || '') +
+    '&email='   + encodeURIComponent(d.email || '') +
+    '&whatsapp='+ encodeURIComponent(d.whatsapp || '') +
+    '&porte='   + encodeURIComponent(d.numColaboradores || '') +
+    '&segmento='+ encodeURIComponent(d.segmento || d.setor || '') +
+    '&cnpj='    + encodeURIComponent(d.cnpj || '');
+  fetch(GAS_URL + params, { method: 'GET', mode: 'no-cors' })
+    .then(function() {
+      btn.textContent = '✅'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = original; }, 2000);
+    })
+    .catch(function() {
+      btn.textContent = '❌'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = original; }, 2000);
+    });
+}
+
 function toggleStatusEmpresa(docId, isAtivo, btn) {
   var novoStatus = isAtivo ? 'inativo' : 'ativo';
   if (!confirm((isAtivo ? 'Inativar' : 'Ativar') + ' esta empresa?')) return;
@@ -4423,4 +4453,4 @@ function atualizarBadgeContratos() {
 </script>
 
 </body>
-</html>
+</html>+
