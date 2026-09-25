@@ -6105,6 +6105,7 @@ function aplicarEmpresa(e) {
   carregarDepartamentos(e.id);
   carregarDashboard(e.id);
   carregarHistoricoUnificado(e.id);
+  verificarPrimeiroAcesso(e.id);
   // Carregar dados completos da empresa (logo, responsável técnico)
   if (window.nr1mapDb) {
     window.nr1mapDb.collection('nr1map_empresas').doc(e.id).get().then(function(doc){
@@ -7578,6 +7579,76 @@ window.NR1MAP_DISPARO_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT
 <script>
 // ============================================================
 // verLinksEnviados definida acima
+</script>
+
+<!-- ===== MODAL TROCA DE SENHA (PRIMEIRO ACESSO) ===== -->
+<div id="modal-primeiro-acesso" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18);">
+    <div style="font-size:28px;text-align:center;margin-bottom:8px;">🔑</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:8px;">Crie sua senha</h2>
+    <p style="font-size:13px;color:#6B7370;text-align:center;margin-bottom:24px;line-height:1.6;">Este é seu primeiro acesso. Crie uma senha segura para proteger sua conta.</p>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Nova senha</label>
+      <input id="nova-senha" type="password" placeholder="Mínimo 6 caracteres"
+        style="width:100%;padding:10px 14px;border:1.5px solid #D1D5DB;border-radius:8px;font-size:14px;outline:none;"/>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Confirmar senha</label>
+      <input id="nova-senha-conf" type="password" placeholder="Repita a senha"
+        style="width:100%;padding:10px 14px;border:1.5px solid #D1D5DB;border-radius:8px;font-size:14px;outline:none;"/>
+    </div>
+    <div id="erro-senha" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;text-align:center;"></div>
+    <button onclick="salvarNovaSenha()"
+      style="width:100%;background:#0A6E4F;color:#fff;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">
+      Salvar senha e entrar →
+    </button>
+  </div>
+</div>
+
+<script>
+// ── Detecta primeiro acesso e abre modal ──────────────────────
+function verificarPrimeiroAcesso(empresaId) {
+  if (!window.nr1mapDb || !window.nr1mapAuth || !window.nr1mapAuth.currentUser) return;
+  window.nr1mapDb.collection('nr1map_empresas').doc(empresaId).get().then(function(doc) {
+    if (doc.exists && doc.data().primeiroAcesso === true) {
+      document.getElementById('modal-primeiro-acesso').style.display = 'flex';
+    }
+  }).catch(function(){});
+}
+
+function salvarNovaSenha() {
+  var nova = document.getElementById('nova-senha').value;
+  var conf = document.getElementById('nova-senha-conf').value;
+  var erroEl = document.getElementById('erro-senha');
+  erroEl.style.display = 'none';
+
+  if (nova.length < 6) {
+    erroEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    erroEl.style.display = 'block'; return;
+  }
+  if (nova !== conf) {
+    erroEl.textContent = 'As senhas não coincidem.';
+    erroEl.style.display = 'block'; return;
+  }
+
+  var user = window.nr1mapAuth.currentUser;
+  if (!user) { erroEl.textContent = 'Sessão expirada. Recarregue a página.'; erroEl.style.display = 'block'; return; }
+
+  user.updatePassword(nova).then(function() {
+    // Atualiza flag no Firestore
+    if (window.nr1mapEmpresa && window.nr1mapEmpresa.id && window.nr1mapDb) {
+      window.nr1mapDb.collection('nr1map_empresas').doc(window.nr1mapEmpresa.id)
+        .update({ primeiroAcesso: false }).catch(function(){});
+    }
+    // Atualiza sessionStorage com nova senha
+    sessionStorage.setItem('nr1map_rh_pwd', nova);
+    document.getElementById('modal-primeiro-acesso').style.display = 'none';
+    alert('✅ Senha criada com sucesso! Bem-vinda ao NR-1 Map.');
+  }).catch(function(e) {
+    erroEl.textContent = 'Erro ao salvar: ' + e.message;
+    erroEl.style.display = 'block';
+  });
+}
 </script>
 </body>
 </html>+
