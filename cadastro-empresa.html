@@ -366,6 +366,7 @@
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
@@ -377,6 +378,7 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();
+  var auth = firebase.auth();
 
   function getColab() { return document.getElementById('e-colab').value.trim(); }
 
@@ -411,11 +413,15 @@
     document.getElementById('prog').style.width = pcts[n] + '%';
   }
 
+  var SENHA_PADRAO = 'Nr1map@2024';
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbxykEIOSX8reM5fUwg2vuuWpdQv5-QVGB4Rz1CfSZ56DT79dyaKZYL21duir4oQGXRb/exec';
+
   function enviarCadastro() {
     var btn = document.getElementById('btn-enviar');
     btn.textContent = 'Enviando...';
     btn.disabled = true;
 
+    var emailEmp = document.getElementById('e-email').value.trim();
     var dados = {
       nome: document.getElementById('e-nome').value.trim(),
       responsavel: document.getElementById('e-responsavel').value.trim(),
@@ -423,29 +429,46 @@
       setor: document.getElementById('e-setor').value.trim(),
       segmento: document.getElementById('e-setor').value.trim(),
       numColaboradores: parseInt(getColab()),
-      email: document.getElementById('e-email').value.trim(),
+      email: emailEmp,
       whatsapp: document.getElementById('e-whatsapp').value.trim(),
       origem: document.getElementById('e-origem').value || '',
       status: 'pendente',
       tipo: 'pj',
       criadoEm: new Date().toISOString(),
-      criadoPor: 'auto-cadastro'
+      criadoPor: 'auto-cadastro',
+      primeiroAcesso: true
     };
 
-    db.collection('nr1map_empresas').add(dados)
-      .then(function() {
+    // 1) Cria usuário no Firebase Auth
+    auth.createUserWithEmailAndPassword(emailEmp, SENHA_PADRAO)
+      .then(function(cred) {
+        dados.uid = cred.user.uid;
+        return db.collection('nr1map_empresas').add(dados);
+      })
+      .catch(function(authErr) {
+        // Se e-mail já existe no Auth, tenta só salvar no Firestore
+        if (authErr.code === 'auth/email-already-in-use') {
+          return db.collection('nr1map_empresas').add(dados);
+        }
+        throw authErr;
+      })
+      .then(function(docRef) {
+        // Se chegou aqui via catch (email já existia), docRef pode ser undefined
         document.getElementById('step-3').style.display = 'none';
         document.getElementById('step-sucesso').style.display = '';
         document.getElementById('prog').style.width = '100%';
 
-        // Disparo GAS — notifica Lucia
-        var GAS_URL = 'https://script.google.com/macros/s/AKfycbxykEIOSX8reM5fUwg2vuuWpdQv5-QVGB4Rz1CfSZ56DT79dyaKZYL21duir4oQGXRb/exec';
-        fetch(GAS_URL + '?tipo=empresa_nova&nome=' + encodeURIComponent(dados.responsavel) +
+        // 2) Notifica Lucia + envia e-mail com credenciais para a empresa
+        fetch(GAS_URL +
+          '?tipo=empresa_nova' +
           '&empresa=' + encodeURIComponent(dados.nome) +
-          '&email=' + encodeURIComponent(dados.email) +
-          '&whatsapp=' + encodeURIComponent(dados.whatsapp) +
-          '&porte=' + encodeURIComponent(dados.numColaboradores) +
-          '&segmento=' + encodeURIComponent(dados.setor),
+          '&nome='    + encodeURIComponent(dados.responsavel) +
+          '&email='   + encodeURIComponent(dados.email) +
+          '&whatsapp='+ encodeURIComponent(dados.whatsapp) +
+          '&porte='   + encodeURIComponent(dados.numColaboradores) +
+          '&segmento='+ encodeURIComponent(dados.setor) +
+          '&cnpj='    + encodeURIComponent(dados.cnpj) +
+          '&senha='   + encodeURIComponent(SENHA_PADRAO),
           { method: 'GET', mode: 'no-cors' }).catch(function(){});
       })
       .catch(function(e) {
