@@ -277,14 +277,7 @@
         </div>
         <div class="field">
           <label>Nº de colaboradores *</label>
-          <div class="porte-grid" id="porte-opts" style="grid-column: 1 / -1;">
-            <div class="porte-opt" onclick="selPorte(this,'Até 5')"><div class="radio-dot"></div>Até 5</div>
-            <div class="porte-opt" onclick="selPorte(this,'6 a 20')"><div class="radio-dot"></div>6 a 20</div>
-            <div class="porte-opt" onclick="selPorte(this,'21 a 50')"><div class="radio-dot"></div>21 a 50</div>
-            <div class="porte-opt" onclick="selPorte(this,'51 a 100')"><div class="radio-dot"></div>51 a 100</div>
-            <div class="porte-opt" onclick="selPorte(this,'101 a 200')"><div class="radio-dot"></div>101 a 200</div>
-            <div class="porte-opt" onclick="selPorte(this,'Acima de 200')"><div class="radio-dot"></div>Acima de 200</div>
-          </div>
+          <input class="input" type="number" id="e-colab" min="1" placeholder="Ex: 42" style="grid-column: 1 / -1;" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
         </div>
       </div>
 
@@ -385,20 +378,14 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();
 
-  var _porte = '';
-
-  function selPorte(el, val) {
-    document.querySelectorAll('#porte-opts .porte-opt').forEach(function(o){ o.classList.remove('selected'); });
-    el.classList.add('selected');
-    _porte = val;
-  }
+  function getColab() { return document.getElementById('e-colab').value.trim(); }
 
   function goStep(n) {
     // Validações
     if (n === 2) {
       var nome = document.getElementById('e-nome').value.trim();
       if (!nome) { alert('Informe a razão social / nome da empresa.'); return; }
-      if (!_porte) { alert('Selecione o número de colaboradores.'); return; }
+      if (!getColab() || parseInt(getColab()) < 1) { alert('Informe o número de colaboradores.'); return; }
     }
     if (n === 3) {
       var resp = document.getElementById('e-responsavel').value.trim();
@@ -410,7 +397,7 @@
         '<strong>Empresa:</strong> ' + document.getElementById('e-nome').value.trim() + '<br/>' +
         '<strong>CNPJ:</strong> ' + (document.getElementById('e-cnpj').value.trim() || '—') + '<br/>' +
         '<strong>Setor:</strong> ' + (document.getElementById('e-setor').value.trim() || '—') + '<br/>' +
-        '<strong>Colaboradores:</strong> ' + _porte + '<br/>' +
+        '<strong>Colaboradores:</strong> ' + getColab() + '<br/>' +
         '<strong>Responsável:</strong> ' + resp + '<br/>' +
         '<strong>E-mail:</strong> ' + email + '<br/>' +
         '<strong>WhatsApp:</strong> ' + wpp + '<br/>' +
@@ -435,8 +422,7 @@
       cnpj: document.getElementById('e-cnpj').value.trim(),
       setor: document.getElementById('e-setor').value.trim(),
       segmento: document.getElementById('e-setor').value.trim(),
-      porte: _porte,
-      numColaboradores: _porte,
+      numColaboradores: parseInt(getColab()),
       email: document.getElementById('e-email').value.trim(),
       whatsapp: document.getElementById('e-whatsapp').value.trim(),
       origem: document.getElementById('e-origem').value || '',
@@ -458,7 +444,7 @@
           '&empresa=' + encodeURIComponent(dados.nome) +
           '&email=' + encodeURIComponent(dados.email) +
           '&whatsapp=' + encodeURIComponent(dados.whatsapp) +
-          '&porte=' + encodeURIComponent(dados.porte) +
+          '&porte=' + encodeURIComponent(dados.numColaboradores) +
           '&segmento=' + encodeURIComponent(dados.setor),
           { method: 'GET', mode: 'no-cors' }).catch(function(){});
       })
