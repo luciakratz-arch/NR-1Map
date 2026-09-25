@@ -2483,6 +2483,24 @@ function gerarLaudoAdmin() {
 }
 
 /* ===== LAUDOS ===== */
+function _laudoStatusBdg(status) {
+  if (status === 'entregue') return '<span class="bdg bdg-ok"><span class="dot"></span>Entregue</span>';
+  if (status === 'analise') return '<span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span>';
+  return '<span class="bdg bdg-pend"><span class="dot"></span>Pendente</span>';
+}
+function _laudoIbpTxt(ibp) {
+  if (ibp === null || ibp === undefined) return '—';
+  return (ibp>=0?'+':'')+Number(ibp).toFixed(1).replace('.',',');
+}
+function _laudoIbpCor(ibp) {
+  if (ibp === null || ibp === undefined) return 'var(--cinza-medio)';
+  return ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)';
+}
+function _laudoDataFmt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+}
+
 function carregarLaudos() {
   if (!window.nr1mapDb) return;
   var tbody = document.getElementById('tabela-laudos');
@@ -2497,34 +2515,82 @@ function carregarLaudos() {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhum laudo gerado ainda.</td></tr>';
         return;
       }
+
+      /* ── Agrupar por empresa+tipo, manter a mais recente no topo ── */
+      var grupos = {}; // chave: "empresaId__tipo"
       snap.forEach(function(doc) {
         var d = doc.data();
-        var ibp = d.ibpGeral !== undefined ? d.ibpGeral : null;
-        var cor = ibp !== null ? (ibp>=1.5?'var(--verde)':ibp<=-1.5?'#ef4444':'var(--laranja)') : 'var(--cinza-medio)';
-        var ibpTxt = ibp !== null ? (ibp>=0?'+':'')+ibp.toFixed(1).replace('.',',') : '—';
-        var data = d.criadoEm ? new Date(d.criadoEm).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}) : '—';
-        var status = d.status === 'entregue'
-          ? '<span class="bdg bdg-ok"><span class="dot"></span>Entregue</span>'
-          : d.status === 'analise'
-          ? '<span class="bdg" style="background:var(--roxo-xp);color:var(--roxo);"><span class="dot" style="background:var(--roxo);"></span>Em análise</span>'
-          : '<span class="bdg bdg-pend"><span class="dot"></span>Pendente</span>';
+        var chave = (d.empresaId || d.empresaNome || 'sem-empresa') + '__' + (d.tipo || 'geral');
+        if (!grupos[chave]) grupos[chave] = [];
+        grupos[chave].push({ id: doc.id, d: d });
+      });
+
+      /* ── Para cada grupo: 1ª linha = versão mais recente; linhas ocultas = histórico ── */
+      Object.keys(grupos).forEach(function(chave) {
+        var versoes = grupos[chave]; // já ordenado desc por criadoEm (Firestore retornou desc)
+        var latest = versoes[0];
+        var d = latest.d;
+
+        /* Linha principal */
         var tr = document.createElement('tr');
+        tr.setAttribute('data-laudo-chave', chave);
         tr.innerHTML =
           '<td><strong>'+(d.empresaNome||'—')+'</strong></td>'+
           '<td>'+(d.tipo||'Diagnóstico Geral')+'</td>'+
-          '<td><span style="color:'+cor+';font-weight:700;">'+ibpTxt+'</span></td>'+
+          '<td><span style="color:'+_laudoIbpCor(d.ibpGeral)+';font-weight:700;">'+_laudoIbpTxt(d.ibpGeral)+'</span></td>'+
           '<td>'+(d.numColaboradores||0)+'</td>'+
-          '<td>'+data+'</td>'+
-          '<td>'+status+'</td>'+
-          '<td style="display:flex;gap:6px;"></td>';
+          '<td>'+_laudoDataFmt(d.criadoEm)+'</td>'+
+          '<td>'+_laudoStatusBdg(d.status)+'</td>'+
+          '<td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"></td>';
+
         var tdAcoes = tr.querySelector('td:last-child');
-        var btnVer = document.createElement('button');
-        btnVer.className='btn btn-ghost btn-sm'; btnVer.textContent='📄 Ver';
         var btnDel = document.createElement('button');
         btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='🗑️';
-        btnDel.onclick=(function(id){return function(){excluirLaudo(id,this);};})(doc.id);
-        tdAcoes.appendChild(btnVer); tdAcoes.appendChild(btnDel);
+        btnDel.onclick=(function(id){return function(){excluirLaudo(id,this);};})(latest.id);
+        tdAcoes.appendChild(btnDel);
+
+        /* Botão "Versões (N)" se houver histórico */
+        if (versoes.length > 1) {
+          var btnHist = document.createElement('button');
+          btnHist.className='btn btn-ghost btn-sm';
+          btnHist.textContent='🕓 Versões ('+versoes.length+')';
+          btnHist.style.fontSize='11px';
+          btnHist.setAttribute('data-hist-chave', chave);
+          btnHist.onclick = function() {
+            var histRows = tbody.querySelectorAll('tr[data-hist-chave="'+chave+'"]');
+            var visible = histRows.length && histRows[0].style.display !== 'none';
+            histRows.forEach(function(r){ r.style.display = visible ? 'none' : ''; });
+            btnHist.textContent = visible ? '🕓 Versões ('+versoes.length+')' : '▲ Fechar';
+          };
+          tdAcoes.appendChild(btnHist);
+        }
+
         tbody.appendChild(tr);
+
+        /* Linhas de histórico (ocultas por padrão) */
+        versoes.slice(1).forEach(function(ver) {
+          var dv = ver.d;
+          var trv = document.createElement('tr');
+          trv.setAttribute('data-hist-chave', chave);
+          trv.style.display = 'none';
+          trv.style.background = 'var(--cinza-claro)';
+          trv.style.fontSize = '12px';
+          trv.style.color = 'var(--cinza-medio)';
+          trv.innerHTML =
+            '<td style="padding-left:20px;">↳ <em>'+(dv.empresaNome||'—')+'</em></td>'+
+            '<td><em>'+(dv.tipo||'Diagnóstico Geral')+'</em></td>'+
+            '<td><span style="color:'+_laudoIbpCor(dv.ibpGeral)+';font-weight:600;">'+_laudoIbpTxt(dv.ibpGeral)+'</span></td>'+
+            '<td>'+(dv.numColaboradores||0)+'</td>'+
+            '<td>'+_laudoDataFmt(dv.criadoEm)+'</td>'+
+            '<td>'+_laudoStatusBdg(dv.status)+'</td>'+
+            '<td style="display:flex;gap:6px;"></td>';
+          var tdvAcoes = trv.querySelector('td:last-child');
+          var btnvDel = document.createElement('button');
+          btnvDel.className='btn btn-danger btn-sm'; btnvDel.textContent='🗑️';
+          btnvDel.onclick=(function(id){return function(){excluirLaudo(id,this);};})(ver.id);
+          tdvAcoes.appendChild(btnvDel);
+          tbody.appendChild(trv);
+        });
       });
     }).catch(function(e){ console.log(e); });
 }
