@@ -430,21 +430,23 @@
     btn.disabled = true;
 
     var dados = {
-      nome: document.getElementById('e-responsavel').value.trim(),
-      empresa: document.getElementById('e-nome').value.trim(),
+      nome: document.getElementById('e-nome').value.trim(),
+      responsavel: document.getElementById('e-responsavel').value.trim(),
       cnpj: document.getElementById('e-cnpj').value.trim(),
       setor: document.getElementById('e-setor').value.trim(),
+      segmento: document.getElementById('e-setor').value.trim(),
       porte: _porte,
+      numColaboradores: _porte,
       email: document.getElementById('e-email').value.trim(),
       whatsapp: document.getElementById('e-whatsapp').value.trim(),
       origem: document.getElementById('e-origem').value || '',
-      status: 'novo',
-      tipo: 'empresa',
-      data: new Date().toISOString(),
-      fonte: 'auto-cadastro'
+      status: 'pendente',
+      tipo: 'pj',
+      criadoEm: new Date().toISOString(),
+      criadoPor: 'auto-cadastro'
     };
 
-    db.collection('nr1map_leads').add(dados)
+    db.collection('nr1map_empresas').add(dados)
       .then(function() {
         document.getElementById('step-3').style.display = 'none';
         document.getElementById('step-sucesso').style.display = '';
@@ -452,8 +454,8 @@
 
         // Disparo GAS — notifica Lucia
         var GAS_URL = 'https://script.google.com/macros/s/AKfycbxYgNopWsVT2bVAoEkf6klteOEnH7d0fQa-kv8WvCw7k2h7boVqRpc2jhk0IftN2DGL/exec';
-        fetch(GAS_URL + '?tipo=lead_novo&nome=' + encodeURIComponent(dados.nome) +
-          '&empresa=' + encodeURIComponent(dados.empresa) +
+        fetch(GAS_URL + '?tipo=empresa_nova&nome=' + encodeURIComponent(dados.responsavel) +
+          '&empresa=' + encodeURIComponent(dados.nome) +
           '&email=' + encodeURIComponent(dados.email) +
           '&whatsapp=' + encodeURIComponent(dados.whatsapp) +
           '&porte=' + encodeURIComponent(dados.porte) +
