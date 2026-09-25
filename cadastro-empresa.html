@@ -443,6 +443,8 @@
     auth.createUserWithEmailAndPassword(emailEmp, SENHA_PADRAO)
       .then(function(cred) {
         dados.uid = cred.user.uid;
+        // Desloga imediatamente — não queremos manter sessão de empresa no cadastro público
+        auth.signOut().catch(function(){});
         return db.collection('nr1map_empresas').add(dados);
       })
       .catch(function(authErr) {
