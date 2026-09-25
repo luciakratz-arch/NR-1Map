@@ -1936,24 +1936,33 @@ var _convLeadData = {};
 function abrirConverterLead(btn) {
   var row = btn.closest('tr');
   var docId = row.dataset.id;
-  var cells = row.querySelectorAll('td');
-  var nomeEmpresa = cells[0] ? cells[0].innerText.trim().split('\n') : ['',''];
-  var nome = nomeEmpresa[0] || '';
-  var empresa = nomeEmpresa[1] || '';
-  var email = cells[1] ? cells[1].innerText.trim() : '';
-  var wppLink = cells[2] ? cells[2].querySelector('a') : null;
-  var wpp = '';
-  if (wppLink) { var m = wppLink.href.match(/wa\.me\/55(\d+)/); if (m) wpp = m[1]; }
-  var porte = cells[3] ? cells[3].innerText.trim() : '';
-  var segmento = cells[4] ? cells[4].innerText.trim() : '';
+  if (!docId || !window.nr1mapDb) return;
 
-  _convLeadData = { id: docId, nome: nome, empresa: empresa, email: email, wpp: wpp, porte: porte, segmento: segmento };
+  // Busca direto do Firestore para garantir todos os campos
+  window.nr1mapDb.collection('nr1map_leads').doc(docId).get().then(function(doc) {
+    if (!doc.exists) return;
+    var d = doc.data();
+    var wpp = (d.whatsapp || '').replace(/\D/g,'');
 
-  document.getElementById('conv-lead-nome-label').textContent = nome + (empresa ? ' (' + empresa + ')' : '');
-  document.getElementById('conv-step-tipo').style.display = '';
-  document.getElementById('conv-form-empresa').style.display = 'none';
-  document.getElementById('conv-form-parceiro').style.display = 'none';
-  document.getElementById('modal-converter-lead').classList.add('open');
+    _convLeadData = {
+      id: docId,
+      nome: d.nome || '',
+      empresa: d.empresa || '',
+      email: d.email || '',
+      wpp: wpp,
+      porte: d.porte || d.numColaboradores || '',
+      segmento: d.segmento || d.setor || '',
+      cnpj: d.cnpj || '',
+      origem: d.origem || ''
+    };
+
+    var label = (d.nome || '') + (d.empresa ? ' (' + d.empresa + ')' : '');
+    document.getElementById('conv-lead-nome-label').textContent = label;
+    document.getElementById('conv-step-tipo').style.display = '';
+    document.getElementById('conv-form-empresa').style.display = 'none';
+    document.getElementById('conv-form-parceiro').style.display = 'none';
+    document.getElementById('modal-converter-lead').classList.add('open');
+  }).catch(function(e) { alert('Erro ao carregar dados do lead: ' + e.message); });
 }
 
 function abrirConvForm(tipo) {
@@ -1964,8 +1973,8 @@ function abrirConvForm(tipo) {
     document.getElementById('conv-pj-email').value = _convLeadData.email;
     document.getElementById('conv-pj-whatsapp').value = _convLeadData.wpp;
     document.getElementById('conv-pj-setor').value = _convLeadData.segmento;
-    document.getElementById('conv-pj-cnpj').value = '';
-    document.getElementById('conv-pj-colab').value = '';
+    document.getElementById('conv-pj-cnpj').value = _convLeadData.cnpj || '';
+    document.getElementById('conv-pj-colab').value = _convLeadData.porte || '';
     document.getElementById('conv-form-empresa').style.display = '';
   } else {
     document.getElementById('conv-par-nome').value = _convLeadData.nome;
@@ -3038,7 +3047,6 @@ function carregarClientes() {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--cinza-medio);">Nenhuma empresa cadastrada ainda.</td></tr>';
         return;
       }
-      // Ordena no cliente para não depender de índice Firestore
       var docs = [];
       snap.forEach(function(doc) { docs.push(doc); });
       docs.sort(function(a,b){
@@ -3055,6 +3063,8 @@ function carregarClientes() {
           : '<span class="bdg"><span class="dot"></span>Inativo</span>';
         var origemBdg = d.criadoPor === 'parceiro'
           ? '<span style="font-size:10px;background:var(--roxo-xp);color:var(--roxo);padding:2px 8px;border-radius:10px;font-weight:600;">🤝 Parceiro</span>'
+          : d.criadoPor === 'auto-cadastro'
+          ? '<span style="font-size:10px;background:#E8F4FD;color:#0277BD;padding:2px 8px;border-radius:10px;font-weight:600;">🌐 Site</span>'
           : '<span style="font-size:10px;background:var(--verde-xp);color:var(--verde);padding:2px 8px;border-radius:10px;font-weight:600;">👤 Admin</span>';
         var plano = d.plano || d.planoLabel || '—';
         var tr = document.createElement('tr');
@@ -3706,8 +3716,8 @@ function carregarLeads() {
           '<td><strong>' + (d.nome||'—') + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">' + (d.empresa||'') + '</span></td>' +
           '<td>' + (d.email||'—') + '</td>' +
           '<td>' + wppLink + '</td>' +
-          '<td>' + (d.porte||'—') + '</td>' +
-          '<td>' + (d.segmento||'—') + '</td>' +
+          '<td>' + (d.porte||d.numColaboradores||'—') + '</td>' +
+          '<td>' + (d.segmento||d.setor||'—') + '</td>' +
           '<td style="font-size:11px;color:var(--cinza-medio);">' + dataStr + '</td>' +
           '<td><span class="' + bdgClass + '"><span class="dot"></span>' + bdgLabel + '</span></td>' +
           '<td style="display:flex;gap:6px;">' + btnContatar + '<button class="btn btn-sm" style="background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7;font-size:11px;" onclick="abrirConverterLead(this)" title="Converter lead">↗ Converter</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>';
