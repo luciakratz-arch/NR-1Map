@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -290,25 +291,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <div style="font-size:11px;color:#6b7280;background:#fef3c7;padding:3px 10px;border-radius:20px;margin-left:auto;">🔒 Só você vê</div>
       </div>
 
-      <div class="termo-hero">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;text-align:center;">Seu IBP atual</div>
-        <div class="termo-ibp-val" id="termo-val" style="color:#f59e0b;">—</div>
-        <div class="termo-zona" id="termo-zona" style="color:#92400e;">Aguardando respostas</div>
-        <div class="termo-strip">
-          <div class="termo-needle" id="termo-needle" style="left:50%;"></div>
-        </div>
-        <div class="termo-labels">
-          <span>😔 Momento<br/>difícil</span>
-          <span style="text-align:center;">Vale<br/>observar</span>
-          <span style="text-align:right;">Você está<br/>bem! 😊</span>
-        </div>
-      </div>
-
       <div class="card">
-        <div class="card-title">📈 Histórico</div>
-        <div class="historico-list" id="historico-lista">
-          <div style="text-align:center;color:#9ca3af;font-size:13px;padding:20px;">Nenhuma resposta registrada ainda.</div>
+        <div class="card-title">Seu resultado</div>
+        <div style="font-size:14px;color:#374151;line-height:1.6;padding:6px 0 14px;">
+          Por segurança, o seu resultado pessoal só aparece depois que você entra com o seu login e a sua senha. Ninguém da empresa vê o seu resultado individual.
         </div>
+        <a href="admin.html" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">Entrar na minha área</a>
       </div>
     </div>
 
@@ -543,6 +531,10 @@ var firebaseConfig = {
 var fbApp;
 try { fbApp = firebase.app('nr1map-colab'); } catch(e) { fbApp = firebase.initializeApp(firebaseConfig, 'nr1map-colab'); }
 var db = firebase.firestore(fbApp);
+// O colaborador não lê nem grava direto no banco: tudo passa por funções seguras no servidor.
+var _fn = fbApp.functions('southamerica-east1');
+function chamarServidor(nome, dados) { return _fn.httpsCallable(nome)(dados).then(function(r) { return r.data; }); }
+var _dadosEntrada = null;
 
 // ===== LEITURA AUTOMÁTICA DO TOKEN NA URL =====
 (function() {
@@ -628,38 +620,29 @@ function mostrarAvisoToken(icone, titulo, msg) {
 }
 
 function validarToken(codigo) {
-  // Busca token no Firestore (sem filtrar por usado — checar manualmente)
-  db.collection('nr1map_tokens').where('codigo', '==', codigo)
-    .get()
-    .then(function(snap) {
-      if (snap.empty) {
+  chamarServidor('colabEntrar', { codigo: codigo })
+    .then(function(r) {
+      if (r.estado === 'invalido') {
         mostrarAvisoToken('❌', 'Link invalido', 'Este codigo nao foi encontrado ou ja expirou. Solicite um novo ao seu RH.');
         return;
       }
-      var doc = snap.docs[0];
-      var data = doc.data();
-      // Verifica se ja foi respondido
-      if (data.usado) {
+      if (r.estado === 'usado') {
         mostrarAvisoToken('✅', 'Questionario ja respondido!', 'Voce ja respondeu esta pesquisa com sucesso. Obrigado pela sua participacao! Aguarde o proximo ciclo.');
         return;
       }
-      // Verifica expiracao pelo campo expiraEm real
-      var expira = data.expiraEm ? new Date(data.expiraEm).getTime()
-                 : data.criadoEm ? new Date(data.criadoEm).getTime() + 7*24*3600*1000
-                 : 0;
-      if (Date.now() > expira) {
+      if (r.estado === 'expirado') {
         mostrarAvisoToken('⏰', 'Link expirado', 'Este link de acesso expirou. Solicite um novo ao seu RH.');
         return;
       }
       _token = codigo;
-      _empresaId = data.empresaId;
-      _tipoPesquisa = data.tipo || 'pulso';
-      _pesquisaId = data.pesquisaId || doc.id;
-      _empresaNome = data.empresaNome || '';
-      _cargo = data.cargo || '';
-      _cbo = data.cbo || '';
-      _setor = data.setor || '';
-      // Nao marca como usado ainda — so apos envio das respostas
+      _empresaId = r.empresaId;
+      _tipoPesquisa = r.tipo || 'pulso';
+      _pesquisaId = r.pesquisaId;
+      _empresaNome = r.empresaNome || '';
+      _cargo = r.cargo || '';
+      _cbo = r.cbo || '';
+      _setor = r.setor || '';
+      _dadosEntrada = r;
       carregarApp();
     })
     .catch(function(e) {
@@ -688,9 +671,10 @@ function carregarApp() {
 
   // Carrega seleções da empresa e pesquisa ativa
   // Usar Promise.allSettled para não bloquear se alguma coleção der erro de permissão
-  Promise.all([
-    db.collection('nr1map_selecoes').doc(_empresaId).get().catch(function(){ return {exists:false, data:function(){return {};}}; }),
-    db.collection('nr1map_streak').doc(_empresaId + '_' + _pesquisaId).get().catch(function(){ return {exists:false, data:function(){return {};}}; })
+  var _sel = _dadosEntrada && _dadosEntrada.selecao;
+  Promise.resolve([
+    { exists: !!_sel, data: function(){ return _sel || {}; } },
+    { exists: !!(_dadosEntrada && _dadosEntrada.streak), data: function(){ return { streak: _dadosEntrada.streak }; } }
   ]).then(function(results) {
     var selDoc = results[0];
     var strDoc = results[1];
@@ -779,33 +763,10 @@ function carregarApp() {
     document.getElementById('card-pesquisa-ativa').style.display = 'block';
 
     // Carrega histórico pessoal
-    carregarHistorico();
   }).catch(function(e) { console.log(e); });
 }
 
-function carregarHistorico() {
-  db.collection('nr1map_respostas_colab').doc(_empresaId + '_' + _pesquisaId)
-    .get().then(function(doc) {
-      if (!doc.exists) return;
-      var hist = doc.data().historico || [];
-      var lista = document.getElementById('historico-lista');
-      if (hist.length === 0) return;
-      lista.innerHTML = '';
-      hist.slice(-6).reverse().forEach(function(h) {
-        var cor = h.ibp >= 1.5 ? '#10b981' : h.ibp <= -1.5 ? '#ef4444' : '#f59e0b';
-        var zona = h.ibp >= 1.5 ? 'Você está bem!' : h.ibp <= -1.5 ? 'Momento difícil' : 'Vale observar';
-        var item = document.createElement('div');
-        item.className = 'hist-item';
-        item.innerHTML = '<div class="hist-dot" style="background:'+cor+';"></div>' +
-          '<div style="flex:1;"><div class="hist-mes">'+h.data+'</div><div class="hist-zona">'+zona+'</div></div>' +
-          '<div class="hist-ibp" style="color:'+cor+';">'+(h.ibp>0?'+':'')+h.ibp.toFixed(1)+'</div>';
-        lista.appendChild(item);
-      });
-      // Atualiza agulha do termômetro com IBP mais recente
-      var ultimo = hist[hist.length - 1];
-      if (ultimo) atualizarTermometro(ultimo.ibp);
-    }).catch(function(){});
-}
+function carregarHistorico() {} // o resultado pessoal só aparece depois do login (área do Usuário)
 
 // ===== NAVEGAÇÃO =====
 function showView(id) {
@@ -1049,72 +1010,18 @@ function enviarRespostas() {
     respondidoEm: agora.toISOString()
   };
 
-  // Salva resposta anônima
-  var refResp = db.collection('nr1map_respostas').doc(_empresaId)
-    .collection('ciclos').doc(_pesquisaId)
-    .collection('respostas').doc(); // doc gerado automaticamente, sem uid — anonimato preservado
-
-  // Histórico pessoal (por token — ligado ao aparelho, não à identidade)
-  var refHist = db.collection('nr1map_respostas_colab').doc(_empresaId + '_' + _pesquisaId);
-
-  // Invalida token e salva resposta
-  var tokenQuery = _token
-    ? db.collection('nr1map_tokens').where('codigo', '==', _token).get()
-    : Promise.resolve({ empty: true, docs: [] });
-
-  // Referência ao documento do ciclo (agrega totais)
-  var refCiclo = db.collection('nr1map_respostas').doc(_empresaId)
-    .collection('ciclos').doc(_pesquisaId);
-
-  // Salvar resposta primeiro (sem depender do token)
-  refResp.set(payload)
-    .then(function() {
-      console.log('STEP 1: resposta salva OK');
-      // Invalidar token separadamente
-      tokenQuery.then(function(snap) {
-        if (!snap.empty) {
-          snap.docs[0].ref.update({ usado: true, usadoEm: agora.toISOString() })
-            .catch(function(e){ console.log('Token update ignorado:', e.message); });
-        }
-      }).catch(function(){});
-      // Atualizar documento do ciclo com IBP agregado
-      return refCiclo.get();
-    })
-    .then(function(cicloDoc) {
-      var totalAnterior = cicloDoc.exists ? (cicloDoc.data().totalRespostas || 0) : 0;
-      var ibpAnterior = cicloDoc.exists ? (cicloDoc.data().ibpGeral || 0) : 0;
-      var novoTotal = totalAnterior + 1;
-      var novoIbp = ((ibpAnterior * totalAnterior) + ibpGeral) / novoTotal;
-      novoIbp = Math.round(novoIbp * 100) / 100;
-      return refCiclo.set({
-        tipo: _tipoPesquisa === 'diagnostico' ? 'geral' : 'pulso',
-        empresaId: _empresaId,
-        ibpGeral: novoIbp,
-        totalRespostas: novoTotal,
-        criadoEm: cicloDoc.exists ? cicloDoc.data().criadoEm : agora.toISOString(),
-        atualizadoEm: agora.toISOString()
-      }, { merge: true });
-    })
-    .then(function() {
-      console.log('STEP 2: salvando histórico em nr1map_respostas_colab');
-      return refHist.set({
-        historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr }),
-        streak: (_streak + 1)
-      }, { merge: true });
-    })
-    .then(function() {
-      console.log('STEP 3: tudo salvo, mostrando conclusão. ibpGeral=', ibpGeral);
-      atualizarTermometro(ibpGeral);
-      showView('concluido');
-      // Esconde card de pesquisa ativa
-      document.getElementById('card-pesquisa-ativa').style.display = 'none';
-      document.getElementById('card-sem-pesquisa').style.display = 'block';
-    })
-    .catch(function(e) {
-      console.log(e);
-      if (btn) { btn.textContent = 'Enviar respostas ✓'; btn.disabled = false; }
-      alert('Erro ao enviar respostas. Tente novamente.');
-    });
+  // Envia ao servidor: ele grava a resposta anônima, guarda o resultado pessoal e usa o código.
+  chamarServidor('colabEnviar', {
+    codigo: _token, respostas: _respostas, ibpSubcats: ibpSubcats, ibpGeral: ibpGeral, zona: zona.nome
+  }).then(function() {
+    showView('concluido');
+    document.getElementById('card-pesquisa-ativa').style.display = 'none';
+    document.getElementById('card-sem-pesquisa').style.display = 'block';
+  }).catch(function(e) {
+    console.log(e);
+    if (btn) { btn.textContent = 'Enviar respostas ✓'; btn.disabled = false; }
+    alert('Erro ao enviar respostas. Tente novamente.');
+  });
 }
 
 // ===== TERMÔMETRO PESSOAL =====
@@ -1141,11 +1048,10 @@ function enviarSugestao() {
   var cat = '';
   document.querySelectorAll('.chip.sel').forEach(function(c){ cat = c.textContent; });
   if (!texto) { alert('Digite sua sugestão antes de enviar.'); return; }
-  db.collection('nr1map_sugestoes').add({
-    empresaId: _empresaId,
+  chamarServidor('colabSugestao', {
+    codigo: _token,
     categoria: cat,
-    texto: texto,
-    criadoEm: new Date().toISOString()
+    texto: texto
   }).then(function() {
     document.getElementById('sug-texto').value = '';
     document.getElementById('char-count').textContent = '0 / 500';
@@ -1174,14 +1080,7 @@ function confirmarChamado() {
   var protocolo = 'OUV-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
   var tipoLabel = { apoio: 'Apoio Psicológico', assedio: 'Denúncia de Assédio', emergencia: 'Emergência Emocional' }[_tipoChamado] || _tipoChamado;
 
-  db.collection('nr1map_chamados').add({
-    empresaId: _empresaId,
-    tipo: _tipoChamado,
-    identificacao: 'Anônimo',
-    texto: texto || '(sem descrição)',
-    protocolo: protocolo,
-    criadoEm: new Date().toISOString()
-  });
+  chamarServidor('colabChamado', { codigo: _token, tipo: _tipoChamado, texto: texto }).catch(function(){});
 
   var msg = '🆘 *NR-1 Map — Canal de Acolhimento*\n' +
     '*Protocolo:* ' + protocolo + '\n\n' +
