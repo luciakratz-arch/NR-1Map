@@ -297,7 +297,8 @@ tbody tr:hover td{background:#F5F8F7;}
         <a href="#" onclick="esqueciSenha(document.getElementById('adm-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
       </div>
       <button class="login-btn roxo" onclick="entrarAdmin()">Entrar como Admin</button>
-      <p class="login-hint">Acesso exclusivo da administradora · use qualquer senha para demo</p>
+      <button class="login-btn" id="btn-adm-google" onclick="entrarAdminGoogle()" style="margin-top:10px;background:#fff;color:#2b2b2b;">Entrar com Google</button>
+      <p class="login-hint">Acesso exclusivo da administradora</p>
     </div>
 
     <!-- PARCEIRO -->
@@ -1614,6 +1615,31 @@ function setLoginTab(tab, el) {
   document.getElementById('login-user').style.display     = tab === 'user'     ? 'block' : 'none';
 }
 
+var ADMINS_AUTORIZADOS = ['luciakratz@gmail.com', 'contato@luciakratz.com.br'];
+function entrarAdminGoogle() {
+  var btn = document.getElementById('btn-adm-google');
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  window.nr1mapAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .then(function(cred) {
+      var mail = String(cred.user.email || '').toLowerCase();
+      if (!cred.user.emailVerified || ADMINS_AUTORIZADOS.indexOf(mail) === -1) {
+        window.nr1mapAuth.signOut();
+        alert('Acesso negado. Use a conta administradora.');
+        btn.textContent = 'Entrar com Google';
+        btn.disabled = false;
+        return;
+      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-admin').classList.add('active');
+      carregarLeads();
+    })
+    .catch(function(e) {
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') alert('Não foi possível entrar com o Google. Tente de novo.');
+      btn.textContent = 'Entrar com Google';
+      btn.disabled = false;
+    });
+}
 function entrarAdmin() {
   var email = document.getElementById('adm-email').value.trim();
   var senha = document.getElementById('adm-senha').value;
