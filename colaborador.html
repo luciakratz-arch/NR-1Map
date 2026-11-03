@@ -405,7 +405,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
     <button class="nav-item" id="nav-acolhimento" onclick="showView('acolhimento')">
       <span class="ni">🫶</span><span class="nl">Acolhimento</span>
     </button>
-    <button class="nav-item" onclick="window.location.href='instalar-app.html'">
+    <button class="nav-item" id="nav-app" onclick="navAppClick()">
       <span class="ni">📲</span><span class="nl">App</span>
     </button>
   </div>
@@ -1168,6 +1168,20 @@ function confirmarChamado() {
     alert('✅ Chamado enviado!\n\nProtocolo: ' + protocolo + '\n\nGuarde este número para acompanhamento.');
   }, 500);
 }
+</script>
+<script>
+// Botão "App": some se o app já está instalado; se não, tenta instalar direto (senão abre a página de instruções)
+(function(){
+  var instalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  var btn = document.getElementById('nav-app');
+  if (instalado && btn) btn.style.display = 'none';
+  var adiado = null;
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); adiado = e; });
+  window.addEventListener('appinstalled', function(){ if (btn) btn.style.display = 'none'; });
+  window.navAppClick = function(){
+    if (adiado) { adiado.prompt(); adiado = null; } else { window.location.href = 'instalar-app.html'; }
+  };
+})();
 </script>
 </body>
 </html>
