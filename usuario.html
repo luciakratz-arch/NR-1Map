@@ -1412,12 +1412,20 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // Botão "App": some se o app já está instalado; se não, tenta instalar direto (senão abre a página de instruções)
 (function(){
-  var instalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  var CHAVE = 'nr1map_app_instalado';
+  function lerFlag(){ try { return localStorage.getItem(CHAVE) === '1'; } catch(e){ return false; } }
+  function gravarFlag(){ try { localStorage.setItem(CHAVE, '1'); } catch(e){} }
+  var emApp = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if (emApp) gravarFlag();                       // aberto pelo ícone do app: lembra neste aparelho
   var btn = document.getElementById('nav-app');
-  if (instalado && btn) btn.style.display = 'none';
+  function esconder(){ if (btn) btn.style.display = 'none'; }
+  if (emApp || lerFlag()) esconder();
+  if (navigator.getInstalledRelatedApps) {       // Chrome: pergunta se o app já está instalado
+    navigator.getInstalledRelatedApps().then(function(l){ if (l && l.length) { gravarFlag(); esconder(); } }).catch(function(){});
+  }
   var adiado = null;
   window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); adiado = e; });
-  window.addEventListener('appinstalled', function(){ if (btn) btn.style.display = 'none'; });
+  window.addEventListener('appinstalled', function(){ gravarFlag(); esconder(); });
   window.navAppClick = function(){
     if (adiado) { adiado.prompt(); adiado = null; } else { window.location.href = 'instalar-app.html'; }
   };

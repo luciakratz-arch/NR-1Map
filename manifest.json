@@ -8,6 +8,8 @@
   "background_color": "#0A6E4F",
   "theme_color": "#0A6E4F",
   "orientation": "portrait",
+  "prefer_related_applications": false,
+  "related_applications": [{"platform": "webapp", "url": "https://luciakratz-arch.github.io/NR-1Map/manifest.json"}],
   "icons": [
     {
       "src": "nr1maps logo 512.png",
