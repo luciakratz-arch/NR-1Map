@@ -321,6 +321,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <script>
 var _firebaseConfig = {
   apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
@@ -334,6 +335,8 @@ if (!firebase.apps.length || !firebase.apps.find(function(a){ return a.name === 
   firebase.initializeApp(_firebaseConfig, 'nr1map');
 }
 var _db = firebase.firestore(firebase.app('nr1map'));
+var _fn = firebase.app('nr1map').functions('southamerica-east1');
+function chamarServidor(nome, dados) { return _fn.httpsCallable(nome)(dados).then(function(r) { return r.data; }); }
 
 // -- Estado global --
 var _contrato = null;   // dados do Firestore
@@ -347,19 +350,17 @@ var _stepAtual = 1;
   _token = params.get('token');
   if (!_token) { mostrarErro(); return; }
 
-  _db.collection('nr1map_contratos').where('tokenAceite','==',_token).limit(1).get()
-    .then(function(snap) {
-      if (snap.empty) { mostrarErro(); return; }
-      var doc = snap.docs[0];
-      _contratoId = doc.id;
-      _contrato   = doc.data();
-
-      if (_contrato.status === 'assinado') {
+  chamarServidor('aceiteCarregar', { token: _token })
+    .then(function(r) {
+      if (r.estado === 'invalido') { mostrarErro(); return; }
+      if (r.estado === 'assinado') {
         document.getElementById('tela-loading').style.display = 'none';
         document.getElementById('tela-assinado').style.display = 'block';
-        document.getElementById('hash-ja-assinado').textContent = _contrato.hashAceite || _token;
+        document.getElementById('hash-ja-assinado').textContent = r.hashAceite || _token;
         return;
       }
+      _contratoId = r.contratoId;
+      _contrato   = r.contrato;
       document.getElementById('tela-loading').style.display = 'none';
       document.getElementById('tela-principal').style.display = 'block';
     })
@@ -571,47 +572,10 @@ function assinar() {
     whatsapp:   document.getElementById('cli-whatsapp').value.trim()
   };
 
-  // Atualizar contrato no Firestore
-  var c = _contrato.comercial || {};
-  var unitBase = c.valorUnit || 0;
-  var nColab = c.nColab || 0;
-  var descPacote = _pacoteAceite === '6m' ? 0.05 : _pacoteAceite === '12m' ? 0.08 : 0;
-  var mesesPacote = _pacoteAceite === '6m' ? 6 : _pacoteAceite === '12m' ? 12 : 0;
-  var unitFinal = unitBase * (1 - descPacote);
-  var totalFinal = nColab * unitFinal * (mesesPacote || 1);
+  // O servidor registra o aceite, calcula o valor e cadastra a empresa
+  chamarServidor('aceiteAssinar', { token: _token, cliente: dadosCliente, pacote: _pacoteAceite })
+    .then(function(r) { hash = r.hash || hash;
 
-  _db.collection('nr1map_contratos').doc(_contratoId).update({
-    status:       'assinado',
-    assinadoEm:   agora,
-    hashAceite:   hash,
-    cliente:      dadosCliente,
-    pacote:       _pacoteAceite,
-    desconto:     descPacote,
-    meses:        mesesPacote,
-    valorFinal:   totalFinal,
-    ipAceite:     'registrado via browser'
-  }).then(function() {
-    // Cadastrar empresa automaticamente
-    return _db.collection('nr1map_empresas').add({
-      nome:        dadosCliente.nome,
-      cnpj:        dadosCliente.cnpj,
-      setor:       dadosCliente.setor,
-      cidade:      dadosCliente.cidade,
-      endereco:    dadosCliente.endereco,
-      responsavel: dadosCliente.responsavel,
-      email:       dadosCliente.email,
-      whatsapp:    dadosCliente.whatsapp,
-      numColab:    (_contrato.comercial || {}).nColab || 0,
-      tipo:        (_contrato.comercial || {}).modalidade === 'mensal' ? 'mensal' : 'uso-unico',
-      faixa:       (_contrato.comercial || {}).faixaLabel || '',
-      status:      'ativo',
-      contratoId:  _contratoId,
-      contratoTipo:'enterprise',
-      hashContrato: hash,
-      criadoEm:    agora,
-      criadoPor:   'aceite-automatico'
-    });
-  }).then(function() {
     // Mostrar sucesso
     document.getElementById('tela-principal').style.display = 'none';
     document.getElementById('tela-sucesso').style.display = 'block';
