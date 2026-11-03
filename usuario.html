@@ -303,6 +303,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
           <div style="text-align:center;color:#9ca3af;font-size:13px;padding:20px;">Nenhuma resposta registrada ainda.</div>
         </div>
       </div>
+      <div id="termo-extra"></div>
     </div>
 
     <!-- ESPAÇO DE FALA -->
@@ -831,6 +832,55 @@ function carregarApp() {
     });
 }
 
+// ===== RESULTADO POR ÁREA, EVOLUÇÃO E ORIENTAÇÃO (aparece depois do login) =====
+var NOMES_AREAS = {'1_1':'Ritmo de trabalho','1_2':'Pausas e descompressão','1_3':'Estresse e esgotamento','1_4':'Ergonomia e carga cognitiva','2_1':'Estabilidade no trabalho','2_2':'Clareza de papéis e metas','2_3':'Segurança psicológica','2_4':'Treinamento e capacitação','2_5':'Segurança e riscos físicos','3_1':'Relação com a liderança','3_2':'Clima entre colegas','3_3':'Cultura da empresa','3_4':'Reconhecimento e valor','3_5':'Proteção contra assédio','4_1':'Propósito e significado','4_2':'Identidade e crescimento','4_3':'Autonomia e criatividade','4_4':'Ações motivadoras'};
+var NOMES_MODULOS = {'1':'Corpo e mente','2':'Segurança e previsibilidade','3':'Relacionamentos e cultura','4':'Motivação e propósito'};
+function _corIbp(v) { return v >= 1.5 ? '#10b981' : v <= -1.5 ? '#ef4444' : '#f59e0b'; }
+function _pct(v) { return Math.max(0, Math.min(100, (v + 5) / 10 * 100)); }
+function renderResultadoExtra(hist) {
+  var el = document.getElementById('termo-extra');
+  if (!el || !hist || !hist.length) return;
+  var ult = hist[hist.length - 1], h = '';
+  var card = function(t, corpo) { return '<div class="card" style="margin-top:12px;"><div class="card-title">' + t + '</div>' + corpo + '</div>'; };
+
+  // 1) Por área
+  if (ult.subcats && Object.keys(ult.subcats).length) {
+    var mods = {};
+    Object.keys(ult.subcats).forEach(function(k) { var m = k.split('_')[0]; (mods[m] = mods[m] || []).push({ k: k, v: ult.subcats[k] }); });
+    var corpo = '';
+    Object.keys(mods).sort().forEach(function(m) {
+      var media = mods[m].reduce(function(a, x) { return a + x.v; }, 0) / mods[m].length;
+      corpo += '<div style="margin:10px 0 4px;font-size:13px;font-weight:600;color:#111827;display:flex;justify-content:space-between;"><span>' + (NOMES_MODULOS[m] || 'Área ' + m) + '</span><span style="color:' + _corIbp(media) + ';">' + (media > 0 ? '+' : '') + media.toFixed(1) + '</span></div>' +
+        '<div style="height:8px;background:#e5e7eb;border-radius:6px;overflow:hidden;"><div style="height:8px;width:' + _pct(media).toFixed(0) + '%;background:' + _corIbp(media) + ';"></div></div>';
+    });
+    h += card('Seu resultado por área', corpo);
+    var atencao = Object.keys(ult.subcats).map(function(k) { return { k: k, v: ult.subcats[k] }; }).filter(function(x) { return x.v < 0; }).sort(function(a, b) { return a.v - b.v; }).slice(0, 3);
+    if (atencao.length) {
+      h += card('Pontos que merecem atenção', atencao.map(function(x) {
+        return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;"><span>' + (NOMES_AREAS[x.k] || x.k) + '</span><span style="font-weight:600;color:' + _corIbp(x.v) + ';">' + x.v.toFixed(1) + '</span></div>';
+      }).join(''));
+    }
+  } else {
+    h += card('Seu resultado por área', '<div style="font-size:13px;color:#6b7280;line-height:1.6;">Esta resposta foi guardada só com o resultado geral. Nas próximas pesquisas você verá também o resultado por área.</div>');
+  }
+
+  // 2) Evolução
+  if (hist.length >= 2) {
+    var pts = hist.slice(-12), W = 300, H = 90;
+    var xy = pts.map(function(p, i) { return [10 + i * ((W - 20) / (pts.length - 1)), H - 8 - (_pct(p.ibp) / 100) * (H - 16)]; });
+    h += card('Sua evolução', '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;"><line x1="0" x2="' + W + '" y1="' + (H / 2) + '" y2="' + (H / 2) + '" stroke="#e5e7eb" stroke-dasharray="4"/>' +
+      '<polyline fill="none" stroke="#10b981" stroke-width="2.5" points="' + xy.map(function(a) { return a[0].toFixed(1) + ',' + a[1].toFixed(1); }).join(' ') + '"/>' +
+      xy.map(function(a, i) { return '<circle cx="' + a[0].toFixed(1) + '" cy="' + a[1].toFixed(1) + '" r="3.5" fill="' + _corIbp(pts[i].ibp) + '"/>'; }).join('') + '</svg>');
+  }
+
+  // 3) Orientação
+  var o = ult.ibp >= 1.5 ? 'Você está em um bom momento no trabalho. Vale reconhecer o que está funcionando e manter os hábitos que fazem bem a você.'
+        : ult.ibp <= -1.5 ? 'Seu resultado indica um momento difícil. Você não precisa passar por isso sozinho(a): use o canal Acolhimento, que é anônimo, ou converse com alguém de confiança. Se estiver em sofrimento intenso, ligue para o CVV, 188, a qualquer hora, ou para o SAMU, 192.'
+        : 'Seu resultado indica que vale observar. Alguns pontos do trabalho podem estar pesando mais. Repare no que se repete e, se quiser conversar, o canal Acolhimento é anônimo.';
+  h += card('Orientação', '<div style="font-size:13px;color:#374151;line-height:1.6;">' + o + '</div><div style="font-size:11px;color:#9ca3af;margin-top:8px;">Este resultado é um retrato do seu bem-estar no trabalho e não é um diagnóstico.</div>');
+  el.innerHTML = h;
+}
+
 function carregarHistorico() {
   var _histId = _uid || (_tokenAnonimo ? 'token_' + _tokenAnonimo : null);
   if (!_histId) return;
@@ -853,6 +903,7 @@ function carregarHistorico() {
       });
       var ultimo = hist[hist.length - 1];
       if (ultimo) atualizarTermometro(ultimo.ibp);
+      renderResultadoExtra(hist);
       if (_streak > 0) {
         document.getElementById('streak-card').style.display = 'block';
         document.getElementById('streak-num').textContent = '🔥 ' + _streak;
@@ -1089,7 +1140,7 @@ function enviarRespostas() {
   batch.commit()
     .then(function() {
       return refHist.set({
-        historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr }),
+        historico: firebase.firestore.FieldValue.arrayUnion({ ibp: ibpGeral, data: dataStr, subcats: Object.keys(ibpSubcats).reduce(function(o, k){ o[k.replace(/\./g, '_')] = ibpSubcats[k].ibp; return o; }, {}) }),
         ultimaResposta: agora.toISOString()
       }, { merge: true });
     })
