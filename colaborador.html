@@ -875,11 +875,25 @@ function renderResultadoExtra(hist) {
 
   // 2) Evolução
   if (hist.length >= 2) {
-    var pts = hist.slice(-12), W = 300, H = 90;
-    var xy = pts.map(function(p, i) { return [10 + i * ((W - 20) / (pts.length - 1)), H - 8 - (_pct(p.ibp) / 100) * (H - 16)]; });
-    h += card('Sua evolução', '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;"><line x1="0" x2="' + W + '" y1="' + (H / 2) + '" y2="' + (H / 2) + '" stroke="#e5e7eb" stroke-dasharray="4"/>' +
-      '<polyline fill="none" stroke="#10b981" stroke-width="2.5" points="' + xy.map(function(a) { return a[0].toFixed(1) + ',' + a[1].toFixed(1); }).join(' ') + '"/>' +
-      xy.map(function(a, i) { return '<circle cx="' + a[0].toFixed(1) + '" cy="' + a[1].toFixed(1) + '" r="3.5" fill="' + _corIbp(pts[i].ibp) + '"/>'; }).join('') + '</svg>');
+    var pts = hist.slice(-8), W = 320, H = 190, ML = 34, MR = 14, MT = 24, MB = 36;
+    var iw = W - ML - MR, ih = H - MT - MB;
+    var yv = function(v) { return MT + ih - (_pct(v) / 100) * ih; };
+    var xv = function(i) { return ML + (pts.length === 1 ? iw / 2 : i * (iw / (pts.length - 1))); };
+    var mes = function(d) { var m = String(d || '').match(/^(\S{3})\S*\s+de\s+(\d{4})$/); return m ? m[1] + '/' + m[2].slice(2) : String(d || ''); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;font-family:sans-serif;">';
+    [[5, '+5'], [0, '0'], [-5, '-5']].forEach(function(l) {
+      svg += '<line x1="' + ML + '" x2="' + (W - MR) + '" y1="' + yv(l[0]).toFixed(1) + '" y2="' + yv(l[0]).toFixed(1) + '" stroke="' + (l[0] === 0 ? '#9ca3af' : '#e5e7eb') + '" stroke-dasharray="' + (l[0] === 0 ? '0' : '4') + '"/>' +
+             '<text x="' + (ML - 6) + '" y="' + (yv(l[0]) + 4).toFixed(1) + '" font-size="10" fill="#6b7280" text-anchor="end">' + l[1] + '</text>';
+    });
+    svg += '<polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round" points="' + pts.map(function(p, i) { return xv(i).toFixed(1) + ',' + yv(p.ibp).toFixed(1); }).join(' ') + '"/>';
+    pts.forEach(function(p, i) {
+      svg += '<circle cx="' + xv(i).toFixed(1) + '" cy="' + yv(p.ibp).toFixed(1) + '" r="5" fill="' + _corIbp(p.ibp) + '" stroke="#fff" stroke-width="2"/>' +
+             '<text x="' + xv(i).toFixed(1) + '" y="' + (yv(p.ibp) - 10).toFixed(1) + '" font-size="11" font-weight="700" fill="' + _corIbp(p.ibp) + '" text-anchor="middle">' + (p.ibp > 0 ? '+' : '') + p.ibp.toFixed(1) + '</text>' +
+             '<text x="' + xv(i).toFixed(1) + '" y="' + (H - 18) + '" font-size="10" fill="#6b7280" text-anchor="middle">' + mes(p.data) + '</text>' +
+             '<text x="' + xv(i).toFixed(1) + '" y="' + (H - 6) + '" font-size="9" fill="#9ca3af" text-anchor="middle">' + (i + 1) + 'ª resposta</text>';
+    });
+    svg += '</svg>';
+    h += card('Sua evolução', svg + '<div style="font-size:12px;color:#6b7280;line-height:1.5;">Quanto mais para cima, melhor o seu bem-estar no trabalho. Cada ponto é uma resposta sua.</div>');
   }
 
   // 3) Orientação
