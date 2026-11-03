@@ -1634,8 +1634,9 @@ function entrarGoogle(perfil) {
         if (!d.nr1Papel && !d.admin) { throw { code: 'sem-cadastro' }; }
         if (perfil === 'parceiro' && d.nr1Papel !== 'parceiro') { throw { code: 'perfil-errado', alvo: 'Parceiro' }; }
         return cred.user.getIdToken(true).then(function() {
-          sessionStorage.setItem(perfil === 'rh' ? 'nr1map_rh_uid' : 'nr1map_user_uid', cred.user.uid);
-          sessionStorage.setItem(perfil === 'rh' ? 'nr1map_rh_email' : 'nr1map_user_email', cred.user.email);
+          var pre = perfil === 'rh' ? 'nr1map_rh' : perfil === 'parceiro' ? 'nr1map_parceiro' : 'nr1map_user';
+          sessionStorage.setItem(pre + '_uid', cred.user.uid);
+          sessionStorage.setItem(pre + '_email', cred.user.email);
           window.location.href = DESTINO_GOOGLE[perfil];
         });
       });
