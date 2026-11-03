@@ -866,7 +866,7 @@ function renderResultadoExtra(hist) {
 
   // 2) Evolução
   if (hist.length >= 2) {
-    var pts = hist.slice(-8), W = 320, H = 190, ML = 34, MR = 14, MT = 24, MB = 36;
+    var pts = hist.slice(-8), W = 320, H = 190, ML = 34, MR = 32, MT = 24, MB = 36;
     var iw = W - ML - MR, ih = H - MT - MB;
     var yv = function(v) { return MT + ih - (_pct(v) / 100) * ih; };
     var xv = function(i) { return ML + (pts.length === 1 ? iw / 2 : i * (iw / (pts.length - 1))); };
