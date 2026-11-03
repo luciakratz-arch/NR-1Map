@@ -311,7 +311,8 @@ tbody tr:hover td{background:#F5F8F7;}
         <a href="#" onclick="esqueciSenha(document.getElementById('par-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
       </div>
       <button class="login-btn" style="background:var(--verde-claro);" onclick="entrarParceiro()">Entrar como Parceiro</button>
-      <p class="login-hint">Representante / Consultoria credenciada · use qualquer senha para demo</p>
+      <button class="login-btn" id="btn-parceiro-google" onclick="entrarGoogle('parceiro')" style="margin-top:10px;background:#fff;color:#2b2b2b;">Entrar com Google</button>
+      <p class="login-hint">Representante / Consultoria credenciada</p>
     </div>
 
     <!-- RH -->
@@ -324,7 +325,8 @@ tbody tr:hover td{background:#F5F8F7;}
         <a href="#" onclick="esqueciSenha(document.getElementById('rh-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
       </div>
       <button class="login-btn" onclick="entrarRH()">Entrar como Gestor RH</button>
-      <p class="login-hint">Conta criada após assinatura do plano · use qualquer senha para demo</p>
+      <button class="login-btn" id="btn-rh-google" onclick="entrarGoogle('rh')" style="margin-top:10px;background:#fff;color:#2b2b2b;">Entrar com Google</button>
+      <p class="login-hint">Conta criada após assinatura do plano</p>
     </div>
 
     <!-- USUÁRIO -->
@@ -337,7 +339,8 @@ tbody tr:hover td{background:#F5F8F7;}
         <a href="#" onclick="esqueciSenha(document.getElementById('user-email').value);return false;" style="font-size:11px;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#12A073'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Esqueci minha senha</a>
       </div>
       <button class="login-btn" onclick="entrarUser()">Entrar na minha área</button>
-      <p class="login-hint">Cadastro feito pelo link recebido da empresa · use qualquer senha para demo</p>
+      <button class="login-btn" id="btn-user-google" onclick="entrarGoogle('user')" style="margin-top:10px;background:#fff;color:#2b2b2b;">Entrar com Google</button>
+      <p class="login-hint">Cadastro feito pelo link recebido da empresa</p>
       <div style="margin-top:16px;padding:12px 14px;background:rgba(10,110,79,.12);border:1px solid rgba(18,160,115,.2);border-radius:9px;font-size:11px;color:#12A073;line-height:1.6;text-align:center;">
         🔒 Suas respostas são guardadas com sigilo absoluto.<br/>
         Seu nome nunca é associado aos resultados que o RH visualiza.
@@ -1615,6 +1618,36 @@ function setLoginTab(tab, el) {
   document.getElementById('login-user').style.display     = tab === 'user'     ? 'block' : 'none';
 }
 
+var ROTULO_GOOGLE = { parceiro: 'Entrar com Google', rh: 'Entrar com Google', user: 'Entrar com Google' };
+var DESTINO_GOOGLE = { parceiro: 'parceiro.html', rh: 'painel.html', user: 'usuario.html' };
+function entrarGoogle(perfil) {
+  var btn = document.getElementById('btn-' + perfil + '-google');
+  function voltar() { btn.textContent = ROTULO_GOOGLE[perfil]; btn.disabled = false; }
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  window.nr1mapAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .then(function(cred) {
+      if (!cred.user.emailVerified) { window.nr1mapAuth.signOut(); alert('O e-mail desta conta Google não está verificado.'); voltar(); return; }
+      // O servidor confere se este e-mail tem acesso cadastrado e marca o papel da conta.
+      return window.nr1mapFn.httpsCallable('marcarPapel')({}).then(function(r) {
+        var d = r.data || {};
+        if (!d.nr1Papel && !d.admin) { throw { code: 'sem-cadastro' }; }
+        if (perfil === 'parceiro' && d.nr1Papel !== 'parceiro') { throw { code: 'perfil-errado', alvo: 'Parceiro' }; }
+        return cred.user.getIdToken(true).then(function() {
+          sessionStorage.setItem(perfil === 'rh' ? 'nr1map_rh_uid' : 'nr1map_user_uid', cred.user.uid);
+          sessionStorage.setItem(perfil === 'rh' ? 'nr1map_rh_email' : 'nr1map_user_email', cred.user.email);
+          window.location.href = DESTINO_GOOGLE[perfil];
+        });
+      });
+    })
+    .catch(function(e) {
+      if (window.nr1mapAuth.currentUser && (e.code === 'sem-cadastro' || e.code === 'perfil-errado' || e.code === 'functions/permission-denied')) window.nr1mapAuth.signOut();
+      if (e.code === 'sem-cadastro' || e.code === 'functions/permission-denied') alert('Este e-mail do Google não tem acesso cadastrado no NR-1 Map. Use o e-mail com o qual você foi cadastrado.');
+      else if (e.code === 'perfil-errado') alert('Esta conta não é de ' + e.alvo + '. Escolha a aba certa.');
+      else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') alert('Não foi possível entrar com o Google. Tente de novo.');
+      voltar();
+    });
+}
 var ADMINS_AUTORIZADOS = ['luciakratz@gmail.com', 'contato@luciakratz.com.br'];
 function entrarAdminGoogle() {
   var btn = document.getElementById('btn-adm-google');
@@ -3753,6 +3786,7 @@ function aprovarDepMestre() {
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 <script>
 (function() {
   var firebaseConfig = {
@@ -3768,6 +3802,7 @@ function aprovarDepMestre() {
   try { app = firebase.app('nr1map'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map'); }
   window.nr1mapDb   = firebase.firestore(app);
   window.nr1mapAuth = firebase.auth(app);
+  window.nr1mapFn   = app.functions('southamerica-east1');
 })();
 
 // Carrega painel geral ao iniciar
