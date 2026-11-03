@@ -291,12 +291,40 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:#f0f4f8;color:#1
         <div style="font-size:11px;color:#6b7280;background:#fef3c7;padding:3px 10px;border-radius:20px;margin-left:auto;">🔒 Só você vê</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Seu resultado</div>
-        <div style="font-size:14px;color:#374151;line-height:1.6;padding:6px 0 14px;">
-          Por segurança, o seu resultado pessoal só aparece depois que você entra com o seu login e a sua senha. Ninguém da empresa vê o seu resultado individual.
+      <div id="termo-login" class="card">
+        <div class="card-title">Entre para ver o seu resultado</div>
+        <div style="font-size:14px;color:#374151;line-height:1.6;padding:6px 0 12px;">
+          Por segurança, o seu resultado pessoal só aparece depois que você entra. Ninguém da empresa vê o seu resultado individual.
         </div>
-        <a href="admin.html" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">Entrar na minha área</a>
+        <button class="btn-primary" id="termo-btn-google" onclick="termoEntrarGoogle()" style="width:100%;margin-bottom:10px;background:#fff;color:#111827;border:1px solid #d1d5db;">Entrar com Google</button>
+        <div style="font-size:12px;color:#6b7280;text-align:center;margin:6px 0;">ou com e-mail e senha</div>
+        <input id="termo-email" type="email" placeholder="seu e-mail" autocomplete="username" style="width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;margin-bottom:8px;font-size:14px;box-sizing:border-box;"/>
+        <input id="termo-senha" type="password" placeholder="sua senha" autocomplete="current-password" style="width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;"/>
+        <button class="btn-primary" id="termo-btn-senha" onclick="termoEntrarSenha()" style="width:100%;">Entrar</button>
+        <div style="text-align:center;margin-top:10px;"><a href="#" onclick="termoEsqueci();return false;" style="font-size:12px;color:#6b7280;">Esqueci minha senha</a></div>
+      </div>
+
+      <div id="termo-conteudo" style="display:none;">
+      <div class="termo-hero">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;text-align:center;">Seu IBP atual</div>
+        <div class="termo-ibp-val" id="termo-val" style="color:#f59e0b;">—</div>
+        <div class="termo-zona" id="termo-zona" style="color:#92400e;">Aguardando respostas</div>
+        <div class="termo-strip">
+          <div class="termo-needle" id="termo-needle" style="left:50%;"></div>
+        </div>
+        <div class="termo-labels">
+          <span>😔 Momento<br/>difícil</span>
+          <span style="text-align:center;">Vale<br/>observar</span>
+          <span style="text-align:right;">Você está<br/>bem! 😊</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 Histórico</div>
+        <div class="historico-list" id="historico-lista">
+          <div style="text-align:center;color:#9ca3af;font-size:13px;padding:20px;">Nenhuma resposta registrada ainda.</div>
+        </div>
+      </div>
       </div>
     </div>
 
@@ -765,6 +793,51 @@ function carregarApp() {
     // Carrega histórico pessoal
   }).catch(function(e) { console.log(e); });
 }
+
+// ===== MEU TERMÔMETRO: resultado pessoal só depois do login =====
+var _authColab = firebase.auth(fbApp);
+function termoErro(e) {
+  var m = 'Não foi possível entrar. Confira e tente de novo.';
+  if (e && (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')) m = 'E-mail ou senha incorretos.';
+  else if (e && e.code === 'auth/too-many-requests') m = 'Muitas tentativas. Aguarde alguns minutos.';
+  else if (e && (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request')) return;
+  alert(m);
+}
+function termoEntrarGoogle() {
+  _authColab.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(c){ termoMostrar(c.user); }).catch(termoErro);
+}
+function termoEntrarSenha() {
+  var em = document.getElementById('termo-email').value.trim(), se = document.getElementById('termo-senha').value;
+  if (!em || !se) { alert('Preencha e-mail e senha.'); return; }
+  _authColab.signInWithEmailAndPassword(em, se).then(function(c){ termoMostrar(c.user); }).catch(termoErro);
+}
+function termoEsqueci() {
+  var em = document.getElementById('termo-email').value.trim();
+  if (!em) { alert('Digite seu e-mail primeiro.'); return; }
+  _authColab.sendPasswordResetEmail(em).then(function(){ alert('Enviamos um e-mail para você criar uma nova senha.'); }).catch(termoErro);
+}
+function termoMostrar(user) {
+  document.getElementById('termo-login').style.display = 'none';
+  document.getElementById('termo-conteudo').style.display = 'block';
+  db.collection('nr1map_historico_usuario').doc(user.uid).get().then(function(doc) {
+    var hist = doc.exists ? (doc.data().historico || []) : [];
+    if (hist.length === 0) return;
+    var lista = document.getElementById('historico-lista');
+    lista.innerHTML = '';
+    hist.slice(-6).reverse().forEach(function(h) {
+      var cor = h.ibp >= 1.5 ? '#10b981' : h.ibp <= -1.5 ? '#ef4444' : '#f59e0b';
+      var zona = h.ibp >= 1.5 ? 'Você está bem!' : h.ibp <= -1.5 ? 'Momento difícil' : 'Vale observar';
+      var item = document.createElement('div');
+      item.className = 'hist-item';
+      item.innerHTML = '<div class="hist-dot" style="background:'+cor+';"></div>' +
+        '<div style="flex:1;"><div class="hist-mes">'+h.data+'</div><div class="hist-zona">'+zona+'</div></div>' +
+        '<div class="hist-ibp" style="color:'+cor+';">'+(h.ibp>0?'+':'')+h.ibp.toFixed(1)+'</div>';
+      lista.appendChild(item);
+    });
+    atualizarTermometro(hist[hist.length - 1].ibp);
+  }).catch(function(){});
+}
+_authColab.onAuthStateChanged(function(u) { if (u) termoMostrar(u); });
 
 function carregarHistorico() {} // o resultado pessoal só aparece depois do login (área do Usuário)
 
