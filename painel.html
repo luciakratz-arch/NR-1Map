@@ -5593,17 +5593,32 @@ function verLinksEnviados() {
     }
 
     var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
-    var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + snap.size + ' links</p>';
+    var agoraIso = new Date().toISOString();
+    // Um link por colaborador: o mais recente. Links vencidos nao viram botao de abrir.
+    var porColab = {};
     snap.forEach(function(td) {
       var t = td.data();
+      var k = t.colaboradorId || td.id;
+      if (!porColab[k] || String(t.criadoEm || '') > String(porColab[k].criadoEm || '')) porColab[k] = t;
+    });
+    var lista = Object.keys(porColab).map(function(k) { return porColab[k]; });
+    var ordem = function(t) { return t.usado ? 1 : ((t.expiraEm || '') < agoraIso ? 2 : 0); };
+    lista.sort(function(x, y) { return ordem(x) - ordem(y); });
+    var vencidos = lista.filter(function(t) { return !t.usado && (t.expiraEm || '') < agoraIso; }).length;
+    var html = '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">' + lista.length + ' colaboradores' + (vencidos ? ' - ' + vencidos + ' com link vencido (dispare a pesquisa de novo para gerar links novos)' : '') + '</p>';
+    lista.forEach(function(t) {
+      var vencido = !t.usado && (t.expiraEm || '') < agoraIso;
       var statusTxt = t.usado
-        ? '<span style="color:#ef4444;font-size:11px;">Respondido</span>'
-        : '<span style="color:#10b981;font-size:11px;">Pendente</span>';
-      var url = base + t.codigo;
+        ? '<span style="color:#6b7280;font-size:11px;">Respondido</span>'
+        : vencido
+          ? '<span style="color:#ef4444;font-size:11px;">Link vencido</span>'
+          : '<span style="color:#10b981;font-size:11px;">Pendente</span>';
+      var url = base + encodeURIComponent(t.codigo);
+      var nome = String(t.colaboradorNome || 'Colaborador').replace(/[<>&]/g, '');
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb;gap:8px;">' +
-        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (t.colaboradorNome || 'Colaborador') + '</div>' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + nome + '</div>' +
         '<div>' + statusTxt + '</div></div>' +
-        '<a href="' + url + '" target="_blank" style="background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;">Abrir link</a>' +
+        ((t.usado || vencido) ? '' : '<a href="' + url + '" target="_blank" style="background:#10b981;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;white-space:nowrap;">Abrir link</a>') +
         '</div>';
     });
     mBody.innerHTML = html;
@@ -6230,41 +6245,8 @@ function carregarCargos(empresaId) {
         })
         .catch(function(){ carregarEmpresa(user.uid, user.email); });
     } else {
-      var uid = sessionStorage.getItem('nr1map_rh_uid');
-      var email = sessionStorage.getItem('nr1map_rh_email');
-      var pwd = sessionStorage.getItem('nr1map_rh_pwd');
-      if(uid){
-        // Se tem senha, fazer login real no Firebase Auth para ter request.auth válido
-        if(email && pwd){
-          window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
-            .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
-            .catch(function(){
-              // Fallback sem auth
-              window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
-                .then(function(doc){
-                  if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); }
-                }).catch(function(err){ console.log('auth painel err:', err); });
-            });
-        } else {
-          // Tenta pelo doc.id primeiro
-          window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
-            .then(function(doc){
-              if(doc.exists){ var e=doc.data(); e.id=doc.id; aplicarEmpresa(e); return; }
-              return window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
-                .then(function(snap){
-                  if(!snap.empty){ var e=snap.docs[0].data(); e.id=snap.docs[0].id; aplicarEmpresa(e); return; }
-                  if(email) return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
-                    .then(function(snap2){
-                      if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; aplicarEmpresa(e); }
-                    });
-                });
-            }).catch(function(err){ console.log('auth painel err:', err); });
-        }
-      } else if(email && pwd){
-        window.nr1mapAuth.signInWithEmailAndPassword(email, pwd)
-          .then(function(c){ carregarEmpresa(c.user.uid, c.user.email); })
-          .catch(function(e){ console.log('Re-auth falhou:', e); });
-      }
+      // Sem login valido nao ha acesso ao painel: volta para a tela de entrada
+      window.location.href = 'admin.html';
     }
   });
 })();
@@ -7653,7 +7635,6 @@ function salvarNovaSenha() {
         .update({ primeiroAcesso: false }).catch(function(){});
     }
     // Atualiza sessionStorage com nova senha
-    sessionStorage.setItem('nr1map_rh_pwd', nova);
     document.getElementById('modal-primeiro-acesso').style.display = 'none';
     alert('✅ Senha criada com sucesso! Bem-vinda ao NR-1 Map.');
   }).catch(function(e) {

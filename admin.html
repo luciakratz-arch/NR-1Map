@@ -1593,15 +1593,15 @@ tbody tr:hover td{background:#F5F8F7;}
       <h3>✅ Acesso criado com sucesso!</h3>
       <button class="modal-close" onclick="document.getElementById('modal-credenciais').classList.remove('open')">✕</button>
     </div>
-    <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;">Envie estas credenciais para o cliente acessar o painel:</p>
+    <p style="font-size:13px;color:var(--cinza-medio);margin-bottom:16px;">Acesso criado. Envie a mensagem abaixo para o cliente acessar o painel:</p>
     <div style="background:var(--verde-xp);border:1px solid var(--verde-claro);border-radius:10px;padding:16px;margin-bottom:16px;">
       <div style="margin-bottom:10px;">
         <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">E-mail de acesso</div>
         <div id="cred-email" style="font-size:14px;font-weight:600;color:var(--preto);word-break:break-all;"></div>
       </div>
       <div>
-        <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Senha temporária</div>
-        <div id="cred-senha" style="font-size:14px;font-weight:600;color:var(--preto);font-family:monospace;letter-spacing:.1em;"></div>
+        <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Senha</div>
+        <div id="cred-senha" style="font-size:13px;font-weight:500;color:var(--preto);"></div>
       </div>
     </div>
     <div style="font-size:12px;color:var(--cinza-medio);margin-bottom:16px;">🔗 Link de acesso: <strong>painel.html</strong></div>
@@ -1758,8 +1758,8 @@ function gerarSenha() {
 
 function exibirCredenciais(email, senha) {
   document.getElementById('cred-email').textContent = email;
-  document.getElementById('cred-senha').textContent = senha;
-  window._credAtual = { email: email, senha: senha };
+  document.getElementById('cred-senha').textContent = 'A senha nao e exibida. Um e-mail foi enviado para a pessoa criar a propria senha.';
+  window._credAtual = { email: email };
   document.getElementById('modal-credenciais').classList.add('open');
 }
 
@@ -1960,7 +1960,34 @@ function salvarPF() {
       alert('❌ ' + msg + '\n\nDetalhe: ' + e.message);
     });
 }
-function entrarParceiro() { window.location.href = 'parceiro.html'; }
+function entrarParceiro() {
+  var email = document.getElementById('par-email').value.trim();
+  var senha = document.getElementById('par-senha').value;
+  if (!email || !senha) { alert('Preencha e-mail e senha.'); return; }
+  var btn = document.querySelector('#login-parceiro .login-btn');
+  var rotulo = btn.textContent;
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  function voltar() { btn.textContent = rotulo; btn.disabled = false; }
+  window.nr1mapAuth.signInWithEmailAndPassword(email, senha)
+    .then(function(cred) {
+      // A "marca" de parceiro foi colocada na conta pelo servidor quando ela foi criada
+      return cred.user.getIdTokenResult(true).then(function(t) {
+        if (!t.claims || t.claims.nr1Papel !== 'parceiro') { throw { code: 'perfil-errado', alvo: 'Parceiro' }; }
+        sessionStorage.setItem('nr1map_parceiro_uid', cred.user.uid);
+        sessionStorage.setItem('nr1map_parceiro_email', cred.user.email);
+        window.location.href = 'parceiro.html';
+      });
+    })
+    .catch(function(e) {
+      if (window.nr1mapAuth.currentUser && e.code === 'perfil-errado') window.nr1mapAuth.signOut();
+      var msg = 'E-mail ou senha incorretos.';
+      if (e.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos.';
+      else if (e.code === 'perfil-errado') msg = 'Esta conta nao e de Parceiro. Escolha a aba certa.';
+      alert(msg);
+      voltar();
+    });
+}
 function entrarRH() {
   var email = document.getElementById('rh-email').value.trim();
   var senha = document.getElementById('rh-senha').value;
@@ -1970,10 +1997,9 @@ function entrarRH() {
   btn.disabled = true;
   window.nr1mapAuth.signInWithEmailAndPassword(email, senha)
     .then(function(cred) {
-      // Passa credenciais via sessionStorage para o painel usar
+      // A sessao do login ja vale para o painel (mesmo app do Firebase); a senha nunca e guardada
       sessionStorage.setItem('nr1map_rh_uid', cred.user.uid);
       sessionStorage.setItem('nr1map_rh_email', cred.user.email);
-      sessionStorage.setItem('nr1map_rh_pwd', senha);
       window.location.href = 'painel.html';
     })
     .catch(function(e) {
@@ -1995,7 +2021,6 @@ function entrarUser() {
     .then(function(cred) {
       sessionStorage.setItem('nr1map_user_uid', cred.user.uid);
       sessionStorage.setItem('nr1map_user_email', cred.user.email);
-      sessionStorage.setItem('nr1map_user_pwd', senha);
       window.location.href = 'usuario.html';
     })
     .catch(function(e) {

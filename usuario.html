@@ -668,19 +668,8 @@ function iniciarFluxoAuth() {
       _uid = user.uid;
       carregarUsuario(_uid);
     } else {
-      // Tenta re-autenticar com credenciais salvas no sessionStorage
-      var email = sessionStorage.getItem('nr1map_user_email');
-      var pwd   = sessionStorage.getItem('nr1map_user_pwd');
-      if (email && pwd) {
-        auth.signInWithEmailAndPassword(email, pwd)
-          .then(function(cred) {
-            _uid = cred.user.uid;
-            carregarUsuario(_uid);
-          })
-          .catch(function() { window.location.href = 'admin.html'; });
-      } else {
-        window.location.href = 'admin.html';
-      }
+      // Sem login valido volta para a tela de entrada (a senha nunca e guardada no navegador)
+      window.location.href = 'admin.html';
     }
   });
 }

@@ -588,8 +588,8 @@ function gerarSenhaPar() {
 
 function exibirCredenciaisPar(email, senha) {
   document.getElementById('par-cred-email').textContent = email;
-  document.getElementById('par-cred-senha').textContent = senha;
-  window._parCredAtual = { email: email, senha: senha };
+  document.getElementById('par-cred-senha').textContent = 'A senha nao e exibida. Um e-mail foi enviado para a pessoa criar a propria senha.';
+  window._parCredAtual = { email: email };
   document.getElementById('modal-cred-parceiro').classList.add('open');
 }
 
@@ -1031,8 +1031,8 @@ function calcular(){
         <div id="par-cred-email" style="font-size:14px;font-weight:600;color:#0D1210;word-break:break-all;"></div>
       </div>
       <div>
-        <div style="font-size:11px;font-weight:600;color:#0A6E4F;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Senha temporária</div>
-        <div id="par-cred-senha" style="font-size:14px;font-weight:600;color:#0D1210;font-family:monospace;letter-spacing:.1em;"></div>
+        <div style="font-size:11px;font-weight:600;color:#0A6E4F;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Senha</div>
+        <div id="par-cred-senha" style="font-size:13px;font-weight:500;color:#0D1210;"></div>
       </div>
     </div>
     <div style="font-size:12px;color:#6B7370;margin-bottom:16px;">🔗 Link: <strong>painel.html</strong></div>
@@ -1062,17 +1062,21 @@ function calcular(){
     appId: "1:437375609844:web:9435b1fb3b21778f2e27a1"
   };
   var app;
-  try { app = firebase.app('nr1map-par'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map-par'); }
+  try { app = firebase.app('nr1map'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map'); }
   window.nr1mapDb   = firebase.firestore(app);
   window.nr1mapFn   = app.functions('southamerica-east1');
   window.nr1mapAuth = firebase.auth(app);
 
   // Detecta UID do parceiro logado via sessionStorage (set pelo admin ao redirecionar)
-  var uid = sessionStorage.getItem('nr1map_parceiro_uid');
-  if (uid) {
-    window._parceiroUid = uid;
-    carregarDadosParceiro(uid);
-  }
+  // Sem login valido o parceiro volta para a tela de entrada
+  window.nr1mapAuth.onAuthStateChanged(function(user) {
+    if (user) {
+      window._parceiroUid = user.uid;
+      carregarDadosParceiro(user.uid);
+    } else {
+      window.location.href = 'admin.html';
+    }
+  });
 })();
 
 function carregarDadosParceiro(uid) {
