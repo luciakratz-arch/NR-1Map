@@ -1633,6 +1633,7 @@ function entrarGoogle(perfil) {
         var d = r.data || {};
         if (!d.nr1Papel && !d.admin) { throw { code: 'sem-cadastro' }; }
         if (perfil === 'parceiro' && d.nr1Papel !== 'parceiro') { throw { code: 'perfil-errado', alvo: 'Parceiro' }; }
+        if ((perfil === 'rh' || perfil === 'user') && !d.nr1EmpresaId) { throw { code: 'sem-empresa' }; }
         return cred.user.getIdToken(true).then(function() {
           var pre = perfil === 'rh' ? 'nr1map_rh' : perfil === 'parceiro' ? 'nr1map_parceiro' : 'nr1map_user';
           sessionStorage.setItem(pre + '_uid', cred.user.uid);
@@ -1642,9 +1643,10 @@ function entrarGoogle(perfil) {
       });
     })
     .catch(function(e) {
-      if (window.nr1mapAuth.currentUser && (e.code === 'sem-cadastro' || e.code === 'perfil-errado' || e.code === 'functions/permission-denied')) window.nr1mapAuth.signOut();
+      if (window.nr1mapAuth.currentUser && (e.code === 'sem-cadastro' || e.code === 'perfil-errado' || e.code === 'sem-empresa' || e.code === 'functions/permission-denied')) window.nr1mapAuth.signOut();
       if (e.code === 'sem-cadastro' || e.code === 'functions/permission-denied') alert('Este e-mail do Google não tem acesso cadastrado no NR-1 Map. Use o e-mail com o qual você foi cadastrado.');
       else if (e.code === 'perfil-errado') alert('Esta conta não é de ' + e.alvo + '. Escolha a aba certa.');
+      else if (e.code === 'sem-empresa') alert('Esta conta não pertence a nenhuma empresa (é a conta da administradora). O painel da empresa abre com a conta da empresa, por exemplo luciakratz.coach@gmail.com. Para ver os clientes, use a aba Admin.');
       else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') alert('Não foi possível entrar com o Google. Tente de novo.');
       voltar();
     });
