@@ -327,6 +327,13 @@ textarea.form-control{resize:vertical;min-height:70px;}
 }
 </style>
 <script src="cbo-database.js"></script>
+<script>
+// Envia a identidade de quem esta logado ao gerar documentos (o servidor so gera para o dono da empresa, o parceiro dela ou a administradora)
+(function(){var f=window.fetch;window.fetch=function(u,o){try{
+  if(typeof u==='string'&&u.indexOf('/gerarLaudo')>-1&&window.nr1mapAuth&&window.nr1mapAuth.currentUser){
+    return window.nr1mapAuth.currentUser.getIdToken().then(function(t){o=o||{};o.headers=Object.assign({},o.headers||{},{Authorization:'Bearer '+t});return f(u,o);});
+  }}catch(e){}return f(u,o);};})();
+</script>
 </head>
 <body>
 <div class="app">

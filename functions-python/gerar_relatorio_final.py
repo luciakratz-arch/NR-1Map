@@ -62,24 +62,25 @@ MODULOS_NOME = {
     "M4": "Fatores Motivacionais / Proposito",
 }
 SUBCATS_NOME = {
-    "1.1":"Ergonomia e Conforto Fisico",
+    "1.1":"Ergonomia e Conforto Físico",
     "1.2":"Pausas e Ritmo de Trabalho",
-    "1.3":"Saude Mental e Ansiedade",
+    "1.3":"Saúde Mental e Ansiedade",
     "1.4":"Carga Cognitiva Digital",
-    "2.1":"Clareza de Papeis",
-    "2.2":"Metas e Pressao por Resultados",
-    "2.3":"Estabilidade e Seguranca no Emprego",
-    "2.4":"Treinamento e Capacitacao",
-    "3.1":"Lideranca e Gestao Direta",
+    "2.1":"Clareza de Papéis",
+    "2.2":"Metas e Pressão por Resultados",
+    "2.3":"Estabilidade e Segurança no Emprego",
+    "2.5":"Segurança e Riscos Físicos",
+    "2.4":"Treinamento e Capacitação",
+    "3.1":"Liderança e Gestão Direta",
     "3.2":"Relacionamento com Pares",
     "3.3":"Cultura e Valores Organizacionais",
     "3.4":"Comunicacao Interna",
-    "3.5":"Assedio e Violencia no Trabalho",
-    "4.1":"Proposito e Missao",
-    "4.2":"Reconhecimento e Valorizacao",
+    "3.5":"Assédio e Violência no Trabalho",
+    "4.1":"Propósito e Missão",
+    "4.2":"Reconhecimento e Valorização",
     "4.3":"Crescimento e Desenvolvimento",
     "4.4":"Autonomia e Pertencimento",
-    "4.5":"Remuneracao e Beneficios",
+    "4.5":"Remuneração e Benefícios",
 }
 
 MIN_RESPONDENTES = 3
@@ -204,7 +205,7 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
     # Rodape
     canvas_obj.setFont('Helvetica', 6.5)
     canvas_obj.setFillColor(CINZA)
-    canvas_obj.drawString(20*mm, 10*mm, "NR-1 Map | Portaria MTE n. 1.419/2024 | Documento Confidencial")
+    canvas_obj.drawString(20*mm, 10*mm, "NR-1 Map | Portaria MTE n. 1.419/2024 | Confidencial")
     canvas_obj.drawRightString(w-20*mm, 10*mm, f"Pagina {doc.page}")
     # Assinante no rodape das paginas internas
     if doc.page > 1 and resp_tecnico:
@@ -212,7 +213,7 @@ def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
         crp  = resp_tecnico.get('crp', '')
         if nome:
             canvas_obj.setFont('Helvetica', 6.5)
-            canvas_obj.drawCentredString(w/2, 10*mm, f"Resp. Tecnico: {nome}" + (f" | {crp}" if crp else ""))
+            canvas_obj.drawCentredString(w/2, 6*mm, f"Resp. Técnico: {nome}" + (f" | {crp}" if crp else ""))
     canvas_obj.restoreState()
 
 

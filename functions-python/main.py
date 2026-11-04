@@ -17,7 +17,7 @@ import re
 import json
 
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import credentials, firestore, storage, auth as fb_auth
 from firebase_functions import https_fn, options
 
 # Inicializa Firebase Admin
@@ -43,8 +43,8 @@ def salvar_storage(caminho_local, nome_arquivo_storage, empresa_id):
     bucket = storage.bucket()
     blob = bucket.blob(f"nr1map_laudos/{empresa_id}/{nome_arquivo_storage}")
     blob.upload_from_filename(caminho_local, content_type='application/pdf')
-    blob.make_public()
-    return blob.public_url
+    # Arquivo PRIVADO: devolve um link assinado que expira em 7 dias (se a assinatura falhar, nao deixa publico: erro)
+    return blob.generate_signed_url(version='v4', expiration=datetime.timedelta(days=7), method='GET')
 
 def salvar_firestore(empresa_id, empresa_nome, tipo, url, num_colab, ibp_geral):
     """Registra laudo gerado no Firestore."""
@@ -526,6 +526,26 @@ def gerar_pdf_laudo(dados):
     return gerar_pdf_por_tipo(dados, 'laudo_tecnico')
 
 
+
+def _autorizado(req, empresa_id):
+    """So gera documento quem esta logado e e dono da empresa (gestor/RH), o parceiro dela ou a administradora."""
+    h = req.headers.get('Authorization', '')
+    if not h.startswith('Bearer '):
+        return False
+    try:
+        t = fb_auth.verify_id_token(h[7:])
+    except Exception:
+        return False
+    if t.get('adminCentral') is True:
+        return True
+    papel = t.get('nr1Papel')
+    if papel == 'empresa' and t.get('nr1EmpresaId') == empresa_id and t.get('nr1Nivel') != 'colaborador':
+        return True
+    if papel == 'parceiro' and t.get('nr1ParceiroId'):
+        emp = db.collection('nr1map_empresas').document(empresa_id).get()
+        return emp.exists and emp.to_dict().get('parceiroId') == t.get('nr1ParceiroId')
+    return False
+
 # ── Cloud Functions ───────────────────────────────────────────────
 
 @https_fn.on_request(
@@ -551,6 +571,10 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         if not empresa_id:
             return https_fn.Response(json.dumps({"error": "empresaId obrigatorio"}),
                                      status=400, mimetype='application/json')
+
+        if not _autorizado(req, empresa_id):
+            return https_fn.Response(json.dumps({"error": "Acesso negado. Entre no sistema para gerar documentos."}),
+                                     status=403, mimetype='application/json')
 
         # Tipo definido PRIMEIRO — usado antes de qualquer outra logica
         body_json = req.get_json(silent=True) or {}
@@ -613,6 +637,6 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
 
     except Exception as e:
         return https_fn.Response(
-            json.dumps({"error": str(e)}),
+            json.dumps({"error": "Nao foi possivel gerar o documento agora."}),
             status=500, mimetype='application/json'
         )
