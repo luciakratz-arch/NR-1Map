@@ -590,6 +590,10 @@ function exibirCredenciaisPar(email, senha) {
   document.getElementById('par-cred-email').textContent = email;
   document.getElementById('par-cred-senha').textContent = 'A senha nao e exibida. Um e-mail foi enviado para a pessoa criar a propria senha.';
   window._parCredAtual = { email: email };
+  var elSenhaPar = document.getElementById('par-cred-senha');
+  window.nr1mapAuth.sendPasswordResetEmail(email)
+    .then(function() { elSenhaPar.textContent = 'E-mail enviado para ' + email + ' com o link para criar a senha (olhe tambem o Spam).'; })
+    .catch(function() { elSenhaPar.textContent = 'Nao foi possivel enviar o e-mail agora. Use "Esqueci a senha" na tela de entrada.'; });
   document.getElementById('modal-cred-parceiro').classList.add('open');
 }
 

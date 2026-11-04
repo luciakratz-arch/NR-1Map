@@ -1760,6 +1760,11 @@ function exibirCredenciais(email, senha) {
   document.getElementById('cred-email').textContent = email;
   document.getElementById('cred-senha').textContent = 'A senha nao e exibida. Um e-mail foi enviado para a pessoa criar a propria senha.';
   window._credAtual = { email: email };
+  // A pessoa cria a propria senha: o Firebase envia o e-mail de redefinicao
+  var elSenha = document.getElementById('cred-senha');
+  window.nr1mapAuth.sendPasswordResetEmail(email)
+    .then(function() { elSenha.textContent = 'E-mail enviado para ' + email + ' com o link para criar a senha (olhe tambem o Spam).'; })
+    .catch(function() { elSenha.textContent = 'Nao foi possivel enviar o e-mail agora. Use "Esqueci a senha" na tela de entrada.'; });
   document.getElementById('modal-credenciais').classList.add('open');
 }
 
