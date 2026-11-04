@@ -414,6 +414,8 @@
     document.getElementById('prog').style.width = pcts[n] + '%';
   }
 
+  // se veio do login com Google, o e-mail já vem preenchido
+  try { var _em = new URLSearchParams(location.search).get('email'); if (_em) { var _c = document.getElementById('e-email'); if (_c) _c.value = _em; } } catch (e) {}
   var SENHA_PADRAO = 'Nr1map@2024';
   var GAS_URL = 'https://script.google.com/macros/s/AKfycbzyYt9OsqM1BmYnuWlkWsVHqC8OjHGPSEcjRT1s-ckPky2vGxLrL5fESREqIOSDTRkb/exec';
 

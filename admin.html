@@ -1627,6 +1627,7 @@ function entrarGoogle(perfil) {
   btn.disabled = true;
   window.nr1mapAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .then(function(cred) {
+      window._emailGoogleTentado = cred.user.email || '';
       if (!cred.user.emailVerified) { window.nr1mapAuth.signOut(); alert('O e-mail desta conta Google não está verificado.'); voltar(); return; }
       // O servidor confere se este e-mail tem acesso cadastrado e marca o papel da conta.
       return window.nr1mapFn.httpsCallable('marcarPapel')({}).then(function(r) {
@@ -1644,7 +1645,20 @@ function entrarGoogle(perfil) {
     })
     .catch(function(e) {
       if (window.nr1mapAuth.currentUser && (e.code === 'sem-cadastro' || e.code === 'perfil-errado' || e.code === 'sem-empresa' || e.code === 'functions/permission-denied')) window.nr1mapAuth.signOut();
-      if (e.code === 'sem-cadastro' || e.code === 'functions/permission-denied') alert('Este e-mail do Google não tem acesso cadastrado no NR-1 Map. Use o e-mail com o qual você foi cadastrado.');
+      if (e.code === 'sem-cadastro' || e.code === 'functions/permission-denied') {
+        var mailTentado = (window._emailGoogleTentado || '');
+        if (perfil === 'rh') {
+          if (confirm('Este e-mail ainda não está cadastrado no NR-1 Map.
+
+Quer solicitar o cadastro da sua empresa agora?')) window.location.href = 'cadastro-empresa.html' + (mailTentado ? '?email=' + encodeURIComponent(mailTentado) : '');
+        } else if (perfil === 'parceiro') {
+          if (confirm('Este e-mail ainda não está cadastrado como parceiro.
+
+Quer conhecer o programa de parceiros e fazer a solicitação?')) window.location.href = 'representantes.html';
+        } else {
+          alert('Este e-mail não tem acesso cadastrado. Peça ao RH da sua empresa para cadastrar você e use o mesmo e-mail.');
+        }
+      }
       else if (e.code === 'perfil-errado') alert('Esta conta não é de ' + e.alvo + '. Escolha a aba certa.');
       else if (e.code === 'sem-empresa') alert('Esta conta não pertence a nenhuma empresa (é a conta da administradora). O painel da empresa abre com a conta da empresa, por exemplo luciakratz.coach@gmail.com. Para ver os clientes, use a aba Admin.');
       else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') alert('Não foi possível entrar com o Google. Tente de novo.');
