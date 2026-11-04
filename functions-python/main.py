@@ -24,7 +24,15 @@ from firebase_functions import https_fn, options
 if not firebase_admin._apps:
     firebase_admin.initialize_app()
 
-db = firestore.client()
+class _DbPreguicoso:
+    """Cria a conexao com o banco so quando precisa (evita falha ao carregar o codigo na publicacao)."""
+    _c = None
+    def __getattr__(self, nome):
+        if _DbPreguicoso._c is None:
+            _DbPreguicoso._c = firestore.client()
+        return getattr(_DbPreguicoso._c, nome)
+
+db = _DbPreguicoso()
 
 # ── Helpers ──────────────────────────────────────────────────────
 
