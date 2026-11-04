@@ -670,7 +670,7 @@ function salvarPJParceiro() {
         status: 'pendente',
         criadoEm: new Date().toISOString(),
         criadoPor: 'parceiro'
-      });
+      }).then(function() { return window.nr1mapFn ? window.nr1mapFn.httpsCallable('marcarPapel')({ email: String(email || '').trim() }).catch(function(e){ console.log('marcarPapel:', e && e.message); }) : null; });
     })
     .then(function() {
       ['ppj-nome','ppj-cnpj','ppj-setor','ppj-responsavel','ppj-email','ppj-whatsapp','ppj-colab'].forEach(function(id){
@@ -748,7 +748,7 @@ function salvarPFParceiro() {
         status: 'pendente',
         criadoEm: new Date().toISOString(),
         criadoPor: 'parceiro'
-      });
+      }).then(function() { return window.nr1mapFn ? window.nr1mapFn.httpsCallable('marcarPapel')({ email: String(email || '').trim() }).catch(function(e){ console.log('marcarPapel:', e && e.message); }) : null; });
     })
     .then(function() {
       ['ppf-nome','ppf-cpf','ppf-email','ppf-whatsapp','ppf-profissao','ppf-colab'].forEach(function(id){
@@ -1050,6 +1050,7 @@ function calcular(){
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 <script>
 (function() {
   var firebaseConfig = {
@@ -1063,6 +1064,7 @@ function calcular(){
   var app;
   try { app = firebase.app('nr1map-par'); } catch(e) { app = firebase.initializeApp(firebaseConfig, 'nr1map-par'); }
   window.nr1mapDb   = firebase.firestore(app);
+  window.nr1mapFn   = app.functions('southamerica-east1');
   window.nr1mapAuth = firebase.auth(app);
 
   // Detecta UID do parceiro logado via sessionStorage (set pelo admin ao redirecionar)

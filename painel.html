@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -5110,6 +5111,9 @@ function salvarNovoColab() {
           criadoEm: new Date().toISOString()
         });
       }).then(function() {
+        // O servidor coloca a "marca" da empresa na conta nova (as regras do banco dependem dela)
+        return window.nr1mapFn ? window.nr1mapFn.httpsCallable('marcarPapel')({ email: String(email || '').trim() }).catch(function(e){ console.log('marcarPapel:', e && e.message); }) : null;
+      }).then(function() {
         // Envia reset de senha pelo app principal (não afeta sessão pois já está logada)
         return window.nr1mapAuth.sendPasswordResetEmail(email);
       }).then(function() {
@@ -6177,6 +6181,7 @@ function carregarCargos(empresaId) {
   var app; try{app=firebase.app('nr1map');}catch(e){app=firebase.initializeApp(cfg,'nr1map');}
   window.nr1mapDb=firebase.firestore(app);
   window.nr1mapAuth=firebase.auth(app);
+  window.nr1mapFn=app.functions('southamerica-east1');
 
   // Pre-carrega logo NR-1Map como base64 para evitar bloqueio 403 do GitHub Pages na Cloud Function
   window._logoNR1MapBase64 = '';

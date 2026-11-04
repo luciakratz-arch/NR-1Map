@@ -367,6 +367,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyDnrgaY8R0Zetkr18uHQJAZXIUa4EwDnv4",
@@ -439,21 +440,8 @@
       primeiroAcesso: true
     };
 
-    // 1) Cria usuário no Firebase Auth
-    auth.createUserWithEmailAndPassword(emailEmp, SENHA_PADRAO)
-      .then(function(cred) {
-        dados.uid = cred.user.uid;
-        // Desloga imediatamente — não queremos manter sessão de empresa no cadastro público
-        auth.signOut().catch(function(){});
-        return db.collection('nr1map_empresas').add(dados);
-      })
-      .catch(function(authErr) {
-        // Se e-mail já existe no Auth, tenta só salvar no Firestore
-        if (authErr.code === 'auth/email-already-in-use') {
-          return db.collection('nr1map_empresas').add(dados);
-        }
-        throw authErr;
-      })
+    // 1) Registra o pedido pelo servidor: sem criar conta e sem senha padrão (a administradora aprova e a empresa cria a própria senha)
+    firebase.app().functions('southamerica-east1').httpsCallable('nr1CadastroEmpresa')(dados)
       .then(function(docRef) {
         // Se chegou aqui via catch (email já existia), docRef pode ser undefined
         document.getElementById('step-3').style.display = 'none';
@@ -470,7 +458,7 @@
           '&porte='   + encodeURIComponent(dados.numColaboradores) +
           '&segmento='+ encodeURIComponent(dados.setor) +
           '&cnpj='    + encodeURIComponent(dados.cnpj) +
-          '&senha='   + encodeURIComponent(SENHA_PADRAO),
+          '&senha='   + encodeURIComponent('(você receberá um link para criar a sua senha)'),
           { method: 'GET', mode: 'no-cors' }).catch(function(){});
       })
       .catch(function(e) {

@@ -1649,6 +1649,11 @@ function entrarGoogle(perfil) {
       voltar();
     });
 }
+// Depois de criar uma conta, o servidor coloca nela a "marca" (empresa, parceiro ou usuário) que as regras do banco leem.
+function marcarContaNr1(email) {
+  if (!window.nr1mapFn) return Promise.resolve();
+  return window.nr1mapFn.httpsCallable('marcarPapel')({ email: String(email || '').trim() }).catch(function(e) { console.log('marcarPapel:', e && e.message); });
+}
 var ADMINS_AUTORIZADOS = ['luciakratz@gmail.com', 'contato@luciakratz.com.br'];
 function entrarAdminGoogle() {
   var btn = document.getElementById('btn-adm-google');
@@ -1833,7 +1838,7 @@ function salvarPJ() {
         status: 'ativo',
         criadoEm: new Date().toISOString(),
         criadoPor: 'admin'
-      });
+      }).then(function() { return marcarContaNr1(email); });
     })
     .then(function() {
       // Limpa formulário e fecha modal
@@ -1915,7 +1920,7 @@ function salvarPF() {
         status: 'ativo',
         criadoEm: new Date().toISOString(),
         criadoPor: 'admin'
-      });
+      }).then(function() { return marcarContaNr1(email); });
     })
     .then(function() {
       ['pf-nome','pf-cpf','pf-email','pf-whatsapp','pf-profissao','pf-colab'].forEach(function(id){
@@ -3364,7 +3369,7 @@ function salvarParceiro() {
         comissaoPct: parseInt(comissao),
         status: 'ativo', clientes: 0,
         criadoEm: new Date().toISOString()
-      }, {merge: true}).then(function(){ return { uid: uid, senha: senhaFinal }; });
+      }, {merge: true}).then(function(){ return marcarContaNr1(email); }).then(function(){ return { uid: uid, senha: senhaFinal }; });
     })
     .then(function(result) {
       btn.textContent = 'Cadastrar Parceiro'; btn.disabled = false;
