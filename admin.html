@@ -1648,13 +1648,9 @@ function entrarGoogle(perfil) {
       if (e.code === 'sem-cadastro' || e.code === 'functions/permission-denied') {
         var mailTentado = (window._emailGoogleTentado || '');
         if (perfil === 'rh') {
-          if (confirm('Este e-mail ainda não está cadastrado no NR-1 Map.
-
-Quer solicitar o cadastro da sua empresa agora?')) window.location.href = 'cadastro-empresa.html' + (mailTentado ? '?email=' + encodeURIComponent(mailTentado) : '');
+          if (confirm('Este e-mail ainda não está cadastrado no NR-1 Map.\n\nQuer solicitar o cadastro da sua empresa agora?')) window.location.href = 'cadastro-empresa.html' + (mailTentado ? '?email=' + encodeURIComponent(mailTentado) : '');
         } else if (perfil === 'parceiro') {
-          if (confirm('Este e-mail ainda não está cadastrado como parceiro.
-
-Quer conhecer o programa de parceiros e fazer a solicitação?')) window.location.href = 'representantes.html';
+          if (confirm('Este e-mail ainda não está cadastrado como parceiro.\n\nQuer conhecer o programa de parceiros e fazer a solicitação?')) window.location.href = 'representantes.html';
         } else {
           alert('Este e-mail não tem acesso cadastrado. Peça ao RH da sua empresa para cadastrar você e use o mesmo e-mail.');
         }
