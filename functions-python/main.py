@@ -51,8 +51,13 @@ def salvar_storage(caminho_local, nome_arquivo_storage, empresa_id):
     bucket = storage.bucket()
     blob = bucket.blob(f"nr1map_laudos/{empresa_id}/{nome_arquivo_storage}")
     blob.upload_from_filename(caminho_local, content_type='application/pdf')
-    # Arquivo PRIVADO: devolve um link assinado que expira em 7 dias (se a assinatura falhar, nao deixa publico: erro)
-    return blob.generate_signed_url(version='v4', expiration=datetime.timedelta(days=7), method='GET')
+    # Arquivo PRIVADO (sem leitura publica): o link so funciona com um codigo secreto unico gerado para este arquivo
+    import urllib.parse
+    token = str(uuid.uuid4())
+    blob.metadata = {'firebaseStorageDownloadTokens': token}
+    blob.patch()
+    return ("https://firebasestorage.googleapis.com/v0/b/" + bucket.name + "/o/" +
+            urllib.parse.quote(blob.name, safe='') + "?alt=media&token=" + token)
 
 def salvar_firestore(empresa_id, empresa_nome, tipo, url, num_colab, ibp_geral):
     """Registra laudo gerado no Firestore."""
@@ -644,6 +649,7 @@ def gerarLaudo(req: https_fn.Request) -> https_fn.Response:
         )
 
     except Exception as e:
+        import traceback; print("gerarLaudo ERRO:", traceback.format_exc())
         return https_fn.Response(
             json.dumps({"error": "Nao foi possivel gerar o documento agora."}),
             status=500, mimetype='application/json'
