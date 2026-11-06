@@ -3862,6 +3862,21 @@ function aprovarDepMestre() {
   window.nr1mapFn   = app.functions('southamerica-east1');
 })();
 
+// Entrada única vinda da Central: usa a chave temporária (#sso=...) uma vez, limpa o endereço e abre o painel.
+(function () {
+  var m = /[#&]sso=([^&]+)/.exec(location.hash);
+  if (!m) return;
+  var chave = decodeURIComponent(m[1]);
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  window.nr1mapAuth.signInWithCustomToken(chave).then(function (cred) {
+    var mail = String(cred.user.email || '').toLowerCase();
+    if (!cred.user.emailVerified || ADMINS_AUTORIZADOS.indexOf(mail) === -1) { window.nr1mapAuth.signOut(); return; }
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-admin').classList.add('active');
+    carregarLeads();
+  }).catch(function (e) { console.warn('entrada única não funcionou:', e && e.code); });
+})();
+
 // Carrega painel geral ao iniciar
 setTimeout(function(){ if(window.nr1mapDb) carregarPainelGeral(); }, 500);
 
