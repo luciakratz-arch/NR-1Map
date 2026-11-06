@@ -1,5 +1,6 @@
-const CACHE_NAME = 'nr1map-v1';
-const BASE = '/NR-1Map';
+const CACHE_NAME = 'nr1map-v2';
+// Funciona tanto em luciakratz-arch.github.io/NR-1Map quanto em nr1-maps.com.br: o caminho base vem do próprio sw.js
+const BASE = self.location.pathname.replace(/\/sw\.js$/, '');
 
 const ARQUIVOS_CACHE = [
   BASE + '/',

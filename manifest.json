@@ -2,14 +2,14 @@
   "name": "NR-1 Map",
   "short_name": "NR-1 Map",
   "description": "Gestão de Riscos Psicossociais — NR-1 / Portaria MTE 1.419/2024",
-  "start_url": "/NR-1Map/admin.html",
-  "scope": "/NR-1Map/",
+  "start_url": "./admin.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0A6E4F",
   "theme_color": "#0A6E4F",
   "orientation": "portrait",
   "prefer_related_applications": false,
-  "related_applications": [{"platform": "webapp", "url": "https://luciakratz-arch.github.io/NR-1Map/manifest.json"}],
+  "related_applications": [{"platform": "webapp", "url": "https://nr1-maps.com.br/manifest.json"}],
   "icons": [
     {
       "src": "nr1maps logo 512.png",
