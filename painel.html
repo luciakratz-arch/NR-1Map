@@ -6219,11 +6219,11 @@ function carregarCargos(empresaId) {
         window._logoNR1MapBase64 = canvas.toDataURL('image/png');
       } catch(e) { window._logoNR1MapBase64 = ''; }
     };
-    img.src = 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png';
+    img.src = 'https://nr1-maps.com.br/nr-1maps%20logo.png?v=2';
   })();
 
   window._getLogoNR1Map = function() {
-    return window._logoNR1MapBase64 || 'https://luciakratz-arch.github.io/NR-1Map/nr-1maps%20logo.png';
+    return window._logoNR1MapBase64 || 'https://nr1-maps.com.br/nr-1maps%20logo.png?v=2';
   };
 
   window.nr1mapAuth.onAuthStateChanged(function(user){
