@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 NR-1 Map - Relatorio Anual Consolidado
-Evolucao historica dos ciclos + analise quanti e qualitativa + resumo de acoes
+Evolucao historica dos ciclos + análise quanti e qualitativa + resumo de ações
 """
 import datetime
 import uuid
@@ -98,12 +98,12 @@ def gerar_relatorio_anual(dados=None, output_path=None):
     styles = getSampleStyleSheet()
     s_h1   = ParagraphStyle('h1', fontSize=16, fontName='Helvetica-Bold', textColor=VERDE,
                              spaceAfter=4, leading=20)
-    s_h2   = ParagraphStyle('h2', fontSize=12, fontName='Helvetica-Bold', textColor=ROXO,
+    s_h2   = ParagraphStyle('h2', fontSize=12, fontName='Helvetica-Bold', textColor=colors.HexColor('#241B35'),
                              spaceBefore=10, spaceAfter=4, leading=16)
     s_h3   = ParagraphStyle('h3', fontSize=10, fontName='Helvetica-Bold', textColor=AZUL,
                              spaceBefore=8, spaceAfter=3, leading=13)
     s_body = ParagraphStyle('body', fontSize=9, fontName='Helvetica', textColor=PRETO,
-                             leading=13, spaceAfter=4)
+                             leading=13, spaceAfter=4, alignment=4)
     s_sub  = ParagraphStyle('sub', fontSize=8.5, fontName='Helvetica', textColor=CINZA,
                              leading=12, spaceAfter=6)
     s_cell = ParagraphStyle('cell', fontSize=8.3, fontName='Helvetica', textColor=PRETO, leading=11)
@@ -333,12 +333,12 @@ def gerar_relatorio_anual(dados=None, output_path=None):
 
             quant_rows = [
                 [Paragraph('<b>Indicador</b>', s_cell), Paragraph('<b>Valor</b>', s_cell)],
-                ['Media IBP no periodo', f'{media:+.2f} ({zona_de(media)})'],
+                ['Média IBP no período', f'{media:+.2f} ({zona_de(media)})'],
                 ['IBP mais alto registrado', f'{maximo:+.2f}'],
                 ['IBP mais baixo registrado', f'{minimo:+.2f}'],
                 ['Total de respondentes (acumulado)', str(total_resp)],
-                ['Numero de ciclos avaliados', str(len(ciclos))],
-                ['Variacao total (1 ciclo ao ultimo)', f'{variacao:+.2f}'],
+                ['Número de ciclos avaliados', str(len(ciclos))],
+                ['Variação total (1 ciclo ao ultimo)', f'{variacao:+.2f}'],
                 ['Tendencia geral', tendencia],
             ]
             t_quant = Table(
@@ -368,23 +368,23 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         zona_fundo = ZONA_FUNDO.get(zona_atual, CINZA_CL)
         narrativas = {
             'Terreno Fertil': (
-                'A organizacao apresenta equilibrio psicodinamico favoravel ao longo do periodo analisado. '
-                'Os indices IBP indicam que as estrategias de defesa coletiva estao convertendo o sofrimento '
+                'A organização apresenta equilíbrio psicodinamico favoravel ao longo do período analisado. '
+                'Os índices IBP indicam que as estratégias de defesa coletiva estao convertendo o sofrimento '
                 'em prazer no trabalho (Dejours), com fatores motivacionais preservados (Herzberg) e necessidades '
-                'basicas atendidas (Maslow). Recomenda-se manutencao das praticas de gestão e continuidade do '
+                'basicas atendidas (Maslow). Recomenda-se manutenção das práticas de gestão e continuidade do '
                 'monitoramento via Pesquisa Pulso para prevencao de retrocessos.'
             ),
             'Defesa Oculta': (
-                'A organizacao apresenta sofrimento psicossocial mascarado por defesas coletivas. O IBP na zona '
-                'de Defesa Oculta indica que os trabalhadores desenvolveram estrategias adaptativas para lidar com '
-                'o sofrimento, porem sem resolve-lo estruturalmente. Ha risco de deterioracao caso os fatores '
+                'A organização apresenta sofrimento psicossocial mascarado por defesas coletivas. O IBP na zona '
+                'de Defesa Oculta indica que os trabalhadores desenvolveram estratégias adaptativas para lidar com '
+                'o sofrimento, porém sem resolve-lo estruturalmente. Há risco de deterioracao caso os fatores '
                 'higienicos (Herzberg) se agravem. O Plano de Ação 5W2H deve ser implementado com urgencia nas '
                 'subcategorias criticas identificadas nos ciclos.'
             ),
             'Sofrimento Patogenico': (
-                'ATENCAO: A organizacao apresenta indices de sofrimento psicossocial patogenico. O IBP nesta zona '
-                'indica falha das estrategias de defesa coletiva, com risco ativo de adoecimento psiquico e fisico '
-                'dos trabalhadores. Intervencao imediata e obrigatoria conforme NR-1 item 1.5.4.4.3. O Plano de '
+                'ATENCAO: A organização apresenta índices de sofrimento psicossocial patogenico. O IBP nesta zona '
+                'indica falha das estratégias de defesa coletiva, com risco ativo de adoecimento psíquico e físico '
+                'dos trabalhadores. Intervenção imediata e obrigatória conforme NR-1 item 1.5.4.4.3. O Plano de '
                 'Ação deve priorizar as subcategorias com maior criticidade e o acompanhamento deve ser semanal.'
             ),
         }
@@ -427,7 +427,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         perc   = round(concl / total * 100) if total else 0
 
         story.append(Paragraph(
-            f'Total de acoes cadastradas: <b>{total}</b> | '
+            f'Total de ações cadastradas: <b>{total}</b> | '
             f'Concluidas: <b>{concl}</b> ({perc}%) | '
             f'Em andamento: <b>{andm}</b> | Pendentes: <b>{pend}</b>',
             s_body))
@@ -464,12 +464,12 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         ]))
         story.append(t_ac)
     else:
-        story.append(Paragraph('Nenhuma acao cadastrada no plano.', s_body))
+        story.append(Paragraph('Nenhuma ação cadastrada no plano.', s_body))
 
     story.append(PageBreak())
 
     # -- 5. Assinatura --
-    story.append(Paragraph('5. Assinatura e Validacao', s_h2))
+    story.append(Paragraph('5. Assinatura e Validação', s_h2))
     story.append(Paragraph('DOCUMENTO ASSINADO ELETRONICAMENTE',
                             ParagraphStyle('ass', parent=s_body, textColor=VERDE,
                                            fontName='Helvetica-Bold', fontSize=10)))
@@ -481,7 +481,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         ['Empresa avaliada:', empresa_nome],
         ['Período de referência:', f'{ano_atual}'],
         ['Data e Hora da emissao:', agora],
-        ['Hash UUID de validacao:', hash_uuid],
+        ['Hash UUID de validação:', hash_uuid],
         ['Plataforma:', 'NR-1 Map | Conformidade Portaria MTE 1.419/2024'],
     ]
     t_sig = Table(
@@ -522,7 +522,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
     story.append(t_met)
     story.append(Spacer(1, 6*mm))
     story.append(Paragraph(
-        'Este relatorio e imutavel apos emissao e serve como documento tecnico oficial '
+        'Este relatorio e imutavel após emissao e serve como documento técnico oficial '
         'para fiscalizacao trabalhista, audiencias e processos administrativos '
         '(NR-1 / Portaria MTE 1.419/2024). O hash UUID garante unicidade e rastreabilidade.',
         s_sub))

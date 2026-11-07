@@ -501,180 +501,116 @@ textarea.form-control{resize:vertical;min-height:70px;}
     <div class="topbar-title">Tutoriais</div>
   </div>
   <div class="content">
+    <style>
+      .tut-hero { background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%); border-radius:16px; padding:26px 28px; color:#fff; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+      .tut-hero h2 { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin:0 0 6px; letter-spacing:-.01em; }
+      .tut-hero p { font-size:13px; line-height:1.6; color:rgba(255,255,255,.72); max-width:560px; margin:0; }
+      .tut-hero .sel { width:54px; height:54px; border-radius:14px; background:rgba(127,255,212,.12); display:flex; align-items:center; justify-content:center; color:#7FFFD4; flex:none; }
+      .tut-sec { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#0A6E4F; margin:26px 0 4px; }
+      .tut-sec-sub { font-size:12.5px; color:#5A6672; margin-bottom:14px; }
+      .tut-grade { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; }
+      .tut-card { position:relative; display:flex; flex-direction:column; background:#fff; border:1.5px solid #E3ECE8; border-radius:14px; padding:20px 20px 16px; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s; text-align:left; font:inherit; color:inherit; width:100%; }
+      .tut-card:hover { border-color:#12A073; box-shadow:0 6px 22px rgba(10,110,79,.12); transform:translateY(-2px); }
+      .tut-card:focus-visible { outline:3px solid #7FFFD4; outline-offset:2px; }
+      .tut-card.roxo:hover { border-color:#7B00C4; box-shadow:0 6px 22px rgba(123,0,196,.12); }
+      .tut-topo { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+      .tut-ic { width:44px; height:44px; border-radius:12px; background:#E6F4EF; color:#0A6E4F; display:flex; align-items:center; justify-content:center; }
+      .tut-card.roxo .tut-ic { background:#F3E6FF; color:#7B00C4; }
+      .tut-num { width:26px; height:26px; border-radius:50%; background:#0A6E4F; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; }
+      .tut-tit { font-family:'Syne',sans-serif; font-size:14.5px; font-weight:800; color:#16322A; margin-bottom:6px; }
+      .tut-card.roxo .tut-tit { color:#3B0D6F; }
+      .tut-desc { font-size:12.5px; line-height:1.6; color:#5A6672; margin-bottom:14px; flex:1; }
+      .tut-rodape { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .tut-tags { display:flex; gap:6px; flex-wrap:wrap; }
+      .tut-tag { background:#E6F4EF; color:#0A6E4F; border-radius:100px; padding:2px 9px; font-size:10.5px; font-weight:700; }
+      .tut-card.roxo .tut-tag { background:#F3E6FF; color:#7B00C4; }
+      .tut-abrir { font-size:12px; font-weight:800; color:#0A6E4F; white-space:nowrap; }
+      .tut-card.roxo .tut-abrir { color:#7B00C4; }
+      .tut-nota { display:flex; gap:14px; background:#F3E6FF; border:1.5px solid #D9B8F5; border-radius:14px; padding:18px 20px; margin:26px 0 0; }
+      .tut-nota .ic { width:38px; height:38px; border-radius:10px; background:#7B00C4; color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+      .tut-nota b { display:block; font-family:'Syne',sans-serif; font-size:14px; color:#3B0D6F; margin-bottom:4px; }
+      .tut-nota p { font-size:13px; line-height:1.65; color:#4B2A6B; margin:0; }
+      .tut-ajuda { background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%); border-radius:14px; padding:20px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-top:26px; }
+      .tut-ajuda b { display:block; font-family:'Syne',sans-serif; font-size:14px; color:#7FFFD4; margin-bottom:4px; }
+      .tut-ajuda span { font-size:12.5px; color:rgba(255,255,255,.72); line-height:1.5; }
+      .tut-ajuda a { background:#25D366; color:#0B2A17; border-radius:9px; padding:10px 18px; font-size:13px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:8px; flex:none; }
+    </style>
 
-    <div style="margin-bottom:24px;">
-      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--azul-escuro);margin-bottom:6px;">Central de Tutoriais e Guias</div>
-      <div style="font-size:13px;color:var(--cinza-medio);line-height:1.6;">Acesse os guias operacionais, manuais e materiais de apoio para implementar a NR-1 Map com sua equipe.</div>
-    </div>
-
-    <!-- CARDS DE TUTORIAIS -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
-
-      <!-- CARD 1 — CO-BRANDING -->
-      <a href="#" onclick="sv('cobranding');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🎨</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Co-Branding (Logo)</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Configure a identidade visual da empresa: logo, organograma e contexto institucional que aparecem nos relatórios oficiais.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Identidade Visual</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 2 — CARGOS / ORGANOGRAMA -->
-      <a href="#" onclick="sv('cargos');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🏗</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Cargos / Organograma</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Cadastre cargos com CBO e hierarquia. O organograma é gerado automaticamente e aparece no Laudo Técnico.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">CBO</span>
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Hierarquia</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 3 — COLABORADORES -->
-      <a href="#" onclick="sv('colaboradores');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">👥</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Colaboradores</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Cadastre, importe e gerencie colaboradores. Gere Magic Links para acesso anônimo às pesquisas.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Magic Link</span>
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Importação</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 4 — METODOLOGIA -->
-      <a href="#" onclick="sv('metodologia');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#7B00C4';this.style.boxShadow='0 4px 20px rgba(123,0,196,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#F3E6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🔬</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7B00C4;margin-bottom:6px;">Metodologia Científica</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Entenda o IBP (Índice de Balança Psicodinâmica), as bases teóricas de Dejours, Herzberg e Maslow e a conformidade com a NR-1.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">IBP</span>
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Dejours</span>
-          </div>
-          <span style="font-size:11px;color:#7B00C4;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 5 — MODULOS -->
-      <a href="#" onclick="sv('modulos');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#7B00C4';this.style.boxShadow='0 4px 20px rgba(123,0,196,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#F3E6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🧩</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7B00C4;margin-bottom:6px;">Módulos e Perguntas</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Gerencie os 4 módulos e 101 perguntas oficiais. Ative ou desative subcategorias por CBO e personalize os textos para a cultura da empresa.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">101 perguntas</span>
-          </div>
-          <span style="font-size:11px;color:#7B00C4;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 6 — PLANEJAMENTO -->
-      <a href="https://luciakratz-arch.github.io/NR-1Map/tutorial_planejamento.html" target="_blank"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#7B00C4';this.style.boxShadow='0 4px 20px rgba(123,0,196,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#F3E6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🗓</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7B00C4;margin-bottom:6px;">Planejamento e Disparo de Campanha</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Como agendar e disparar o Diagnóstico Geral e a Pesquisa Pulso. Inclui o que o colaborador recebe no WhatsApp, Magic Link, tela de resposta e automações.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">WhatsApp</span>
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Magic Link</span>
-            <span style="background:#F3E6FF;color:#7B00C4;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Automações</span>
-          </div>
-          <span style="font-size:11px;color:#7B00C4;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 7 — DIAGNOSTICO -->
-      <a href="#" onclick="sv('diagnostico');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">🔍</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Diagnóstico Geral</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Inicie e gerencie o Diagnóstico Psicossocial completo com as 101 perguntas. Gera o Laudo Técnico e o Mapa de Risco ao final.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Laudo</span>
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Mapa de Risco</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 8 — PESQUISA PULSO -->
-      <a href="#" onclick="sv('pulso');return false;"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📡</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Pesquisa Pulso</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Pesquisa semanal de 3 perguntas via WhatsApp para monitoramento contínuo do bem-estar organizacional.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">WhatsApp</span>
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Semanal</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-      <!-- CARD 9 — GUIA RH -->
-      <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
-        style="display:block;background:#fff;border:1.5px solid #D8E8E2;border-radius:12px;padding:22px;text-decoration:none;transition:all .2s;cursor:pointer;"
-        onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 4px 20px rgba(10,110,79,.12)';this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none';this.style.transform='none'">
-        <div style="width:44px;height:44px;border-radius:10px;background:#E6F4EF;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;">📋</div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#0A6E4F;margin-bottom:6px;">Guia de Implementação RH</div>
-        <div style="font-size:12px;color:#5A6672;line-height:1.6;margin-bottom:14px;">Manual operacional completo para gestores de RH e diretores. Checklist interativo de implementação, mockups das telas, como exportar documentos GRO e guia eSocial S-2240.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">RH & Diretores</span>
-            <span style="background:#E6F4EF;color:#0A6E4F;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:700;">Conformidade NR-1</span>
-          </div>
-          <span style="font-size:11px;color:#0A6E4F;font-weight:700;">Abrir →</span>
-        </div>
-      </a>
-
-    </div>
-
-    <!-- SUPORTE -->
-    <div style="background:linear-gradient(135deg,#0D1210 0%,#0D2A20 100%);border-radius:12px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div class="tut-hero">
       <div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#7FFFD4;margin-bottom:4px;">Precisa de ajuda personalizada?</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.5;">Entre em contato com o suporte da NR-1 Map para orientações específicas sobre sua empresa.</div>
+        <h2>Central de Tutoriais e Guias</h2>
+        <p>Siga os seis primeiros passos na ordem para colocar o NR-1 Map para funcionar com a sua equipe. Os guias de aprofundamento ficam logo abaixo.</p>
       </div>
-      <a href="https://api.whatsapp.com/send?phone=5562991546757&text=Ol%C3%A1%2C%20preciso%20de%20suporte%20com%20o%20NR-1%20Map" target="_blank"
-        style="background:#25D366;color:#fff;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        💬 Falar com Suporte
+      <div class="sel" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div>
+    </div>
+
+    <div class="tut-sec">Comece por aqui</div>
+    <div class="tut-sec-sub">Seis passos, nesta ordem.</div>
+    <div class="tut-grade" id="tut-passos"></div>
+
+    <div class="tut-sec">Para aprofundar</div>
+    <div class="tut-sec-sub">Entenda o método e consulte o manual completo.</div>
+    <div class="tut-grade" id="tut-extras"></div>
+
+    <div class="tut-nota">
+      <div class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+      <div>
+        <b>Como funcionam os planos de ação</b>
+        <p>Os planos de ação são sempre ações ligadas ao diagnóstico, por meio de benefícios coletivos. Cada ação nasce de um resultado do diagnóstico e é pensada para o grupo ou o setor, não para uma pessoa isolada. Depois, o Acompanhamento mede de novo para mostrar se a ação funcionou.</p>
+      </div>
+    </div>
+
+    <div class="tut-ajuda">
+      <div>
+        <b>Precisa de ajuda personalizada?</b>
+        <span>Fale com o suporte do NR-1 Map para orientações específicas sobre a sua empresa.</span>
+      </div>
+      <a href="https://api.whatsapp.com/send?phone=5562991546757&text=Ol%C3%A1%2C%20preciso%20de%20suporte%20com%20o%20NR-1%20Map" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+        Falar com o suporte
       </a>
     </div>
+
+    <script>
+    (function () {
+      var IC = {
+        paleta: '<path d="M12 22a10 10 0 1 1 10-10c0 3-2 4-4 4h-2a2 2 0 0 0-1 3.7c.7.5.4 2.3-3 2.3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16.5" cy="11" r="1"/>',
+        org: '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>',
+        pessoas: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+        agenda: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+        lupa: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+        pulso: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+        ciencia: '<path d="M10 2v7.5L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9.5V2"/><path d="M8.5 2h7M7 16h10"/>',
+        modulos: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+        guia: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'
+      };
+      function svg(n) { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + IC[n] + '</svg>'; }
+      var PASSOS = [
+        { t: 'Co-Branding (logo)', d: 'Configure a identidade visual da empresa: logo, organograma e contexto institucional que aparecem nos relatórios oficiais.', i: 'paleta', tags: ['Identidade visual'], v: 'cobranding' },
+        { t: 'Cargos e organograma', d: 'Cadastre os cargos com CBO e a hierarquia. O organograma é gerado sozinho e aparece no Laudo Técnico.', i: 'org', tags: ['CBO', 'Hierarquia'], v: 'cargos' },
+        { t: 'Colaboradores', d: 'Cadastre, importe e organize os colaboradores. Gere o Magic Link para o acesso anônimo às pesquisas.', i: 'pessoas', tags: ['Magic Link', 'Importação'], v: 'colaboradores' },
+        { t: 'Planejamento e disparo', d: 'Como agendar e disparar o Diagnóstico Geral e a Pesquisa Pulso: o que o colaborador recebe no WhatsApp, o Magic Link, a tela de resposta e as automações.', i: 'agenda', tags: ['WhatsApp', 'Automações'], href: 'tutorial_planejamento.html' },
+        { t: 'Diagnóstico Geral', d: 'Inicie e acompanhe o diagnóstico psicossocial completo, com as 101 perguntas. Ao final, ele gera o Laudo Técnico e o Mapa de Risco.', i: 'lupa', tags: ['Laudo', 'Mapa de Risco'], v: 'diagnostico' },
+        { t: 'Pesquisa Pulso', d: 'Pesquisa semanal de 3 perguntas pelo WhatsApp, para acompanhar o bem-estar da equipe de forma contínua.', i: 'pulso', tags: ['WhatsApp', 'Semanal'], v: 'pulso' }
+      ];
+      var EXTRAS = [
+        { t: 'Metodologia científica', d: 'Entenda o IBP (Índice de Balança Psicodinâmica), as bases teóricas de Dejours, Herzberg e Maslow e o alinhamento com a NR-1.', i: 'ciencia', tags: ['IBP', 'Dejours'], v: 'metodologia', roxo: 1 },
+        { t: 'Módulos e perguntas', d: 'Gerencie os 4 módulos e as 101 perguntas oficiais. Ative ou desative subcategorias por CBO e adapte os textos à cultura da empresa.', i: 'modulos', tags: ['101 perguntas'], v: 'modulos', roxo: 1 },
+        { t: 'Guia de implementação para RH', d: 'Manual operacional para gestores de RH e diretores, com checklist interativo de implementação.', i: 'guia', tags: ['RH e diretores'], href: 'guia_rh.html', roxo: 1 }
+      ];
+      function card(p, n) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'tut-card' + (p.roxo ? ' roxo' : '');
+        b.innerHTML = '<div class="tut-topo"><div class="tut-ic">' + svg(p.i) + '</div>' + (n ? '<div class="tut-num">' + n + '</div>' : '') + '</div>' +
+          '<div class="tut-tit">' + p.t + '</div><div class="tut-desc">' + p.d + '</div>' +
+          '<div class="tut-rodape"><div class="tut-tags">' + p.tags.map(function (x) { return '<span class="tut-tag">' + x + '</span>'; }).join('') + '</div><span class="tut-abrir">Abrir &rarr;</span></div>';
+        b.onclick = function () { if (p.href) window.open(p.href, '_blank', 'noopener'); else sv(p.v); };
+        return b;
+      }
+      var a = document.getElementById('tut-passos'), e = document.getElementById('tut-extras');
+      PASSOS.forEach(function (p, i) { a.appendChild(card(p, i + 1)); });
+      EXTRAS.forEach(function (p) { e.appendChild(card(p, 0)); });
+    })();
+    </script>
 
   </div>
 </div>
@@ -1367,12 +1303,16 @@ textarea.form-control{resize:vertical;min-height:70px;}
       <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Historico de Planos de Acao</div>
       <div id="plano-ciclos-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
-    <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px;">
-      Acoes geradas automaticamente a partir dos setores/cargos (CBO) classificados como
-      <b>Substancial</b> ou <b>Intoleravel</b> na Avaliacao do Risco. Edite o texto, responsavel,
-      prazo e status a vontade — toda alteracao fica registrada como evidencia de gestao continua
+    <p style="font-size:12px;color:var(--cinza-medio);margin-bottom:12px;">
+      Ações geradas automaticamente a partir dos setores/cargos (CBO) classificados como
+      <b>Substancial</b> ou <b>Intolerável</b> na Avaliação do Risco. Edite o texto, o responsável,
+      o prazo e o status à vontade: toda alteração fica registrada como evidência de gestão contínua
       (item 1.5.4.4.6 da NR-1).
     </p>
+    <div style="display:flex;gap:12px;align-items:flex-start;background:#F3E6FF;border:1.5px solid #D9B8F5;border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+      <span style="width:28px;height:28px;border-radius:8px;background:#7B00C4;color:#fff;display:flex;align-items:center;justify-content:center;flex:none;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+      <div style="font-size:12.5px;line-height:1.6;color:#4B2A6B;"><b style="color:#3B0D6F;">Observação:</b> os planos de ação são sempre ações ligadas ao diagnóstico, por meio de benefícios coletivos.</div>
+    </div>
 
     <div class="card">
       <div class="table-wrap">
@@ -5338,7 +5278,21 @@ function aplicarRestricoesPorNivel(nivel) {
   }, 1000);
 }
 
+// Gestor/RH não são "donos" do cadastro da empresa: acham a empresa pelo vínculo (empresaId) gravado no próprio usuário.
+function _empresaPorVinculo(uid) {
+  return window.nr1mapDb.collection('nr1map_usuarios_pf').doc(uid).get().then(function(u){
+    var emp = u.exists && u.data().empresaId;
+    if (!emp) return false;
+    return window.nr1mapDb.collection('nr1map_empresas').doc(emp).get().then(function(d){
+      if (!d.exists) return false;
+      var e = d.data(); e.id = d.id; aplicarEmpresa(e); return true;
+    });
+  }).catch(function(){ return false; });
+}
+
 function carregarEmpresa(uid, email) {
+  var padrao = function(){ aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'}); };
+  var porVinculo = function(){ return _empresaPorVinculo(uid).then(function(ok){ if(!ok) padrao(); }); };
   window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
   .then(function(snap){
     if(!snap.empty){
@@ -5351,18 +5305,15 @@ function carregarEmpresa(uid, email) {
         return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
           .then(function(snap2){
             if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; return aplicarEmpresa(e); }
-            aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
+            return porVinculo();
           });
       });
   }).catch(function(err){
-    aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'});
+    porVinculo();
   });
 }
 
 
-
-
-/* ===== GERAR LAUDO PDF ===== */
 function gerarLaudoCompleto() {
   var empresaId = window.nr1mapEmpresa && window.nr1mapEmpresa.id;
   if (!empresaId) { alert('Empresa nao carregada.'); return; }

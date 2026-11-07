@@ -162,9 +162,9 @@ styles = getSampleStyleSheet()
 s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
                        spaceAfter=4, fontName='Helvetica-Bold')
 s_sub = ParagraphStyle('sub', parent=styles['Normal'], fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1,
+s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=colors.HexColor('#241B35'),
                        spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
-s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
+s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13, alignment=4)
 s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.3, textColor=CINZA_TEXTO, leading=11)
 s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
 s_cell_center = ParagraphStyle('cellc', parent=s_cell, alignment=TA_CENTER)
@@ -482,7 +482,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         ["Responsável Técnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
         ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
         ["Data e Hora (UTC):", agora],
-        ["Hash UUID de Validacao:", hash_uuid],
+        ["Hash UUID de Validação:", hash_uuid],
     ]
     t_sig = Table(sig_rows, colWidths=[45 * mm, 100 * mm])
     t_sig.setStyle(TableStyle([
@@ -496,7 +496,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     story.append(Spacer(1, 3 * mm))
     story.append(Spacer(1, 6*mm))
     story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
-    story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
+    story.append(Paragraph("✓ VALIDADO PELA RESPONSÁVEL TÉCNICA DA METODOLOGIA", ParagraphStyle(
         'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [

@@ -64,11 +64,12 @@ def cabecalho_rodape(c, doc, titulo_curto, empresa, logo_parceiro=None, logo_emp
 class BlocoTitulo(Flowable):
     """Título do documento: etiqueta do instrumento, título, subtítulo, cartão com empresa/referência e trilha do fluxo GRO."""
 
-    def __init__(self, titulo, subtitulo, empresa, referencia, instrumento=None, extra=None, largura=None):
+    def __init__(self, titulo, subtitulo, empresa, referencia, instrumento=None, extra=None, largura=None, completo=False):
         Flowable.__init__(self)
         self.titulo, self.subtitulo, self.empresa, self.referencia = titulo, subtitulo, empresa or "", referencia or ""
         self.instrumento, self.extra = instrumento, extra   # instrumento: 1 a 4 (ou None, sem trilha)
-        self.altura = 56 * mm if instrumento else 40 * mm
+        self.completo = completo                            # documento consolidado: os 4 passos aparecem como concluídos
+        self.altura = 56 * mm if (instrumento or completo) else 40 * mm
 
     def wrap(self, aw, ah):
         self.aw = aw
@@ -78,7 +79,10 @@ class BlocoTitulo(Flowable):
         c, W = self.canv, self.aw
         y = self.altura
         c.setFont("Helvetica-Bold", 8); c.setFillColor(VERDE_ESC)
-        kicker = ("INSTRUMENTO %d DE 4  ·  FLUXO GRO  ·  PGR (NR-1)" % self.instrumento) if self.instrumento else "NR-1 MAP  ·  PGR (NR-1)"
+        if self.completo:
+            kicker = "DOCUMENTO CONSOLIDADO  ·  FLUXO GRO COMPLETO  ·  PGR (NR-1)"
+        else:
+            kicker = ("INSTRUMENTO %d DE 4  ·  FLUXO GRO  ·  PGR (NR-1)" % self.instrumento) if self.instrumento else "NR-1 MAP  ·  PGR (NR-1)"
         c.drawString(0, y - 3 * mm, kicker)
         c.setFont("Helvetica-Bold", 22); c.setFillColor(ESCURO)
         c.drawString(0, y - 12 * mm, self.titulo)
@@ -101,17 +105,20 @@ class BlocoTitulo(Flowable):
         else:
             dado(5 * mm, "Empresa", self.empresa, W * 0.62)
             dado(W * 0.68, "Referência", self.referencia, W * 0.30)
-        if self.instrumento:
+        if self.instrumento or self.completo:
             ty = top - 13 * mm - 3 * mm
             gap = 4 * mm
             pw = (W - 3 * gap) / 4
             for i, nome in enumerate(PASSOS):
                 x = i * (pw + gap)
                 atual = (i + 1 == self.instrumento)
-                c.setFillColor(VERDE if atual else FUNDO); c.setStrokeColor(VERDE if atual else LINHA)
+                if self.completo:
+                    c.setFillColor(colors.HexColor("#E4F6EF")); c.setStrokeColor(VERDE)
+                else:
+                    c.setFillColor(VERDE if atual else FUNDO); c.setStrokeColor(VERDE if atual else LINHA)
                 c.roundRect(x, ty - 7.5 * mm, pw, 7.5 * mm, 2.4 * mm, fill=1, stroke=1)
-                c.setFillColor(colors.white if atual else CINZA)
-                c.setFont("Helvetica-Bold" if atual else "Helvetica", 8.4)
+                c.setFillColor(VERDE_ESC if self.completo else (colors.white if atual else CINZA))
+                c.setFont("Helvetica-Bold" if (atual or self.completo) else "Helvetica", 8.4)
                 c.drawCentredString(x + pw / 2, ty - 5 * mm, "%d  %s" % (i + 1, nome))
 
 
@@ -123,3 +130,18 @@ def mes_ano_pt(dt=None):
     import datetime
     dt = dt or datetime.datetime.now()
     return "%s de %d" % (_MESES[dt.month - 1], dt.year)
+
+
+OBS_PLANOS = "Os planos de ação são sempre ações ligadas ao diagnóstico, por meio de benefícios coletivos."
+
+
+def caixa_observacao(texto=OBS_PLANOS, largura=174 * mm):
+    """Caixa lilás com a observação, texto justificado."""
+    from reportlab.platypus import Table, TableStyle, Paragraph
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_JUSTIFY
+    est = ParagraphStyle("obs", fontName="Helvetica", fontSize=9, leading=13, textColor=colors.HexColor("#4B2A6B"), alignment=TA_JUSTIFY)
+    t = Table([[Paragraph("<b>Observação:</b> " + texto, est)]], colWidths=[largura])
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F3E6FF")), ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#D9B8F5")),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 10), ("RIGHTPADDING", (0, 0), (-1, -1), 10), ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7)]))
+    return t

@@ -113,11 +113,11 @@ styles = getSampleStyleSheet()
 s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
                        spaceAfter=4, fontName='Helvetica-Bold')
 s_sub = ParagraphStyle('sub', parent=styles['Normal'], fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1,
+s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=colors.HexColor('#241B35'),
                        spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
 s_h3 = ParagraphStyle('h3', parent=styles['Heading3'], fontSize=10.5, textColor=AZUL_ESCURO,
                        spaceBefore=10, spaceAfter=4, fontName='Helvetica-Bold')
-s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
+s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13, alignment=4)
 s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.3, textColor=CINZA_TEXTO, leading=11)
 s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
 s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', textColor=colors.black,
@@ -273,10 +273,10 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
     # Cabecalho do resumo
     story.append(Paragraph("Resumo do Plano de Ação", s_h2))
     resumo_rows = [
-        [Paragraph("<b>Total de Ações</b>", s_cell),
-         Paragraph("<b>Concluidas</b>", s_cell),
-         Paragraph("<b>Em Andamento</b>", s_cell),
-         Paragraph("<b>Pendentes</b>", s_cell)],
+        [Paragraph('<font color="white"><b>Total de Ações</b></font>', s_cell),
+         Paragraph('<font color="white"><b>Concluídas</b></font>', s_cell),
+         Paragraph('<font color="white"><b>Em Andamento</b></font>', s_cell),
+         Paragraph('<font color="white"><b>Pendentes</b></font>', s_cell)],
         [Paragraph(str(TOTAL_ACOES), s_cell),
          Paragraph(str(concluidas), s_cell),
          Paragraph(str(andamento), s_cell),
@@ -302,10 +302,10 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
     # Gantt -- barra de progresso por acao
     story.append(Paragraph("Progresso por Ação", s_h2))
     gantt_header = [
-        Paragraph("<b>Ação</b>", s_cell),
-        Paragraph("<b>Responsável</b>", s_cell),
-        Paragraph("<b>Prazo</b>", s_cell),
-        Paragraph("<b>Status</b>", s_cell),
+        Paragraph('<font color="white"><b>Ação</b></font>', s_cell),
+        Paragraph('<font color="white"><b>Responsável</b></font>', s_cell),
+        Paragraph('<font color="white"><b>Prazo</b></font>', s_cell),
+        Paragraph('<font color="white"><b>Status</b></font>', s_cell),
     ]
     gantt_rows = [gantt_header]
     for gi, gitem in enumerate(_acompanhamento, 1):
@@ -411,7 +411,7 @@ def gerar_acompanhamento(dados: dict = None, output_path=None):
         ["Responsável Técnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
         ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
         ["Data e Hora (UTC):", agora],
-        ["Hash UUID de Validacao:", hash_uuid],
+        ["Hash UUID de Validação:", hash_uuid],
     ]
     t_sig = Table(sig_rows, colWidths=[45 * mm, 100 * mm])
     t_sig.setStyle(TableStyle([

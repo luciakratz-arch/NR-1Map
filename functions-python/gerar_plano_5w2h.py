@@ -186,11 +186,11 @@ styles = getSampleStyleSheet()
 s_h1 = ParagraphStyle('h1', parent=styles['Heading1'], fontSize=15, textColor=VERDE_NR1,
                        spaceAfter=4, fontName='Helvetica-Bold')
 s_sub = ParagraphStyle('sub', parent=styles['Normal'], fontSize=9.5, textColor=CINZA_TEXTO, spaceAfter=10)
-s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=ROXO_NR1,
+s_h2 = ParagraphStyle('h2', parent=styles['Heading2'], fontSize=11.5, textColor=colors.HexColor('#241B35'),
                        spaceBefore=12, spaceAfter=6, fontName='Helvetica-Bold')
 s_h3 = ParagraphStyle('h3', parent=styles['Heading3'], fontSize=10.5, textColor=AZUL_ESCURO,
                        spaceBefore=10, spaceAfter=4, fontName='Helvetica-Bold')
-s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13)
+s_body = ParagraphStyle('body', parent=styles['Normal'], fontSize=9, textColor=CINZA_TEXTO, leading=13, alignment=4)
 s_cell = ParagraphStyle('cell', parent=styles['Normal'], fontSize=8.5, textColor=CINZA_TEXTO, leading=12)
 s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
 s_badge = ParagraphStyle('badge', parent=s_cell, fontName='Helvetica-Bold', textColor=colors.black,
@@ -266,6 +266,8 @@ def gerar_5w2h(dados: dict = None, output_path=None):
         "reavaliada no instrumento de Acompanhamento (4) com nova medição de IBP para comprovação de eficácia.",
         s_body
     ))
+    story.append(Spacer(1, 3 * mm))
+    story.append(nr1_visual.caixa_observacao())
     story.append(Spacer(1, 4 * mm))
 
     # Usar acoes salvas no Firestore (nr1map_plano_acao) se existirem
@@ -276,12 +278,12 @@ def gerar_5w2h(dados: dict = None, output_path=None):
         # -- Ações salvas no painel pelo RH --
         if not acoes_firestore:
             story.append(Paragraph(
-                "Nenhuma acao cadastrada para este ciclo.",
+                "Nenhuma ação cadastrada para este ciclo.",
                 s_body
             ))
         else:
             story.append(Paragraph(
-                f"Total de acoes cadastradas: {len(acoes_firestore)}",
+                f"Total de ações cadastradas: {len(acoes_firestore)}",
                 ParagraphStyle('sub2', parent=s_body, textColor=VERDE_NR1, fontSize=9)
             ))
             story.append(Spacer(1, 3 * mm))
@@ -341,7 +343,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
         if not acoes:
             story.append(Paragraph(
                 "Nenhum CBO ou setor classificado como Substancial ou Intolerável neste ciclo. "
-                "Nenhuma acao corretiva obrigatoria — manter monitoramento de rotina via Pesquisa Pulso.",
+                "Nenhuma ação corretiva obrigatória — manter monitoramento de rotina via Pesquisa Pulso.",
                 s_body
             ))
         else:
@@ -409,7 +411,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
         ["Responsável Técnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
         ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
         ["Data e Hora (UTC):", agora],
-        ["Hash UUID de Validacao:", hash_uuid],
+        ["Hash UUID de Validação:", hash_uuid],
     ]
     t_sig = Table(sig_rows, colWidths=[45 * mm, 100 * mm])
     t_sig.setStyle(TableStyle([
@@ -423,7 +425,7 @@ def gerar_5w2h(dados: dict = None, output_path=None):
     story.append(Spacer(1, 3 * mm))
     story.append(Spacer(1, 6*mm))
     story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
-    story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
+    story.append(Paragraph("✓ VALIDADO PELA RESPONSÁVEL TÉCNICA DA METODOLOGIA", ParagraphStyle(
         'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [

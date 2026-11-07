@@ -56,10 +56,10 @@ MATRIZ_GRO = {
 PROB_LETRA = {1:"A", 2:"B", 3:"C", 4:"D", 5:"E"}
 
 MODULOS_NOME = {
-    "M1": "Fatores Fisiologicos / Corpo e Mente",
-    "M2": "Fatores de Seguranca / Previsibilidade",
+    "M1": "Fatores Fisiológicos / Corpo e Mente",
+    "M2": "Fatores de Segurança / Previsibilidade",
     "M3": "Fatores Sociais / Relacionamentos",
-    "M4": "Fatores Motivacionais / Proposito",
+    "M4": "Fatores Motivacionais / Propósito",
 }
 SUBCATS_NOME = {
     "1.1":"Ergonomia e Conforto Físico",
@@ -74,7 +74,7 @@ SUBCATS_NOME = {
     "3.1":"Liderança e Gestão Direta",
     "3.2":"Relacionamento com Pares",
     "3.3":"Cultura e Valores Organizacionais",
-    "3.4":"Comunicacao Interna",
+    "3.4":"Comunicação Interna",
     "3.5":"Assédio e Violência no Trabalho",
     "4.1":"Propósito e Missão",
     "4.2":"Reconhecimento e Valorização",
@@ -138,8 +138,8 @@ def nome_arquivo_padrao(empresa, ano=None):
 # ──────────────────────────── ESTILOS ────────────────────────────
 styles = getSampleStyleSheet()
 S = {
-    "h1":    ParagraphStyle('h1',    parent=styles['Normal'], fontSize=14, textColor=VERDE,   fontName='Helvetica-Bold', spaceAfter=3, spaceBefore=0),
-    "h2":    ParagraphStyle('h2',    parent=styles['Normal'], fontSize=11, textColor=ROXO,    fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=5),
+    "h1":    ParagraphStyle('h1',    parent=styles['Normal'], fontSize=14, textColor=colors.HexColor('#241B35'),   fontName='Helvetica-Bold', spaceAfter=3, spaceBefore=0),
+    "h2":    ParagraphStyle('h2',    parent=styles['Normal'], fontSize=11, textColor=colors.HexColor('#241B35'),    fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=5),
     "h3":    ParagraphStyle('h3',    parent=styles['Normal'], fontSize=9.5, textColor=AZUL_ESC, fontName='Helvetica-Bold', spaceBefore=6, spaceAfter=3),
     "sub":   ParagraphStyle('sub',   parent=styles['Normal'], fontSize=8.5, textColor=CINZA,  spaceAfter=8),
     "body":  ParagraphStyle('body',  parent=styles['Normal'], fontSize=8.8, textColor=CINZA,  leading=13.5, spaceAfter=4, alignment=TA_JUSTIFY),
@@ -178,7 +178,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     dados = {
       "empresa":            str,
       "cnpj":               str,
-      "responsavel":        str,
+      "responsável":        str,
       "responsavelTecnico": {"nome": str, "crp": str, "email": str},
       "referencia":         str,   # ex: "Junho de 2026"
       "colaboradoresAtivos": int,
@@ -188,7 +188,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
       "ibpSubcats":         {"1.1": {"ibp": float, "n": int, "nome": str, "modId": str}, ...},
       "porUnidade":         [{"unidade": str, "n": int, "ibp": float}, ...],
       "porCargo":           [{"cargo": str, "cbo": str, "unidade": str, "n": int, "ibp": float}, ...],
-      "acoes":              [{"descricao": str, "status": str, "classif": str}, ...],
+      "ações":              [{"descrição": str, "status": str, "classif": str}, ...],
     }
     """
     empresa       = dados.get("empresa", "Empresa")
@@ -237,23 +237,23 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     story = []
 
-    # FIX: Banner de aviso quando laudo gerado sem dados de respostas
-    if _sem_dados_ibp or respondentes == 0:
-        story.append(Paragraph(
-            "AVISO: Este laudo foi gerado sem respostas computadas no ciclo atual. "
-            "Os indices IBP exibidos sao placeholders (0,00). "
-            "Dispare um Diagnostico Geral e aguarde respostas para obter o laudo analitico completo.",
-            S["body"]
-        ))
-        story.append(Spacer(1, 4*mm))
-
     # ════════════════════════════════════════════════════════
     # CAPA
     # ════════════════════════════════════════════════════════
     story.append(Spacer(1, 4*mm))
     import nr1_visual
-    story.append(nr1_visual.BlocoTitulo("Laudo Técnico Psicossocial", "Relatório final consolidado", empresa, referencia))
+    story.append(nr1_visual.BlocoTitulo("Laudo Técnico Psicossocial", "Relatório final consolidado", empresa, referencia, completo=True))
     story.append(Spacer(1, 4*mm))
+    # FIX: Banner de aviso quando laudo gerado sem dados de respostas
+    if _sem_dados_ibp or respondentes == 0:
+        story.append(Paragraph(
+            "AVISO: Este laudo foi gerado sem respostas computadas no ciclo atual. "
+            "Os índices IBP exibidos são placeholders (0,00). "
+            "Dispare um Diagnostico Geral e aguarde respostas para obter o laudo analitico completo.",
+            S["body"]
+        ))
+        story.append(Spacer(1, 4*mm))
+
 
     # Ficha de identificacao
     ficha = [
@@ -357,27 +357,27 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     # 1. FUNDAMENTACAO TEORICA E METODOLOGICA
     # ════════════════════════════════════════════════════════
-    story.append(Paragraph("1. Fundamentacao Teorica e Metodologica", S["h2"]))
+    story.append(Paragraph("1. Fundamentação Teórica e Metodológica", S["h2"]))
 
     story.append(Paragraph("1.1 Psicodinâmica do Trabalho — Christophe Dejours", S["h3"]))
     story.append(Paragraph(
-        "A Psicodinâmica do Trabalho, desenvolvida pelo medico e psicanalista frances Christophe Dejours, "
-        "investiga a relacao entre organizacao do trabalho e o sofrimento psiquico dos trabalhadores. "
-        "O conceito central e a Balança Psicodinâmica: quando as estrategias de defesa coletiva conseguem "
-        "transformar o sofrimento em prazer, o equilibrio se mantem; quando falham, instala-se o "
-        "<b>Sofrimento Patogenico</b>, precursor de adoecimento psiquico e fisico.",
+        "A Psicodinâmica do Trabalho, desenvolvida pelo médico e psicanalista francês Christophe Dejours, "
+        "investiga a relação entre organização do trabalho e o sofrimento psíquico dos trabalhadores. "
+        "O conceito central e a Balança Psicodinâmica: quando as estratégias de defesa coletiva conseguem "
+        "transformar o sofrimento em prazer, o equilíbrio se mantem; quando falham, instala-se o "
+        "<b>Sofrimento Patogenico</b>, precursor de adoecimento psíquico e físico.",
         S["body"]
     ))
     story.append(Paragraph(
-        "O <b>Índice de Balança Psicodinâmica (IBP)</b> quantifica esse equilibrio em escala de "
-        "<b>-5,0 (Sofrimento Patogenico maximo) a +5,0 (Terreno Fertil pleno)</b>, calculado pela "
+        "O <b>Índice de Balança Psicodinâmica (IBP)</b> quantifica esse equilíbrio em escala de "
+        "<b>-5,0 (Sofrimento Patogenico máximo) a +5,0 (Terreno Fertil pleno)</b>, calculado pela "
         "conversao direta das frequencias de resposta: Sempre=+5 | Na maioria=+2,5 | Na metade=0 | "
-        "Poucas vezes=-2,5 | Raramente=-5. Tres zonas resultantes:",
+        "Poucas vezes=-2,5 | Raramente=-5. Três zonas resultantes:",
         S["body"]
     ))
     zonas_tab = [
         ["Zona Dejours",          "Faixa IBP",      "Significado Clinico",                      "Severidade GRO"],
-        ["Sofrimento Patogenico", "-5,0 a -1,5",    "Risco ativo de adoecimento psiquico",      "Alta (4)"],
+        ["Sofrimento Patogenico", "-5,0 a -1,5",    "Risco ativo de adoecimento psíquico",      "Alta (4)"],
         ["Defesa Oculta",         "-1,4 a +1,4",    "Sofrimento mascarado por defesas coletivas","Media (3)"],
         ["Terreno Fertil",        "+1,5 a +5,0",    "Equilibrio Prazer-Sofrimento preservado",  "Baixa (1)"],
     ]
@@ -393,31 +393,31 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     story.append(Paragraph("1.2 Teoria dos Dois Fatores — Frederick Herzberg", S["h3"]))
     story.append(Paragraph(
-        "Herzberg distingue <b>fatores higienicos</b> (salario, condicoes fisicas, politicas da empresa — "
-        "cuja ausencia causa insatisfacao mas cuja presenca nao gera motivacao) dos <b>fatores motivadores</b> "
-        "(reconhecimento, responsabilidade, crescimento — que produzem satisfacao genuina). "
-        "Os Modulos 1 e 2 do IBP mapeiam predominantemente fatores higienicos; "
-        "os Modulos 3 e 4 mapeiam fatores motivadores.",
+        "Herzberg distingue <b>fatores higienicos</b> (salário, condições físicas, políticas da empresa — "
+        "cuja ausência causa insatisfação mas cuja presenca não gera motivação) dos <b>fatores motivadores</b> "
+        "(reconhecimento, responsabilidade, crescimento — que produzem satisfação genuina). "
+        "Os Módulos 1 e 2 do IBP mapeiam predominantemente fatores higienicos; "
+        "os Módulos 3 e 4 mapeiam fatores motivadores.",
         S["body"]
     ))
 
     story.append(Paragraph("1.3 Hierarquia de Necessidades — Abraham Maslow", S["h3"]))
     story.append(Paragraph(
-        "A piramide de Maslow organiza as necessidades humanas em cinco niveis (fisiologicas, seguranca, "
-        "sociais, estima e autorrealizacao). Este laudo foca nos tres primeiros niveis — base da piramide "
-        "— cujas falhas sao as principais precursoras de risco psicossocial no ambiente laboral, "
-        "mapeadas respectivamente pelos Modulos 1, 2 e 3 do questionario.",
+        "A piramide de Maslow organiza as necessidades humanas em cinco níveis (fisiológicas, segurança, "
+        "sociais, estima e autorrealização). Este laudo foca nos tres primeiros níveis — base da piramide "
+        "— cujas falhas são as principais precursoras de risco psicossocial no ambiente laboral, "
+        "mapeadas respectivamente pelos Módulos 1, 2 e 3 do questionário.",
         S["body"]
     ))
 
     story.append(Paragraph("1.4 Base Legal e Normativa", S["h3"]))
     story.append(Paragraph(
         "Este laudo cumpre integralmente os requisitos da <b>NR-1 (Norma Regulamentadora n. 1)</b>, "
-        "atualizada pela <b>Portaria MTE n. 1.419/2024</b>, que estabelece obrigacao de identificacao, "
-        "avaliacao e controle dos riscos psicossociais como parte do Gerenciamento de Riscos "
+        "atualizada pela <b>Portaria MTE n. 1.419/2024</b>, que estabelece obrigação de identificação, "
+        "avaliação e controle dos riscos psicossociais como parte do Gerenciamento de Riscos "
         "Ocupacionais (GRO) e do Programa de Gerenciamento de Riscos (PGR). "
-        "A classificacao de risco utiliza a <b>Matriz Severidade x Probabilidade</b> (metodologia "
-        "AIHA/Fundacentro), com cinco niveis: Trivial, Toleravel, Moderado, Substancial e Intolerável.",
+        "A classificação de risco utiliza a <b>Matriz Severidade x Probabilidade</b> (metodologia "
+        "AIHA/Fundacentro), com cinco níveis: Trivial, Tolerável, Moderado, Substancial e Intolerável.",
         S["body"]
     ))
     story.append(PageBreak())
@@ -425,14 +425,14 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     # 2. RESULTADOS POR MODULO E SUBCATEGORIA
     # ════════════════════════════════════════════════════════
-    story.append(Paragraph("2. Resultados por Modulo e Subcategoria (IBP)", S["h2"]))
+    story.append(Paragraph("2. Resultados por Módulo e Subcategoria (IBP)", S["h2"]))
     story.append(Paragraph(
-        "Apresenta-se a media IBP de cada subcategoria avaliada, com a zona Dejours correspondente "
-        "e a classificacao oficial GRO. O Resultado Geral da Organizacao e os indices por "
-        "Modulos e Subcategorias sao exibidos independentemente do numero de respondentes. "
+        "Apresenta-se a média IBP de cada subcategoria avaliada, com a zona Dejours correspondente "
+        "e a classificação oficial GRO. O Resultado Geral da Organização e os índices por "
+        "Módulos e Subcategorias são exibidos independentemente do número de respondentes. "
         "Subcategorias marcadas com (*) possuem menos de "
         f"{MIN_RESPONDENTES} respondentes — o IBP e exibido com representatividade reduzida. "
-        "A trava de anonimato estatistico aplica-se EXCLUSIVAMENTE as quebras por Unidade e Cargo/CBO individuais.",
+        "A trava de anonimato estatístico aplica-se EXCLUSIVAMENTE as quebras por Unidade e Cargo/CBO individuais.",
         S["body"]
     ))
 
@@ -456,7 +456,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
         # Linha de resumo do modulo
         resumo_mod = [[
-            Paragraph(f"IBP do Modulo: {ibp_mod_str}", S["cellb"]),
+            Paragraph(f"IBP do Módulo: {ibp_mod_str}", S["cellb"]),
             Paragraph(f"Zona Dejours: {zona_mod}", S["cellb"]),
             Paragraph(f"Classificacao GRO: {gro_mod}", S["cellb"]),
         ]]
@@ -520,7 +520,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
             tsc.setStyle(TableStyle(TS_BASE + bgs_sc))
             story.append(tsc)
         else:
-            story.append(Paragraph("Sem dados suficientes para este modulo.", S["body"]))
+            story.append(Paragraph("Sem dados suficientes para este módulo.", S["body"]))
         story.append(Spacer(1, 4*mm))
 
     story.append(PageBreak())
@@ -528,11 +528,11 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     # 3. SEGMENTACAO POR UNIDADE E CARGO/CBO
     # ════════════════════════════════════════════════════════
-    story.append(Paragraph("3. Segmentacao por Unidade e Cargo/CBO", S["h2"]))
+    story.append(Paragraph("3. Segmentação por Unidade e Cargo/CBO", S["h2"]))
     story.append(Paragraph(
-        f"Trava de anonimato estatistico: resultados Gerais, por Modulo e por Subcategoria sao SEMPRE exibidos. "
+        f"Trava de anonimato estatístico: resultados Gerais, por Módulo e por Subcategoria são SEMPRE exibidos. "
         f"Quebras por Unidade ou Cargo com menos de <b>{MIN_RESPONDENTES} respondentes</b> "
-        "nao sao individualizados, sendo apresentados de forma agregada para proteger a identidade "
+        "não são individualizados, sendo apresentados de forma agregada para proteger a identidade "
         "dos colaboradores, conforme diretrizes de compliance da plataforma.",
         S["body"]
     ))
@@ -649,15 +649,15 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     # 4. CONCLUSAO TECNICA E CONFORMIDADE GRO
     # ════════════════════════════════════════════════════════
-    story.append(Paragraph("4. Conclusao Tecnica e Conformidade com o PGR", S["h2"]))
+    story.append(Paragraph("4. Conclusão Técnica e Conformidade com o PGR", S["h2"]))
 
     # Resumo consolidado
     cor_zona = ZONA_COR.get(zona_geral, CINZA_CLR)
     resumo_geral = [[
-        Paragraph("IBP Geral", S["cellb"]),
-        Paragraph("Zona Dejours", S["cellb"]),
-        Paragraph("Classif. GRO", S["cellb"]),
-        Paragraph("Taxa de Adesao", S["cellb"]),
+        Paragraph('<font color="white">IBP Geral</font>', S["cellb"]),
+        Paragraph('<font color="white">Zona Dejours</font>', S["cellb"]),
+        Paragraph('<font color="white">Classif. GRO</font>', S["cellb"]),
+        Paragraph('<font color="white">Taxa de Adesão</font>', S["cellb"]),
     ],[
         Paragraph(f"{ibp_geral:+.2f}" if ibp_geral is not None else "—", S["ctr"]),
         Paragraph(zona_geral, S["ctr"]),
@@ -689,18 +689,18 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     if piores_mod:
         pm = piores_mod[0]
         piores_txt = (
-            f" O modulo de maior criticidade e <b>{MODULOS_NOME.get(pm[0], pm[0])}</b> "
+            f" O módulo de maior criticidade e <b>{MODULOS_NOME.get(pm[0], pm[0])}</b> "
             f"(IBP {pm[1]:+.2f}), que requer atencao prioritaria."
         )
 
     story.append(Paragraph(
-        f"Diante dos dados consolidados neste ciclo de avaliacao psicossocial, a organizacao "
+        f"Diante dos dados consolidados neste ciclo de avaliação psicossocial, a organização "
         f"<b>{empresa}</b> apresenta IBP Geral de <b>{(f'{ibp_geral:+.2f}' if ibp_geral is not None else '—')}</b>, "
-        f"correspondendo a zona <b>{zona_geral}</b> na escala Dejours e classificacao <b>{gro_geral}</b> "
+        f"correspondendo a zona <b>{zona_geral}</b> na escala Dejours e classificação <b>{gro_geral}</b> "
         f"na Matriz GRO (Portaria MTE 1.419/2024).{piores_txt} "
-        f"Recomenda-se a implementacao ou manutencao do Plano de Ação 5W2H para os grupos criticos "
-        f"identificados, monitoramento continuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) "
-        f"e reavaliacao completa deste laudo no proximo periodo de referencia.",
+        f"Recomenda-se a implementação ou manutenção do Plano de Ação 5W2H para os grupos críticos "
+        f"identificados, monitoramento contínuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) "
+        f"e reavaliação completa deste laudo no próximo período de referencia.",
         S["body"]
     ))
     story.append(Spacer(1, 3*mm))
@@ -714,32 +714,34 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     acoes_sub = [a for a in acoes if a.get('classif','').upper() in ('SUBSTANCIAL','INTOLERAVEL','SUBSTANCIAL','INTOLERÁVEL')]
     if n_acoes > 0:
         story.append(Paragraph(
-            f"Foram identificadas <b>{n_acoes} acao(oes)</b> no Plano de Ação 5W2H, sendo "
+            f"Foram identificadas <b>{n_acoes} ação(oes)</b> no Plano de Ação 5W2H, sendo "
             f"<b>{len(acoes_sub)}</b> para setores/CBOs classificados como Substancial ou Intolerável. "
-            "O detalhamento completo (responsavel, prazo, status e evidencias de execucao) consta no "
+            "O detalhamento completo (responsável, prazo, status e evidências de execução) consta no "
             "<b>Instrumento 3 — Plano de Ação 5W2H</b>, documento operacional independente gerado pela plataforma NR-1 Map.",
             S["body"]
         ))
     else:
         story.append(Paragraph(
             "Nenhum CBO ou setor classificado como Substancial ou Intolerável neste ciclo. "
-            "Nao ha acoes corretivas obrigatorias — manter monitoramento de rotina via Pesquisa Pulso "
-            "conforme item 1.5.4.4.6 da NR-1. O Instrumento 3 (Plano 5W2H) registrara apenas o "
-            "compromisso de monitoramento continuo.",
+            "Não há ações corretivas obrigatórias — manter monitoramento de rotina via Pesquisa Pulso "
+            "conforme item 1.5.4.4.6 da NR-1. O Instrumento 3 (Plano 5W2H) registrará apenas o "
+            "compromisso de monitoramento contínuo.",
             S["body"]
         ))
+    story.append(Spacer(1, 2*mm))
+    story.append(nr1_visual.caixa_observacao())
     story.append(Spacer(1, 4*mm))
 
     # Conformidade com PGR
-    story.append(Paragraph("4.2 Declaracao de Conformidade com o PGR", S["h3"]))
+    story.append(Paragraph("4.2 Declaração de Conformidade com o PGR", S["h3"]))
     itens_pgr = [
-        "Identificacao dos perigos psicossociais (NR-1, item 1.5.3)",
+        "Identificação dos perigos psicossociais (NR-1, item 1.5.3)",
         "Avaliação dos riscos com Matriz Severidade x Probabilidade (NR-1, item 1.5.4)",
         "Plano de Ação corretiva e preventiva documentado (NR-1, item 1.5.4.4)",
-        "Monitoramento continuo via Pesquisa Pulso periodica (NR-1, item 1.5.4.4.6)",
-        "Trava de anonimato estatistico (minimo 3 respondentes por grupo)",
+        "Monitoramento contínuo via Pesquisa Pulso periódica (NR-1, item 1.5.4.4.6)",
+        "Trava de anonimato estatístico (mínimo 3 respondentes por grupo)",
         "Responsável Técnico com registro ativo no CRP",
-        "Documento gerado eletronicamente com hash de validacao unico",
+        "Documento gerado eletronicamente com hash de validação único",
     ]
     for item in itens_pgr:
         story.append(Paragraph(f"[✓]  {item}", S["body"]))
@@ -749,7 +751,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     # 5. ASSINATURA TECNICA
     # ════════════════════════════════════════════════════════
-    story.append(Paragraph("5. Assinatura e Validacao Tecnica", S["h2"]))
+    story.append(Paragraph("5. Assinatura e Validação Técnica", S["h2"]))
     story.append(Paragraph("DOCUMENTO ASSINADO ELETRONICAMENTE", S["ok"]))
     story.append(Spacer(1, 3*mm))
 
@@ -764,7 +766,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
         ["Empresa avaliada:",           empresa],
         ["Período de referência:",      referencia],
         ["Data e Hora da emissao:",     agora_str],
-        ["Hash UUID de validacao:",     hash_doc],
+        ["Hash UUID de validação:",     hash_doc],
         ["Plataforma:",                 "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
     ]
     tsig = Table(sig, colWidths=[50*mm, 119*mm])
@@ -779,7 +781,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     story.append(tsig)
     story.append(Spacer(1, 6*mm))
     story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", S["h3"]))
-    story.append(Paragraph("DOCUMENTO VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", S["ok"]))
+    story.append(Paragraph("DOCUMENTO VALIDADO PELA RESPONSÁVEL TÉCNICA DA METODOLOGIA", S["ok"]))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [
         ["Responsável pela Metodologia:", "Dra. Lucia Kratz"],
@@ -802,7 +804,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     story.append(HRFlowable(width="100%", thickness=1, color=VERDE, spaceAfter=4))
     story.append(Paragraph(
-        "Este laudo e imutavel apos emissao e serve como documento tecnico oficial para "
+        "Este laudo e imutavel após emissao e serve como documento técnico oficial para "
         "fiscalizacao trabalhista, audiencias e processos administrativos (NR-1 / Portaria MTE 1.419/2024). "
         "O hash UUID garante unicidade e rastreabilidade do documento.",
         S["body"]
