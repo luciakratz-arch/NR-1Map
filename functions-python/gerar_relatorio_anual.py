@@ -111,36 +111,9 @@ def gerar_relatorio_anual(dados=None, output_path=None):
                              backColor=VERDE, borderPadding=3)
 
     def cabecalho_rodape(canvas_obj, doc):
-        from reportlab.lib.utils import ImageReader
-        canvas_obj.saveState()
-        w, h = A4
-        if lp_path:
-            try:
-                canvas_obj.drawImage(ImageReader(lp_path), 18*mm, h-28*mm,
-                                      width=50*mm, height=14*mm, preserveAspectRatio=True, mask='auto')
-            except Exception:
-                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        else:
-            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        if le_path:
-            try:
-                canvas_obj.drawImage(ImageReader(le_path), w-62*mm, h-28*mm,
-                                      width=50*mm, height=14*mm, preserveAspectRatio=True, mask='auto')
-            except Exception: pass
-        canvas_obj.setStrokeColor(VERDE)
-        canvas_obj.setLineWidth(1.0)
-        canvas_obj.line(18*mm, h-26*mm, w-18*mm, h-26*mm)
-        canvas_obj.setFont('Helvetica-Bold', 9.5)
-        canvas_obj.setFillColor(AZUL)
-        canvas_obj.drawCentredString(w/2, h-31*mm, 'RELATORIO ANUAL CONSOLIDADO')
-        canvas_obj.setFont('Helvetica', 8)
-        canvas_obj.setFillColor(CINZA)
-        canvas_obj.drawCentredString(w/2, h-36*mm, empresa_nome)
-        canvas_obj.setFont('Helvetica', 7.5)
-        canvas_obj.setFillColor(CINZA)
-        canvas_obj.drawString(20*mm, 12*mm, 'NR-1 Map | Portaria MTE 1.419/2024 | Documento Confidencial')
-        canvas_obj.drawRightString(w-20*mm, 12*mm, f'Pagina {doc.page}')
-        canvas_obj.restoreState()
+        import nr1_visual
+        nr1_visual.cabecalho_rodape(canvas_obj, doc, "Relatório Anual Consolidado", empresa_nome, lp_path, le_path,
+                                    rodape="NR-1 Map  ·  Alinhado à NR-1 (Portaria MTE 1.419/2024)  ·  Confidencial")
 
     if not output_path:
         tmp = _tmpmod.NamedTemporaryFile(suffix='.pdf', delete=False)
@@ -148,25 +121,23 @@ def gerar_relatorio_anual(dados=None, output_path=None):
         output_path = tmp.name
 
     doc = SimpleDocTemplate(output_path, pagesize=A4,
-                             topMargin=50*mm, bottomMargin=20*mm,
+                             topMargin=36*mm, bottomMargin=22*mm,
                              leftMargin=18*mm, rightMargin=18*mm)
     story = []
 
     # -- Capa / Identificacao --
-    story.append(Paragraph(f'Relatorio Anual Consolidado {ano_atual}', s_h1))
-    story.append(Paragraph(
-        f'{empresa_nome} | Gestao de Riscos Psicossociais | '
-        f'NR-1 / Portaria MTE 1.419/2024', s_sub))
+    import nr1_visual
+    story.append(nr1_visual.BlocoTitulo(f'Relatório Anual {ano_atual}', 'Gestão de riscos psicossociais consolidada', empresa_nome, str(ano_atual)))
     story.append(Spacer(1, 4*mm))
 
     id_rows = [
         ['Empresa', empresa_nome],
         ['CNPJ', empresa_cnpj],
-        ['Responsavel', responsavel],
-        ['Responsavel Tecnico', f"{resp_tec.get('nome','')} | {resp_tec.get('crp','')}"],
+        ['Responsável', responsavel],
+        ['Responsável Técnico', f"{resp_tec.get('nome','')} | {resp_tec.get('crp','')}"],
         ['Total de ciclos avaliados', str(len(ciclos))],
         ['Gerado em', agora],
-        ['Hash de validacao', hash_uuid],
+        ['Hash de validação', hash_uuid],
     ]
     t_id = Table([[Paragraph(r[0], ParagraphStyle('lb', fontSize=8.5, fontName='Helvetica-Bold', textColor=PRETO)),
                    Paragraph(r[1], s_cell)] for r in id_rows],
@@ -183,17 +154,17 @@ def gerar_relatorio_anual(dados=None, output_path=None):
 
     # -- Contexto Institucional --
     _ctx_items = [
-        ('Setor de atuacao', ctx.get('setor', '')),
-        ('Fundacao',         ctx.get('fundacao', '')),
-        ('Missao / Proposito', ctx.get('missao', '')),
+        ('Setor de atuação', ctx.get('setor', '')),
+        ('Fundação',         ctx.get('fundacao', '')),
+        ('Missão / Propósito', ctx.get('missao', '')),
     ]
     _ctx_textos = [
-        ('Historico e contexto organizacional', ctx.get('historico', '')),
+        ('Histórico e contexto organizacional', ctx.get('historico', '')),
         ('Contexto do diagnostico',             ctx.get('diagnostico', '')),
     ]
     _tem_ctx = any(v for _, v in _ctx_items) or any(v for _, v in _ctx_textos)
     if _tem_ctx:
-        story.append(Paragraph('Contexto Institucional da Organizacao', s_h2))
+        story.append(Paragraph('Contexto Institucional da Organização', s_h2))
         _tab_ctx = [[k, v] for k, v in _ctx_items if v]
         if _tab_ctx:
             _tc = Table(
@@ -400,21 +371,21 @@ def gerar_relatorio_anual(dados=None, output_path=None):
                 'A organizacao apresenta equilibrio psicodinamico favoravel ao longo do periodo analisado. '
                 'Os indices IBP indicam que as estrategias de defesa coletiva estao convertendo o sofrimento '
                 'em prazer no trabalho (Dejours), com fatores motivacionais preservados (Herzberg) e necessidades '
-                'basicas atendidas (Maslow). Recomenda-se manutencao das praticas de gestao e continuidade do '
+                'basicas atendidas (Maslow). Recomenda-se manutencao das praticas de gestão e continuidade do '
                 'monitoramento via Pesquisa Pulso para prevencao de retrocessos.'
             ),
             'Defesa Oculta': (
                 'A organizacao apresenta sofrimento psicossocial mascarado por defesas coletivas. O IBP na zona '
                 'de Defesa Oculta indica que os trabalhadores desenvolveram estrategias adaptativas para lidar com '
                 'o sofrimento, porem sem resolve-lo estruturalmente. Ha risco de deterioracao caso os fatores '
-                'higienicos (Herzberg) se agravem. O Plano de Acao 5W2H deve ser implementado com urgencia nas '
+                'higienicos (Herzberg) se agravem. O Plano de Ação 5W2H deve ser implementado com urgencia nas '
                 'subcategorias criticas identificadas nos ciclos.'
             ),
             'Sofrimento Patogenico': (
                 'ATENCAO: A organizacao apresenta indices de sofrimento psicossocial patogenico. O IBP nesta zona '
                 'indica falha das estrategias de defesa coletiva, com risco ativo de adoecimento psiquico e fisico '
                 'dos trabalhadores. Intervencao imediata e obrigatoria conforme NR-1 item 1.5.4.4.3. O Plano de '
-                'Acao deve priorizar as subcategorias com maior criticidade e o acompanhamento deve ser semanal.'
+                'Ação deve priorizar as subcategorias com maior criticidade e o acompanhamento deve ser semanal.'
             ),
         }
         story.append(Paragraph(
@@ -447,7 +418,7 @@ def gerar_relatorio_anual(dados=None, output_path=None):
     story.append(Spacer(1, 6*mm))
 
     # -- 4. Resumo das Acoes --
-    story.append(Paragraph('4. Resumo do Plano de Acao', s_h2))
+    story.append(Paragraph('4. Resumo do Plano de Ação', s_h2))
     if acoes:
         total  = len(acoes)
         concl  = sum(1 for a in acoes if 'onclu' in a.get('status',''))
@@ -464,8 +435,8 @@ def gerar_relatorio_anual(dados=None, output_path=None):
 
         # Tabela de acoes
         ac_header = [Paragraph('<b>Setor / CBO</b>', s_cell),
-                     Paragraph('<b>Acao</b>', s_cell),
-                     Paragraph('<b>Responsavel</b>', s_cell),
+                     Paragraph('<b>Ação</b>', s_cell),
+                     Paragraph('<b>Responsável</b>', s_cell),
                      Paragraph('<b>Prazo</b>', s_cell),
                      Paragraph('<b>Status</b>', s_cell)]
         ac_rows = [ac_header]
@@ -504,11 +475,11 @@ def gerar_relatorio_anual(dados=None, output_path=None):
                                            fontName='Helvetica-Bold', fontSize=10)))
     story.append(Spacer(1, 3*mm))
     sig_rows = [
-        ['Responsavel Tecnico:', resp_tec.get('nome', 'Dra. Lucia Kratz')],
+        ['Responsável Técnico:', resp_tec.get('nome', 'Dra. Lucia Kratz')],
         ['Registro Profissional:', resp_tec.get('crp', 'CRP 09/20590')],
         ['E-mail:', resp_tec.get('email', 'luciakratz@gmail.com')],
         ['Empresa avaliada:', empresa_nome],
-        ['Periodo de referencia:', f'{ano_atual}'],
+        ['Período de referência:', f'{ano_atual}'],
         ['Data e Hora da emissao:', agora],
         ['Hash UUID de validacao:', hash_uuid],
         ['Plataforma:', 'NR-1 Map | Conformidade Portaria MTE 1.419/2024'],
@@ -526,16 +497,16 @@ def gerar_relatorio_anual(dados=None, output_path=None):
     story.append(t_sig)
     story.append(Spacer(1, 8*mm))
 
-    story.append(Paragraph('Responsavel pela Metodologia IBP e Plataforma NR-1 Map', s_h2))
+    story.append(Paragraph('Responsável pela Metodologia IBP e Plataforma NR-1 Map', s_h2))
     story.append(Paragraph('VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA',
                             ParagraphStyle('v2', parent=s_body, textColor=ROXO,
                                            fontName='Helvetica-Bold', fontSize=9)))
     story.append(Spacer(1, 3*mm))
     met_rows = [
-        ['Responsavel pela Metodologia:', 'Dra. Lucia Kratz'],
+        ['Responsável pela Metodologia:', 'Dra. Lucia Kratz'],
         ['Registro Profissional:', 'CRP 09/20590'],
         ['Titulacao:', 'Doutora em Administracao | Psicologa Organizacional'],
-        ['Metodologia:', 'IBP -- Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)'],
+        ['Metodologia:', 'IBP -- Índice de Balança Psicodinâmica (Dejours + Herzberg + Maslow)'],
         ['Plataforma:', 'NR-1 Map | Conformidade Portaria MTE 1.419/2024'],
     ]
     t_met = Table(

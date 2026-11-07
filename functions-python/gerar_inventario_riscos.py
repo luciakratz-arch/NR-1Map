@@ -231,7 +231,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
     canvas_obj.setFillColor(CINZA_TEXTO)
     canvas_obj.drawString(20 * mm, 12 * mm,
                            "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
+    canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Página {doc.page}")
 
     canvas_obj.restoreState()
 
@@ -240,7 +240,7 @@ def desenhar_cabecalho_rodape(canvas_obj, doc):
 def gerar_inventario(dados: dict = None, output_path=None):
     _dados = dados or {}
     _empresa_nome = _dados.get('empresa_nome') or _dados.get('empresa', {}).get('nome', 'Empresa')
-    _referencia   = _dados.get('referencia', __import__('datetime').datetime.now().strftime('%B de %Y'))
+    _referencia   = _dados.get('referencia', __import__('nr1_visual').mes_ano_pt())
     _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
     _ibp_geral    = _dados.get('ibp_geral')
     _ibp_subcats  = _dados.get('ibpSubcats') or {}
@@ -270,58 +270,21 @@ def gerar_inventario(dados: dict = None, output_path=None):
     _le_path_inv = _baixar_logo_inv(_dados.get('logoEmpresaUrl') or '')
 
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
-        from reportlab.lib.utils import ImageReader
-        canvas_obj.saveState()
-        w, h = A4
+        import nr1_visual
+        nr1_visual.cabecalho_rodape(canvas_obj, doc, "Inventário de Riscos", _empresa_nome,
+                                    getattr(desenhar_cabecalho_rodape_local, '_logo_parc', None),
+                                    getattr(desenhar_cabecalho_rodape_local, '_logo_emp', None))
 
-        # Logo parceiro (esquerda)
-        if _lp_path_inv:
-            try:
-                canvas_obj.drawImage(ImageReader(_lp_path_inv), 18*mm, h-28*mm,
-                                      width=50*mm, height=14*mm,
-                                      preserveAspectRatio=True, mask='auto')
-            except Exception:
-                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        else:
-            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        # Logo empresa (direita)
-        if _le_path_inv:
-            try:
-                canvas_obj.drawImage(ImageReader(_le_path_inv), w-62*mm, h-28*mm,
-                                      width=50*mm, height=14*mm,
-                                      preserveAspectRatio=True, mask='auto')
-            except Exception:
-                pass
-
-        canvas_obj.setStrokeColor(VERDE_NR1)
-        canvas_obj.setLineWidth(1.0)
-        canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
-        canvas_obj.setFont('Helvetica-Bold', 9.5)
-        canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, "INVENTARIO DE RISCOS PSICOSSOCIAIS")
-        canvas_obj.setFont('Helvetica', 8)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawCentredString(w / 2, h - 36 * mm, _empresa_nome)
-        canvas_obj.setFont('Helvetica', 7.5)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-        canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
-        canvas_obj.restoreState()
-
-    output_path = output_path or nome_arquivo_padrao("InventarioDeRiscos", _empresa_nome)
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
-        topMargin=48 * mm, bottomMargin=20 * mm,
+        topMargin=36 * mm, bottomMargin=22 * mm,
         leftMargin=20 * mm, rightMargin=20 * mm,
     )
     story = []
 
-    story.append(Paragraph("Inventario de Riscos Psicossociais", s_h1))
-    story.append(Paragraph(
-        f"{_empresa_nome} · Referencia: {_referencia} · Documento para anexacao ao PGR (NR-1) — "
-        f"1 instrumento do fluxo GRO (Inventario → Avaliacao → Plano de Acao → Acompanhamento)",
-        s_sub
-    ))
+    import nr1_visual
+    story.append(nr1_visual.BlocoTitulo("Inventário de Riscos", "Perigos psicossociais por setor", _empresa_nome, _referencia, instrumento=1))
+    story.append(Spacer(1, 5 * mm))
     story.append(Paragraph(
         "Este Inventário registra os perigos psicossociais identificados por setor, conforme item "
         "1.5.4.4.1 da NR-1 (Portaria MTE 1.419/2024), que exige o registro dos perigos antes da etapa "
@@ -450,7 +413,7 @@ def gerar_inventario(dados: dict = None, output_path=None):
     agora = datetime.datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S UTC")
     hash_uuid = str(uuid.uuid4()).upper()
     sig_rows = [
-        ["Responsavel Tecnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
+        ["Responsável Técnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
         ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
         ["Data e Hora (UTC):", agora],
         ["Hash UUID de Validacao:", hash_uuid],
@@ -466,15 +429,15 @@ def gerar_inventario(dados: dict = None, output_path=None):
     story.append(t_sig)
     story.append(Spacer(1, 3 * mm))
     story.append(Spacer(1, 6*mm))
-    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
+    story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
     story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
         'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [
-        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
+        ["Responsável pela Metodologia:", "Dra. Lucia Kratz"],
         ["Registro Profissional:",         "CRP 09/20590"],
         ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
-        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
+        ["Metodologia:",                   "IBP — Índice de Balança Psicodinâmica (Dejours + Herzberg + Maslow)"],
         ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
     ]
     t_sig_lucia = Table(sig_lucia, colWidths=[45*mm, 100*mm])

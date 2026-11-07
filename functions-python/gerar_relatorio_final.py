@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-NR-1 Map -- Gerador do LAUDO TECNICO PSICOSSOCIAL (Relatorio Final Consolidado)
+NR-1 Map -- Gerador do LAUDO TECNICO PSICOSSOCIAL (Relatório Final Consolidado)
 Conformidade: NR-1 / Portaria MTE n. 1.419/2024
-Metodologia: Psicodinamica do Trabalho (Dejours) + Herzberg + Maslow
+Metodologia: Psicodinâmica do Trabalho (Dejours) + Herzberg + Maslow
 Dados: lidos dinamicamente do Firestore pela Cloud Function (main.py)
 """
 
@@ -164,57 +164,12 @@ TS_BASE = [
 # ──────────────────────────── CABECALHO / RODAPE ────────────────────────────
 def _cabecalho_rodape(canvas_obj, doc, empresa, resp_tecnico,
                       logo_parceiro_path=None, logo_empresa_path=None):
-    canvas_obj.saveState()
-    w, h = A4
-    # Logo esquerda — parceiro (ou NR-1 Map como fallback)
-    if logo_parceiro_path and os.path.exists(logo_parceiro_path):
-        try:
-            canvas_obj.drawImage(logo_parceiro_path, 18*mm, h-24*mm,
-                                 width=50*mm, height=14*mm,
-                                 preserveAspectRatio=True, mask='auto', anchor='c')
-        except Exception:
-            canvas_obj.setFont('Helvetica-Bold', 8)
-            canvas_obj.setFillColor(VERDE)
-            canvas_obj.drawString(18*mm, h-20*mm, "NR-1Map")
-    else:
-        canvas_obj.setFont('Helvetica-Bold', 8)
-        canvas_obj.setFillColor(VERDE)
-        canvas_obj.drawString(18*mm, h-20*mm, "NR-1Map")
-    # Logo direita — empresa (se existir, nao exibe texto sobreposto)
-    _tem_logo_empresa = False
-    if logo_empresa_path and os.path.exists(logo_empresa_path):
-        try:
-            canvas_obj.drawImage(logo_empresa_path, w-60*mm, h-24*mm,
-                                 width=42*mm, height=18*mm,
-                                 preserveAspectRatio=True, anchor='c')
-            _tem_logo_empresa = True
-        except Exception:
-            pass
-    # Sem logo empresa: espaco direito fica em branco (sem texto sobreposto)
-    # Linha
-    canvas_obj.setStrokeColor(VERDE)
-    canvas_obj.setLineWidth(1.0)
-    canvas_obj.line(18*mm, h-26*mm, w-18*mm, h-26*mm)
-    # Titulo
-    canvas_obj.setFont('Helvetica-Bold', 9.5)
-    canvas_obj.setFillColor(AZUL_ESC)
-    canvas_obj.drawCentredString(w/2, h-31*mm, "LAUDO TECNICO PSICOSSOCIAL")
-    canvas_obj.setFont('Helvetica', 8)
-    canvas_obj.setFillColor(CINZA)
-    canvas_obj.drawCentredString(w/2, h-36*mm, empresa)
-    # Rodape
-    canvas_obj.setFont('Helvetica', 6.5)
-    canvas_obj.setFillColor(CINZA)
-    canvas_obj.drawString(20*mm, 10*mm, "NR-1 Map | Portaria MTE n. 1.419/2024 | Confidencial")
-    canvas_obj.drawRightString(w-20*mm, 10*mm, f"Pagina {doc.page}")
-    # Assinante no rodape das paginas internas
-    if doc.page > 1 and resp_tecnico:
-        nome = resp_tecnico.get('nome', '')
-        crp  = resp_tecnico.get('crp', '')
-        if nome:
-            canvas_obj.setFont('Helvetica', 6.5)
-            canvas_obj.drawCentredString(w/2, 6*mm, f"Resp. Técnico: {nome}" + (f" | {crp}" if crp else ""))
-    canvas_obj.restoreState()
+    import nr1_visual
+    extra = ""
+    if resp_tecnico and resp_tecnico.get('nome'):
+        extra = "Resp. Técnico: " + resp_tecnico.get('nome', '') + (" | " + resp_tecnico.get('crp', '') if resp_tecnico.get('crp') else "")
+    nr1_visual.cabecalho_rodape(canvas_obj, doc, "Laudo Técnico Psicossocial", empresa, logo_parceiro_path, logo_empresa_path,
+                                rodape="NR-1 Map  ·  Alinhado à NR-1 (Portaria MTE 1.419/2024)  ·  Confidencial", linha_extra=extra)
 
 
 # ──────────────────────────── FUNCAO PRINCIPAL ────────────────────────────
@@ -240,7 +195,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     cnpj          = dados.get("cnpj", "")
     responsavel   = dados.get("responsavel", "")
     resp_tec      = dados.get("responsavelTecnico") or {}
-    referencia    = dados.get("referencia", datetime.datetime.now().strftime("%B de %Y"))
+    referencia    = dados.get("referencia", __import__("nr1_visual").mes_ano_pt())
     col_ativos    = dados.get("colaboradoresAtivos", 0)
     respondentes  = dados.get("respondentes", 0)
     ibp_geral     = dados.get("ibpGeral")
@@ -274,7 +229,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
 
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
-        topMargin=48*mm, bottomMargin=20*mm,
+        topMargin=36*mm, bottomMargin=22*mm,
         leftMargin=18*mm, rightMargin=18*mm
     )
 
@@ -296,28 +251,24 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # CAPA
     # ════════════════════════════════════════════════════════
     story.append(Spacer(1, 4*mm))
-    story.append(Paragraph("LAUDO TECNICO PSICOSSOCIAL", S["h1"]))
-    story.append(Paragraph(
-        f"Relatorio Final Consolidado | {empresa} | {referencia} | "
-        f"Conformidade NR-1 / Portaria MTE n. 1.419/2024",
-        S["sub"]
-    ))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=LINHA, spaceAfter=5))
+    import nr1_visual
+    story.append(nr1_visual.BlocoTitulo("Laudo Técnico Psicossocial", "Relatório final consolidado", empresa, referencia))
+    story.append(Spacer(1, 4*mm))
 
     # Ficha de identificacao
     ficha = [
         ["Empresa",                empresa],
         ["CNPJ",                   cnpj or "—"],
-        ["Responsavel pela empresa", responsavel or "—"],
-        ["Responsavel Tecnico",    resp_tec.get("nome","—") + (" | " + resp_tec.get("crp","") if resp_tec.get("crp") else "")],
-        ["Periodo de referencia",  referencia],
+        ["Responsável pela empresa", responsavel or "—"],
+        ["Responsável Técnico",    resp_tec.get("nome","—") + (" | " + resp_tec.get("crp","") if resp_tec.get("crp") else "")],
+        ["Período de referência",  referencia],
         ["Colaboradores ativos",   str(col_ativos)],
-        ["Respondentes validos",   f"{respondentes} ({taxa}% de adesao)"],
-        ["IBP Geral da organizacao", f"{ibp_geral:+.2f}" if ibp_geral is not None else "—"],
+        ["Respondentes válidos",   f"{respondentes} ({taxa}% de adesão)"],
+        ["IBP Geral da organização", f"{ibp_geral:+.2f}" if ibp_geral is not None else "—"],
         ["Zona Dejours / Classif. GRO", f"{zona_geral} / {gro_geral}"],
-        ["Metodologia",            "Psicodinamica do Trabalho (Dejours) | Herzberg | Maslow"],
+        ["Metodologia",            "Psicodinâmica do Trabalho (Dejours) | Herzberg | Maslow"],
         ["Gerado em",              agora_str],
-        ["Hash de validacao",      hash_doc],
+        ["Hash de validação",      hash_doc],
     ]
     t = Table(ficha, colWidths=[52*mm, 117*mm])
     t.setStyle(TableStyle([
@@ -336,17 +287,17 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # CONTEXTO INSTITUCIONAL (so exibe campos preenchidos)
     # ════════════════════════════════════════════════════════
     _ctx_items = [
-        ("Setor de atuacao",    ctx.get("setor", "")),
+        ("Setor de atuação",    ctx.get("setor", "")),
         ("Fundacao",            ctx.get("fundacao", "")),
-        ("Missao / Proposito",  ctx.get("missao", "")),
+        ("Missão / Propósito",  ctx.get("missao", "")),
     ]
     _ctx_textos = [
-        ("Historico e contexto organizacional", ctx.get("historico", "")),
+        ("Histórico e contexto organizacional", ctx.get("historico", "")),
         ("Contexto do diagnostico",             ctx.get("diagnostico", "")),
     ]
     _tem_ctx = any(v for _, v in _ctx_items) or any(v for _, v in _ctx_textos)
     if _tem_ctx:
-        story.append(Paragraph("Contexto Institucional da Organizacao", S["h2"]))
+        story.append(Paragraph("Contexto Institucional da Organização", S["h2"]))
         _tab_ctx = [[k, v] for k, v in _ctx_items if v]
         if _tab_ctx:
             _tc = Table(_tab_ctx, colWidths=[52*mm, 117*mm])
@@ -408,17 +359,17 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # ════════════════════════════════════════════════════════
     story.append(Paragraph("1. Fundamentacao Teorica e Metodologica", S["h2"]))
 
-    story.append(Paragraph("1.1 Psicodinamica do Trabalho — Christophe Dejours", S["h3"]))
+    story.append(Paragraph("1.1 Psicodinâmica do Trabalho — Christophe Dejours", S["h3"]))
     story.append(Paragraph(
-        "A Psicodinamica do Trabalho, desenvolvida pelo medico e psicanalista frances Christophe Dejours, "
+        "A Psicodinâmica do Trabalho, desenvolvida pelo medico e psicanalista frances Christophe Dejours, "
         "investiga a relacao entre organizacao do trabalho e o sofrimento psiquico dos trabalhadores. "
-        "O conceito central e a Balanca Psicodinamica: quando as estrategias de defesa coletiva conseguem "
+        "O conceito central e a Balança Psicodinâmica: quando as estrategias de defesa coletiva conseguem "
         "transformar o sofrimento em prazer, o equilibrio se mantem; quando falham, instala-se o "
         "<b>Sofrimento Patogenico</b>, precursor de adoecimento psiquico e fisico.",
         S["body"]
     ))
     story.append(Paragraph(
-        "O <b>Indice de Balanca Psicodinamica (IBP)</b> quantifica esse equilibrio em escala de "
+        "O <b>Índice de Balança Psicodinâmica (IBP)</b> quantifica esse equilibrio em escala de "
         "<b>-5,0 (Sofrimento Patogenico maximo) a +5,0 (Terreno Fertil pleno)</b>, calculado pela "
         "conversao direta das frequencias de resposta: Sempre=+5 | Na maioria=+2,5 | Na metade=0 | "
         "Poucas vezes=-2,5 | Raramente=-5. Tres zonas resultantes:",
@@ -466,7 +417,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
         "avaliacao e controle dos riscos psicossociais como parte do Gerenciamento de Riscos "
         "Ocupacionais (GRO) e do Programa de Gerenciamento de Riscos (PGR). "
         "A classificacao de risco utiliza a <b>Matriz Severidade x Probabilidade</b> (metodologia "
-        "AIHA/Fundacentro), com cinco niveis: Trivial, Toleravel, Moderado, Substancial e Intoleravel.",
+        "AIHA/Fundacentro), com cinco niveis: Trivial, Toleravel, Moderado, Substancial e Intolerável.",
         S["body"]
     ))
     story.append(PageBreak())
@@ -747,7 +698,7 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
         f"<b>{empresa}</b> apresenta IBP Geral de <b>{(f'{ibp_geral:+.2f}' if ibp_geral is not None else '—')}</b>, "
         f"correspondendo a zona <b>{zona_geral}</b> na escala Dejours e classificacao <b>{gro_geral}</b> "
         f"na Matriz GRO (Portaria MTE 1.419/2024).{piores_txt} "
-        f"Recomenda-se a implementacao ou manutencao do Plano de Acao 5W2H para os grupos criticos "
+        f"Recomenda-se a implementacao ou manutencao do Plano de Ação 5W2H para os grupos criticos "
         f"identificados, monitoramento continuo via Pesquisas Pulso semanais (NR-1, item 1.5.4.4.6) "
         f"e reavaliacao completa deste laudo no proximo periodo de referencia.",
         S["body"]
@@ -758,20 +709,20 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     # 4.1 — Referencia ao Plano de Acao (documento separado — Instrumento 3)
     # O Laudo Tecnico e documento ANALITICO. O Plano de Acao 5W2H e gerado
     # como documento operacional independente (Instrumento 3 do fluxo GRO).
-    story.append(Paragraph("4.1 Plano de Acao 5W2H — Referencia ao Instrumento 3", S["h3"]))
+    story.append(Paragraph("4.1 Plano de Ação 5W2H — Referência ao Instrumento 3", S["h3"]))
     n_acoes = len(acoes)
     acoes_sub = [a for a in acoes if a.get('classif','').upper() in ('SUBSTANCIAL','INTOLERAVEL','SUBSTANCIAL','INTOLERÁVEL')]
     if n_acoes > 0:
         story.append(Paragraph(
-            f"Foram identificadas <b>{n_acoes} acao(oes)</b> no Plano de Acao 5W2H, sendo "
-            f"<b>{len(acoes_sub)}</b> para setores/CBOs classificados como Substancial ou Intoleravel. "
+            f"Foram identificadas <b>{n_acoes} acao(oes)</b> no Plano de Ação 5W2H, sendo "
+            f"<b>{len(acoes_sub)}</b> para setores/CBOs classificados como Substancial ou Intolerável. "
             "O detalhamento completo (responsavel, prazo, status e evidencias de execucao) consta no "
-            "<b>Instrumento 3 — Plano de Acao 5W2H</b>, documento operacional independente gerado pela plataforma NR-1 Map.",
+            "<b>Instrumento 3 — Plano de Ação 5W2H</b>, documento operacional independente gerado pela plataforma NR-1 Map.",
             S["body"]
         ))
     else:
         story.append(Paragraph(
-            "Nenhum CBO ou setor classificado como Substancial ou Intoleravel neste ciclo. "
+            "Nenhum CBO ou setor classificado como Substancial ou Intolerável neste ciclo. "
             "Nao ha acoes corretivas obrigatorias — manter monitoramento de rotina via Pesquisa Pulso "
             "conforme item 1.5.4.4.6 da NR-1. O Instrumento 3 (Plano 5W2H) registrara apenas o "
             "compromisso de monitoramento continuo.",
@@ -783,11 +734,11 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     story.append(Paragraph("4.2 Declaracao de Conformidade com o PGR", S["h3"]))
     itens_pgr = [
         "Identificacao dos perigos psicossociais (NR-1, item 1.5.3)",
-        "Avaliacao dos riscos com Matriz Severidade x Probabilidade (NR-1, item 1.5.4)",
-        "Plano de Acao corretiva e preventiva documentado (NR-1, item 1.5.4.4)",
+        "Avaliação dos riscos com Matriz Severidade x Probabilidade (NR-1, item 1.5.4)",
+        "Plano de Ação corretiva e preventiva documentado (NR-1, item 1.5.4.4)",
         "Monitoramento continuo via Pesquisa Pulso periodica (NR-1, item 1.5.4.4.6)",
         "Trava de anonimato estatistico (minimo 3 respondentes por grupo)",
-        "Responsavel Tecnico com registro ativo no CRP",
+        "Responsável Técnico com registro ativo no CRP",
         "Documento gerado eletronicamente com hash de validacao unico",
     ]
     for item in itens_pgr:
@@ -807,11 +758,11 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     email_tec = resp_tec.get("email", "luciakratz@gmail.com")
 
     sig = [
-        ["Responsavel Tecnico:",       nome_tec],
+        ["Responsável Técnico:",       nome_tec],
         ["Registro Profissional:",      crp_tec],
         ["E-mail:",                     email_tec],
         ["Empresa avaliada:",           empresa],
-        ["Periodo de referencia:",      referencia],
+        ["Período de referência:",      referencia],
         ["Data e Hora da emissao:",     agora_str],
         ["Hash UUID de validacao:",     hash_doc],
         ["Plataforma:",                 "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
@@ -827,14 +778,14 @@ def gerar_relatorio_final(dados: dict, output_path: str = None) -> str:
     ]))
     story.append(tsig)
     story.append(Spacer(1, 6*mm))
-    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", S["h3"]))
+    story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", S["h3"]))
     story.append(Paragraph("DOCUMENTO VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", S["ok"]))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [
-        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
+        ["Responsável pela Metodologia:", "Dra. Lucia Kratz"],
         ["Registro Profissional:",         "CRP 09/20590"],
         ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
-        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
+        ["Metodologia:",                   "IBP — Índice de Balança Psicodinâmica (Dejours + Herzberg + Maslow)"],
         ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
     ]
     tsig_lucia = Table(sig_lucia, colWidths=[50*mm, 119*mm])

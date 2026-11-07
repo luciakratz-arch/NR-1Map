@@ -240,7 +240,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     # Dados dinamicos do Firestore (injetados pelo main.py)
     _dados = dados or {}
     _empresa_nome = _dados.get('empresa_nome') or _dados.get('empresa', {}).get('nome', 'Empresa')
-    _referencia   = _dados.get('referencia', datetime.datetime.now().strftime('%B de %Y'))
+    _referencia   = _dados.get('referencia', __import__('nr1_visual').mes_ano_pt())
     _resp_tec     = _dados.get('responsavelTecnico') or {'nome': 'Dra. Lucia Kratz', 'crp': 'CRP 09/20590'}
     _num_resp     = _dados.get('respondentes', 0)
 
@@ -277,47 +277,18 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     output_path = output_path or nome_arquivo_padrao(f"MapaDeRisco_{_slug_ref}", _empresa_nome)
 
     def desenhar_cabecalho_rodape_local(canvas_obj, doc):
-        from reportlab.lib.utils import ImageReader as _IR
-        canvas_obj.saveState()
-        w, h = A4
-        _lp_loc = getattr(desenhar_cabecalho_rodape_local, '_logo_parc', None)
-        _le_loc = getattr(desenhar_cabecalho_rodape_local, '_logo_emp', None)
-        # Logo parceiro (esquerda)
-        if _lp_loc:
-            try: canvas_obj.drawImage(_IR(_lp_loc), 18*mm, h-28*mm, width=50*mm, height=14*mm, preserveAspectRatio=True, mask='auto')
-            except:
-                canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        else:
-            canvas_obj.setFont('Helvetica-Bold', 8); canvas_obj.setFillColor(VERDE_NR1); canvas_obj.drawString(18*mm, h-24*mm, 'NR-1Map')
-        # Logo empresa (direita)
-        if _le_loc:
-            try: canvas_obj.drawImage(_IR(_le_loc), w-62*mm, h-28*mm, width=50*mm, height=14*mm, preserveAspectRatio=True)
-            except: pass
-        canvas_obj.setStrokeColor(VERDE_NR1)
-        canvas_obj.setLineWidth(1.0)
-        canvas_obj.line(18 * mm, h - 26 * mm, w - 18 * mm, h - 26 * mm)
-        canvas_obj.setFont('Helvetica-Bold', 9.5)
-        canvas_obj.setFillColor(AZUL_ESCURO)
-        canvas_obj.drawCentredString(w / 2, h - 31 * mm, "AVALIACAO DO RISCO — MAPA DE RISCO PSICOSSOCIAL")
-        canvas_obj.setFont('Helvetica', 8)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawCentredString(w / 2, h - 36 * mm, _empresa_nome)
-        canvas_obj.setFont('Helvetica', 7.5)
-        canvas_obj.setFillColor(CINZA_TEXTO)
-        canvas_obj.drawString(20 * mm, 12 * mm, "NR-1 Map · Conformidade Portaria MTE 1.419/2024")
-        canvas_obj.drawRightString(w - 20 * mm, 12 * mm, f"Pagina {doc.page}")
-        canvas_obj.restoreState()
+        import nr1_visual
+        nr1_visual.cabecalho_rodape(canvas_obj, doc, "Avaliação do Risco", _empresa_nome,
+                                    getattr(desenhar_cabecalho_rodape_local, '_logo_parc', None),
+                                    getattr(desenhar_cabecalho_rodape_local, '_logo_emp', None))
 
-    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=48 * mm, bottomMargin=20 * mm,
-                             leftMargin=16 * mm, rightMargin=16 * mm)
+    doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=36 * mm, bottomMargin=22 * mm,
+                             leftMargin=18 * mm, rightMargin=16 * mm)
     story = []
 
-    story.append(Paragraph("Avaliacao do Risco — Mapa de Risco Psicossocial", s_h1))
-    story.append(Paragraph(
-        f"{_empresa_nome} · Referencia: {_referencia} · Documento para anexacao ao PGR (NR-1) — "
-        f"2 instrumento do fluxo GRO (Inventario → <b>Avaliacao</b> → Plano de Acao → Acompanhamento)",
-        s_sub
-    ))
+    import nr1_visual
+    story.append(nr1_visual.BlocoTitulo("Avaliação do Risco", "Mapa de Risco Psicossocial", _empresa_nome, _referencia, instrumento=2))
+    story.append(Spacer(1, 5 * mm))
     story.append(Paragraph(
         "Esta Avaliação classifica, por setor, os perigos já registrados no Inventário de Riscos "
         "(instrumento 1), em conformidade com o item 1.5.4.4.2 da NR-1, que exige a classificação por "
@@ -343,7 +314,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
         matriz_rows.append(row)
         matriz_bg.append(('BACKGROUND', (0, r_idx), (0, r_idx), CINZA_CLARO))
 
-    t_matriz = Table(matriz_rows, colWidths=[34 * mm] + [27.2 * mm] * 5)
+    t_matriz = Table(matriz_rows, colWidths=[34 * mm] + [28 * mm] * 5)
     t_matriz.setStyle(TableStyle([
         *matriz_bg,
         ('GRID', (0, 0), (-1, -1), 0.5, colors.white),
@@ -508,7 +479,7 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     agora = datetime.datetime.now(datetime.timezone.utc).strftime("%d/%m/%Y %H:%M:%S UTC")
     hash_uuid = str(uuid.uuid4()).upper()
     sig_rows = [
-        ["Responsavel Tecnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
+        ["Responsável Técnico:", _resp_tec.get("nome","Dra. Lucia Kratz")],
         ["Registro Profissional:", _resp_tec.get("crp","CRP 09/20590")],
         ["Data e Hora (UTC):", agora],
         ["Hash UUID de Validacao:", hash_uuid],
@@ -524,15 +495,15 @@ def gerar_mapa_risco(dados: dict = None, output_path=None):
     story.append(t_sig)
     story.append(Spacer(1, 3 * mm))
     story.append(Spacer(1, 6*mm))
-    story.append(Paragraph("Responsavel pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
+    story.append(Paragraph("Responsável pela Metodologia IBP e Plataforma NR-1 Map", s_h2))
     story.append(Paragraph("✓ VALIDADO PELA RESPONSAVEL TECNICA DA METODOLOGIA", ParagraphStyle(
         'lucia_ok', parent=s_body, textColor=VERDE_NR1, fontName='Helvetica-Bold', fontSize=9)))
     story.append(Spacer(1, 3*mm))
     sig_lucia = [
-        ["Responsavel pela Metodologia:", "Dra. Lucia Kratz"],
+        ["Responsável pela Metodologia:", "Dra. Lucia Kratz"],
         ["Registro Profissional:",         "CRP 09/20590"],
         ["Titulacao:",                     "Doutora em Administracao | Psicologa Organizacional"],
-        ["Metodologia:",                   "IBP — Indice de Balanca Psicodinamica (Dejours + Herzberg + Maslow)"],
+        ["Metodologia:",                   "IBP — Índice de Balança Psicodinâmica (Dejours + Herzberg + Maslow)"],
         ["Plataforma:",                    "NR-1 Map | Conformidade Portaria MTE 1.419/2024"],
     ]
     t_sig_lucia = Table(sig_lucia, colWidths=[45*mm, 100*mm])
