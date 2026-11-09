@@ -748,7 +748,7 @@ tbody tr:hover td{background:#F5F8F7;}
         <div style="margin-top:16px;padding:12px 14px;background:rgba(123,0,196,.08);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
           <div style="font-size:11px;font-weight:600;color:#7B00C4;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o parceiro</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-control" id="link-parceiro" readonly value="https://luciakratz-arch.github.io/NR-1Map/representantes.html#parceiro" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <input class="form-control" id="link-parceiro" readonly value="https://nr1-maps.com.br/representantes.html#parceiro" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
             <button class="btn btn-sm" style="background:#7B00C4;color:#fff;white-space:nowrap;" onclick="copiarLinkWhats('parceiro')">🟢 WhatsApp</button>
           </div>
           <p style="font-size:11px;color:#7B00C4;margin-top:6px;">📱 Envie este link por WhatsApp para o parceiro preencher o cadastro sozinho.</p>
@@ -919,7 +919,7 @@ tbody tr:hover td{background:#F5F8F7;}
         <div style="margin-top:16px;padding:12px 14px;background:var(--verde-xp);border-radius:8px;border:1px solid rgba(10,110,79,.2);">
           <div style="font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para a empresa</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-control" id="link-pj" readonly value="https://luciakratz-arch.github.io/NR-1Map/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <input class="form-control" id="link-pj" readonly value="https://nr1-maps.com.br/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
             <button class="btn btn-primary btn-sm" onclick="copiarLink('link-pj')">Copiar</button>
           </div>
           <p style="font-size:11px;color:var(--verde);margin-top:6px;">📱 Envie este link por WhatsApp para a empresa preencher os dados sozinha.</p>
@@ -1011,7 +1011,7 @@ tbody tr:hover td{background:#F5F8F7;}
         <div style="margin-top:16px;padding:12px 14px;background:var(--roxo-xp);border-radius:8px;border:1px solid rgba(123,0,196,.2);">
           <div style="font-size:11px;font-weight:600;color:var(--roxo);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">🔗 Link de auto-cadastro para o cliente PF</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-control" id="link-pf" readonly value="https://luciakratz-arch.github.io/NR-1Map/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
+            <input class="form-control" id="link-pf" readonly value="https://nr1-maps.com.br/cadastro-empresa.html" style="font-size:11px;color:var(--cinza-medio);background:var(--branco);"/>
             <button class="btn btn-roxo btn-sm" onclick="copiarLink('link-pf')">Copiar</button>
           </div>
           <p style="font-size:11px;color:var(--roxo);margin-top:6px;">📱 Envie este link por WhatsApp para o cliente preencher os dados sozinho.</p>
@@ -1046,7 +1046,7 @@ tbody tr:hover td{background:#F5F8F7;}
                 <div style="font-size:12px;color:var(--cinza-medio);">NR1Map_Tabela_Precos_Final.pdf — versao atual aprovada</div>
               </div>
               <div style="display:flex;gap:8px;">
-                <a href="https://luciakratz-arch.github.io/NR-1Map/assets/NR1Map_Tabela_Precos_Final.pdf" target="_blank" class="btn btn-primary btn-sm">⬇ Baixar PDF</a>
+                <a href="https://nr1-maps.com.br/assets/NR1Map_Tabela_Precos_Final.pdf" target="_blank" class="btn btn-primary btn-sm">⬇ Baixar PDF</a>
                 <button class="btn btn-ghost btn-sm" onclick="copiarLinkTabela()">🔗 Copiar Link</button>
               </div>
             </div>
@@ -1780,7 +1780,7 @@ function copiarCredenciais() {
     '2️⃣ Clique no link *Redefinir senha* que chegou\n' +
     '⚠️ Pode estar na pasta Spam ou Atualizações!\n' +
     '3️⃣ Crie sua senha\n' +
-    '4️⃣ Acesse: https://luciakratz-arch.github.io/NR-1Map/admin.html\n' +
+    '4️⃣ Acesse: https://nr1-maps.com.br/admin.html\n' +
     '5️⃣ Clique na aba *RH / Empresa* e entre com seu e-mail e senha\n\n' +
     '✅ Pronto! Seu painel estará disponível.';
   navigator.clipboard.writeText(texto).then(function(){
@@ -3352,7 +3352,7 @@ function esqueciSenha(email) {
 }
 
 function copiarLinkWhats(tipo) {
-  var baseUrl = 'https://luciakratz-arch.github.io/NR-1Map/';
+  var baseUrl = 'https://nr1-maps.com.br/';
   var txt, url;
   if (tipo === 'rh') {
     url = baseUrl + 'cadastro-empresa.html';
@@ -3440,7 +3440,7 @@ function salvarParceiro() {
           '📧 *E-mail:* ' + email + '\n' +
           '🔑 *Senha:* ' + result.senha + '\n\n' +
           '🔗 *Acesse seu painel aqui:*\n' +
-          'https://luciakratz-arch.github.io/NR-1Map/parceiro.html\n\n' +
+          'https://nr1-maps.com.br/parceiro.html\n\n' +
           'Qualquer dúvida, estou à disposição! 🚀'
         );
         setTimeout(function(){ window.open('https://wa.me/55' + wpp + '?text=' + txt, '_blank'); }, 800);
@@ -4351,7 +4351,7 @@ function calcularEnterprise() {
 }
 
 function copiarLinkTabela() {
-  var url = 'https://luciakratz-arch.github.io/NR-1Map/assets/NR1Map_Tabela_Precos_Final.pdf';
+  var url = 'https://nr1-maps.com.br/assets/NR1Map_Tabela_Precos_Final.pdf';
   navigator.clipboard.writeText(url).then(function(){ alert('Link copiado!'); });
 }
 
@@ -4383,7 +4383,7 @@ function salvarContratoEnterprise() {
 
   // Token unico para esta proposta
   var tokenAceite = 'ENT-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
-  var urlAceite = 'https://luciakratz-arch.github.io/NR-1Map/aceite.html?token=' + tokenAceite;
+  var urlAceite = 'https://nr1-maps.com.br/aceite.html?token=' + tokenAceite;
 
   var contrato = {
     tipo: 'enterprise',

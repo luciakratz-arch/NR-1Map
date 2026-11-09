@@ -412,7 +412,7 @@ textarea.form-control{resize:vertical;min-height:70px;}
     </div>
 
     <!-- BANNER GUIA RH -->
-    <a href="https://luciakratz-arch.github.io/NR-1Map/guia_rh.html" target="_blank"
+    <a href="https://nr1-maps.com.br/guia_rh.html" target="_blank"
       style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #D8E8E2;border-radius:10px;padding:14px 20px;margin-bottom:20px;cursor:pointer;text-decoration:none;transition:all .2s;flex-wrap:wrap;gap:10px;"
       onmouseover="this.style.borderColor='#12A073';this.style.boxShadow='0 2px 12px rgba(10,110,79,.1)'"
       onmouseout="this.style.borderColor='#D8E8E2';this.style.boxShadow='none'">
@@ -5089,7 +5089,7 @@ function salvarNovoColab() {
           '2️⃣ Clique no link *Redefinir senha* que chegou\n' +
           '⚠️ _Pode estar na pasta Spam ou Atualizações!_\n' +
           '3️⃣ Crie sua senha\n' +
-          '4️⃣ Acesse: https://luciakratz-arch.github.io/NR-1Map/admin.html\n' +
+          '4️⃣ Acesse: https://nr1-maps.com.br/admin.html\n' +
           '5️⃣ Clique na aba *Usuário* e entre com e-mail e senha\n\n' +
           '🔒 Suas respostas são 100% anônimas.';
         if (confirm(msg + '\n\nEnviar instruções via WhatsApp?')) {
@@ -5544,7 +5544,7 @@ function verLinksEnviados() {
       return;
     }
 
-    var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+    var base = 'https://nr1-maps.com.br/colaborador.html?token=';
     var agoraIso = new Date().toISOString();
     // Um link por colaborador: o mais recente. Links vencidos nao viram botao de abrir.
     var porColab = {};
@@ -5584,7 +5584,7 @@ function verLinksEnviadosLEGACY() {
   var prazoEl = document.getElementById('ag-prazo');
   var prazoNum = parseInt((prazoEl && prazoEl.value) || '7', 10);
   var prazoTxt = prazoNum <= 1 ? '24 horas' : prazoNum + ' dias';
-  var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+  var base = 'https://nr1-maps.com.br/colaborador.html?token=';
   var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
   var agendaId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
   if (!agendaId) { alert('Abra o agendamento pelo lapis e dispare primeiro.'); return; }
@@ -5731,7 +5731,7 @@ function dispararPesquisa(tipo) {
         });
 
         batch.commit().then(function() {
-        var base = 'https://luciakratz-arch.github.io/NR-1Map/colaborador.html?token=';
+        var base = 'https://nr1-maps.com.br/colaborador.html?token=';
         var tipotxt = tipo === 'pulso' ? 'Pesquisa Pulso' : 'Diagnóstico Geral';
         var empresaNome = (window.nr1mapEmpresa && window.nr1mapEmpresa.nome) || 'sua empresa';
 
@@ -5787,23 +5787,29 @@ function dispararPesquisa(tipo) {
         }
 
         // Google Apps Script requer JSONP para evitar CORS
-        var cbName = 'nr1cb_' + Date.now();
-        var getUrl = disparoUrl + '?dados=' + encodeURIComponent(JSON.stringify(payload)) + '&callback=' + cbName;
-        var scriptTag = document.createElement('script');
-        scriptTag.src = getUrl;
-        var jsonpPromise = new Promise(function(resolve, reject) {
-          window[cbName] = function(res) {
-            delete window[cbName];
-            document.body.removeChild(scriptTag);
-            resolve(res);
-          };
-          scriptTag.onerror = function() {
-            delete window[cbName];
-            document.body.removeChild(scriptTag);
-            reject(new Error('Falha ao conectar com o script de disparo.'));
-          };
+        // o script confere o login do usuário a cada envio (idToken do Firebase)
+        var tokenLogin = (window.nr1mapAuth && window.nr1mapAuth.currentUser) ? window.nr1mapAuth.currentUser.getIdToken() : Promise.resolve('');
+        var jsonpPromise = tokenLogin.then(function(idTk) {
+          payload.idToken = idTk;
+          var cbName = 'nr1cb_' + Date.now();
+          var getUrl = disparoUrl + '?dados=' + encodeURIComponent(JSON.stringify(payload)) + '&callback=' + cbName;
+          var scriptTag = document.createElement('script');
+          scriptTag.src = getUrl;
+          var promessa = new Promise(function(resolve, reject) {
+            window[cbName] = function(res) {
+              delete window[cbName];
+              document.body.removeChild(scriptTag);
+              resolve(res);
+            };
+            scriptTag.onerror = function() {
+              delete window[cbName];
+              document.body.removeChild(scriptTag);
+              reject(new Error('Falha ao conectar com o script de disparo.'));
+            };
+          });
+          document.body.appendChild(scriptTag);
+          return promessa;
         });
-        document.body.appendChild(scriptTag);
         jsonpPromise
         .then(function(res) {
           var html = '<div style="max-height:50vh;overflow-y:auto;">';
