@@ -4603,7 +4603,9 @@ function salvarAgendamento() {
 
 function dispararPulsoComCanal() {
   // Lê canal do d-opt (mesmo padrão do diagnóstico)
-  var optSel = document.querySelector('#view-nova-pulso .d-opt.sel .d-lb');
+  // lê o canal da tela que está VISÍVEL (há mais de uma tela de Pulso; a escondida fica sempre em WhatsApp)
+  var telaVisivel = Array.prototype.slice.call(document.querySelectorAll('.view')).filter(function(v){ return v.offsetParent !== null && v.querySelector('.d-opt'); })[0];
+  var optSel = (telaVisivel && telaVisivel.querySelector('.d-opt.sel .d-lb')) || document.querySelector('#view-nova-pulso .d-opt.sel .d-lb');
   var canalVal = optSel ? optSel.textContent.trim() : 'WhatsApp';
   window._canalPulsoEscolhido = canalVal;   // guarda já, porque o envio só lê o canal depois de gravar no banco
   var elCanal = document.getElementById('pulso-canal');
