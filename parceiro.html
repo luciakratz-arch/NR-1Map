@@ -4,6 +4,7 @@
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script>/* limpeza de texto vindo do banco antes de ir para a tela (evita código malicioso) */function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Painel do Parceiro (Micro-Adm)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -555,7 +556,7 @@ function salvarEditClienteParceiro() {
   var row = window._editRowParceiro;
   if(!row) return;
   var cells = Array.from(row.querySelectorAll('td'));
-  cells[0].innerHTML = '<strong>' + document.getElementById('edit-parc-nome').value + '</strong>';
+  cells[0].innerHTML = '<strong>' + esc(document.getElementById('edit-parc-nome').value) + '</strong>';
   cells[2].innerText = document.getElementById('edit-parc-colab').value;
   document.getElementById('modal-edit-cliente-parceiro').classList.remove('open');
   alert('✅ Cliente atualizado!');
@@ -691,7 +692,7 @@ function salvarPJParceiro() {
       var tbody = document.getElementById('tabela-parceiro-clientes');
       if(tbody) {
         var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CNPJ: ' + cnpj + '</span></td>' +
+        tr.innerHTML = '<td><strong>' + esc(nome) + '</strong><br/><span style="font-size:10px;color:#6B7370;">CNPJ: ' + esc(cnpj) + '</span></td>' +
           '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;"/></td>' +
           '<td>' + colab + '</td>' +
           '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
@@ -768,7 +769,7 @@ function salvarPFParceiro() {
       var tbody = document.getElementById('tabela-parceiro-clientes');
       if(tbody) {
         var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + nome + '</strong><br/><span style="font-size:10px;color:#6B7370;">CPF: ' + cpf + '</span></td>' +
+        tr.innerHTML = '<td><strong>' + esc(nome) + '</strong><br/><span style="font-size:10px;color:#6B7370;">CPF: ' + esc(cpf) + '</span></td>' +
           '<td><input type="number" class="form-control" value="0" style="width:75px;padding:4px;"/></td>' +
           '<td>' + colab + '</td>' +
           '<td><span class="bdg-s s-pend"><span class="dot"></span>Pendente</span></td>' +
@@ -1147,7 +1148,7 @@ function carregarDadosParceiro(uid) {
               : '<button class="btn btn-ghost btn-sm" disabled>Conforme</button>';
             var ultimaStr = ultima ? (diasSem === 0 ? 'Hoje' : 'Há ' + diasSem + ' dia' + (diasSem !== 1 ? 's' : '')) : 'Sem atividade';
             var tr = document.createElement('tr');
-            tr.innerHTML = '<td><strong>' + (d.nome || d.razaoSocial || 'Empresa') + '</strong></td>' +
+            tr.innerHTML = '<td><strong>' + esc(d.nome || d.razaoSocial || 'Empresa') + '</strong></td>' +
               '<td>' + ultimaStr + '</td>' +
               '<td><span class="bdg-s ' + statusCls + '"><span class="dot"></span>' + statusTxt + '</span></td>' +
               '<td>' + acao + '</td>';
@@ -1180,7 +1181,7 @@ function carregarDadosParceiro(uid) {
         var statusTxt = d.status === 'liquidado' ? 'Liquidado' : d.status === 'processando' ? 'Processando' : 'Pendente';
         var fmt = function(v){ return 'R$ ' + (v||0).toFixed(2).replace('.',','); };
         var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + (d.mesRef || '—') + '</strong></td>' +
+        tr.innerHTML = '<td><strong>' + esc(d.mesRef || '—') + '</strong></td>' +
           '<td>' + fmt(d.faturamentoBruto) + '</td>' +
           '<td style="color:var(--verde);font-weight:600;">' + fmt(d.comissao) + '</td>' +
           '<td><span class="bdg-s ' + statusCls + '"><span class="dot"></span>' + statusTxt + '</span></td>';

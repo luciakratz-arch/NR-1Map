@@ -4,6 +4,7 @@
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script>/* limpeza de texto vindo do banco antes de ir para a tela (evita código malicioso) */function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Painel do Gestor</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -2441,7 +2442,7 @@ function carregarPlanoAcao(empresaId, cicloId) {
         var tdSetor = document.createElement('td');
         var divSetor = document.createElement('div');
         divSetor.contentEditable = 'true'; divSetor.style.fontWeight = '600';
-        divSetor.innerHTML = (d.setor||'Setor') + (d.cbo ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">'+d.cbo+'</span>' : '');
+        divSetor.innerHTML = esc(d.setor||'Setor') + (d.cbo ? '<br/><span style="font-size:10px;color:var(--cinza-medio);">'+esc(d.cbo)+'</span>' : '');
         divSetor.addEventListener('blur', (function(id){ return function(){ salvarCampoAcao(this,id,'setor'); }; })(doc.id));
         tdSetor.appendChild(divSetor); tr.appendChild(tdSetor);
 
@@ -2742,7 +2743,7 @@ function renderRH(){
     var corCnt = nSel>=3?'var(--verde)':'var(--laranja)';
     html+='<div style="margin-bottom:10px;border:1px solid var(--linha);border-radius:8px;overflow:hidden;">';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--cinza-claro);cursor:pointer;" onclick="toggleRHSubcat(this)">';
-    html+='<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+s.id+' — '+s.titulo+'</span>';
+    html+='<span style="font-size:12px;font-weight:700;color:'+cor+';">📌 '+esc(s.id)+' — '+esc(s.titulo)+'</span>';
     html+='<span style="font-size:11px;font-weight:600;color:'+corCnt+';">'+nSel+'/'+s.perguntas.length+' ▸</span></div>';
     html+='<div style="display:none;" id="sc-body-'+s.id+'"></div>';
     html+='</div>';
@@ -3429,7 +3430,7 @@ function _carregarResponsavelTecnico() {
       // Logo existente da empresa
       if (d.logo_url) {
         var prev = document.getElementById('logo-empresa-preview');
-        if (prev) prev.innerHTML = '<img src="' + d.logo_url + '" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
+        if (prev) prev.innerHTML = '<img src="' + esc(d.logo_url) + '" style="max-height:36px;max-width:70px;object-fit:contain;border-radius:4px;"/>';
         if (window.nr1mapEmpresa) window.nr1mapEmpresa.logo_url = d.logo_url;
       }
       // Preview logo parceiro no co-branding
@@ -3437,12 +3438,12 @@ function _carregarResponsavelTecnico() {
       var logoParc = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
       if (prevParc) {
         if (logoParc) {
-          prevParc.innerHTML = '<img src="' + logoParc + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+          prevParc.innerHTML = '<img src="' + esc(logoParc) + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
         } else {
           // Ainda carregando — aguarda 1s e tenta novamente
           setTimeout(function() {
             var lp2 = window.nr1mapEmpresa && window.nr1mapEmpresa.logoParceiroUrl;
-            if (lp2) prevParc.innerHTML = '<img src="' + lp2 + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
+            if (lp2) prevParc.innerHTML = '<img src="' + esc(lp2) + '" style="max-height:40px;max-width:90px;object-fit:contain;"/>';
           }, 1200);
         }
       }
@@ -3694,7 +3695,7 @@ function renderCargos() {
     var nvCor = nv ? nv.cor : '#999';
     var supNome = sup ? sup.nome : '— Topo —';
     html += '<tr>';
-    html += '<td style="font-weight:600;">' + c.nome + '</td>';
+    html += '<td style="font-weight:600;">' + esc(c.nome) + '</td>';
     html += '<td style="font-family:monospace;font-size:12px;">' + c.cbo + '</td>';
     html += '<td><span style="background:' + nvCor + '22;color:' + nvCor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + nvNome + '</span></td>';
     html += '<td style="font-size:12px;">' + supNome + '</td>';
@@ -3738,7 +3739,7 @@ function renderNiveis() {
     for (var j=0; j<cargos.length; j++) { if (cargos[j].nvId === nv.id) qtd++; }
     html += '<tr>';
     html += '<td style="font-weight:600;color:' + nv.cor + ';">Nível ' + (i+1) + '</td>';
-    html += '<td><input class="form-control" value="' + nv.nome + '" data-id="' + nv.id + '" onchange="renomearNivel(this)" style="font-size:12px;padding:5px 8px;"/></td>';
+    html += '<td><input class="form-control" value="' + esc(nv.nome) + '" data-id="' + esc(nv.id) + '" onchange="renomearNivel(this)" style="font-size:12px;padding:5px 8px;"/></td>';
     html += '<td><input type="color" value="' + nv.cor + '" data-id="' + nv.id + '" onchange="recolorirNivel(this)" style="width:36px;height:28px;border:none;cursor:pointer;border-radius:4px;"/></td>';
     html += '<td>' + qtd + '</td>';
     html += '<td><button class="btn btn-ghost btn-sm" onclick="delNivel(\'' + nv.id + '\')">✕</button></td>';
@@ -3786,7 +3787,7 @@ function renderUnidades() {
   var html = '';
   unidades.forEach(function(u) {
     html += '<tr style="border-bottom:1px solid var(--linha);">';
-    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + u.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + esc(u.nome) + '</td>';
     html += '<td style="padding:8px 12px;font-size:12px;color:var(--cinza-medio);">' + (u.cidade || '—') + '</td>';
     html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delUnidade(\"" + u.id + "\")'>🗑️</button></td>";
     html += '</tr>';
@@ -3866,7 +3867,7 @@ function renderDepartamentos() {
     var nvNome = '';
     niveisHier.forEach(function(nv) { if (nv.id === d.nvId) nvNome = nv.nome; });
     html += '<tr style="border-bottom:1px solid var(--linha);">';
-    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + d.nome + '</td>';
+    html += '<td style="padding:8px 12px;font-size:13px;font-weight:600;">' + esc(d.nome) + '</td>';
     html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (nvNome || '—') + '</td>';
     html += '<td style="padding:8px 12px;font-size:11px;color:var(--cinza-medio);">' + (tiposLabel[d.tipo] || d.tipo) + '</td>';
     html += "<td style='padding:8px 12px;text-align:right;'><button class='btn btn-danger btn-sm' onclick='delDepartamento(\"" + d.id + "\")'>🗑️</button></td>";
@@ -5830,7 +5831,7 @@ function dispararPesquisa(tipo) {
           if (canalVal === 'E-mail' || canalVal === 'Ambos') {
             html += '<div style="background:var(--verde-xp);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--verde);">✅ ' + (res.enviados||0) + ' e-mail(s) enviado(s) automaticamente</div>';
             if (res.erros && res.erros.length) {
-              res.erros.forEach(function(er){ html += '<div style="font-size:12px;color:var(--laranja);padding:2px 0;">⚠️ ' + er.nome + ' — ' + er.erro + '</div>'; });
+              res.erros.forEach(function(er){ html += '<div style="font-size:12px;color:var(--laranja);padding:2px 0;">⚠️ ' + esc(er.nome) + ' — ' + esc(er.erro) + '</div>'; });
             }
           }
 
@@ -5838,7 +5839,7 @@ function dispararPesquisa(tipo) {
             if (canalVal === 'Ambos') html += '<div style="font-size:12px;font-weight:600;color:var(--preto);margin:12px 0 6px;">📱 WhatsApp — clique para abrir cada conversa:</div>';
             res.waLinks.forEach(function(w) {
               html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha);">';
-              html += '<span style="font-size:13px;">' + w.nome + '</span>';
+              html += '<span style="font-size:13px;">' + esc(w.nome) + '</span>';
               if (w.url) {
                 html += '<a href="' + w.url + '" target="_blank" style="background:#25D366;color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;text-decoration:none;">📱 Abrir</a>';
               } else {
@@ -6074,8 +6075,8 @@ function carregarSugestoes(empresaId) {
         var d = doc.data();
         var div = document.createElement('div');
         div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
-        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">'+(d.categoria||'Geral')+'</div>'+
-          '<div style="font-size:13px;color:var(--cinza-escuro);line-height:1.5;">'+d.texto+'</div>'+
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--verde);margin-bottom:4px;">'+esc(d.categoria||'Geral')+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);line-height:1.5;">'+esc(d.texto)+'</div>'+
           '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+_parseCriadoEm(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
         container.appendChild(div);
       });
@@ -6096,8 +6097,8 @@ function carregarChamados(empresaId) {
         var tipos = {socorro:'🧠 Apoio psicológico', assedio:'🛡️ Denúncia de assédio', emergencia:'🆘 Emergência'};
         var div = document.createElement('div');
         div.style.cssText='padding:12px 16px;border-bottom:1px solid var(--linha);';
-        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">'+(tipos[d.tipo]||d.tipo)+'</div>'+
-          '<div style="font-size:13px;color:var(--cinza-escuro);">'+d.mensagem+'</div>'+
+        div.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--roxo);margin-bottom:4px;">'+esc(tipos[d.tipo]||d.tipo)+'</div>'+
+          '<div style="font-size:13px;color:var(--cinza-escuro);">'+esc(d.mensagem)+'</div>'+
           '<div style="font-size:10px;color:var(--cinza-medio);margin-top:4px;">'+_parseCriadoEm(d.criadoEm).toLocaleDateString('pt-BR')+'</div>';
         container.appendChild(div);
       });
@@ -6175,7 +6176,7 @@ function carregarCargos(empresaId) {
       if (selCg) {
         selCg.innerHTML = '<option value="Todos">Todos os cargos</option>';
         cargos.forEach(function(c) {
-          selCg.innerHTML += '<option value="' + c.nome + '">' + c.nome + '</option>';
+          selCg.innerHTML += '<option value="' + esc(c.nome) + '">' + esc(c.nome) + '</option>';
         });
       }
     }).catch(function(e){ 
