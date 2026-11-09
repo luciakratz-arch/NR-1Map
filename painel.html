@@ -5301,24 +5301,25 @@ function _empresaPorVinculo(uid) {
 function carregarEmpresa(uid, email) {
   var padrao = function(){ aplicarEmpresa({id:uid,uid:uid,email:email,nome:'Empresa',responsavel:email,tipo:'mensal',faixa:'Faixa 2'}); };
   var porVinculo = function(){ return _empresaPorVinculo(uid).then(function(ok){ if(!ok) padrao(); }); };
-  window.nr1mapDb.collection('nr1map_empresas').where('uid','==',uid).limit(1).get()
-  .then(function(snap){
-    if(!snap.empty){
-      var e=snap.docs[0].data(); e.id=snap.docs[0].id;
-      return aplicarEmpresa(e);
-    }
-    return window.nr1mapDb.collection('nr1map_empresas').doc(uid).get()
-      .then(function(doc){
-        if(doc.exists){ var e=doc.data(); e.id=doc.id; return aplicarEmpresa(e); }
-        return window.nr1mapDb.collection('nr1map_empresas').where('email','==',email).limit(1).get()
-          .then(function(snap2){
-            if(!snap2.empty){ var e=snap2.docs[0].data(); e.id=snap2.docs[0].id; return aplicarEmpresa(e); }
-            return porVinculo();
-          });
-      });
-  }).catch(function(err){
-    porVinculo();
-  });
+  var col = window.nr1mapDb.collection('nr1map_empresas');
+  var usar = function(d){ var e = d.data(); e.id = d.id; aplicarEmpresa(e); return true; };
+  // 1) busca direta pelo código (as regras de segurança permitem); 2) consulta por uid; 3) consulta por e-mail; 4) vínculo do usuário
+  col.doc(uid).get()
+    .then(function(doc){ return doc.exists ? usar(doc) : false; })
+    .catch(function(){ return false; })
+    .then(function(ok){
+      if (ok) return true;
+      return col.where('uid','==',uid).limit(1).get()
+        .then(function(snap){ return snap.empty ? false : usar(snap.docs[0]); })
+        .catch(function(){ return false; });
+    })
+    .then(function(ok){
+      if (ok) return true;
+      return col.where('email','==',email).limit(1).get()
+        .then(function(snap){ return snap.empty ? false : usar(snap.docs[0]); })
+        .catch(function(){ return false; });
+    })
+    .then(function(ok){ if (!ok) return porVinculo(); });
 }
 
 
