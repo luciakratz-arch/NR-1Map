@@ -4702,17 +4702,18 @@ function carregarHistoricoUnificado(empresaId) {
             // Só adiciona se não houver ciclo já executado com mesmo id
             var jaExiste = todos.some(function(c){ return c._id === doc.id; });
             var foiDisparado = a.status === 'disparado';
-            if (!jaExiste && !foiDisparado) {
+            if (!jaExiste) {
               todos.push({
                 _id: doc.id,
                 _tipo: a.tipo || 'geral',
                 tipo: a.tipo || 'geral',
                 ibpGeral: undefined,
                 totalRespostas: 0,
-                criadoEm: a.data || a.criadoEm || '',
-                _status: 'planejado',
+                criadoEm: foiDisparado ? (a.disparadoEm || a.criadoEm || a.data || '') : (a.data || a.criadoEm || ''),
+                _status: foiDisparado ? 'disparado' : 'planejado',
                 _canal: a.canal,
-                _unidade: a.unidade
+                _unidade: a.unidade,
+                _total: a.totalColaboradores
               });
             }
           });
@@ -4766,10 +4767,11 @@ function renderHistoricoUnificado() {
     var respostas = d.totalRespostas || 0;
     var ibp = d.ibpGeral !== undefined ? (parseFloat(d.ibpGeral) > 0 ? '+' : '') + parseFloat(d.ibpGeral).toFixed(1) : '—';
     var cicloId = d._id || '';
-    var isPlanejado = d._status === 'planejado';
-    var badgePlan = isPlanejado ? '<span style="font-size:9px;font-weight:700;background:rgba(243,156,18,0.15);color:#F39C12;border:1px solid rgba(243,156,18,0.3);border-radius:20px;padding:1px 7px;margin-left:6px;">Planejado</span>' : '';
+    var isDisparado = d._status === 'disparado';
+    var isPlanejado = d._status === 'planejado' || isDisparado;
+    var badgePlan = isDisparado ? '<span style="font-size:9px;font-weight:700;background:rgba(10,110,79,0.12);color:#0A6E4F;border:1px solid rgba(10,110,79,0.3);border-radius:20px;padding:1px 7px;margin-left:6px;">Disparada</span>' : (isPlanejado ? '<span style="font-size:9px;font-weight:700;background:rgba(243,156,18,0.15);color:#F39C12;border:1px solid rgba(243,156,18,0.3);border-radius:20px;padding:1px 7px;margin-left:6px;">Planejado</span>' : '');
     var subInfo = isPlanejado
-      ? (dataStr + ' · Aguardando respostas' + (d._canal ? ' · ' + d._canal : ''))
+      ? (dataStr + ' · ' + (isDisparado ? 'Enviada' + (d._total ? ' a ' + d._total + ' colaborador(es)' : '') + ' · aguardando respostas' : 'Aguardando respostas') + (d._canal ? ' · ' + d._canal : ''))
       : (dataStr + ' · ' + respostas + ' respostas · IBP ' + ibp);
     var acaoBotao = isPlanejado
       ? '<button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="sv(&quot;planejamento&quot;)">Ver agenda</button>'
@@ -5851,6 +5853,21 @@ function dispararPesquisa(tipo) {
           if (window.nr1mapDb && res.waLinks) {
             var _agId = window._currentAgendaId || window._editAgendaId || (function(){ try { return localStorage.getItem('nr1map_agendaId') || ''; } catch(e){ return ''; } })();
             if (_agId) window.nr1mapDb.collection('nr1map_agenda').doc(_agId).update({ waLinks: res.waLinks, disparadoEm: new Date().toISOString() }).catch(function(){});
+          }
+          // registra o disparo no Histórico (fica na agenda com status 'disparado')
+          if (window.nr1mapDb) {
+            var _isoAgora = new Date().toISOString();
+            var _hj = new Date(); var _hojeTxt = _hj.getFullYear() + '-' + String(_hj.getMonth()+1).padStart(2,'0') + '-' + String(_hj.getDate()).padStart(2,'0');
+            var _idReg = window._currentAgendaId || window._editAgendaId || '';
+            if (_idReg) {
+              window.nr1mapDb.collection('nr1map_agenda').doc(_idReg).update({ status: 'disparado', disparadoEm: _isoAgora, canal: canalVal, totalColaboradores: total }).catch(function(){});
+            } else {
+              window.nr1mapDb.collection('nr1map_agenda').add({
+                empresaId: empresaId, tipo: (tipo === 'pulso' ? 'pulso' : 'geral'), tema: '', data: _hojeTxt, canal: canalVal,
+                unidade: filtroUnidade, prazo: String(prazoVal), depto: filtroDepto, cargo: filtroCargo,
+                status: 'disparado', criadoEm: _isoAgora, disparadoEm: _isoAgora, totalColaboradores: total
+              }).catch(function(){});
+            }
           }
         })
         .catch(function(err) {
