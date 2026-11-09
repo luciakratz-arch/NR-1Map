@@ -6,14 +6,15 @@
       "**/.*",
       "**/node_modules/**",
       "functions/**",
-      "functions-python/**"
+      "functions-python/**",
+      "backend-seguranca/**"
     ]
   },
   "functions": [
     {
       "source": "functions",
       "codebase": "nodejs",
-      "runtime": "nodejs18",
+      "runtime": "nodejs22",
       "ignore": ["node_modules", ".git", "firebase-debug.log"]
     },
     {

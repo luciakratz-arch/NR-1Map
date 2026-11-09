@@ -1,46 +1,85 @@
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-/**
- * NR-1 Map — Cloud Function
- * Recebe dados do formulário de leads da landing page
- * Salva na coleção nr1map_leads (para o painel admin)
- * Salva na coleção nr1map_emails (para o Trigger Email disparar o e-book)
- */
-exports.receberLead = functions.https.onRequest(async (req, res) => {
-  // Permitir CORS para a landing page
-  res.set("Access-Control-Allow-Origin", "*");
+// Só estes endereços podem chamar as funções a partir de um navegador.
+const ORIGENS_PERMITIDAS = ["https://nr1-maps.com.br", "https://www.nr1-maps.com.br"];
+const EMAIL_VALIDO = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,190}\.[^\s@<>"']{2,}$/;
+
+// Limite de instâncias: segura o custo se alguém tentar inundar a função.
+const config = functions.runWith({ maxInstances: 5, timeoutSeconds: 30, memory: "256MB" });
+
+function esc(v) {
+  return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Texto simples: sem quebras de controle, sem < >, com tamanho máximo.
+function limpa(v, max) {
+  return String(v == null ? "" : v).replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/[<>]/g, "").trim().slice(0, max);
+}
+
+function cors(req, res) {
+  const origem = req.get("Origin") || "";
+  if (ORIGENS_PERMITIDAS.includes(origem)) {
+    res.set("Access-Control-Allow-Origin", origem);
+    res.set("Vary", "Origin");
+  }
   res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type");
+}
 
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
-    return;
-  }
+function ipDe(req) {
+  const xf = String(req.get("x-forwarded-for") || "").split(",")[0].trim();
+  return xf || req.ip || "desconhecido";
+}
 
-  if (req.method !== "POST") {
-    res.status(405).send("Method Not Allowed");
-    return;
-  }
+// Contador simples no Firestore: devolve false quando o limite da janela foi passado.
+async function dentroDoLimite(chave, limite, janelaSeg) {
+  const id = crypto.createHash("sha256").update(chave).digest("hex").slice(0, 40);
+  const ref = db.collection("nr1map_limites").doc(id);
+  const agora = Date.now();
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.exists ? snap.data() : null;
+    if (!d || d.expiraMs < agora) {
+      tx.set(ref, { n: 1, expiraMs: agora + janelaSeg * 1000 });
+      return true;
+    }
+    if (d.n >= limite) return false;
+    tx.update(ref, { n: d.n + 1 });
+    return true;
+  });
+}
+
+/**
+ * NR-1 Map — recebe os dados do formulário de leads da página inicial.
+ * Salva em nr1map_leads (painel admin) e em nr1map_emails (envio do e-book).
+ * Proteções: só aceita o site oficial, valida e limpa os campos, limita por IP e por e-mail.
+ */
+exports.receberLead = config.https.onRequest(async (req, res) => {
+  cors(req, res);
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
 
   try {
-    const {
-      nome,
-      cargo,
-      email,
-      whatsapp,
-      empresa,
-      segmento,
-      porte,
-      nivel_nr1,
-      preocupacao,
-    } = req.body;
+    const corpo = req.body && typeof req.body === "object" ? req.body : {};
 
-    if (!email) {
-      res.status(400).json({ error: "E-mail é obrigatório." });
+    // Campo-isca: pessoas não veem; robôs preenchem. Finge sucesso e não faz nada.
+    if (corpo.website || corpo.site_url) { res.status(200).json({ success: true }); return; }
+
+    const email = limpa(corpo.email, 254).toLowerCase();
+    if (!EMAIL_VALIDO.test(email)) { res.status(400).json({ error: "Informe um e-mail válido." }); return; }
+
+    const nome = limpa(corpo.nome, 80);
+    const nomeSeguro = esc(nome);
+
+    // No máximo 6 pedidos por hora por IP e 2 e-books por dia por e-mail.
+    const ip = ipDe(req);
+    if (!(await dentroDoLimite("lead-ip:" + ip, 6, 3600)) || !(await dentroDoLimite("lead-mail:" + email, 2, 86400))) {
+      res.status(429).json({ error: "Muitas tentativas. Tente novamente mais tarde." });
       return;
     }
 
@@ -48,15 +87,15 @@ exports.receberLead = functions.https.onRequest(async (req, res) => {
 
     // 1. Salvar lead no painel admin
     await db.collection("nr1map_leads").add({
-      nome: nome || "",
-      cargo: cargo || "",
+      nome,
+      cargo: limpa(corpo.cargo, 80),
       email,
-      whatsapp: whatsapp || "",
-      empresa: empresa || "",
-      segmento: segmento || "",
-      porte: porte || "",
-      nivel_nr1: nivel_nr1 || "",
-      preocupacao: preocupacao || "",
+      whatsapp: limpa(corpo.whatsapp, 25),
+      empresa: limpa(corpo.empresa, 120),
+      segmento: limpa(corpo.segmento, 80),
+      porte: limpa(corpo.porte, 40),
+      nivel_nr1: limpa(corpo.nivel_nr1, 80),
+      preocupacao: limpa(corpo.preocupacao, 500),
       status: "novo",
       criado_em: timestamp,
     });
@@ -89,7 +128,7 @@ exports.receberLead = functions.https.onRequest(async (req, res) => {
     </td></tr>
     <tr><td style="background:#ffffff;padding:36px 40px;">
       <p style="color:#2A2E2C;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        Olá${nome ? ", " + nome : ""}! 👋
+        Olá${nomeSeguro ? ", " + nomeSeguro : ""}! 👋
       </p>
       <p style="color:#2A2E2C;font-size:15px;line-height:1.7;margin:0 0 20px;">
         Obrigada pelo seu interesse no <strong>NR-1 Map</strong>. Segue em anexo o e-book <strong>"NR-1 Descomplicada"</strong>.
@@ -117,7 +156,7 @@ exports.receberLead = functions.https.onRequest(async (req, res) => {
       </table>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
         <tr><td align="center">
-          <a href="https://luciakratz-arch.github.io/NR-1Map" style="display:inline-block;background:#0A6E4F;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 36px;border-radius:8px;">
+          <a href="https://nr1-maps.com.br" style="display:inline-block;background:#0A6E4F;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 36px;border-radius:8px;">
             Conhecer o NR-1 Map →
           </a>
           <p style="margin:10px 0 0;font-size:12px;color:#6B7370;">A partir de R$ 35,00/colaborador/mês</p>
@@ -141,7 +180,7 @@ exports.receberLead = functions.https.onRequest(async (req, res) => {
         attachments: [
           {
             filename: "NR-1-Descomplicada.pdf",
-            path: "https://luciakratz-arch.github.io/NR-1Map/nr1-descomplicada-ebook.pdf",
+            path: "https://nr1-maps.com.br/nr1-descomplicada-ebook.pdf",
           },
         ],
       },
@@ -159,33 +198,38 @@ exports.receberLead = functions.https.onRequest(async (req, res) => {
 });
 
 /**
- * NR-1 Map — Receber depoimento
- * Salva depoimento pendente de aprovação
+ * NR-1 Map — recebe depoimento (fica pendente de aprovação no painel).
  */
-exports.receberDepoimento = functions.https.onRequest(async (req, res) => {
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
-    return;
-  }
+exports.receberDepoimento = config.https.onRequest(async (req, res) => {
+  cors(req, res);
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
 
   try {
-    const { nome, cargo, texto, estrelas } = req.body;
+    const corpo = req.body && typeof req.body === "object" ? req.body : {};
+    if (corpo.website || corpo.site_url) { res.status(200).json({ success: true }); return; }
 
+    const texto = limpa(corpo.texto, 800);
+    if (texto.length < 10) { res.status(400).json({ error: "Escreva um depoimento um pouco maior." }); return; }
+
+    if (!(await dentroDoLimite("depo-ip:" + ipDe(req), 3, 3600))) {
+      res.status(429).json({ error: "Muitas tentativas. Tente novamente mais tarde." });
+      return;
+    }
+
+    const estrelas = Math.min(5, Math.max(1, parseInt(corpo.estrelas, 10) || 5));
     await db.collection("nr1map_depoimentos").add({
-      nome: nome || "Anônimo",
-      cargo: cargo || "",
+      nome: limpa(corpo.nome, 80) || "Anônimo",
+      cargo: limpa(corpo.cargo, 80),
       texto,
-      estrelas: estrelas || 5,
+      estrelas,
       status: "pendente",
       criado_em: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     res.status(200).json({ success: true });
   } catch (error) {
+    console.error("Erro ao salvar depoimento:", error);
     res.status(500).json({ error: "Erro ao salvar depoimento." });
   }
 });

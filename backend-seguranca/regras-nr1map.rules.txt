@@ -1,0 +1,117 @@
+    // ============================================================
+    //  NR-1 MAP (fechado em 04/11/2026)
+    //  Quem é quem vem das marcas da conta, colocadas só pelo servidor (função marcarPapel):
+    //    adminCentral = administradora | nr1Papel = empresa | usuario | parceiro
+    //    nr1EmpresaId = empresa da pessoa | nr1ParceiroId = parceiro | nr1Nivel = colaborador | rh | gestor
+    //  Quem responde sem login (colaborador por código, aceite de contrato) passa pelas funções do servidor.
+    // ============================================================
+    function nrLogado() { return request.auth != null; }
+    function nrAdmin() { return nrLogado() && request.auth.token.get('adminCentral', false) == true; }
+    function nrMembro(e) {
+      return nrLogado() && e is string && e != '' && request.auth.token.get('nr1EmpresaId', '') == e
+        && request.auth.token.get('nr1Papel', '') in ['empresa', 'usuario'];
+    }
+    function nrGestor(e) {
+      return nrMembro(e) && (request.auth.token.get('nr1Papel', '') == 'empresa'
+        || request.auth.token.get('nr1Nivel', '') in ['rh', 'gestor']);
+    }
+    function nrParceiro(p) {
+      return nrLogado() && p is string && p != '' && request.auth.token.get('nr1ParceiroId', '') == p
+        && request.auth.token.get('nr1Papel', '') == 'parceiro';
+    }
+    function nrEmpresaDoParceiro(e) {
+      return nrLogado() && request.auth.token.get('nr1Papel', '') == 'parceiro'
+        && exists(/databases/$(database)/documents/nr1map_empresas/$(e))
+        && get(/databases/$(database)/documents/nr1map_empresas/$(e)).data.get('parceiroId', get(/databases/$(database)/documents/nr1map_empresas/$(e)).data.get('parceiro', '')) == request.auth.token.get('nr1ParceiroId', '-');
+    }
+
+    // formulários públicos do site: qualquer pessoa cria, só a administradora lê
+    match /nr1map_leads/{docId} { allow create: if true; allow read, update, delete: if nrAdmin(); }
+    match /nr1map_depoimentos/{docId} { allow create: if true; allow read, update, delete: if nrAdmin(); }
+    match /nr1map_leads_parceiros/{docId} { allow create: if true; allow read, update, delete: if nrAdmin(); }
+
+    // só a administradora
+    match /nr1map_contratos/{docId} { allow read, write: if nrAdmin(); }
+    match /nr1map_admins/{docId} { allow read, write: if nrAdmin(); }
+    match /nr1map_pagamentos/{docId} { allow read: if nrAdmin(); allow write: if false; }
+    match /nr1map_laudos/{docId} {
+      allow read: if nrAdmin() || nrGestor(resource.data.get('empresaId', ''));
+      allow write: if nrAdmin();
+    }
+    match /nr1map_emails/{docId} {
+      allow create: if nrAdmin() || (nrLogado() && request.auth.token.get('nr1Papel', '') in ['empresa', 'usuario']);
+      allow read, update, delete: if nrAdmin();
+    }
+
+    // empresa
+    match /nr1map_empresas/{empresaId} {
+      allow read: if nrAdmin() || nrMembro(empresaId) || nrParceiro(resource.data.get('parceiroId', resource.data.get('parceiro', '')));
+      allow create: if nrAdmin() || (nrLogado() && request.auth.uid == empresaId) || nrParceiro(request.resource.data.get('parceiroId', request.resource.data.get('parceiro', '')));
+      allow update: if nrAdmin() || nrGestor(empresaId) || (nrLogado() && request.auth.uid == empresaId);
+      allow delete: if nrAdmin();
+      match /{subcol}/{subId} { allow read, write: if nrAdmin() || nrGestor(empresaId); }
+    }
+
+    // pessoas da empresa
+    match /nr1map_usuarios_pf/{uid} {
+      allow read: if nrAdmin() || (nrLogado() && request.auth.uid == uid) || nrGestor(resource.data.get('empresaId', ''));
+      allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', ''))
+        || nrParceiro(request.resource.data.get('parceiro', ''))
+        || (nrLogado() && request.auth.token.get('nr1Papel', '') == 'parceiro' && nrEmpresaDoParceiro(request.resource.data.get('empresaId', '-')));
+      allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', ''));
+    }
+    match /nr1map_colaboradores/{uid} {
+      allow read: if nrAdmin() || (nrLogado() && request.auth.uid == uid) || nrGestor(resource.data.get('empresaId', ''));
+      allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', ''));
+      allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', ''));
+    }
+
+    // dados da empresa (cargos, unidades, agenda, plano...): todos da empresa leem; só o gestor altera
+    match /nr1map_cargos/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_departamentos/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_unidades/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_agenda/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_plano_acao/{docId} { allow read: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_pesquisas/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_selecoes/{empresaId} { allow read: if nrAdmin() || nrMembro(empresaId); allow write: if nrAdmin() || nrGestor(empresaId); }
+    match /nr1map_tokens/{docId} { allow read: if nrAdmin() || nrMembro(resource.data.get('empresaId', '')); allow create: if nrAdmin() || nrGestor(request.resource.data.get('empresaId', '')); allow update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_chamados/{docId} { allow create: if nrAdmin() || nrMembro(request.resource.data.get('empresaId', '')); allow read, update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+    match /nr1map_sugestoes/{docId} { allow create: if nrAdmin() || nrMembro(request.resource.data.get('empresaId', '')); allow read, update, delete: if nrAdmin() || nrGestor(resource.data.get('empresaId', '')); }
+
+    // sequência e histórico (o colaborador por código grava pelo servidor)
+    match /nr1map_streak/{docId} { allow read: if nrAdmin() || nrMembro(docId.split('_')[0]); allow write: if nrAdmin() || nrGestor(docId.split('_')[0]); }
+    match /nr1map_respostas_colab/{docId} { allow read: if nrAdmin() || nrGestor(docId.split('_')[0]); allow write: if nrAdmin(); }
+    match /nr1map_historico_usuario/{uid} {
+      allow read, write: if nrLogado() && request.auth.uid == uid;
+      allow read: if nrAdmin();
+    }
+
+    // respostas dos questionários: individuais só o gestor da empresa lê; quem responde logado só cria
+    match /nr1map_respostas/{empresaId} {
+      allow read: if nrAdmin() || nrMembro(empresaId) || nrEmpresaDoParceiro(empresaId);
+      allow write: if nrAdmin() || nrGestor(empresaId);
+      match /ciclos/{cicloId} {
+        allow read: if nrAdmin() || nrMembro(empresaId) || nrEmpresaDoParceiro(empresaId);
+        allow write: if nrAdmin() || nrGestor(empresaId);
+        match /respostas/{respId} {
+          allow read: if nrAdmin() || nrGestor(empresaId) || nrEmpresaDoParceiro(empresaId);
+          allow create: if nrAdmin() || nrMembro(empresaId);
+          allow update, delete: if nrAdmin();
+        }
+        match /anonimos/{anonId} { allow read: if nrAdmin() || nrGestor(empresaId); allow create: if nrAdmin() || nrMembro(empresaId); allow update, delete: if nrAdmin(); }
+      }
+    }
+
+    // parceiros, comissões e saques
+    match /nr1map_parceiros/{parceiroId} {
+      allow read: if nrAdmin() || nrParceiro(parceiroId) || (nrLogado() && request.auth.uid == parceiroId);
+      allow create: if nrAdmin() || (nrLogado() && request.auth.uid == parceiroId);
+      allow update: if nrAdmin() || nrParceiro(parceiroId);
+      allow delete: if nrAdmin();
+    }
+    match /nr1map_comissoes/{docId} { allow read: if nrAdmin() || nrParceiro(resource.data.get('parceiroId', '')); allow write: if nrAdmin(); }
+    match /nr1map_saques/{docId} {
+      allow create: if nrAdmin() || nrParceiro(request.resource.data.get('parceiroId', ''));
+      allow read: if nrAdmin() || nrParceiro(resource.data.get('parceiroId', ''));
+      allow update, delete: if nrAdmin();
+    }
