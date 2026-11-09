@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>/* limpeza de texto vindo do banco antes de ir para a tela (evita código malicioso) */function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}</script>
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -2739,7 +2740,7 @@ function carregarDepoimentos() {
       if(sid) sid.textContent = snap.size;
       snap.forEach(function(doc) {
         var d = doc.data();
-        var estrelas = '★'.repeat(d.estrelas||5) + '☆'.repeat(5-(d.estrelas||5));
+        var nEst = Math.max(1, Math.min(5, parseInt(d.estrelas, 10) || 5)); var estrelas = '★'.repeat(nEst) + '☆'.repeat(5 - nEst);
         var card = document.createElement('div');
         card.className = 'card';
         card.style.marginBottom = '16px';
@@ -2756,9 +2757,9 @@ function carregarDepoimentos() {
             '<div style="flex:1;">'+
               '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
                 '<span style="color:var(--roxo);font-size:16px;">'+estrelas+'</span>'+
-                '<strong style="font-size:13px;">'+(d.empresa||d.nome||'Anônimo')+'</strong>'+
+                '<strong style="font-size:13px;">'+esc(d.empresa||d.nome||'Anônimo')+'</strong>'+
               '</div>'+
-              '<p style="font-size:13px;color:var(--cinza-escuro);margin-bottom:14px;">"'+(d.texto||d.depoimento||'')+'"</p>'+
+              '<p style="font-size:13px;color:var(--cinza-escuro);margin-bottom:14px;">"'+esc(d.texto||d.depoimento||'')+'"</p>'+
               '<div class="form-group">'+
                 '<label class="form-label">Sua resposta pública</label>'+
               '</div>'+
@@ -3472,17 +3473,20 @@ function carregarParceiros() {
         var wa = (d.whatsapp||'').replace(/'/g,'');
         var area2 = (d.area||'').replace(/'/g,'');
         tr.innerHTML =
-          '<td><strong>'+(d.nome||'—')+'</strong></td>'+
-          '<td>'+(d.email||'—')+'</td>'+
-          '<td>'+(d.whatsapp||'—')+'</td>'+
-          '<td>'+(d.area||'—')+'</td>'+
-          '<td>'+(d.volumeClientes||'—')+'</td>'+
-          '<td>'+(d.estado||'—')+'</td>'+
-          '<td>'+(d.criadoEm?new Date(d.criadoEm).toLocaleDateString('pt-BR'):'—')+'</td>'+
+          '<td><strong>'+esc(d.nome||'—')+'</strong></td>'+
+          '<td>'+esc(d.email||'—')+'</td>'+
+          '<td>'+esc(d.whatsapp||'—')+'</td>'+
+          '<td>'+esc(d.area||'—')+'</td>'+
+          '<td>'+esc(d.volumeClientes||'—')+'</td>'+
+          '<td>'+esc(d.estado||'—')+'</td>'+
+          '<td>'+(d.criadoEm?esc(new Date(d.criadoEm).toLocaleDateString('pt-BR')):'—')+'</td>'+
           '<td style="display:flex;gap:6px;">'+
-            '<button class="btn btn-primary btn-sm" onclick="aprovarLead(\''+doc.id+'\',\''+nome+'\',\''+email2+'\',\''+wa+'\',\''+area2+'\')">✅ Aprovar</button>'+
-            '<button class="btn btn-danger btn-sm" onclick="rejeitarLead(\''+doc.id+'\')">❌ Rejeitar</button>'+
+            '<button class="btn btn-primary btn-sm" data-acao="aprovar">✅ Aprovar</button>'+
+            '<button class="btn btn-danger btn-sm" data-acao="rejeitar">❌ Rejeitar</button>'+
           '</td>';
+        /* os dados não vão mais dentro do texto do onclick: um nome com aspas quebrava a proteção */
+        tr.querySelector('[data-acao="aprovar"]').onclick = function(){ aprovarLead(doc.id, nome, email2, wa, area2); };
+        tr.querySelector('[data-acao="rejeitar"]').onclick = function(){ rejeitarLead(doc.id); };
         tbody.appendChild(tr);
       });
       document.getElementById('parc-leads').textContent = snap.size;
@@ -3911,19 +3915,19 @@ function carregarLeads() {
           try {
             var dt = new Date(d.data);
             dataStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
-          } catch(e) { dataStr = d.data; }
+          } catch(e) { dataStr = esc(d.data); }
         }
         // Formata WhatsApp
         var wpp = d.whatsapp || '';
-        var wppLink = wpp ? '<a href="https://wa.me/55' + wpp.replace(/\D/g,'') + '" target="_blank" style="color:#25D366;font-weight:600;">📱 ' + wpp + '</a>' : '—';
+        var wppLink = wpp ? '<a href="https://wa.me/55' + wpp.replace(/\D/g,'') + '" target="_blank" rel="noopener" style="color:#25D366;font-weight:600;">📱 ' + esc(wpp) + '</a>' : '—';
         var tr = document.createElement('tr');
         tr.dataset.id = doc.id;
         tr.innerHTML =
-          '<td><strong>' + (d.nome||'—') + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">' + (d.empresa||'') + '</span></td>' +
-          '<td>' + (d.email||'—') + '</td>' +
+          '<td><strong>' + esc(d.nome||'—') + '</strong><br/><span style="font-size:10px;color:var(--cinza-medio);">' + esc(d.empresa||'') + '</span></td>' +
+          '<td>' + esc(d.email||'—') + '</td>' +
           '<td>' + wppLink + '</td>' +
-          '<td>' + (d.porte||d.numColaboradores||'—') + '</td>' +
-          '<td>' + (d.segmento||d.setor||'—') + '</td>' +
+          '<td>' + esc(d.porte||d.numColaboradores||'—') + '</td>' +
+          '<td>' + esc(d.segmento||d.setor||'—') + '</td>' +
           '<td style="font-size:11px;color:var(--cinza-medio);">' + dataStr + '</td>' +
           '<td><span class="' + bdgClass + '"><span class="dot"></span>' + bdgLabel + '</span></td>' +
           '<td style="display:flex;gap:6px;">' + btnContatar + '<button class="btn btn-sm" style="background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7;font-size:11px;" onclick="abrirConverterLead(this)" title="Converter lead">↗ Converter</button><button class="btn btn-danger btn-sm" onclick="excluirLead(this)">🗑️</button></td>';
@@ -3932,7 +3936,7 @@ function carregarLeads() {
       atualizarBadgeLeads();
     })
     .catch(function(e) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#e53935;">Erro ao carregar leads: ' + e.message + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#e53935;">Erro ao carregar leads: ' + esc(e.message) + '</td></tr>';
       console.log('Erro carregarLeads:', e);
     });
 }
