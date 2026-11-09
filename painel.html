@@ -5812,6 +5812,11 @@ function dispararPesquisa(tipo) {
         });
         jsonpPromise
         .then(function(res) {
+          if (res && res.erro) {
+            document.getElementById('modal-disp-titulo').textContent = '⚠️ Envio não realizado';
+            document.getElementById('modal-disp-body').textContent = String(res.erro);
+            return;
+          }
           var html = '<div style="max-height:50vh;overflow-y:auto;">';
 
           if (canalVal === 'E-mail' || canalVal === 'Ambos') {
