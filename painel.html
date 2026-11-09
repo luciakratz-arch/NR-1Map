@@ -4605,6 +4605,7 @@ function dispararPulsoComCanal() {
   // Lê canal do d-opt (mesmo padrão do diagnóstico)
   var optSel = document.querySelector('#view-nova-pulso .d-opt.sel .d-lb');
   var canalVal = optSel ? optSel.textContent.trim() : 'WhatsApp';
+  window._canalPulsoEscolhido = canalVal;   // guarda já, porque o envio só lê o canal depois de gravar no banco
   var elCanal = document.getElementById('pulso-canal');
   if (!elCanal) {
     // Injeta valor temporário para dispararPesquisa ler
@@ -5742,6 +5743,7 @@ function dispararPesquisa(tipo) {
         if (tipo === 'pulso') {
           var pc = document.getElementById('pulso-canal');
           if (pc) canalVal = pc.value;
+          else if (window._canalPulsoEscolhido) canalVal = window._canalPulsoEscolhido;
         }
 
         // Criar modal
