@@ -1835,18 +1835,6 @@ function salvarPJ() {
   var secondaryAuth = firebase.auth(secondaryApp);
 
   secondaryAuth.createUserWithEmailAndPassword(email, senha)
-    .catch(function(e) {
-      // E-mail já cadastrado no Auth — busca o uid existente para reutilizar
-      if (e.code === 'auth/email-already-in-use') {
-        return secondaryAuth.signInWithEmailAndPassword(email, senha)
-          .catch(function() {
-            // Senha diferente — cria documento sem Auth (isento/teste)
-            var fakeUid = 'isento_' + Date.now();
-            return { user: { uid: fakeUid }, reusoSemAuth: true };
-          });
-      }
-      throw e;
-    })
     .then(function(cred) {
       var uid = cred.user.uid;
       // Salva no Firestore sob o uid do usuário RH criado
@@ -3403,20 +3391,9 @@ function salvarParceiro() {
   catch(e) { secApp = firebase.initializeApp(cfg, 'nr1map-parc-sec'); }
   var senha = gerarSenha();
   firebase.auth(secApp).createUserWithEmailAndPassword(email, senha)
-    .catch(function(e) {
-      if (e.code === 'auth/email-already-in-use') {
-        // E-mail já existe no Auth — faz login para pegar o uid
-        return firebase.auth(secApp).signInWithEmailAndPassword(email, senha)
-          .catch(function() {
-            // Senha diferente — gera uid baseado no email como fallback
-            return { user: { uid: 'parc_' + email.replace(/[^a-z0-9]/gi,'_') }, senhaExistente: true };
-          });
-      }
-      throw e;
-    })
     .then(function(cred) {
       var uid = cred.user.uid;
-      var senhaFinal = cred.senhaExistente ? '(use a senha anterior)' : senha;
+      var senhaFinal = '';   // a senha não é exibida nem enviada: a pessoa cria a própria pelo link do e-mail
       return window.nr1mapDb.collection('nr1map_parceiros').doc(uid).set({
         uid: uid, nome: nome, email: email,
         whatsapp: whatsapp.replace(/[^0-9]/g,''),
@@ -3440,8 +3417,8 @@ function salvarParceiro() {
         var txt = encodeURIComponent(
           '🤝 *Bem-vindo(a) ao NR-1 Map!*\n\n' +
           'Olá, ' + nome + '! Seu cadastro como Parceiro/Representante foi aprovado.\n\n' +
-          '📧 *E-mail:* ' + email + '\n' +
-          '🔑 *Senha:* ' + result.senha + '\n\n' +
+          '📧 *E-mail:* ' + email + '\n\n' +
+          'Você vai receber por e-mail um link para *criar a sua senha* (olhe também o Spam).\n\n' +
           '🔗 *Acesse seu painel aqui:*\n' +
           'https://nr1-maps.com.br/parceiro.html\n\n' +
           'Qualquer dúvida, estou à disposição! 🚀'
