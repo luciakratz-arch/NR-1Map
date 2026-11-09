@@ -3,6 +3,7 @@
 <head>
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Painel do Gestor</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -3094,9 +3095,10 @@ function filtrarStatus(s){
   });
 }
 function ordenar(campo){alert('Ordenando por '+campo+'...');}
+function _rndInt(n){var a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do{crypto.getRandomValues(a);}while(a[0]>=lim);return a[0]%n;}
 function _gerarSenhaTemp() {
   var c='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#';
-  var s=''; for(var i=0;i<10;i++) s+=c[Math.floor(Math.random()*c.length)]; return s;
+  var s=''; for(var i=0;i<10;i++) s+=c[_rndInt(c.length)]; return s;
 }
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
@@ -5636,7 +5638,7 @@ function verLinksEnviadosLEGACY() {
 
 
 function gerarToken6() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(100000 + _rndInt(900000));
 }
 
 function dispararPesquisa(tipo) {

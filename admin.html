@@ -4,6 +4,7 @@
 <script>/* limpeza de texto vindo do banco antes de ir para a tela (evita código malicioso) */function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}</script>
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Área Administrativa</title>
 <link rel="manifest" href="manifest.json"/>
@@ -1752,10 +1753,11 @@ function fecharModalPJ(){ document.getElementById('modal-pj').classList.remove('
 function abrirModalPF(){ document.getElementById('modal-pf').classList.add('open'); }
 function fecharModalPF(){ document.getElementById('modal-pf').classList.remove('open'); }
 
+function _rndInt(n){var a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do{crypto.getRandomValues(a);}while(a[0]>=lim);return a[0]%n;}
 function gerarSenha() {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   var s = '';
-  for (var i = 0; i < 10; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (var i = 0; i < 10; i++) s += chars.charAt(_rndInt(chars.length));
   return s;
 }
 
@@ -2041,6 +2043,7 @@ function entrarUser() {
 }
 
 function sair() {
+  try { sessionStorage.clear(); localStorage.removeItem('nr1map_agendaId'); } catch(e){}
   if (window.nr1mapAuth) window.nr1mapAuth.signOut();
   document.getElementById('app-admin').classList.remove('active');
   document.getElementById('login-screen').style.display = 'flex';
@@ -4382,7 +4385,7 @@ function salvarContratoEnterprise() {
   var total = nColab * unit;
 
   // Token unico para esta proposta
-  var tokenAceite = 'ENT-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+  var tokenAceite = 'ENT-' + (function(n){var a=crypto.getRandomValues(new Uint8Array(n));return Array.prototype.map.call(a,function(b){return (b%36).toString(36);}).join('');})(9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
   var urlAceite = 'https://nr1-maps.com.br/aceite.html?token=' + tokenAceite;
 
   var contrato = {

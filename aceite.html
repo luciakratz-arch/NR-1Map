@@ -3,6 +3,7 @@
 <head>
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>NR-1 Map -- Proposta e Contrato</title>
 <style>
@@ -85,7 +86,7 @@
 <body>
 
 <div class="topo">
-  <img src="https://luciakratz-arch.github.io/NR-1Map/assets/logo-nr1map.png" alt="NR-1 Map" onerror="this.style.display='none'"/>
+  <img src="https://nr1-maps.com.br/assets/logo-nr1map.png" alt="NR-1 Map" onerror="this.style.display='none'"/>
   <div class="topo-txt">
     <div class="t1">NR-1 Map -- Proposta Comercial</div>
     <div class="t2">Gestao de Riscos Psicossociais | Portaria MTE 1.419/2024</div>
@@ -557,7 +558,7 @@ function assinar() {
   btn.disabled = true;
   btn.textContent = 'Registrando...';
 
-  var hash = 'ACE-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  var hash = 'ACE-' + Date.now().toString(36).toUpperCase() + '-' + (function(n){var a=crypto.getRandomValues(new Uint8Array(n));return Array.prototype.map.call(a,function(b){return (b%36).toString(36);}).join('');})(8).toUpperCase();
   var agora = new Date().toISOString();
 
   var dadosCliente = {

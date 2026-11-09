@@ -3,6 +3,7 @@
 <head>
 <script>if(location.protocol==="http:"&&/(^|\.)nr1-maps\.com\.br$/.test(location.hostname)){location.replace("https://"+location.host+location.pathname+location.search+location.hash);}</script>
 <meta charset="UTF-8"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NR-1 Map — Painel do Parceiro (Micro-Adm)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -580,10 +581,11 @@ function copiarLinkParceiro(id) {
 }
 
 /* ── Firebase helpers (parceiro) ── */
+function _rndInt(n){var a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do{crypto.getRandomValues(a);}while(a[0]>=lim);return a[0]%n;}
 function gerarSenhaPar() {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   var s = '';
-  for (var i = 0; i < 10; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (var i = 0; i < 10; i++) s += chars.charAt(_rndInt(chars.length));
   return s;
 }
 
